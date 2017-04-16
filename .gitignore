@@ -1,0 +1,7 @@
+Unity/**/Library/
+Unity/**/obj/
+Unity/**/Temp/
+Unity/**/*.sln
+Unity/**/*.csproj
+xcuserdata/
+
