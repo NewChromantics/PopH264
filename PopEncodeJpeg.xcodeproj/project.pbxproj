@@ -15,6 +15,7 @@
 /* Begin PBXFileReference section */
 		BF0A19BC1EA3E626007EBC95 /* TStringBuffer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TStringBuffer.cpp; path = Source/TStringBuffer.cpp; sourceTree = "<group>"; };
 		BF0A19BD1EA3E626007EBC95 /* TStringBuffer.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = TStringBuffer.hpp; path = Source/TStringBuffer.hpp; sourceTree = "<group>"; };
+		BF0A19C21EA428F4007EBC95 /* Unity */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Unity; sourceTree = "<group>"; };
 		BF4A6A141EA16D7D00613A64 /* PopEncodeJpeg.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PopEncodeJpeg.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
 		BFC09A281EA1735A003E0818 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = Source/TinyJpeg/README.md; sourceTree = "<group>"; };
 		BFC09A291EA1735A003E0818 /* tiny_jpeg.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = tiny_jpeg.h; path = Source/TinyJpeg/tiny_jpeg.h; sourceTree = "<group>"; };
@@ -43,6 +44,7 @@
 		BF4A6A0B1EA16D7C00613A64 = {
 			isa = PBXGroup;
 			children = (
+				BF0A19C21EA428F4007EBC95 /* Unity */,
 				BFD6076D1EA16ED20035C814 /* Source */,
 				BF4A6A161EA16D7D00613A64 /* Osx */,
 				BF4A6A151EA16D7D00613A64 /* Products */,

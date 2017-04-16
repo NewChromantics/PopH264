@@ -47,7 +47,7 @@ void DebugLog(const STRING& String)
 }
 
 
-const char* PopDebugString()
+__export const char* PopDebugString()
 {
 	try
 	{
@@ -61,7 +61,7 @@ const char* PopDebugString()
 	}
 }
 
-void ReleaseDebugString(const char* String)
+__export void ReleaseDebugString(const char* String)
 {
 	try
 	{
@@ -75,7 +75,7 @@ void ReleaseDebugString(const char* String)
 
 
 
-int32_t	EncodeJpeg(uint8_t* JpegData,int32_t JpegDataSize,int32_t JpegQuality,uint8_t* ImageData,int32_t ImageDataSize,int32_t ImageWidth,int32_t ImageHeight,int32_t ImageComponents,char* )
+__export int32_t	EncodeJpeg(uint8_t* JpegData,int32_t JpegDataSize,int32_t JpegQuality,uint8_t* ImageData,int32_t ImageDataSize,int32_t ImageWidth,int32_t ImageHeight,int32_t ImageComponents)
 {
 	//	non-capturing lambda
 	auto WriteToContext = [](void* context, void* data, int size)
@@ -94,8 +94,8 @@ int32_t	EncodeJpeg(uint8_t* JpegData,int32_t JpegDataSize,int32_t JpegQuality,ui
 	{
 		TWriteContext Context( JpegData, JpegDataSize );
 		
-		auto Result = tje_encode_with_func( WriteToContext, nullptr, JpegQuality, ImageWidth, ImageHeight, ImageComponents, ImageData);
-		if ( Result != 0 )
+		auto Result = tje_encode_with_func( WriteToContext, &Context, JpegQuality, ImageWidth, ImageHeight, ImageComponents, ImageData);
+		if ( Result != 1 )
 		{
 			std::stringstream Error;
 			Error << "Error encoding: " << Result;
@@ -125,12 +125,26 @@ TStringBuffer& PopEncodeJpeg::GetDebugStrings()
 
 void TWriteContext::Write(const uint8_t* Data,size_t Size)
 {
+	//	gr: keep going so we know how much we need
+	/*
 	if ( mDataWritten + Size > mJpegDataSize )
 	{
 		std::stringstream Error;
 		Error << "Jpeg buffer size not big enough, trying to write " << (mDataWritten + Size) << "/" << mJpegDataSize;
 		throw std::runtime_error::runtime_error( Error.str() );
 	}
+	*/
+	
+	auto SpaceRemaining = mJpegDataSize - mDataWritten;
+	auto WriteLength = std::min( SpaceRemaining, Size );
+	if ( WriteLength > 0 )
+	{
+		auto* Dst = &mJpegData[mDataWritten];
+		auto* Src = Data;
+		memcpy( Dst, Src, WriteLength );
+	}
+	
+	mDataWritten += Size;
 }
 
 
