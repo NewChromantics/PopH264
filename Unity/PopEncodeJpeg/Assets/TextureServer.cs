@@ -97,4 +97,34 @@ public class TextureServer : MonoBehaviour {
 		}
 
 	}
+
+	public void SetTexture(Texture2D NewTexture)
+	{
+		texture = NewTexture;
+		TextureDirty = true;
+	}
+
+	public void SetTexture(WebCamTexture NewTexture)
+	{
+		if (texture != null) {
+			if (texture.width != NewTexture.width || texture.height != NewTexture.height)
+				texture = null;
+		}
+
+		try
+		{
+			if (texture == null) {
+				texture = new Texture2D (NewTexture.width, NewTexture.height, TextureFormat.ARGB32, false);
+			}
+
+			var Pixels = NewTexture.GetPixels32();
+			texture.SetPixels32( Pixels );
+			TextureDirty = true;
+		}
+		catch
+		{
+			texture = null;
+			throw;
+		}
+	}
 }
