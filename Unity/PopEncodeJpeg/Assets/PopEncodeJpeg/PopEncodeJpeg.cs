@@ -27,9 +27,7 @@ public static class PopEncodeJpeg {
 	[DllImport(PluginName, CallingConvention = CallingConvention.Cdecl)]
 	private static extern int		EncodeJpeg (byte[] JpegData, int JpegDataSize, int JpegQuality, byte[] ImageData, int ImageDataSize, int ImageWidth, int ImageHeight, int ImageComponents);
 
-
-
-	public static byte[] EncodeToJpeg(Texture2D Image)
+	public static void EncodeToJpeg(Texture2D Image,ref byte[] JpegData,ref int JpegDataSize)
 	{
 		var Width = Image.width;
 		var Height = Image.height;
@@ -47,13 +45,23 @@ public static class PopEncodeJpeg {
 		}
 
 		//	try and encode, returns number of bytes used. if the number is bigger than allocated, we need a bigger buffer
-		var JpegData = new byte[ComponentCount * Width * Height];
+		if (JpegData == null) {
+			JpegData = new byte[ComponentCount * Width * Height];
+		}
 		int Quality = 1;
-		var BytesWritten = EncodeJpeg (JpegData, JpegData.Length, Quality, PixelBytes, PixelBytes.Length, Width, Height, ComponentCount);
-		if (BytesWritten > JpegData.Length)
-			throw new System.Exception ("Didn't allocate enough bytes for JPEG. " + JpegData.Length + "/" + BytesWritten);
+		JpegDataSize = EncodeJpeg (JpegData, JpegData.Length, Quality, PixelBytes, PixelBytes.Length, Width, Height, ComponentCount);
+		if (JpegDataSize > JpegData.Length)
+			throw new System.Exception ("Didn't allocate enough bytes for JPEG. " + JpegData.Length + "/" + JpegDataSize);
+	}
 
-		var ShrunkJpegData = new Byte[BytesWritten];
+
+	public static byte[] EncodeToJpeg(Texture2D Image)
+	{
+		byte[] JpegData = null;
+		int JpegDataSize = 0;
+		EncodeToJpeg (Image, ref JpegData, ref JpegDataSize);
+
+		var ShrunkJpegData = new Byte[JpegDataSize];
 		for (int i = 0;	i < ShrunkJpegData.Length;	i++)
 			ShrunkJpegData [i] = JpegData [i];
 
