@@ -50,7 +50,7 @@ void TStringBuffer::Release(const char* String)
 {
 	std::lock_guard<std::mutex> Lock( mBufferLock );
 	
-	for ( int i=0;	i<mBuffer.size();	i++ )
+	for ( size_t i=0;	i<mBuffer.size();	i++ )
 	{
 		
 	}
