@@ -6,6 +6,7 @@
 #include <algorithm>
 #include "TStringBuffer.hpp"
 
+#define ENABLE_FOPEN	0
 #define TJE_IMPLEMENTATION
 #include "TinyJpeg/tiny_jpeg.h"
 
