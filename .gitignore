@@ -1,7 +1,19 @@
 Unity/**/Library/
+
 Unity/**/obj/
+
 Unity/**/Temp/
+
 Unity/**/*.sln
+
 Unity/**/*.csproj
 xcuserdata/
 
+Unity/**/holobuild/
+Unity/**/UWP/
+Unity/**/holobuild/
+**/.vs/
+**/*.db
+**/*.opendb
+**/*.unitypackage
+PopEncodeJpeg.uwp/Release/
