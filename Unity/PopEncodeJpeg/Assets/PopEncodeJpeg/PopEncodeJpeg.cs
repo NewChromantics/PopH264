@@ -12,11 +12,7 @@ using System.Collections.Generic;
 /// </summary>
 public static class PopEncodeJpeg {
 
-	#if UNITY_IOS && !UNITY_EDITOR_OSX && !UNITY_EDITOR_WIN
-	private const string PluginName = "__Internal";
-	#else
 	private const string PluginName = "PopEncodeJpeg";
-	#endif
 
 	[DllImport (PluginName, CallingConvention = CallingConvention.Cdecl)]
 	private static extern System.IntPtr	PopDebugString();
