@@ -23,6 +23,9 @@ public static class PopEncodeJpeg {
 	[DllImport(PluginName, CallingConvention = CallingConvention.Cdecl)]
 	private static extern int		EncodeJpeg (byte[] JpegData, int JpegDataSize, int JpegQuality, byte[] ImageData, int ImageDataSize, int ImageWidth, int ImageHeight, int ImageComponents);
 
+	[DllImport(PluginName, CallingConvention = CallingConvention.Cdecl)]
+	private static extern int		EncodeJpeg (byte[] JpegData, int JpegDataSize, int JpegQuality, System.IntPtr ImageData, int ImageDataSize, int ImageWidth, int ImageHeight, int ImageComponents);
+
 	public static void EncodeToJpeg(Texture2D Image,ref byte[] JpegData,ref int JpegDataSize)
 	{
 		var Width = Image.width;
@@ -50,6 +53,56 @@ public static class PopEncodeJpeg {
 			throw new System.Exception ("Didn't allocate enough bytes for JPEG. " + JpegData.Length + "/" + JpegDataSize);
 	}
 
+	public static void EncodeToJpeg(byte[] PixelBytes,int Width,int Height,int ComponentCount,ref byte[] JpegData,ref int JpegDataSize)
+	{
+		//	try and encode, returns number of bytes used. if the number is bigger than allocated, we need a bigger buffer
+		if (JpegData == null) {
+			JpegData = new byte[ComponentCount * Width * Height];
+		}
+		int Quality = 1;
+		JpegDataSize = EncodeJpeg (JpegData, JpegData.Length, Quality, PixelBytes, PixelBytes.Length, Width, Height, ComponentCount);
+		if (JpegDataSize > JpegData.Length)
+			throw new System.Exception ("Didn't allocate enough bytes for JPEG. " + JpegData.Length + "/" + JpegDataSize);
+	}
+
+	public static void EncodeToJpeg(System.IntPtr PixelBytes,int Width,int Height,int ComponentCount,ref byte[] JpegData,ref int JpegDataSize)
+	{
+		int PixelBytesLength = ComponentCount * Width * Height;
+		//	try and encode, returns number of bytes used. if the number is bigger than allocated, we need a bigger buffer
+		if (JpegData == null) {
+			JpegData = new byte[ComponentCount * Width * Height];
+		}
+		int Quality = 1;
+		JpegDataSize = EncodeJpeg (JpegData, JpegData.Length, Quality, PixelBytes, PixelBytesLength, Width, Height, ComponentCount);
+		if (JpegDataSize > JpegData.Length)
+			throw new System.Exception ("Didn't allocate enough bytes for JPEG. " + JpegData.Length + "/" + JpegDataSize);
+	}
+
+	public static byte[] EncodeToJpeg(System.IntPtr PixelBytes,int Width,int Height,int ComponentCount)
+	{
+		byte[] JpegData = null;
+		int JpegDataSize = 0;
+		EncodeToJpeg (PixelBytes, Width, Height,ComponentCount, ref JpegData, ref JpegDataSize);
+
+		var ShrunkJpegData = new Byte[JpegDataSize];
+		for (int i = 0;	i < ShrunkJpegData.Length;	i++)
+			ShrunkJpegData [i] = JpegData [i];
+
+		return ShrunkJpegData;
+	}
+
+	public static byte[] EncodeToJpeg(byte[] PixelBytes,int Width,int Height,int ComponentCount)
+	{
+		byte[] JpegData = null;
+		int JpegDataSize = 0;
+		EncodeToJpeg (PixelBytes, Width, Height,ComponentCount, ref JpegData, ref JpegDataSize);
+
+		var ShrunkJpegData = new Byte[JpegDataSize];
+		for (int i = 0;	i < ShrunkJpegData.Length;	i++)
+			ShrunkJpegData [i] = JpegData [i];
+
+		return ShrunkJpegData;
+	}
 
 	public static byte[] EncodeToJpeg(Texture2D Image)
 	{
