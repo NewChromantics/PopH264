@@ -4,6 +4,33 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Net;
 
+#if WINDOWS_UWP
+using Windows.Networking.Sockets;
+#endif
+
+[System.Serializable]
+public class UnityEvent_String : UnityEngine.Events.UnityEvent <string> {}
+
+
+#if WINDOWS_UWP
+public class HttpListener
+{
+/*
+	public HttpListenerPrefixCollection Prefixes { get; }
+	
+	public IAsyncResult BeginGetContext(AsyncCallback callback, object state)
+	{
+		return null;
+	}
+	public void Close()	{}
+	//public HttpListenerContext EndGetContext(IAsyncResult asyncResult);
+	//public HttpListenerContext GetContext();
+	public void Start()	{}
+	public void Stop()	{}
+*/
+};
+#endif
+
 
 public class TextureServer : MonoBehaviour {
 
@@ -15,6 +42,7 @@ public class TextureServer : MonoBehaviour {
 	byte[]				LastJpeg;
 	int					LastJpegLength;
 
+	public UnityEvent_String	OnDebug;
 
 	void Start()
 	{
@@ -25,9 +53,11 @@ public class TextureServer : MonoBehaviour {
 
 		try
 		{
+			/*
 			Http.Prefixes.Add ("http://*:" + Port + "/");
 			Http.Start ();
 			Http.BeginGetContext(ListenerCallback, Http);
+			*/
 		}
 		catch {
 			//Stop ();
@@ -37,15 +67,18 @@ public class TextureServer : MonoBehaviour {
 
 	void Stop()
 	{
+		/*
 		if (Http == null)
 			return;
 		Http.Stop ();
 		Http = null;
 		System.GC.Collect ();
+		*/
 	}
 		
 	public void ListenerCallback(IAsyncResult result)
 	{
+		/*
 		HttpListener listener = (HttpListener)result.AsyncState;
 		// Call EndGetContext to complete the asynchronous operation.
 		HttpListenerContext context = listener.EndGetContext(result);
@@ -72,6 +105,7 @@ public class TextureServer : MonoBehaviour {
 
 		//	listen for next request
 		listener.BeginGetContext(ListenerCallback, listener);
+		*/
 	}
 
 		
@@ -86,7 +120,11 @@ public class TextureServer : MonoBehaviour {
 			{
 				try
 				{
+					var EncodeStart = Time.realtimeSinceStartup;
 					PopEncodeJpeg.EncodeToJpeg (texture, ref LastJpeg, ref LastJpegLength);
+					var EncodeTimeMs = (int)((Time.realtimeSinceStartup - EncodeStart) * 1000.0f);
+					Debug.Log("Jpeg encode took " + EncodeTimeMs + "ms");
+					OnDebug.Invoke("Jpeg encode took " + EncodeTimeMs + "ms");
 					TextureDirty = false;
 				}
 				catch {

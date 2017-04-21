@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source">
+      <UniqueIdentifier>{34256f74-9d84-4dd9-8219-d2aba029edd6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\TinyJpeg">
+      <UniqueIdentifier>{017b9a8e-dda7-4317-b649-849fe5616f23}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\Source\PopEncodeJpeg.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\TStringBuffer.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\Source\PopEncodeJpeg.hpp">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\TStringBuffer.hpp">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\TinyJpeg\tiny_jpeg.h">
+      <Filter>Source\TinyJpeg</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
