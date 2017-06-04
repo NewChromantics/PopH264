@@ -1,3 +1,4 @@
 [submodule "Source/TinyJpeg"]
 	path = Source/TinyJpeg
 	url = https://github.com/SoylentGraham/TinyJPEG
+	branch = BGR-support
