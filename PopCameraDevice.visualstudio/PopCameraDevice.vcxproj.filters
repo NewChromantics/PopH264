@@ -51,6 +51,39 @@
     <ClCompile Include="..\Source\TCameraDevice.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source\MfCapture.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\MfDecoder.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\SoyLib\src\SoyThread.cpp">
+      <Filter>SoyLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\SoyLib\src\SoyMediaFormat.cpp">
+      <Filter>SoyLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\SoyLib\src\SoyMedia.cpp">
+      <Filter>SoyLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\SoyLib\src\SoyMediaFoundation.cpp">
+      <Filter>SoyLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\SoyLib\src\SoyMath.cpp">
+      <Filter>SoyLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\SoyLib\src\SoyJson.cpp">
+      <Filter>SoyLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\SoyLib\src\SoyEvent.cpp">
+      <Filter>SoyLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\SoyLib\src\SoyWave.cpp">
+      <Filter>SoyLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\SoyLib\src\SoyH264.cpp">
+      <Filter>SoyLib</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\TStringBuffer.hpp">
@@ -103,6 +136,39 @@
     </ClInclude>
     <ClInclude Include="..\Source\TCameraDevice.hpp">
       <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\MfCapture.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\MfDecoder.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\SoyLib\src\SoyThread.h">
+      <Filter>SoyLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\SoyLib\src\SoyMedia.h">
+      <Filter>SoyLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\SoyLib\src\SoyMediaFormat.h">
+      <Filter>SoyLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\SoyLib\src\soymediafoundation.h">
+      <Filter>SoyLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\SoyLib\src\SoyMath.h">
+      <Filter>SoyLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\SoyLib\src\SoyJson.h">
+      <Filter>SoyLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\SoyLib\src\SoyEvent.h">
+      <Filter>SoyLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\SoyLib\src\SoyWave.h">
+      <Filter>SoyLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\SoyLib\src\SoyH264.h">
+      <Filter>SoyLib</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

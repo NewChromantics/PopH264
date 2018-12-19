@@ -19,21 +19,34 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\Source\MfCapture.cpp" />
+    <ClCompile Include="..\Source\MfDecoder.cpp" />
     <ClCompile Include="..\Source\PopCameraDevice.cpp" />
     <ClCompile Include="..\Source\SoyLib\src\memheap.cpp" />
     <ClCompile Include="..\Source\SoyLib\src\SoyArray.cpp" />
     <ClCompile Include="..\Source\SoyLib\src\SoyAssert.cpp" />
     <ClCompile Include="..\Source\SoyLib\src\SoyDebug.cpp" />
+    <ClCompile Include="..\Source\SoyLib\src\SoyEvent.cpp" />
+    <ClCompile Include="..\Source\SoyLib\src\SoyH264.cpp" />
+    <ClCompile Include="..\Source\SoyLib\src\SoyJson.cpp" />
+    <ClCompile Include="..\Source\SoyLib\src\SoyMath.cpp" />
+    <ClCompile Include="..\Source\SoyLib\src\SoyMedia.cpp" />
+    <ClCompile Include="..\Source\SoyLib\src\SoyMediaFormat.cpp" />
+    <ClCompile Include="..\Source\SoyLib\src\SoyMediaFoundation.cpp" />
     <ClCompile Include="..\Source\SoyLib\src\SoyPixels.cpp" />
     <ClCompile Include="..\Source\SoyLib\src\SoyPng.cpp" />
     <ClCompile Include="..\Source\SoyLib\src\SoyString.cpp" />
+    <ClCompile Include="..\Source\SoyLib\src\SoyThread.cpp" />
     <ClCompile Include="..\Source\SoyLib\src\SoyTime.cpp" />
     <ClCompile Include="..\Source\SoyLib\src\SoyTypes.cpp" />
+    <ClCompile Include="..\Source\SoyLib\src\SoyWave.cpp" />
     <ClCompile Include="..\Source\TCameraDevice.cpp" />
     <ClCompile Include="..\Source\TestDevice.cpp" />
     <ClCompile Include="..\Source\TStringBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Source\MfCapture.h" />
+    <ClInclude Include="..\Source\MfDecoder.h" />
     <ClInclude Include="..\Source\PopCameraDevice.hpp" />
     <ClInclude Include="..\Source\SoyLib\src\Array.hpp" />
     <ClInclude Include="..\Source\SoyLib\src\BufferArray.hpp" />
@@ -42,11 +55,20 @@
     <ClInclude Include="..\Source\SoyLib\src\SoyArray.h" />
     <ClInclude Include="..\Source\SoyLib\src\SoyAssert.h" />
     <ClInclude Include="..\Source\SoyLib\src\SoyDebug.h" />
+    <ClInclude Include="..\Source\SoyLib\src\SoyEvent.h" />
+    <ClInclude Include="..\Source\SoyLib\src\SoyH264.h" />
+    <ClInclude Include="..\Source\SoyLib\src\SoyJson.h" />
+    <ClInclude Include="..\Source\SoyLib\src\SoyMath.h" />
+    <ClInclude Include="..\Source\SoyLib\src\SoyMedia.h" />
+    <ClInclude Include="..\Source\SoyLib\src\SoyMediaFormat.h" />
+    <ClInclude Include="..\Source\SoyLib\src\soymediafoundation.h" />
     <ClInclude Include="..\Source\SoyLib\src\SoyPixels.h" />
     <ClInclude Include="..\Source\SoyLib\src\SoyPng.h" />
     <ClInclude Include="..\Source\SoyLib\src\SoyString.h" />
+    <ClInclude Include="..\Source\SoyLib\src\SoyThread.h" />
     <ClInclude Include="..\Source\SoyLib\src\SoyTypes.h" />
     <ClInclude Include="..\Source\SoyLib\src\SoyTypes_Windows.h" />
+    <ClInclude Include="..\Source\SoyLib\src\SoyWave.h" />
     <ClInclude Include="..\Source\SoyLib\src\string.hpp" />
     <ClInclude Include="..\Source\TCameraDevice.hpp" />
     <ClInclude Include="..\Source\TestDevice.hpp" />

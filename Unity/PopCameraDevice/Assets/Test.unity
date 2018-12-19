@@ -155,7 +155,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2acbc0bf6d5200d428561bae3f687cc6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  DeviceName: Test
+  DeviceName: Display iSight
 --- !u!23 &806355512
 MeshRenderer:
   m_ObjectHideFlags: 0

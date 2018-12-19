@@ -26,8 +26,9 @@ public class CameraDevice : MonoBehaviour {
 
 	void Update()
 	{
-		if ( Device.GetNextFrame( ref Plane0,  ref Plane1,  ref Plane2 ) )
-			OnNewFrame( Plane0);
+		if ( Device != null )
+			if ( Device.GetNextFrame( ref Plane0,  ref Plane1,  ref Plane2 ) )
+				OnNewFrame( Plane0);
 	}
 
 

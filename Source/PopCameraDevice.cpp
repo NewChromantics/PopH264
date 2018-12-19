@@ -7,7 +7,7 @@
 #include "TStringBuffer.hpp"
 #include "SoyLib\src\HeapArray.hpp"
 #include "TestDevice.hpp"
-
+#include "MfCapture.h"
 
 #if defined(TARGET_WINDOWS)
 BOOL APIENTRY DllMain(HMODULE /* hModule */, DWORD ul_reason_for_call, LPVOID /* lpReserved */)
@@ -124,6 +124,8 @@ __export void EnumCameraDevices(char* StringBuffer,int32_t StringBufferLength)
 		DeviceNames.PushBack(Name);
 	};
 	TestDevice::EnumDeviceNames(EnumDevice);
+	MediaFoundation::EnumCaptureDevices(EnumDevice);
+
 
 	auto IsCharUsed = [&](char Char)
 	{
@@ -169,6 +171,18 @@ uint32_t PopCameraDevice::CreateCameraDevice(const std::string& Name)
 	try
 	{
 		auto Device = TestDevice::CreateDevice(Name);
+		if ( Device )
+			return PopCameraDevice::CreateInstance(Device);
+	}
+	catch(std::exception& e)
+	{
+		std::Debug << e.what() << std::endl;
+	}
+
+
+	try
+	{
+		std::shared_ptr<TCameraDevice> Device(new MediaFoundation::TCamera(Name));
 		if ( Device )
 			return PopCameraDevice::CreateInstance(Device);
 	}
