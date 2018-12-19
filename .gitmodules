@@ -1,7 +1,3 @@
-[submodule "Source/TinyJpeg"]
-	path = Source/TinyJpeg
-	url = https://github.com/SoylentGraham/TinyJPEG
-	branch = BGR-support
 [submodule "Source/SoyLib"]
 	path = Source/SoyLib
 	url = https://github.com/SoylentGraham/SoyLib.git
