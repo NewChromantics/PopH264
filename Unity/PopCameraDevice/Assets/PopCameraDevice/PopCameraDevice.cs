@@ -166,26 +166,35 @@ public static class PopCameraDevice
 			var Plane1Size = (PlaneCount >= 2) ? MetaValues[(int)MetaIndex.Plane1_PixelDataSize] : 0;
 			var Plane2Size = (PlaneCount >= 3) ? MetaValues[(int)MetaIndex.Plane2_PixelDataSize] : 0;
 
-			var Plane0Data = new byte[Plane0Size];
-			var Plane1Data = new byte[Plane1Size];
-			var Plane2Data = new byte[Plane2Size];
-
-			var PopResult = PopFrame( Instance.Value, Plane0Data, Plane0Data.Length, Plane1Data, Plane1Data.Length, Plane2Data, Plane2Data.Length );
-			if ( PopResult == 0 )
-				return false;
-
 			//	alloc textures so we have data to write to
 			if ( PlaneCount >= 1 )	AllocTexture( ref Plane0, MetaValues[(int)MetaIndex.Plane0_Width], MetaValues[(int)MetaIndex.Plane0_Height], MetaValues[(int)MetaIndex.Plane0_ComponentCount] );
 			if ( PlaneCount >= 2 )	AllocTexture( ref Plane1, MetaValues[(int)MetaIndex.Plane1_Width], MetaValues[(int)MetaIndex.Plane1_Height], MetaValues[(int)MetaIndex.Plane1_ComponentCount] );
 			if ( PlaneCount >= 3 )	AllocTexture( ref Plane2, MetaValues[(int)MetaIndex.Plane2_Width], MetaValues[(int)MetaIndex.Plane2_Height], MetaValues[(int)MetaIndex.Plane2_ComponentCount] );
 
-			if ( Plane0 )
-				Plane0.LoadRawTextureData( Plane0Data );
-			if ( Plane1 )
-				Plane1.LoadRawTextureData( Plane1Data );
-			if ( Plane2 )
-				Plane2.LoadRawTextureData( Plane2Data );
+			var UnusedData = new byte[1];
+			var Plane0Data = Plane0 ? Plane0.GetRawTextureData() : UnusedData;
+			var Plane1Data = Plane1 ? Plane1.GetRawTextureData() : UnusedData;
+			var Plane2Data = Plane2 ? Plane2.GetRawTextureData() : UnusedData;
 
+			var PopResult = PopFrame( Instance.Value, Plane0Data, Plane0Data.Length, Plane1Data, Plane1Data.Length, Plane2Data, Plane2Data.Length );
+			if ( PopResult == 0 )
+				return false;
+			
+			if ( Plane0 )
+			{
+				Plane0.LoadRawTextureData( Plane0Data );
+				Plane0.Apply();
+			}
+			if ( Plane1 )
+			{
+				Plane1.LoadRawTextureData( Plane1Data );
+				Plane1.Apply();
+			}
+			if ( Plane2 )
+			{
+				Plane2.LoadRawTextureData( Plane2Data );
+				Plane2.Apply();
+			}
 			return true;
 		}
 
