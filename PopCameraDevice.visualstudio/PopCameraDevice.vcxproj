@@ -142,6 +142,9 @@
     <Link>
       <Profile>true</Profile>
     </Link>
+    <PostBuildEvent>
+      <Command>copy /y $(TargetPath) $(ProjectDir)..\Unity\PopCameraDevice\Assets\PopCameraDevice</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
