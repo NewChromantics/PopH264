@@ -17,3 +17,7 @@ Unity/**/holobuild/
 **/*.opendb
 **/*.unitypackage
 PopEncodeJpeg.uwp/Release/
+
+PopCameraDevice\.visualstudio/Build/
+
+PopCameraDevice\.visualstudio/x64/

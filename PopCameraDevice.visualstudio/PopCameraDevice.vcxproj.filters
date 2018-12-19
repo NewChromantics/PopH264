@@ -1,273 +1,93 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="src">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    <Filter Include="Source">
+      <UniqueIdentifier>{241b992b-1ab2-4d74-a454-bd7dc4dbb7a6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Scripts">
-      <UniqueIdentifier>{55e4f83c-108f-4a4d-b4b5-bda3404cf6d5}</UniqueIdentifier>
+    <Filter Include="SoyLib">
+      <UniqueIdentifier>{5fca03a2-531e-4020-b3a7-da724687bfc8}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\TBlitterDirectx.cpp">
-      <Filter>src</Filter>
+    <ClCompile Include="..\Source\PopEncodeJpeg.cpp">
+      <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\TBlitterOpengl.cpp">
-      <Filter>src</Filter>
+    <ClCompile Include="..\Source\TStringBuffer.cpp">
+      <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\TCaster.cpp">
-      <Filter>src</Filter>
+    <ClCompile Include="..\Source\SoyLib\src\memheap.cpp">
+      <Filter>SoyLib</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\TFileCaster.cpp">
-      <Filter>src</Filter>
+    <ClCompile Include="..\Source\SoyLib\src\SoyDebug.cpp">
+      <Filter>SoyLib</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\THttpCaster.cpp">
-      <Filter>src</Filter>
+    <ClCompile Include="..\Source\SoyLib\src\SoyPixels.cpp">
+      <Filter>SoyLib</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\TMemFileCaster.cpp">
-      <Filter>src</Filter>
+    <ClCompile Include="..\Source\SoyLib\src\SoyString.cpp">
+      <Filter>SoyLib</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\LibavMuxer.cpp">
-      <Filter>src</Filter>
+    <ClCompile Include="..\Source\SoyLib\src\SoyTypes.cpp">
+      <Filter>SoyLib</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\PopCast.cpp">
-      <Filter>src</Filter>
+    <ClCompile Include="..\Source\SoyLib\src\SoyTime.cpp">
+      <Filter>SoyLib</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\PopUnity.cpp">
-      <Filter>src</Filter>
+    <ClCompile Include="..\Source\SoyLib\src\SoyPng.cpp">
+      <Filter>SoyLib</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\SoyGif.cpp">
-      <Filter>src</Filter>
+    <ClCompile Include="..\Source\SoyLib\src\SoyAssert.cpp">
+      <Filter>SoyLib</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\SoyMpeg2Ts.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\TBlitter.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\MfMuxer.cpp">
-      <Filter>src</Filter>
+    <ClCompile Include="..\Source\SoyLib\src\SoyArray.cpp">
+      <Filter>SoyLib</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\src\TBlitter.h">
-      <Filter>src</Filter>
+    <ClInclude Include="..\Source\PopEncodeJpeg.hpp">
+      <Filter>Source</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\TBlitterDirectx.h">
-      <Filter>src</Filter>
+    <ClInclude Include="..\Source\TStringBuffer.hpp">
+      <Filter>Source</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\TBlitterOpengl.h">
-      <Filter>src</Filter>
+    <ClInclude Include="..\Source\SoyLib\src\Array.hpp">
+      <Filter>SoyLib</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\TBlitterWatermark.h">
-      <Filter>src</Filter>
+    <ClInclude Include="..\Source\SoyLib\src\BufferArray.hpp">
+      <Filter>SoyLib</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\TCaster.h">
-      <Filter>src</Filter>
+    <ClInclude Include="..\Source\SoyLib\src\HeapArray.hpp">
+      <Filter>SoyLib</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\TFileCaster.h">
-      <Filter>src</Filter>
+    <ClInclude Include="..\Source\SoyLib\src\MemHeap.hpp">
+      <Filter>SoyLib</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\TGoogleCaster.h">
-      <Filter>src</Filter>
+    <ClInclude Include="..\Source\SoyLib\src\SoyDebug.h">
+      <Filter>SoyLib</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\THttpCaster.h">
-      <Filter>src</Filter>
+    <ClInclude Include="..\Source\SoyLib\src\SoyPixels.h">
+      <Filter>SoyLib</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\TMemFileCaster.h">
-      <Filter>src</Filter>
+    <ClInclude Include="..\Source\SoyLib\src\SoyString.h">
+      <Filter>SoyLib</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\AvfCompressor.h">
-      <Filter>src</Filter>
+    <ClInclude Include="..\Source\SoyLib\src\SoyTypes.h">
+      <Filter>SoyLib</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\AvfMuxer.h">
-      <Filter>src</Filter>
+    <ClInclude Include="..\Source\SoyLib\src\SoyTypes_Windows.h">
+      <Filter>SoyLib</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\AvfPixelBuffer.h">
-      <Filter>src</Filter>
+    <ClInclude Include="..\Source\SoyLib\src\string.hpp">
+      <Filter>SoyLib</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\gif.h">
-      <Filter>src</Filter>
+    <ClInclude Include="..\Source\SoyLib\src\SoyPng.h">
+      <Filter>SoyLib</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\LibavMuxer.h">
-      <Filter>src</Filter>
+    <ClInclude Include="..\Source\SoyLib\src\SoyAssert.h">
+      <Filter>SoyLib</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\PopCast.h">
-      <Filter>src</Filter>
+    <ClInclude Include="..\Source\SoyLib\src\SoyArray.h">
+      <Filter>SoyLib</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\PopCastFramework.h">
-      <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\PopUnity.h">
-      <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\SoyGif.h">
-      <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\SoyMpeg2Ts.h">
-      <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\TAirplayCaster.h">
-      <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\MfMuxer.h">
-      <Filter>src</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\AndroidBuild.sh">
-      <Filter>Scripts</Filter>
-    </None>
-    <None Include="..\CopyCSharpFiles.sh">
-      <Filter>Scripts</Filter>
-    </None>
-    <None Include="..\IosPostBuild.sh">
-      <Filter>Scripts</Filter>
-    </None>
-    <None Include="..\MakePackage.sh">
-      <Filter>Scripts</Filter>
-    </None>
-    <None Include="..\OsxPostBuild.sh">
-      <Filter>Scripts</Filter>
-    </None>
-    <None Include="..\WindowsPostBuild.bat">
-      <Filter>Scripts</Filter>
-    </None>
-    <None Include="..\src\TGoogleCaster.mm">
-      <Filter>src</Filter>
-    </None>
-    <None Include="..\src\AvfCompressor.mm">
-      <Filter>src</Filter>
-    </None>
-    <None Include="..\src\AvfMuxer.mm">
-      <Filter>src</Filter>
-    </None>
-    <None Include="..\src\AvfPixelBuffer.mm">
-      <Filter>src</Filter>
-    </None>
-    <None Include="..\src\BundleInfo.plist">
-      <Filter>src</Filter>
-    </None>
-    <None Include="..\src\FrameworkInfo.plist">
-      <Filter>src</Filter>
-    </None>
-    <None Include="..\src\PopCast.cs">
-      <Filter>src</Filter>
-    </None>
-    <None Include="..\src\TAirplayCaster.mm">
-      <Filter>src</Filter>
-    </None>
-    <None Include="..\src\Editor\PopCastWindow.cs">
-      <Filter>src</Filter>
-    </None>
-    <None Include="..\src\GifDebug.glsl.frag">
-      <Filter>src</Filter>
-    </None>
-    <None Include="..\src\GifNearest.glsl.frag">
-      <Filter>src</Filter>
-    </None>
-    <None Include="..\src\GifNearest.hlsl.frag">
-      <Filter>src</Filter>
-    </None>
-    <None Include="..\src\GifDebug.hlsl.frag">
-      <Filter>src</Filter>
-    </None>
-    <None Include="..\src\Blit.hlsl.vert">
-      <Filter>src</Filter>
-    </None>
-    <None Include="..\src\Blit2D.glsl.frag">
-      <Filter>src</Filter>
-    </None>
-    <None Include="..\src\BlitAudioGraph.glsl.frag">
-      <Filter>src</Filter>
-    </None>
-    <None Include="..\src\BlitAudioGraph.hlsl.frag">
-      <Filter>src</Filter>
-    </None>
-    <None Include="..\src\BlitBarGraph.glsl.frag">
-      <Filter>src</Filter>
-    </None>
-    <None Include="..\src\BlitBarGraph.hlsl.frag">
-      <Filter>src</Filter>
-    </None>
-    <None Include="..\src\BlitError.glsl.frag">
-      <Filter>src</Filter>
-    </None>
-    <None Include="..\src\BlitError.hlsl.frag">
-      <Filter>src</Filter>
-    </None>
-    <None Include="..\src\BlitFreenectDepth10mm.glsl.frag">
-      <Filter>src</Filter>
-    </None>
-    <None Include="..\src\BlitOesExternal.glsl.frag">
-      <Filter>src</Filter>
-    </None>
-    <None Include="..\src\BlitRectangle.glsl.frag">
-      <Filter>src</Filter>
-    </None>
-    <None Include="..\src\BlitRgba.hlsl.frag">
-      <Filter>src</Filter>
-    </None>
-    <None Include="..\src\BlitTest.glsl.frag">
-      <Filter>src</Filter>
-    </None>
-    <None Include="..\src\BlitTest.hlsl.frag">
-      <Filter>src</Filter>
-    </None>
-    <None Include="..\src\BlitWatermark.glsl.frag">
-      <Filter>src</Filter>
-    </None>
-    <None Include="..\src\BlitWatermark.hlsl.frag">
-      <Filter>src</Filter>
-    </None>
-    <None Include="..\src\BlitYuv.glsl.frag">
-      <Filter>src</Filter>
-    </None>
-    <None Include="..\src\BlitYuv.hlsl.frag">
-      <Filter>src</Filter>
-    </None>
-    <None Include="..\src\BlitYuv_8_8_8_Full.glsl.frag">
-      <Filter>src</Filter>
-    </None>
-    <None Include="..\src\BlitYuv_8_8_8_Full.hlsl.frag">
-      <Filter>src</Filter>
-    </None>
-    <None Include="..\src\BlitYuv_8_8_8_Video.glsl.frag">
-      <Filter>src</Filter>
-    </None>
-    <None Include="..\src\BlitYuv_8_8_8_Video.hlsl.frag">
-      <Filter>src</Filter>
-    </None>
-    <None Include="..\src\BlitYuv_8_88_Full.glsl.frag">
-      <Filter>src</Filter>
-    </None>
-    <None Include="..\src\BlitYuv_8_88_Full.hlsl.frag">
-      <Filter>src</Filter>
-    </None>
-    <None Include="..\src\BlitYuv_8_88_Video.glsl.frag">
-      <Filter>src</Filter>
-    </None>
-    <None Include="..\src\BlitYuv_8_88_Video.hlsl.frag">
-      <Filter>src</Filter>
-    </None>
-    <None Include="..\src\Blit.glsl.vert">
-      <Filter>src</Filter>
-    </None>
-    <None Include="..\src\PopCastCameraCapture.cs">
-      <Filter>src</Filter>
-    </None>
-    <None Include="..\src\Editor\PopCastInspector.cs">
-      <Filter>src</Filter>
-    </None>
-    <None Include="..\src\PopTexturePtrCache.cs">
-      <Filter>src</Filter>
-    </None>
-    <None Include="..\src\BlitRgbaFlip.hlsl.frag">
-      <Filter>src</Filter>
-    </None>
-    <None Include="..\MakePackage.bat">
-      <Filter>Scripts</Filter>
-    </None>
   </ItemGroup>
 </Project>

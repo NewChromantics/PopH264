@@ -5,11 +5,7 @@
 #include <sstream>
 #include <algorithm>
 #include "TStringBuffer.hpp"
-
-#define ENABLE_FOPEN	0
-#define TJE_IMPLEMENTATION
-#include "TinyJpeg/tiny_jpeg.h"
-
+#include "SoyLib\src\HeapArray.hpp"
 
 
 
@@ -90,43 +86,51 @@ __export void ReleaseDebugString(const char* String)
 }
 
 
-
-__export int32_t	EncodeJpeg(uint8_t* JpegData,int32_t JpegDataSize,int32_t JpegQuality,uint8_t* ImageData,int32_t ImageDataSize,int32_t ImageWidth,int32_t ImageHeight,int32_t ImageComponents,int32_t IsRgb)
+__export void EnumCameraDevices(char* StringBuffer,int32_t StringBufferLength)
 {
-	//	non-capturing lambda
-	auto WriteToContext = [](void* context, void* data, int size)
+	//	first char is delin
+	const char PossibleDelin[] = ",;:#!@+=_-&^%*$£?|/ ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopoqrstuvwzy0123456789";
+	auto PossibleDelinArray = GetRemoteArray( PossibleDelin );
+
+	Array<std::string> DeviceNames;
+	DeviceNames.PushBack("Test,");
+
+	auto IsCharUsed = [&](char Char)
 	{
-		if ( size < 0 )
+		for ( int d=0;	d<DeviceNames.GetSize();	d++ )
 		{
-			std::stringstream Error;
-			Error << "Trying to write negative size " << size;
-			throw std::range_error::range_error( Error.str() );
+			auto& DeviceName = DeviceNames[d];
+			auto Index = DeviceName.find_first_of(Char);
+			if ( Index != DeviceName.npos )
+				return true;
 		}
-		auto& Context = *reinterpret_cast<TWriteContext*>( context );
-		Context.Write( reinterpret_cast<const uint8_t*>(data), size );
+		return false;
 	};
 
-	try
+	char Delin;
+	for ( auto pd=0;	pd<PossibleDelinArray.GetSize();	pd++ )
 	{
-		TWriteContext Context( JpegData, JpegDataSize );
-		
-		bool DataIsRgb = (IsRgb!=0);
-		auto Result = tje_encode_with_func( WriteToContext, &Context, JpegQuality, ImageWidth, ImageHeight, ImageComponents, DataIsRgb, ImageData );
-		if ( Result != 1 )
-		{
-			std::stringstream Error;
-			Error << "Error encoding: " << Result;
-			throw std::runtime_error::runtime_error( Error.str() );
-		}
-		auto Written = static_cast<int32_t>( Context.mDataWritten );
-		return Written;
+		Delin = PossibleDelin[pd];
+		bool Used = IsCharUsed(Delin);
+		if ( !Used )
+			break;		
 	}
-	catch(std::exception& e)
+	//	todo! handle no unused chars!
+
+	//	build output
+	//	first char is delin, then each device seperated by that delin
+	std::stringstream OutputString;
+	OutputString << Delin;
+	for ( int d=0;	d<DeviceNames.GetSize();	d++ )
 	{
-		DebugLog( e.what() );
-		return 0;
+		auto& DeviceName = DeviceNames[d];
+		OutputString << DeviceName << Delin;
 	}
+
+	auto OutputStringStr = OutputString.str();
+	Soy::StringToBuffer( OutputStringStr, StringBuffer, StringBufferLength );
 }
+
 
 
 TStringBuffer& PopEncodeJpeg::GetDebugStrings()
