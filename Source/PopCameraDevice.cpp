@@ -1,4 +1,4 @@
-#include "PopEncodeJpeg.hpp"
+#include "PopCameraDevice.hpp"
 #include <exception>
 #include <stdexcept>
 #include <vector>

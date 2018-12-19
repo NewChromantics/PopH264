@@ -12,9 +12,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\Source\PopEncodeJpeg.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
     <ClCompile Include="..\Source\TStringBuffer.cpp">
       <Filter>Source</Filter>
     </ClCompile>
@@ -45,11 +42,11 @@
     <ClCompile Include="..\Source\SoyLib\src\SoyArray.cpp">
       <Filter>SoyLib</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source\PopCameraDevice.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Source\PopEncodeJpeg.hpp">
-      <Filter>Source</Filter>
-    </ClInclude>
     <ClInclude Include="..\Source\TStringBuffer.hpp">
       <Filter>Source</Filter>
     </ClInclude>
@@ -91,6 +88,9 @@
     </ClInclude>
     <ClInclude Include="..\Source\SoyLib\src\SoyArray.h">
       <Filter>SoyLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\PopCameraDevice.hpp">
+      <Filter>Source</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

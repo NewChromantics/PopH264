@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\Source\PopEncodeJpeg.cpp" />
+    <ClCompile Include="..\Source\PopCameraDevice.cpp" />
     <ClCompile Include="..\Source\SoyLib\src\memheap.cpp" />
     <ClCompile Include="..\Source\SoyLib\src\SoyArray.cpp" />
     <ClCompile Include="..\Source\SoyLib\src\SoyAssert.cpp" />
@@ -32,7 +32,7 @@
     <ClCompile Include="..\Source\TStringBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Source\PopEncodeJpeg.hpp" />
+    <ClInclude Include="..\Source\PopCameraDevice.hpp" />
     <ClInclude Include="..\Source\SoyLib\src\Array.hpp" />
     <ClInclude Include="..\Source\SoyLib\src\BufferArray.hpp" />
     <ClInclude Include="..\Source\SoyLib\src\HeapArray.hpp" />
