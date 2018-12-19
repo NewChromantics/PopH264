@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup />
+  <ItemDefinitionGroup>
+    <PostBuildEvent>
+      <Command>SET SRCROOT=$(ProjectDir)..
+SET PROJECT=$(ProjectName)
+SET UNITY_EXE=$(UNITY_EXE)
+if not defined PLATFORM_NAME (
+	SET PLATFORM_NAME=Windows/$(Platform)/
+)
+
+if "%PLATFORM_NAME%" == "PS4" (
+	echo setting BUILD_DLL to ps4
+	SET BUILD_DLL=$(OutputPath)$(ProjectName)*
+) else (
+	SET BUILD_DLL=$(TargetPath)
+)
+
+$(ProjectDir)\..\WindowsPostBuild.bat
+</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup>
+    <PostBuildEvent>
+      <Message>Post build</Message>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup />
+</Project>

@@ -1,0 +1,297 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Watermarked|Win32">
+      <Configuration>Watermarked</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Watermarked|x64">
+      <Configuration>Watermarked</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\AndroidBuild.sh" />
+    <None Include="..\CopyCSharpFiles.sh" />
+    <None Include="..\IosPostBuild.sh" />
+    <None Include="..\MakePackage.bat" />
+    <None Include="..\MakePackage.sh" />
+    <None Include="..\OsxPostBuild.sh" />
+    <None Include="..\src\AvfCompressor.mm">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Watermarked|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Watermarked|x64'">true</ExcludedFromBuild>
+    </None>
+    <None Include="..\src\AvfMuxer.mm">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Watermarked|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Watermarked|x64'">true</ExcludedFromBuild>
+    </None>
+    <None Include="..\src\AvfPixelBuffer.mm">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Watermarked|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Watermarked|x64'">true</ExcludedFromBuild>
+    </None>
+    <None Include="..\src\Blit.glsl.vert" />
+    <None Include="..\src\Blit.hlsl.vert" />
+    <None Include="..\src\Blit2D.glsl.frag" />
+    <None Include="..\src\BlitAudioGraph.glsl.frag" />
+    <None Include="..\src\BlitAudioGraph.hlsl.frag" />
+    <None Include="..\src\BlitBarGraph.glsl.frag" />
+    <None Include="..\src\BlitBarGraph.hlsl.frag" />
+    <None Include="..\src\BlitError.glsl.frag" />
+    <None Include="..\src\BlitError.hlsl.frag" />
+    <None Include="..\src\BlitFreenectDepth10mm.glsl.frag" />
+    <None Include="..\src\BlitOesExternal.glsl.frag" />
+    <None Include="..\src\BlitRectangle.glsl.frag" />
+    <None Include="..\src\BlitRgba.hlsl.frag" />
+    <None Include="..\src\BlitRgbaFlip.hlsl.frag" />
+    <None Include="..\src\BlitTest.glsl.frag" />
+    <None Include="..\src\BlitTest.hlsl.frag" />
+    <None Include="..\src\BlitWatermark.glsl.frag" />
+    <None Include="..\src\BlitWatermark.hlsl.frag" />
+    <None Include="..\src\BlitYuv.glsl.frag" />
+    <None Include="..\src\BlitYuv.hlsl.frag" />
+    <None Include="..\src\BlitYuv_8_88_Full.glsl.frag" />
+    <None Include="..\src\BlitYuv_8_88_Full.hlsl.frag" />
+    <None Include="..\src\BlitYuv_8_88_Video.glsl.frag" />
+    <None Include="..\src\BlitYuv_8_88_Video.hlsl.frag" />
+    <None Include="..\src\BlitYuv_8_8_8_Full.glsl.frag" />
+    <None Include="..\src\BlitYuv_8_8_8_Full.hlsl.frag" />
+    <None Include="..\src\BlitYuv_8_8_8_Video.glsl.frag" />
+    <None Include="..\src\BlitYuv_8_8_8_Video.hlsl.frag" />
+    <None Include="..\src\BundleInfo.plist">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Watermarked|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Watermarked|x64'">true</ExcludedFromBuild>
+    </None>
+    <None Include="..\src\Editor\PopCameraDeviceInspector.cs" />
+    <None Include="..\src\Editor\PopCastWindow.cs" />
+    <None Include="..\src\FrameworkInfo.plist">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Watermarked|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Watermarked|x64'">true</ExcludedFromBuild>
+    </None>
+    <None Include="..\src\GifDebug.hlsl.frag" />
+    <None Include="..\src\GifDebug.glsl.frag" />
+    <None Include="..\src\GifNearest.glsl.frag" />
+    <None Include="..\src\GifNearest.hlsl.frag" />
+    <None Include="..\src\PopCast.cs" />
+    <None Include="..\src\PopCastCameraCapture.cs" />
+    <None Include="..\src\PopTexturePtrCache.cs" />
+    <None Include="..\src\TAirplayCaster.mm">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Watermarked|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Watermarked|x64'">true</ExcludedFromBuild>
+    </None>
+    <None Include="..\src\TGoogleCaster.mm">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Watermarked|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Watermarked|x64'">true</ExcludedFromBuild>
+    </None>
+    <None Include="..\WindowsPostBuild.bat" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\AvfCompressor.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Watermarked|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Watermarked|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="..\src\AvfMuxer.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Watermarked|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Watermarked|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="..\src\AvfPixelBuffer.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Watermarked|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Watermarked|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="..\src\gif.h" />
+    <ClInclude Include="..\src\LibavMuxer.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Watermarked|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Watermarked|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="..\src\MfMuxer.h" />
+    <ClInclude Include="..\src\PopCast.h" />
+    <ClInclude Include="..\src\PopCastFramework.h" />
+    <ClInclude Include="..\src\PopUnity.h" />
+    <ClInclude Include="..\src\SoyGif.h" />
+    <ClInclude Include="..\src\SoyMpeg2Ts.h" />
+    <ClInclude Include="..\src\TAirplayCaster.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Watermarked|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Watermarked|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="..\src\TBlitter.h" />
+    <ClInclude Include="..\src\TBlitterDirectx.h" />
+    <ClInclude Include="..\src\TBlitterOpengl.h" />
+    <ClInclude Include="..\src\TBlitterWatermark.h" />
+    <ClInclude Include="..\src\TCaster.h" />
+    <ClInclude Include="..\src\TFileCaster.h" />
+    <ClInclude Include="..\src\TGoogleCaster.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Watermarked|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Watermarked|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="..\src\THttpCaster.h" />
+    <ClInclude Include="..\src\TMemFileCaster.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\LibavMuxer.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Watermarked|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Watermarked|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\MfMuxer.cpp" />
+    <ClCompile Include="..\src\PopCast.cpp" />
+    <ClCompile Include="..\src\PopUnity.cpp" />
+    <ClCompile Include="..\src\SoyGif.cpp" />
+    <ClCompile Include="..\src\SoyMpeg2Ts.cpp" />
+    <ClCompile Include="..\src\TBlitter.cpp" />
+    <ClCompile Include="..\src\TBlitterDirectx.cpp" />
+    <ClCompile Include="..\src\TBlitterOpengl.cpp" />
+    <ClCompile Include="..\src\TCaster.cpp" />
+    <ClCompile Include="..\src\TFileCaster.cpp" />
+    <ClCompile Include="..\src\THttpCaster.cpp" />
+    <ClCompile Include="..\src\TMemFileCaster.cpp" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{64811728-CD20-4F2C-899B-E3BF3D4B032E}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>PopMoveiTexture</RootNamespace>
+    <TargetPlatformVersion>8.1</TargetPlatformVersion>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Watermarked|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Watermarked|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\SoyLib\Soy_Windows.props" />
+    <Import Project="..\..\SoyLib\SoyApp_Windows.props" />
+    <Import Project="NoWatermark.props" />
+    <Import Project="WindowsPostBuild.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\SoyLib\Soy_Windows.props" />
+    <Import Project="..\..\SoyLib\SoyApp_Windows.props" />
+    <Import Project="NoWatermark.props" />
+    <Import Project="WindowsPostBuild.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Watermarked|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\SoyLib\Soy_Windows.props" />
+    <Import Project="..\..\SoyLib\SoyApp_Windows.props" />
+    <Import Project="Watermarked.props" />
+    <Import Project="WindowsPostBuild.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Watermarked|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\SoyLib\Soy_Windows.props" />
+    <Import Project="..\..\SoyLib\SoyApp_Windows.props" />
+    <Import Project="Watermarked.props" />
+    <Import Project="WindowsPostBuild.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Watermarked|x64'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Watermarked|Win32'" />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <PreprocessorDefinitions>ENABLE_DIRECTX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link />
+    <Link />
+    <PostBuildEvent />
+    <Link>
+      <Profile>true</Profile>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <PreprocessorDefinitions>ENABLE_DIRECTX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link />
+    <Link />
+    <PostBuildEvent />
+    <Link>
+      <Profile>true</Profile>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Watermarked|x64'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <PreprocessorDefinitions>ENABLE_DIRECTX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link />
+    <Link />
+    <PostBuildEvent />
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Watermarked|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <PreprocessorDefinitions>ENABLE_DIRECTX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link />
+    <Link />
+    <PostBuildEvent />
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
