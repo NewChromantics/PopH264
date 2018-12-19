@@ -45,6 +45,12 @@
     <ClCompile Include="..\Source\PopCameraDevice.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source\TestDevice.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\TCameraDevice.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\TStringBuffer.hpp">
@@ -90,6 +96,12 @@
       <Filter>SoyLib</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\PopCameraDevice.hpp">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\TestDevice.hpp">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\TCameraDevice.hpp">
       <Filter>Source</Filter>
     </ClInclude>
   </ItemGroup>

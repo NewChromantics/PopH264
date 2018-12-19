@@ -29,6 +29,8 @@
     <ClCompile Include="..\Source\SoyLib\src\SoyString.cpp" />
     <ClCompile Include="..\Source\SoyLib\src\SoyTime.cpp" />
     <ClCompile Include="..\Source\SoyLib\src\SoyTypes.cpp" />
+    <ClCompile Include="..\Source\TCameraDevice.cpp" />
+    <ClCompile Include="..\Source\TestDevice.cpp" />
     <ClCompile Include="..\Source\TStringBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -46,6 +48,8 @@
     <ClInclude Include="..\Source\SoyLib\src\SoyTypes.h" />
     <ClInclude Include="..\Source\SoyLib\src\SoyTypes_Windows.h" />
     <ClInclude Include="..\Source\SoyLib\src\string.hpp" />
+    <ClInclude Include="..\Source\TCameraDevice.hpp" />
+    <ClInclude Include="..\Source\TestDevice.hpp" />
     <ClInclude Include="..\Source\TStringBuffer.hpp" />
   </ItemGroup>
   <ItemGroup>

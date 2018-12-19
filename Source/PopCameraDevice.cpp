@@ -6,7 +6,7 @@
 #include <algorithm>
 #include "TStringBuffer.hpp"
 #include "SoyLib\src\HeapArray.hpp"
-
+#include "TestDevice.hpp"
 
 
 #if defined(TARGET_WINDOWS)
@@ -23,6 +23,31 @@ BOOL APIENTRY DllMain(HMODULE /* hModule */, DWORD ul_reason_for_call, LPVOID /*
 	return TRUE;
 }
 #endif
+
+class TDeviceInstance;
+
+namespace PopCameraDevice
+{
+	TCameraDevice&	GetCameraDevice(uint32_t Instance);
+	uint32_t		CreateInstance(std::shared_ptr<TCameraDevice> Device);
+	void			FreeInstance(uint32_t Instance);
+
+	uint32_t		CreateCameraDevice(const std::string& Name);
+
+	std::mutex								InstancesLock;
+	Array<std::shared_ptr<TDeviceInstance>>	Instances;
+	uint32_t								InstancesCounter = 1;
+}
+
+
+class TDeviceInstance
+{
+public:
+	std::shared_ptr<TCameraDevice>	mDevice;
+	uint32_t						mInstanceId = 0;
+
+	bool							operator==(const uint32_t& InstanceId) const	{	return mInstanceId == InstanceId;	}
+};
 
 
 class TWriteContext
@@ -93,7 +118,11 @@ __export void EnumCameraDevices(char* StringBuffer,int32_t StringBufferLength)
 	auto PossibleDelinArray = GetRemoteArray( PossibleDelin );
 
 	Array<std::string> DeviceNames;
-	DeviceNames.PushBack("Test,");
+	auto EnumDevice = [&](const std::string& Name)
+	{
+		DeviceNames.PushBack(Name);
+	};
+	TestDevice::EnumDeviceNames(EnumDevice);
 
 	auto IsCharUsed = [&](char Char)
 	{
@@ -133,6 +162,52 @@ __export void EnumCameraDevices(char* StringBuffer,int32_t StringBufferLength)
 
 
 
+uint32_t PopCameraDevice::CreateCameraDevice(const std::string& Name)
+{
+	//	alloc device
+	try
+	{
+		auto Device = TestDevice::CreateDevice(Name);
+		if ( Device )
+			return PopCameraDevice::CreateInstance(Device);
+	}
+	catch(std::exception& e)
+	{
+		std::Debug << e.what() << std::endl;
+	}
+
+
+	throw Soy::AssertException("Failed to create device");
+}
+
+
+__export int32_t CreateCameraDevice(const char* Name)
+{
+	try
+	{
+		auto InstanceId = PopCameraDevice::CreateCameraDevice( Name );
+
+		return InstanceId;
+	}
+	catch(std::exception& e)
+	{
+		std::Debug << __func__ << " exception: " << e.what() << std::endl;
+		return -1;
+	}
+	catch(...)
+	{
+		std::Debug << __func__ << " unknown exception." << std::endl;
+		return -1;
+	}
+
+
+}
+__export void				FreeCameraDevice(int32_t Instance);
+__export void				GetMeta(int32_t Instance,int32_t* MetaValues,int32_t MetaValuesCount);
+__export int32_t			PopFrame(int32_t Instance,uint8_t* Plane0,int32_t Plane0Size,uint8_t* Plane1,int32_t Plane1Size,uint8_t* Plane2,int32_t Plane2Size);
+
+
+
 TStringBuffer& PopEncodeJpeg::GetDebugStrings()
 {
 	if ( !gDebugStrings )
@@ -168,4 +243,17 @@ void TWriteContext::Write(const uint8_t* Data,size_t Size)
 	mDataWritten += Size;
 }
 
+
+uint32_t PopCameraDevice::CreateInstance(std::shared_ptr<TCameraDevice> Device)
+{
+	std::lock_guard<std::mutex> Lock(InstancesLock);
+	
+	std::shared_ptr<TDeviceInstance> pInstance(new TDeviceInstance);
+	auto& Instance = *pInstance;
+	Instance.mInstanceId = InstancesCounter;
+	Instance.mDevice = Device;
+	Instances.PushBack(pInstance);
+	InstancesCounter++;
+	return Instance.mInstanceId;
+}
 
