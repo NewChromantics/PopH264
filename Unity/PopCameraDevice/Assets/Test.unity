@@ -156,6 +156,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   DeviceName: Display iSight
+  MaterialUniform_Luma: _MainTex
+  MaterialUniform_ChromaU: ChromaUTexture
+  MaterialUniform_ChromaV: ChromaVTexture
 --- !u!23 &806355512
 MeshRenderer:
   m_ObjectHideFlags: 0

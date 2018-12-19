@@ -99,6 +99,12 @@ public static class PopCameraDevice
 	{
 		int? Instance = null;
 
+		//	cache once to avoid allocating each frame
+		byte[] Plane0Cache;
+		byte[] Plane1Cache;
+		byte[] Plane2Cache;
+		byte[] UnusedBuffer = new byte[1];
+
 		public Device(string DeviceName)
 		{
 			var DeviceNameAscii = System.Text.ASCIIEncoding.ASCII.GetBytes(DeviceName);
@@ -171,10 +177,17 @@ public static class PopCameraDevice
 			if ( PlaneCount >= 2 )	AllocTexture( ref Plane1, MetaValues[(int)MetaIndex.Plane1_Width], MetaValues[(int)MetaIndex.Plane1_Height], MetaValues[(int)MetaIndex.Plane1_ComponentCount] );
 			if ( PlaneCount >= 3 )	AllocTexture( ref Plane2, MetaValues[(int)MetaIndex.Plane2_Width], MetaValues[(int)MetaIndex.Plane2_Height], MetaValues[(int)MetaIndex.Plane2_ComponentCount] );
 
-			var UnusedData = new byte[1];
-			var Plane0Data = Plane0 ? Plane0.GetRawTextureData() : UnusedData;
-			var Plane1Data = Plane1 ? Plane1.GetRawTextureData() : UnusedData;
-			var Plane2Data = Plane2 ? Plane2.GetRawTextureData() : UnusedData;
+			
+			if ( Plane0Cache == null && Plane0 )
+				Plane0Cache = Plane0.GetRawTextureData();
+			if ( Plane1Cache== null && Plane1 )
+				Plane1Cache = Plane1.GetRawTextureData();
+			if ( Plane2Cache == null&& Plane2 )
+				Plane2Cache = Plane2.GetRawTextureData();
+
+			var Plane0Data = Plane0Cache!=null ? Plane0Cache : UnusedBuffer;
+			var Plane1Data = Plane1Cache!=null ? Plane1Cache : UnusedBuffer;
+			var Plane2Data = Plane2Cache!=null ? Plane2Cache : UnusedBuffer;
 
 			var PopResult = PopFrame( Instance.Value, Plane0Data, Plane0Data.Length, Plane1Data, Plane1Data.Length, Plane2Data, Plane2Data.Length );
 			if ( PopResult == 0 )

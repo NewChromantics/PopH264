@@ -3,16 +3,13 @@
 	Properties
 	{
 		_MainTex ("Texture", 2D) = "white" {}
-		ChromaUTexture ("ChromaU", 2D) = "black" {}
-		ChromaVTexture ("ChromaV", 2D) = "black" {}
-		LumaMin("LumaMin", Range(0,255) ) = 16
-		LumaMax("LumaMax", Range(0,255) ) = 253
-		ChromaVRed("ChromaVRed", Range(-2,2) ) = 1.5958
-		ChromaUGreen("ChromaUGreen", Range(-2,2) ) = -0.39173
-		ChromaVGreen("ChromaVGreen", Range(-2,2) ) = -0.81290
-		ChromaUBlue("ChromaUBlue", Range(-2,2) ) = 2.017
+		ChromaUTexture ("ChromaU", 2D) = "white" {}
+		ChromaVTexture ("ChromaV", 2D) = "white" {}
+		ChromaVRed("ChromaVRed", Ranage(-1,2) ) = 1.5958
+		ChromaUGreen("ChromaUGreen", Ranage(-1,1) ) = -0.39173
+		ChromaVGreen("ChromaVGreen", Ranage(-1,1) ) = -0.81290
+		ChromaUBlue("ChromaUBlue", Ranage(-1,2) ) = 1.5958
 		[Toggle]Flip("Flip", Range(0,1)) = 1
-		[Toggle]EnableChroma("EnableChroma", Range(0,1)) = 1
 	}
 	SubShader
 	{
@@ -45,18 +42,8 @@
 			sampler2D ChromaUTexture;
 			sampler2D ChromaVTexture;
 
-			float LumaMin;
-			float LumaMax;
-			float ChromaVRed;
-			float ChromaUGreen;
-			float ChromaVGreen;
-			float ChromaUBlue;
-
-
 			float Flip;
-			float EnableChroma;
 			#define FLIP	( Flip > 0.5f )	
-			#define ENABLE_CHROMA	( EnableChroma > 0.5f )
 			
 			v2f vert (appdata v)
 			{
@@ -77,20 +64,7 @@
 				float ChromaU = tex2D(ChromaUTexture, i.uv);
 				float ChromaV = tex2D(ChromaVTexture, i.uv);
 				
-				ChromaU = lerp(-0.5, 0.5, ChromaU);
-				ChromaV = lerp(-0.5, 0.5, ChromaV);
-				Luma = lerp(LumaMin/255, LumaMax/255, Luma);
-
-				if ( !ENABLE_CHROMA )
-				{
-					ChromaU = 0;
-					ChromaV = 0;
-				}
-
-				float3 Rgb;
-				Rgb.x = Luma + (ChromaVRed * ChromaV);
-				Rgb.y = Luma + (ChromaUGreen * ChromaU) + (ChromaVGreen * ChromaV);
-				Rgb.z = Luma + (ChromaUBlue * ChromaU);
+				float3 Rgb = Luma.xxx;
 
 				return float4( Rgb, 1);
 			}
