@@ -7,6 +7,9 @@
     <Filter Include="SoyLib">
       <UniqueIdentifier>{5fca03a2-531e-4020-b3a7-da724687bfc8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Unity Source">
+      <UniqueIdentifier>{38d16710-35c0-4ee2-89fd-1eed7bd8119e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Source\PopEncodeJpeg.cpp">
@@ -89,5 +92,10 @@
     <ClInclude Include="..\Source\SoyLib\src\SoyArray.h">
       <Filter>SoyLib</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Unity\PopCameraDevice\Assets\PopCameraDevice\PopCameraDevice.cs">
+      <Filter>Unity Source</Filter>
+    </None>
   </ItemGroup>
 </Project>

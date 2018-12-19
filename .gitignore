@@ -21,3 +21,5 @@ PopEncodeJpeg.uwp/Release/
 PopCameraDevice\.visualstudio/Build/
 
 PopCameraDevice\.visualstudio/x64/
+
+Unity/PopCameraDevice/Assets/PopCameraDevice/PopCameraDevice\.dll

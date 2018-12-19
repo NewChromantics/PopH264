@@ -48,6 +48,9 @@
     <ClInclude Include="..\Source\SoyLib\src\string.hpp" />
     <ClInclude Include="..\Source\TStringBuffer.hpp" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Unity\PopCameraDevice\Assets\PopCameraDevice\PopCameraDevice.cs" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{64811728-CD20-4F2C-899B-E3BF3D4B032E}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
