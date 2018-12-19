@@ -45,7 +45,7 @@ void TestDevice::GenerateFrame()
 		Plane.SetPixels(GetArrayBridge(Components));
 	}
 
-	this->PushFrame(pPixelBuffer);
+	this->PushFrame(pPixelBuffer, Pixels.mMeta );
 }
 	
 

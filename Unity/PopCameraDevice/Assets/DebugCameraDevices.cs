@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class DebugCameraDevices : MonoBehaviour {
 
-	void Update ()
+	void OnEnable ()
 	{
 		var DeviceNames = PopCameraDevice.EnumCameraDevices();
 		DeviceNames.ForEach( Debug.Log );
