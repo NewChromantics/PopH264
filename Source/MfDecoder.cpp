@@ -671,14 +671,14 @@ bool MfExtractor::OnSeek()
 void MediaFoundation::GetSupportedFormats(ArrayBridge<SoyPixelsFormat::Type>&& Formats)
 {
 	//	gr: this is more to do with the parent decoder and it's shader support... so this applies to all platforms...
+	Formats.PushBack( SoyPixelsFormat::Yuv_8_8_8_Full );
+	Formats.PushBack( SoyPixelsFormat::Yuv_8_8_8_Ntsc );
+	Formats.PushBack( SoyPixelsFormat::Yuv_8_8_8_Smptec );
 	Formats.PushBack( SoyPixelsFormat::RGBA );
 	Formats.PushBack( SoyPixelsFormat::RGB );
 	Formats.PushBack( SoyPixelsFormat::Yuv_8_88_Full );
 	Formats.PushBack( SoyPixelsFormat::Yuv_8_88_Ntsc );
 	Formats.PushBack( SoyPixelsFormat::Yuv_8_88_Smptec );
-	Formats.PushBack( SoyPixelsFormat::Yuv_8_8_8_Full );
-	Formats.PushBack( SoyPixelsFormat::Yuv_8_8_8_Ntsc );
-	Formats.PushBack( SoyPixelsFormat::Yuv_8_8_8_Smptec );
 
 	Formats.PushBack( SoyPixelsFormat::YYuv_8888_Full );
 	Formats.PushBack( SoyPixelsFormat::YYuv_8888_Ntsc );
@@ -794,8 +794,8 @@ void MfExtractor::ConfigureVideoStream(TStreamMeta& Stream)
 	MediaFoundation::GetSupportedFormats( GetArrayBridge(Formats) );
 	
 	//	start with it's current format for least conversion! (as long as we support it)
-	if ( Formats.Find( Stream.mPixelMeta.GetFormat() ) )
-		*Formats.InsertBlock( 0, 1 ) = Stream.mPixelMeta.GetFormat();
+	//if ( Formats.Find( Stream.mPixelMeta.GetFormat() ) )
+	//	*Formats.InsertBlock( 0, 1 ) = Stream.mPixelMeta.GetFormat();
 
 	auto FinalFormat = SoyPixelsFormat::Invalid;
 	

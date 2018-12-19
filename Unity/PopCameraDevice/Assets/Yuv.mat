@@ -35,6 +35,7 @@ Material:
     - ChromaUGreen: -0.39173
     - ChromaVGreen: -0.8129
     - ChromaVRed: 1.5958
+    - EnableChroma: 0
     - Flip: 1
     - LumaMax: 253
     - LumaMin: 16
