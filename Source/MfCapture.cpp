@@ -433,7 +433,40 @@ MediaFoundation::TCamera::TCamera(const std::string& DeviceName)
 {
 	TMediaExtractorParams Params(DeviceName);
 
-	mExtractor.reset(new TCaptureExtractor(Params));
-	mExtractor->Start();
-};
+	Params.mOnFrameExtracted = [this](const SoyTime,size_t StreamIndex)
+	{
+		PushLatestFrame(StreamIndex);
+	};
 
+	mExtractor.reset(new TCaptureExtractor(Params));
+}
+
+void MediaFoundation::TCamera::PushLatestFrame(size_t StreamIndex)
+{
+	//	get latest packet
+	auto StreamBuffer = mExtractor->GetStreamBuffer(StreamIndex);
+	if ( !StreamBuffer )
+	{
+		auto MaxBufferSize = 2;
+		StreamBuffer = mExtractor->AllocStreamBuffer(StreamIndex, MaxBufferSize);
+	}
+	if ( !StreamBuffer )
+	{
+		std::Debug << "No stream buffer for stream " << StreamIndex << std::endl;
+		return;
+	}
+
+	std::shared_ptr<TMediaPacket> LatestPacket;
+	while ( true )
+	{
+		auto NextPacket = StreamBuffer->PopPacket();
+		if ( !NextPacket )
+			break;
+		LatestPacket = NextPacket;
+	}
+
+	if ( !LatestPacket )
+		return;
+
+	this->PushFrame(LatestPacket->mPixelBuffer, LatestPacket->mMeta.mPixelMeta);
+}

@@ -19,6 +19,8 @@ class MediaFoundation::TCamera : public TCameraDevice
 public:
 	TCamera(const std::string& DeviceName);
 
+	void		PushLatestFrame(size_t StreamIndex);
+
 	std::shared_ptr<TMediaExtractor>	mExtractor;
 };
 

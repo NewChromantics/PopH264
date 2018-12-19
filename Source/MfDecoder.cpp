@@ -275,10 +275,17 @@ TStreamMeta MediaFoundation::GetStreamMeta(IMFMediaType& MediaType,bool VerboseD
 		//	assume format is not known here
 		auto Format = Meta.mPixelMeta.GetFormat();
 		auto Result = MFGetAttributeSize( &MediaType, MF_MT_FRAME_SIZE, &Width, &Height );
-		MediaFoundation::IsOkay(Result, ErrorPrefix + " MF_MT_FRAME_SIZE");
-		Meta.mPixelMeta = SoyPixelsMeta( Width, Height, Format );
-		if ( VerboseDebug )
-			std::Debug << ErrorPrefix << " MF_MT_FRAME_SIZE = " << Meta.mPixelMeta << std::endl;		
+		try
+		{
+			MediaFoundation::IsOkay(Result, ErrorPrefix + " MF_MT_FRAME_SIZE");
+			Meta.mPixelMeta = SoyPixelsMeta(Width, Height, Format);
+			if ( VerboseDebug )
+				std::Debug << ErrorPrefix << " MF_MT_FRAME_SIZE = " << Meta.mPixelMeta << std::endl;
+		}
+		catch(std::exception& e)
+		{
+			std::Debug << e.what() << std::endl;
+		}
 	}
 
 	//	for 2d buffers, extract their pitch/stride. This reveals the padded width (which we cannot get directly from an IMFMediaBuffer)
@@ -333,16 +340,21 @@ TStreamMeta MediaFoundation::GetStreamMeta(IMFMediaType& MediaType,bool VerboseD
 	{
 		UINT32 Numerator = 0;
 		UINT32 Denominator = 0;
-		auto Result = MFGetAttributeSize( &MediaType, MF_MT_FRAME_RATE, &Numerator, &Denominator );
-		MediaFoundation::IsOkay(Result, ErrorPrefix + " MF_MT_FRAME_RATE");
-		if ( Numerator == 0 || Denominator == 0 )
+		try
 		{
-			if ( VerboseDebug )
-				std::Debug << "Failed to decode frame rate from Numerator=" << Numerator << " & " << "Denominator=" << Denominator << " (would get div/0)" << std::endl;
-		}
-		else
-		{
+			auto Result = MFGetAttributeSize( &MediaType, MF_MT_FRAME_RATE, &Numerator, &Denominator );
+			MediaFoundation::IsOkay(Result, ErrorPrefix + " MF_MT_FRAME_RATE");
+			if ( Numerator == 0 || Denominator == 0 )
+			{
+				std::stringstream Error;
+				Error << "Failed to decode frame rate from Numerator=" << Numerator << " & " << "Denominator=" << Denominator << " (would get div/0)";
+				throw Soy::AssertException(Error.str());
+			}
 			Meta.mFramesPerSecond = (float)Numerator / (float)Denominator;
+		}
+		catch(std::exception& e)
+		{
+			std::Debug << e.what() << std::endl;
 		}
 	}
 
