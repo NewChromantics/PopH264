@@ -2,10 +2,14 @@
 {
 	Properties
 	{
-		_MainTex ("Texture", 2D) = "white" {}
-		ChromaUTexture ("ChromaU", 2D) = "black" {}
-		ChromaVTexture ("ChromaV", 2D) = "black" {}
-		LumaMin("LumaMin", Range(0,255) ) = 16
+		LumaTexture ("LumaTexture", 2D) = "white" {}
+		[Enum(None,0,Greyscale,1)]LumaFormat("LumaFormat",int) = 0
+		ChromaUTexture ("ChromaUTexture", 2D) = "black" {}
+		[Enum(Debug,999,None,0,ChromaUV_88,25,ChromaVU_88,998)]ChromaUFormat("ChromaUFormat",int) = 0
+		ChromaVTexture ("ChromaVTexture", 2D) = "black" {}
+		[Enum(Debug,999,None,0,One,1,Two,2)]ChromaVFormat("ChromaVFormat",int) = 0
+		
+		[Header(NTSC etc colour settings)]LumaMin("LumaMin", Range(0,255) ) = 16
 		LumaMax("LumaMax", Range(0,255) ) = 253
 		ChromaVRed("ChromaVRed", Range(-2,2) ) = 1.5958
 		ChromaUGreen("ChromaUGreen", Range(-2,2) ) = -0.39173
@@ -39,11 +43,12 @@
 				float4 vertex : SV_POSITION;
 			};
 
-			sampler2D _MainTex;
-			float4 _MainTex_ST;
-		#define LumaTexture _MainTex
+			sampler2D LumaTexture;
 			sampler2D ChromaUTexture;
 			sampler2D ChromaVTexture;
+			int LumaFormat;
+			int ChromaUFormat;
+			int ChromaVFormat;
 
 			float LumaMin;
 			float LumaMax;
@@ -52,6 +57,12 @@
 			float ChromaVGreen;
 			float ChromaUBlue;
 
+			//	SoyPixelsFormats
+		#define Debug		999
+		#define None		0
+		#define Greyscale	1
+		#define ChromaUV_88	25
+		#define ChromaVU_88	998
 
 			float Flip;
 			float EnableChroma;
@@ -62,37 +73,76 @@
 			{
 				v2f o;
 				o.vertex = UnityObjectToClipPos(v.vertex);
-				o.uv = TRANSFORM_TEX(v.uv, _MainTex);
+				o.uv = v.uv;
 
 				if ( FLIP )
 					o.uv.y = 1 - o.uv.y;
 
 				return o;
 			}
-			
+
+			float2 GetChromaUv_88(float2 uv)
+			{
+				//	uv in one plane but organised as 2-component texture
+				float2 ChromaUV = tex2D(ChromaUTexture, uv).xy;
+				return ChromaUV;
+			}
+
+			float2 GetChromaVu_88(float2 uv)
+			{
+				//	uv in one plane but organised as 2-component texture
+				float2 ChromaUV = tex2D(ChromaUTexture, uv).yx;
+				return ChromaUV;
+			}
+
+			float2 GetChromaUv_Debug(float2 uv)
+			{
+				return uv;
+			}
+
+			float2 GetChromaUv_8_8(float2 uv)
+			{
+				//	seperate planes
+				float ChromaU = tex2D(ChromaUTexture, uv);
+				float ChromaV = tex2D(ChromaVTexture, uv);
+				return float2(ChromaU, ChromaV);
+			}
+
 			fixed4 frag (v2f i) : SV_Target
 			{
 				// sample the texture
 				float Luma = tex2D(LumaTexture, i.uv);
-				float ChromaU = tex2D(ChromaUTexture, i.uv);
-				float ChromaV = tex2D(ChromaVTexture, i.uv);
-				
-				ChromaU = lerp(-0.5, 0.5, ChromaU);
-				ChromaV = lerp(-0.5, 0.5, ChromaV);
-				Luma = lerp(LumaMin/255, LumaMax/255, Luma);
-
-				if ( !ENABLE_CHROMA )
+				float2 ChromaUV = float2(0, 0);
+				if ( ChromaUFormat == Debug )
 				{
-					ChromaU = 0;
-					ChromaV = 0;
+					ChromaUV = GetChromaUv_Debug(i.uv);
+				}
+				else if ( ChromaUFormat == ChromaUV_88 )
+				{
+					ChromaUV = GetChromaUv_88(i.uv);
+				}
+				else if ( ChromaUFormat == ChromaVU_88 )
+				{
+					ChromaUV = GetChromaVu_88(i.uv);
 				}
 
-				float3 Rgb;
-				Rgb.x = Luma + (ChromaVRed * ChromaV);
-				Rgb.y = Luma + (ChromaUGreen * ChromaU) + (ChromaVGreen * ChromaV);
-				Rgb.z = Luma + (ChromaUBlue * ChromaU);
+				//	0..1 to -0.5..0.5
+				ChromaUV -= 0.5;
+				
+				//	override for quick debug
+				if ( !ENABLE_CHROMA )
+				{
+					ChromaUV = float2(0, 0);
+				}
 
-				return float4( Rgb, 1);
+				//	set luma range
+				Luma = lerp(LumaMin/255, LumaMax/255, Luma);
+				float3 Rgb;
+				Rgb.x = Luma + (ChromaVRed * ChromaUV.y);
+				Rgb.y = Luma + (ChromaUGreen * ChromaUV.x) + (ChromaVGreen * ChromaUV.y);
+				Rgb.z = Luma + (ChromaUBlue * ChromaUV.x);
+
+				return float4( Rgb.xyz, 1);
 			}
 			ENDCG
 		}

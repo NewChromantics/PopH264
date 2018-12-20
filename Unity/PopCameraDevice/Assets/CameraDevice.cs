@@ -5,12 +5,16 @@ using UnityEngine;
 public class CameraDevice : MonoBehaviour {
 
 	public string DeviceName = "Test";
-	public string MaterialUniform_Luma = "_MainTex";
-	public string MaterialUniform_ChromaU = "ChromaU";
-	public string MaterialUniform_ChromaV = "ChromaV";
-	Texture2D Plane0;
-	Texture2D Plane1;
-	Texture2D Plane2;
+	public string MaterialUniform_LumaTexture = "LumaTexture";
+	public string MaterialUniform_LumaFormat = "LumaFormat";
+	public string MaterialUniform_ChromaUTexture = "ChromaUTexture";
+	public string MaterialUniform_ChromaUFormat = "ChromaUFormat";
+	public string MaterialUniform_ChromaVTexture = "ChromaVTexture";
+	public string MaterialUniform_ChromaVFormat = "ChromaVFormat";
+	[Header("Turn off to debug by changing the material setting manually")]
+	public bool SetMaterialFormat = true;
+	List<Texture2D> PlaneTextures;
+	List<PopCameraDevice.SoyPixelsFormat> PlaneFormats;
 	PopCameraDevice.Device Device;
 
 	void OnEnable()
@@ -29,8 +33,10 @@ public class CameraDevice : MonoBehaviour {
 	void Update()
 	{
 		if ( Device != null )
-			if ( Device.GetNextFrame( ref Plane0,  ref Plane1,  ref Plane2 ) )
+		{
+			if ( Device.GetNextFrame( ref PlaneTextures,  ref PlaneFormats ) )
 				OnNewFrame();
+		}
 	}
 
 
@@ -38,9 +44,28 @@ public class CameraDevice : MonoBehaviour {
 	{
 		var mr = GetComponent<MeshRenderer>();
 		var mat = mr.sharedMaterial;
-		mat.SetTexture(MaterialUniform_Luma, Plane0);
-		mat.SetTexture(MaterialUniform_ChromaU, Plane1);
-		mat.SetTexture(MaterialUniform_ChromaV, Plane2);
+
+		if ( PlaneTextures.Count >= 1 )
+		{
+			mat.SetTexture(MaterialUniform_LumaTexture, PlaneTextures[0] );
+			if ( SetMaterialFormat )
+				mat.SetInt(MaterialUniform_LumaFormat, (int)PlaneFormats[0] );
+		}
+
+		if ( PlaneTextures.Count >= 2 )
+		{
+			mat.SetTexture(MaterialUniform_ChromaUTexture, PlaneTextures[1] );
+			if ( SetMaterialFormat )
+				mat.SetInt(MaterialUniform_ChromaUFormat, (int)PlaneFormats[1] );
+		}
+
+		if ( PlaneTextures.Count >= 3 )
+		{
+			mat.SetTexture(MaterialUniform_ChromaVTexture, PlaneTextures[2] );
+			if ( SetMaterialFormat )
+				mat.SetInt(MaterialUniform_ChromaVFormat, (int)PlaneFormats[2] );
+		}
+	
 	}
 
 }
