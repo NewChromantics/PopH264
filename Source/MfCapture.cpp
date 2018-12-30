@@ -447,7 +447,7 @@ void MediaFoundation::TCamera::PushLatestFrame(size_t StreamIndex)
 	auto StreamBuffer = mExtractor->GetStreamBuffer(StreamIndex);
 	if ( !StreamBuffer )
 	{
-		auto MaxBufferSize = 2;
+		auto MaxBufferSize = 10;
 		StreamBuffer = mExtractor->AllocStreamBuffer(StreamIndex, MaxBufferSize);
 	}
 	if ( !StreamBuffer )

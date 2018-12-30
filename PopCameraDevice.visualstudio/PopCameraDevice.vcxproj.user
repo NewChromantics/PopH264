@@ -5,4 +5,9 @@
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
     <LocalDebuggerCommandArguments>-projectPath $(ProjectDir)..\Unity\PopCameraDevice</LocalDebuggerCommandArguments>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Master|x64'">
+    <LocalDebuggerCommand>E:\Unity2017.3.1f1\Editor\Unity.exe</LocalDebuggerCommand>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+    <LocalDebuggerCommandArguments>-projectPath $(ProjectDir)..\Unity\PopCameraDevice</LocalDebuggerCommandArguments>
+  </PropertyGroup>
 </Project>

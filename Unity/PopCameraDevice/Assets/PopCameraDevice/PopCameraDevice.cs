@@ -284,7 +284,7 @@ public static class PopCameraDevice
 			var PlaneCount = MetaValues[(int)MetaIndex.PlaneCount];
 			if ( PlaneCount <= 0 )
 			{
-				Debug.Log("No planes (" + PlaneCount +")");
+				//Debug.Log("No planes (" + PlaneCount +")");
 				PixelFormats = null;
 				return false;
 			}

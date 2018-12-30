@@ -3,11 +3,11 @@
 	Properties
 	{
 		LumaTexture ("LumaTexture", 2D) = "white" {}
-		[Enum(None,0,Greyscale,1)]LumaFormat("LumaFormat",int) = 0
+		[Enum(None,0,Greyscale,1,YYuv_8888_Ntsc,19)]LumaFormat("LumaFormat",int) = 0
 		ChromaUTexture ("ChromaUTexture", 2D) = "black" {}
-		[Enum(Debug,999,None,0,ChromaUV_88,25,ChromaVU_88,998)]ChromaUFormat("ChromaUFormat",int) = 0
+		[Enum(Debug,999,None,0,ChromaUV_88,25,ChromaVU_88,998,Chroma_U,26,Chroma_V,27)]ChromaUFormat("ChromaUFormat",int) = 0
 		ChromaVTexture ("ChromaVTexture", 2D) = "black" {}
-		[Enum(Debug,999,None,0,One,1,Two,2)]ChromaVFormat("ChromaVFormat",int) = 0
+		[Enum(Debug,999,None,0,Chroma_U,26,Chroma_V,27)]ChromaVFormat("ChromaVFormat",int) = 0
 		
 		[Header(NTSC etc colour settings)]LumaMin("LumaMin", Range(0,255) ) = 16
 		LumaMax("LumaMax", Range(0,255) ) = 253
@@ -57,11 +57,14 @@
 			float ChromaVGreen;
 			float ChromaUBlue;
 
-			//	SoyPixelsFormats
+			//	SoyPixelsFormat's 
+			//	see https://github.com/SoylentGraham/SoyLib/blob/master/src/SoyPixels.h#L16
 		#define Debug		999
 		#define None		0
 		#define Greyscale	1
 		#define ChromaUV_88	25
+		#define Chroma_U	26
+		#define Chroma_V	27
 		#define ChromaVU_88	998
 
 			float Flip;
@@ -108,6 +111,7 @@
 				return float2(ChromaU, ChromaV);
 			}
 
+
 			fixed4 frag (v2f i) : SV_Target
 			{
 				// sample the texture
@@ -121,9 +125,9 @@
 				{
 					ChromaUV = GetChromaUv_88(i.uv);
 				}
-				else if ( ChromaUFormat == ChromaVU_88 )
+				else if ( ChromaUFormat == Chroma_U && ChromaVFormat == Chroma_V  )
 				{
-					ChromaUV = GetChromaVu_88(i.uv);
+					ChromaUV = GetChromaUv_8_8(i.uv);
 				}
 
 				//	0..1 to -0.5..0.5

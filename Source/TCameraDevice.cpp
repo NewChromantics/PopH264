@@ -47,6 +47,7 @@ bool TCameraDevice::PopLastFrame(ArrayBridge<uint8_t>& Plane0, ArrayBridge<uint8
 			auto PlaneSrcPixelsMin = GetRemoteArray(PlaneSrcPixels.GetArray(), MaxSize);
 			PlaneDstPixels.Copy(PlaneSrcPixelsMin);
 		}
+		PixelBuffer->Unlock();
 	}
 	catch(...)
 	{

@@ -1522,7 +1522,7 @@ void MfPixelBuffer::LockPixelsMediaBuffer2D(ArrayBridge<SoyPixelsImpl*>& Texture
 	{
 		Pitch = Meta.GetWidth();
 	}
-	else
+	else if ( Pitch != Meta.GetWidth() )	//	gr: is this right to skip?
 	{
 		SoyPixelsRemote Pixels( Bytes, ByteSize, Meta );
 		Pitch = RescalePitch( Pitch, Pixels );

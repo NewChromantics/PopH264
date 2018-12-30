@@ -34,7 +34,7 @@ Material:
     - ChromaUBlue: 2.017
     - ChromaUFormat: 25
     - ChromaUGreen: -0.39173
-    - ChromaVFormat: 0
+    - ChromaVFormat: 27
     - ChromaVGreen: -0.8129
     - ChromaVRed: 1.5958
     - EnableChroma: 1
