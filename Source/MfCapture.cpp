@@ -438,6 +438,10 @@ MediaFoundation::TCamera::TCamera(const std::string& DeviceName)
 		PushLatestFrame(StreamIndex);
 	};
 
+	//	gr: pitch padding is crashing, my padding code might be wrong... but none of my cameras are giving out unaligned images...
+	Params.mApplyHeightPadding = false;
+	Params.mApplyWidthPadding = false;
+
 	mExtractor.reset(new TCaptureExtractor(Params));
 }
 
