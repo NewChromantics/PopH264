@@ -794,9 +794,9 @@ void MfExtractor::ConfigureVideoStream(TStreamMeta& Stream)
 	MediaFoundation::GetSupportedFormats( GetArrayBridge(Formats) );
 	
 	//	start with it's current format for least conversion! (as long as we support it)
-	//if ( Formats.Find( Stream.mPixelMeta.GetFormat() ) )
-	//	*Formats.InsertBlock( 0, 1 ) = Stream.mPixelMeta.GetFormat();
-
+	if ( Formats.Find( Stream.mPixelMeta.GetFormat() ) )
+		*Formats.InsertBlock( 0, 1 ) = Stream.mPixelMeta.GetFormat();
+	
 	auto FinalFormat = SoyPixelsFormat::Invalid;
 	
 	while ( FinalFormat == SoyMediaFormat::Invalid && !Formats.IsEmpty() )
