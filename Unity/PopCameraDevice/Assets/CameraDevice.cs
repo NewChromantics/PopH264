@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class CameraDevice : MonoBehaviour {
 
+	public int DeviceIndex = -1;
 	public string DeviceName = "Test";
 	public string MaterialUniform_LumaTexture = "LumaTexture";
 	public string MaterialUniform_LumaFormat = "LumaFormat";
@@ -19,6 +20,12 @@ public class CameraDevice : MonoBehaviour {
 
 	void OnEnable()
 	{
+		if ( DeviceIndex >= 0 )
+		{
+			var DeviceNames = PopCameraDevice.EnumCameraDevices();
+			DeviceName = DeviceNames[DeviceIndex];
+		}
+
 		Device = new PopCameraDevice.Device(DeviceName);
 	}
 
