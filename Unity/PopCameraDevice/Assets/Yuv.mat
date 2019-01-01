@@ -39,7 +39,7 @@ Material:
     - ChromaVRed: 1.5958
     - EnableChroma: 1
     - Flip: 1
-    - LumaFormat: 1
+    - LumaFormat: 18
     - LumaMax: 253
     - LumaMin: 16
     m_Colors: []

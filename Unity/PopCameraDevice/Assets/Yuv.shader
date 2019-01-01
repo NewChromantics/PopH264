@@ -3,7 +3,7 @@
 	Properties
 	{
 		LumaTexture ("LumaTexture", 2D) = "white" {}
-		[Enum(None,0,Greyscale,1,YYuv_8888_Ntsc,19)]LumaFormat("LumaFormat",int) = 0
+		[Enum(None,0,Greyscale,1,YYuv_8888_Full,18,YYuv_8888_Ntsc,19)]LumaFormat("LumaFormat",int) = 0
 		ChromaUTexture ("ChromaUTexture", 2D) = "black" {}
 		[Enum(Debug,999,None,0,ChromaUV_88,25,ChromaVU_88,998,Chroma_U,26,Chroma_V,27)]ChromaUFormat("ChromaUFormat",int) = 0
 		ChromaVTexture ("ChromaVTexture", 2D) = "black" {}
@@ -46,6 +46,7 @@
 			sampler2D LumaTexture;
 			sampler2D ChromaUTexture;
 			sampler2D ChromaVTexture;
+			float4 LumaTexture_TexelSize;
 			int LumaFormat;
 			int ChromaUFormat;
 			int ChromaVFormat;
@@ -62,6 +63,8 @@
 		#define Debug		999
 		#define None		0
 		#define Greyscale	1
+		#define YYuv_8888_Full	18
+		#define YYuv_8888_Ntsc	19
 		#define ChromaUV_88	25
 		#define Chroma_U	26
 		#define Chroma_V	27
@@ -111,13 +114,41 @@
 				return float2(ChromaU, ChromaV);
 			}
 
+			void GetLumaChromaUv_8888(float2 uv,out float Luma,out float2 ChromaUV)
+			{
+				//	data is 
+				//	LumaX+0, ChromaU+0, LumaX+1, ChromaV+0
+				//	2 lumas for each chroma 
+				float2 x = fmod(uv.x * LumaTexture_TexelSize.z, 2.0);
+				float uRemainder = x * LumaTexture_TexelSize.x;
+				
+				//	uv0 = left pixel of pair
+				float2 uv0 = uv;
+				uv0.x -= uRemainder;
+				//	uv1 = right pixel of pair
+				float2 uv1 = uv0;
+				uv1.x += LumaTexture_TexelSize.x;
+
+				//	just in case, sample from middle of texel!
+				uv0.x += LumaTexture_TexelSize.x * 0.5;
+				uv1.x += LumaTexture_TexelSize.x * 0.5;
+
+				float ChromaU = tex2D(LumaTexture, uv0).y;
+				float ChromaV = tex2D(LumaTexture, uv1).y;
+				Luma = tex2D(LumaTexture, uv).x;
+				ChromaUV = float2(ChromaU, ChromaV);
+			}
 
 			fixed4 frag (v2f i) : SV_Target
 			{
 				// sample the texture
 				float Luma = tex2D(LumaTexture, i.uv);
 				float2 ChromaUV = float2(0, 0);
-				if ( ChromaUFormat == Debug )
+				if ( LumaFormat == YYuv_8888_Full || LumaFormat == YYuv_8888_Ntsc )
+				{
+					GetLumaChromaUv_8888(i.uv, Luma, ChromaUV);
+				}
+				else if ( ChromaUFormat == Debug )
 				{
 					ChromaUV = GetChromaUv_Debug(i.uv);
 				}
@@ -129,6 +160,7 @@
 				{
 					ChromaUV = GetChromaUv_8_8(i.uv);
 				}
+				
 
 				//	0..1 to -0.5..0.5
 				ChromaUV -= 0.5;
