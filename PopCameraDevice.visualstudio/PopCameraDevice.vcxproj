@@ -144,7 +144,11 @@
       <Profile>true</Profile>
     </Link>
     <PostBuildEvent>
-      <Command>copy /y $(TargetPath) $(ProjectDir)..\Unity\PopCameraDevice\Assets\PopCameraDevice</Command>
+      <Command>SET PathDll=$(TargetPath)
+SET PathPdb=%PathDll:dll=pdb%
+copy /y $(TargetPath) $(ProjectDir)..\Unity\PopCameraDevice\Assets\PopCameraDevice
+copy /y %PathPdb% $(ProjectDir)..\Unity\PopCameraDevice\Assets\PopCameraDevice
+</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Master|x64'">
@@ -159,7 +163,11 @@
       <Profile>true</Profile>
     </Link>
     <PostBuildEvent>
-      <Command>copy /y $(TargetPath) $(ProjectDir)..\Unity\PopCameraDevice\Assets\PopCameraDevice</Command>
+      <Command>SET PathDll=$(TargetPath)
+SET PathPdb=%PathDll:dll=pdb%
+copy /y $(TargetPath) $(ProjectDir)..\Unity\PopCameraDevice\Assets\PopCameraDevice
+copy /y %PathPdb% $(ProjectDir)..\Unity\PopCameraDevice\Assets\PopCameraDevice
+</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -174,6 +182,13 @@
     <Link>
       <Profile>true</Profile>
     </Link>
+    <PostBuildEvent>
+      <Command>SET PathDll=$(TargetPath)
+SET PathPdb=%PathDll:dll=pdb%
+copy /y $(TargetPath) $(ProjectDir)..\Unity\PopCameraDevice\Assets\PopCameraDevice
+copy /y %PathPdb% $(ProjectDir)..\Unity\PopCameraDevice\Assets\PopCameraDevice
+</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Master|Win32'">
     <ClCompile>
@@ -187,6 +202,13 @@
     <Link>
       <Profile>true</Profile>
     </Link>
+    <PostBuildEvent>
+      <Command>SET PathDll=$(TargetPath)
+SET PathPdb=%PathDll:dll=pdb%
+copy /y $(TargetPath) $(ProjectDir)..\Unity\PopCameraDevice\Assets\PopCameraDevice
+copy /y %PathPdb% $(ProjectDir)..\Unity\PopCameraDevice\Assets\PopCameraDevice
+</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
