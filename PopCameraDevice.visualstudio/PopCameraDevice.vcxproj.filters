@@ -172,7 +172,7 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\Unity\PopCameraDevice\Assets\PopCameraDevice\PopCameraDevice.cs">
+    <None Include="..\Unity\PopH264\Assets\PopH264\PopH264.cs">
       <Filter>Unity Source</Filter>
     </None>
   </ItemGroup>

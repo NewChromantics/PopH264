@@ -75,7 +75,7 @@
     <ClInclude Include="..\Source\TStringBuffer.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\Unity\PopCameraDevice\Assets\PopCameraDevice\PopCameraDevice.cs" />
+    <None Include="..\Unity\PopH264\Assets\PopH264\PopH264.cs" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{64811728-CD20-4F2C-899B-E3BF3D4B032E}</ProjectGuid>
@@ -146,8 +146,8 @@
     <PostBuildEvent>
       <Command>SET PathDll=$(TargetPath)
 SET PathPdb=%PathDll:dll=pdb%
-copy /y $(TargetPath) $(ProjectDir)..\Unity\PopCameraDevice\Assets\PopCameraDevice
-copy /y %PathPdb% $(ProjectDir)..\Unity\PopCameraDevice\Assets\PopCameraDevice
+copy /y $(TargetPath) $(ProjectDir)..\Unity\PopH264\Assets\PopH264
+copy /y %PathPdb% $(ProjectDir)..\Unity\PopH264\Assets\PopH264
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -165,8 +165,8 @@ copy /y %PathPdb% $(ProjectDir)..\Unity\PopCameraDevice\Assets\PopCameraDevice
     <PostBuildEvent>
       <Command>SET PathDll=$(TargetPath)
 SET PathPdb=%PathDll:dll=pdb%
-copy /y $(TargetPath) $(ProjectDir)..\Unity\PopCameraDevice\Assets\PopCameraDevice
-copy /y %PathPdb% $(ProjectDir)..\Unity\PopCameraDevice\Assets\PopCameraDevice
+copy /y $(TargetPath) $(ProjectDir)..\Unity\PopH264\Assets\PopH264
+copy /y %PathPdb% $(ProjectDir)..\Unity\PopH264\Assets\PopH264
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -185,8 +185,8 @@ copy /y %PathPdb% $(ProjectDir)..\Unity\PopCameraDevice\Assets\PopCameraDevice
     <PostBuildEvent>
       <Command>SET PathDll=$(TargetPath)
 SET PathPdb=%PathDll:dll=pdb%
-copy /y $(TargetPath) $(ProjectDir)..\Unity\PopCameraDevice\Assets\PopCameraDevice
-copy /y %PathPdb% $(ProjectDir)..\Unity\PopCameraDevice\Assets\PopCameraDevice
+copy /y $(TargetPath) $(ProjectDir)..\Unity\PopH264\Assets\PopH264
+copy /y %PathPdb% $(ProjectDir)..\Unity\PopH264\Assets\PopH264
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -205,8 +205,8 @@ copy /y %PathPdb% $(ProjectDir)..\Unity\PopCameraDevice\Assets\PopCameraDevice
     <PostBuildEvent>
       <Command>SET PathDll=$(TargetPath)
 SET PathPdb=%PathDll:dll=pdb%
-copy /y $(TargetPath) $(ProjectDir)..\Unity\PopCameraDevice\Assets\PopCameraDevice
-copy /y %PathPdb% $(ProjectDir)..\Unity\PopCameraDevice\Assets\PopCameraDevice
+copy /y $(TargetPath) $(ProjectDir)..\Unity\PopH264\Assets\PopH264
+copy /y %PathPdb% $(ProjectDir)..\Unity\PopH264\Assets\PopH264
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
