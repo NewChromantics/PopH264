@@ -447,6 +447,12 @@ MediaFoundation::TCamera::TCamera(const std::string& DeviceName)
 
 void MediaFoundation::TCamera::PushLatestFrame(size_t StreamIndex)
 {
+	if ( !mExtractor )
+	{
+		std::Debug << "MediaFoundation::TCamera::PushLatestFrame(" << StreamIndex << ") null extractor" << std::endl;
+		return;
+	}
+
 	//	get latest packet
 	auto StreamBuffer = mExtractor->GetStreamBuffer(StreamIndex);
 	if ( !StreamBuffer )
