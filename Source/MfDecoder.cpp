@@ -1028,7 +1028,16 @@ void MfExtractor::TriggerAsyncRead()
 		
 		DWORD ReadFlags = 0;
 		auto Result = mSourceReader->ReadSample( MF_SOURCE_READER_ANY_STREAM, ReadFlags, nullptr, nullptr, nullptr, nullptr );
-		MediaFoundation::IsOkay( Result, "TriggerAsyncRead");
+		if ( Result == MF_E_INVALIDREQUEST )
+			MediaFoundation::IsOkay( Result, "TriggerAsyncRead MF_E_INVALIDREQUEST");
+		else if ( Result == MF_E_INVALIDSTREAMNUMBER )
+			MediaFoundation::IsOkay( Result, "TriggerAsyncRead MF_E_INVALIDSTREAMNUMBER");
+		else if ( Result == MF_E_NOTACCEPTING )
+			MediaFoundation::IsOkay( Result, "TriggerAsyncRead MF_E_NOTACCEPTING");
+		else if ( Result == E_INVALIDARG )
+			MediaFoundation::IsOkay( Result, "TriggerAsyncRead E_INVALIDARG");
+		else 			
+			MediaFoundation::IsOkay( Result, "TriggerAsyncRead");
 		mAsyncReadSampleRequests++;
 	}
 	catch(std::exception& e)
