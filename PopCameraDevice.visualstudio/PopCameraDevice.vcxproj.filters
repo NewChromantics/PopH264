@@ -12,9 +12,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\Source\TStringBuffer.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
     <ClCompile Include="..\Source\SoyLib\src\memheap.cpp">
       <Filter>SoyLib</Filter>
     </ClCompile>
@@ -43,18 +40,6 @@
       <Filter>SoyLib</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\PopCameraDevice.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\TestDevice.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\TCameraDevice.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\MfCapture.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\MfDecoder.cpp">
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\SoyLib\src\SoyThread.cpp">
@@ -86,9 +71,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Source\TStringBuffer.hpp">
-      <Filter>Source</Filter>
-    </ClInclude>
     <ClInclude Include="..\Source\SoyLib\src\Array.hpp">
       <Filter>SoyLib</Filter>
     </ClInclude>
@@ -129,18 +111,6 @@
       <Filter>SoyLib</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\PopCameraDevice.hpp">
-      <Filter>Source</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\TestDevice.hpp">
-      <Filter>Source</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\TCameraDevice.hpp">
-      <Filter>Source</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\MfCapture.h">
-      <Filter>Source</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\MfDecoder.h">
       <Filter>Source</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\SoyLib\src\SoyThread.h">

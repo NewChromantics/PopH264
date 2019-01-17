@@ -124,7 +124,6 @@ GameObject:
   - component: {fileID: 806355514}
   - component: {fileID: 806355513}
   - component: {fileID: 806355512}
-  - component: {fileID: 806355511}
   - component: {fileID: 806355510}
   m_Layer: 0
   m_Name: Cube
@@ -141,29 +140,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 806355509}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: db1cddf5d84420a41b6756c894c9d3ee, type: 3}
+  m_Script: {fileID: 11500000, guid: 742ccf5315ad06942a59cdcc26250846, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &806355511
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 806355509}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2acbc0bf6d5200d428561bae3f687cc6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  DeviceIndex: 1
-  DeviceName: Display iSight
-  MaterialUniform_LumaTexture: LumaTexture
-  MaterialUniform_LumaFormat: LumaFormat
-  MaterialUniform_ChromaUTexture: ChromaUTexture
-  MaterialUniform_ChromaUFormat: ChromaUFormat
-  MaterialUniform_ChromaVTexture: ChromaVTexture
-  MaterialUniform_ChromaVFormat: ChromaVFormat
-  SetMaterialFormat: 1
 --- !u!23 &806355512
 MeshRenderer:
   m_ObjectHideFlags: 0
