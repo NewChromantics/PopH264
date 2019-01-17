@@ -1,6 +1,7 @@
 #pragma once
 
-#include "SoyLib\src\SoyTypes.h"
+//#include "SoyLib\src\SoyTypes.h"
+#include <stdint.h>
 
 #if defined(TARGET_WINDOWS)
 #include <SDKDDKVer.h>
