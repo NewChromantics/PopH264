@@ -37,6 +37,6 @@ private:
 	bool			DecodeNextPacket(std::function<void(const SoyPixelsImpl&)> OnFrameDecoded);	//	returns true if more data to proccess
 	
 public:
-	H264SwDecInst	mDecoderInstance;
+	H264SwDecInst	mDecoderInstance = nullptr;
 	Array<uint8_t>	mPendingData;
 };

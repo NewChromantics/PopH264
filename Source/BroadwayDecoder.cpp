@@ -17,8 +17,10 @@ Broadway::TDecoder::TDecoder()
 	{
 		std::stringstream Error;
 		Error << "H264SwDecInit failed: " << Result;
+		mDecoderInstance = nullptr;
 		throw Soy::AssertException(Error.str());
 	}
+
 	/*
 	mDecoderInstance.pStream = decoder[i]->byteStrmStart;
 	mDecoderInstance.dataLen = strmLen;
@@ -28,7 +30,8 @@ Broadway::TDecoder::TDecoder()
 
 Broadway::TDecoder::~TDecoder()
 {
-	H264SwDecRelease( &mDecoderInstance );
+	H264SwDecRelease( mDecoderInstance );
+	mDecoderInstance = nullptr;
 /*
 	if (decoder[i]->foutput)
 	fclose(decoder[i]->foutput);
