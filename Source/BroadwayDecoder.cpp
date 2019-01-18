@@ -97,9 +97,26 @@ bool Broadway::TDecoder::DecodeNextPacket(std::function<void(const SoyPixelsImpl
 	const unsigned IntraGrayConcealment = 0;
 	const unsigned IntraReferenceConcealment = 1;
 	
+	auto GetNextNalOffset = [this]
+	{
+		for ( int i=3;	i<mPendingData.GetDataSize();	i++ )
+		{
+			if ( mPendingData[i+0] != 0 )	continue;
+			if ( mPendingData[i+1] != 0 )	continue;
+			if ( mPendingData[i+2] != 0 )	continue;
+			if ( mPendingData[i+3] != 1 )	continue;
+			return i;
+		}
+		return 0;
+	};
+	
 	H264SwDecInput Input;
-	Input.pStream = mPendingData.GetArray();
-	Input.dataLen = mPendingData.GetDataSize();
+	{
+		std::lock_guard<std::mutex> Lock(mPendingDataLock);
+		Input.pStream = mPendingData.GetArray();
+		Input.dataLen = GetNextNalOffset();
+		//Input.dataLen = mPendingData.GetDataSize();
+	}
 	Input.picId = 0;
 	Input.intraConcealmentMethod = IntraGrayConcealment;
 	
@@ -117,8 +134,10 @@ bool Broadway::TDecoder::DecodeNextPacket(std::function<void(const SoyPixelsImpl
 	std::Debug << "H264SwDecDecode result: " << GetDecodeResultString(Result) << ". Bytes processed: "  << BytesProcessed << "/" << Input.dataLen << std::endl;
 	
 	//	gr: can we delete data here? or do calls below use this data...
-	mPendingData.RemoveBlock(0, BytesProcessed);
-
+	{
+		std::lock_guard<std::mutex> Lock(mPendingDataLock);
+		mPendingData.RemoveBlock(0, BytesProcessed);
+	}
 	
 	auto GetMeta = [&]()
 	{
@@ -190,7 +209,10 @@ bool Broadway::TDecoder::DecodeNextPacket(std::function<void(const SoyPixelsImpl
 
 void Broadway::TDecoder::Decode(ArrayBridge<uint8_t>&& PacketData,std::function<void(const SoyPixelsImpl&)> OnFrameDecoded)
 {
-	mPendingData.PushBackArray(PacketData);
+	{
+		std::lock_guard<std::mutex> Lock(mPendingDataLock);
+		mPendingData.PushBackArray(PacketData);
+	}
 	
 	while ( true )
 	{

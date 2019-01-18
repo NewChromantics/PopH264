@@ -38,5 +38,6 @@ private:
 	
 public:
 	H264SwDecInst	mDecoderInstance = nullptr;
+	std::mutex		mPendingDataLock;
 	Array<uint8_t>	mPendingData;
 };
