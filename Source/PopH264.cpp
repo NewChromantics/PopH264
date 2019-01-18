@@ -27,7 +27,7 @@ public:
 	
 private:
 	uint32_t								mFrameCounter = 0;
-	std::shared_ptr<Broadway::TDecoder>		mDecoder;
+	Broadway::TDecoder						mDecoder;
 	std::mutex								mFramesLock;
 	Array<TFrame>							mFrames;
 	SoyPixelsMeta							mMeta;
@@ -59,7 +59,7 @@ void TDecoderInstance::PushData(const uint8_t* Data,size_t DataSize)
 	{
 		this->PushFrame( Pixels );
 	};
-	mDecoder->Decode( GetArrayBridge(DataArray), PushFrame );
+	mDecoder.Decode( GetArrayBridge(DataArray), PushFrame );
 }
 
 void TDecoderInstance::PopFrame(int32_t& FrameTimeMs,ArrayBridge<uint8_t>&& Plane0,ArrayBridge<uint8_t>&& Plane1,ArrayBridge<uint8_t>&& Plane2)
@@ -70,6 +70,9 @@ void TDecoderInstance::PopFrame(int32_t& FrameTimeMs,ArrayBridge<uint8_t>&& Plan
 		FrameTimeMs = -1;
 		return;
 	}
+	
+	//	if we don't set the correct time the c# thinks we have a bad frame!
+	FrameTimeMs = Frame.mTimeMs;
 	
 	//	emulating TPixelBuffer interface
 	BufferArray<SoyPixelsImpl*, 10> Textures;

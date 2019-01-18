@@ -143,6 +143,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2acbc0bf6d5200d428561bae3f687cc6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  PopKbPerFrame: 1024
   H264Data: {fileID: 4900000, guid: d6a7e6ec9c6234554b62b904de6f9e0a, type: 3}
   MaterialUniform_LumaTexture: LumaTexture
   MaterialUniform_LumaFormat: LumaFormat

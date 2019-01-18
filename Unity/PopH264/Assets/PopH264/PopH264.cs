@@ -235,11 +235,19 @@ public static class PopH264
 
 		public int PushFrameData(byte[] H264Data)
 		{
-			return PushData(Instance.Value, H264Data, H264Data.Length);
+			System.Action ExecutePushData = () =>
+			{
+				PushData(Instance.Value, H264Data, H264Data.Length);
+			};
+
+			//	do send data and do decoding on a thread
+			var Thread = new System.Threading.Thread( new System.Threading.ThreadStart(ExecutePushData));
+			Thread.Start();
+			return 0;//PushData();
 		}
 
-		//	returns if changed
-		public bool GetNextFrame(ref List<Texture2D> Planes, ref List<SoyPixelsFormat> PixelFormats)
+		//	returns frame time
+		public int? GetNextFrame(ref List<Texture2D> Planes, ref List<SoyPixelsFormat> PixelFormats)
 		{
 			var MetaValues = new int[100];
 			GetMeta(Instance.Value, MetaValues, MetaValues.Length);
@@ -248,7 +256,7 @@ public static class PopH264
 			{
 				//Debug.Log("No planes (" + PlaneCount +")");
 				PixelFormats = null;
-				return false;
+				return null;
 			}
 
 			AllocListToSize(ref Planes, PlaneCount);
@@ -279,8 +287,11 @@ public static class PopH264
 			var Plane1Data = (PlaneCaches.Count >= 2 && PlaneCaches[1] != null) ? PlaneCaches[1] : UnusedBuffer;
 			var Plane2Data = (PlaneCaches.Count >= 3 && PlaneCaches[2] != null) ? PlaneCaches[2] : UnusedBuffer;
 			var PopResult = PopFrame(Instance.Value, Plane0Data, Plane0Data.Length, Plane1Data, Plane1Data.Length, Plane2Data, Plane2Data.Length);
-			if (PopResult == 0)
-				return false;
+			if (PopResult < 0)
+			{
+				Debug.Log("PopFrame returned " + PopResult);
+				return null;
+			}
 
 			//	update texture
 			for (var p = 0; p < PlaneCount; p++)
@@ -292,7 +303,7 @@ public static class PopH264
 				Planes[p].Apply();
 			}
 
-			return true;
+			return PopResult;
 		}
 
 	}

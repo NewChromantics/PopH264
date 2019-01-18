@@ -35,21 +35,35 @@ public class CameraDevice : MonoBehaviour {
 
 	void Update()
 	{
-		if (H264PendingData==null || H264PendingData.Count == 0 )
+		if (H264PendingData==null )//|| H264PendingData.Count == 0 )
 			H264PendingData = new List<byte>(H264Data.bytes);
 
 		if (Decoder != null )
 		{
-			var PopBytesSize = Mathf.Min(PopKbPerFrame, H264PendingData.Count);
-			var PopBytes = new byte[PopBytesSize];
-			H264PendingData.CopyTo(0, PopBytes, 0, PopBytes.Length);
-			H264PendingData.RemoveRange(0, PopBytesSize);
+			System.Action PushNewData = () =>
+			{
+				//var PopBytesSize = Mathf.Min(PopKbPerFrame * 1024, H264PendingData.Count);
+				var PopBytesSize = H264PendingData.Count;
+				if (PopBytesSize == 0)
+					return;
+				var PopBytes = new byte[PopBytesSize];
+				H264PendingData.CopyTo(0, PopBytes, 0, PopBytes.Length);
+				H264PendingData.RemoveRange(0, PopBytesSize);
 
-			var PushResult = Decoder.PushFrameData(PopBytes);
-			Debug.Log("Push returned: " + PushResult);
+				var PushResult = Decoder.PushFrameData(PopBytes);
+				//if (PushResult!=0)
+					Debug.Log("Push returned: " + PushResult);
+			};
 
-			if (Decoder.GetNextFrame( ref PlaneTextures,  ref PlaneFormats ) )
+			var FrameTime = Decoder.GetNextFrame(ref PlaneTextures, ref PlaneFormats);
+			if (FrameTime.HasValue)
+			{
 				OnNewFrame();
+			}
+			else
+			{
+				PushNewData();
+			}
 		}
 	}
 

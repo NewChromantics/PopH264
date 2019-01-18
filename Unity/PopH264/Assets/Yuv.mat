@@ -4,7 +4,7 @@
 Material:
   serializedVersion: 6
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_Name: Yuv
   m_Shader: {fileID: 4800000, guid: 19592822f1b4ffb4d8a12ee48c8b8404, type: 3}
@@ -32,14 +32,14 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Floats:
     - ChromaUBlue: 2.017
-    - ChromaUFormat: 25
+    - ChromaUFormat: 26
     - ChromaUGreen: -0.39173
     - ChromaVFormat: 27
     - ChromaVGreen: -0.8129
     - ChromaVRed: 1.5958
     - EnableChroma: 1
     - Flip: 1
-    - LumaFormat: 18
+    - LumaFormat: 1
     - LumaMax: 253
     - LumaMin: 16
     m_Colors: []
