@@ -198,7 +198,7 @@ public static class PopH264
 			}
 			if (PushByteThread != null)
 			{
-				PushByteThread.Abort();
+				//PushByteThread.Abort();
 				PushByteThread.Join();
 				PushByteThread = null;
 			}
