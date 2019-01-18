@@ -2,8 +2,16 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+
+//	gr: I had a script in PopUnityCommon somewhere for this...
+[System.Serializable]
+public class UnityEvent_String : UnityEngine.Events.UnityEvent<string> { }
+
+
 public class CameraDevice : MonoBehaviour {
 
+
+	public bool PushAllData = false;
 	[Range(1, 1024)]
 	public int PopKbPerFrame = 30;
 	public TextAsset H264Data;
@@ -20,6 +28,9 @@ public class CameraDevice : MonoBehaviour {
 	List<PopH264.SoyPixelsFormat> PlaneFormats;
 	PopH264.Decoder Decoder;
 
+	public UnityEvent_String OnNewFrameTime;
+
+
 	void OnEnable()
 	{
 		Decoder = new PopH264.Decoder();
@@ -35,30 +46,39 @@ public class CameraDevice : MonoBehaviour {
 
 	void Update()
 	{
-		if (H264PendingData==null )//|| H264PendingData.Count == 0 )
+		if (H264PendingData == null)//|| H264PendingData.Count == 0 )
+		{
 			H264PendingData = new List<byte>(H264Data.bytes);
+			Debug.Log("Initial H264PendingData size: " + H264PendingData.Count);
+		}
 
 		if (Decoder != null )
 		{
 			System.Action PushNewData = () =>
 			{
-				//var PopBytesSize = Mathf.Min(PopKbPerFrame * 1024, H264PendingData.Count);
-				var PopBytesSize = H264PendingData.Count;
+				var PopBytesSize = PushAllData ? H264PendingData.Count : PopKbPerFrame * 1024;
+				PopBytesSize = Mathf.Min(PopBytesSize, H264PendingData.Count);
 				if (PopBytesSize == 0)
+				{
+					Debug.Log("Pushed all data");
 					return;
+				}
+
 				var PopBytes = new byte[PopBytesSize];
 				H264PendingData.CopyTo(0, PopBytes, 0, PopBytes.Length);
 				H264PendingData.RemoveRange(0, PopBytesSize);
 
 				var PushResult = Decoder.PushFrameData(PopBytes);
-				//if (PushResult!=0)
+				if (PushResult!=0)
 					Debug.Log("Push returned: " + PushResult);
+				Debug.Log("H264PendingData has " + H264PendingData.Count + " bytes remaining in file");
 			};
 
 			var FrameTime = Decoder.GetNextFrame(ref PlaneTextures, ref PlaneFormats);
 			if (FrameTime.HasValue)
 			{
 				OnNewFrame();
+				OnNewFrameTime.Invoke("" + FrameTime.Value);
 			}
 			else
 			{

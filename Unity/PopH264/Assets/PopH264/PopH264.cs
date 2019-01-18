@@ -172,8 +172,14 @@ public static class PopH264
 		List<byte[]> PlaneCaches;
 		byte[] UnusedBuffer = new byte[1];
 
-		public Decoder()
+		bool ThreadedDecoding = true;
+		System.Threading.Thread PushByteThread;
+		List<byte> PushByteQueue;
+		int? PushByteThreadResult = 0;
+
+		public Decoder(bool ThreadedDecoding=true)
 		{
+			this.ThreadedDecoding = ThreadedDecoding;
 			Instance = CreateInstance();
 			if (Instance.Value <= 0)
 				throw new System.Exception("Failed to create decoder instance");
@@ -185,6 +191,18 @@ public static class PopH264
 
 		public void Dispose()
 		{
+			//	stop thread before killing decoder
+			lock(PushByteQueue)
+			{
+				PushByteQueue = null;
+			}
+			if (PushByteThread != null)
+			{
+				PushByteThread.Abort();
+				PushByteThread.Join();
+				PushByteThread = null;
+			}
+
 			if (Instance.HasValue)
 				DestroyInstance(Instance.Value);
 			Instance = null;
@@ -233,17 +251,53 @@ public static class PopH264
 				Array.Add(default(T));
 		}
 
+		void ThreadPushQueue()
+		{
+			while (PushByteQueue != null)
+			{
+				if (PushByteQueue.Count == 0)
+				{
+					System.Threading.Thread.Sleep(100);
+					//	make thread idle properly
+					//PushByteThread.Suspend();
+					continue;
+				}
+
+				//	pop off the data
+				byte[] Data;
+				lock (PushByteQueue)
+				{
+					Data = PushByteQueue.ToArray();
+					PushByteQueue.RemoveRange(0, PushByteQueue.Count);
+				}
+				PushByteThreadResult = PushData(Instance.Value, Data, Data.Length);
+			}
+		}
+
 		public int PushFrameData(byte[] H264Data)
 		{
-			System.Action ExecutePushData = () =>
+			if ( !ThreadedDecoding )
 			{
-				PushData(Instance.Value, H264Data, H264Data.Length);
-			};
+				return PushData(Instance.Value, H264Data, H264Data.Length);
+			}
 
-			//	do send data and do decoding on a thread
-			var Thread = new System.Threading.Thread( new System.Threading.ThreadStart(ExecutePushData));
-			Thread.Start();
-			return 0;//PushData();
+			if (PushByteThread == null )
+			{
+				PushByteQueue = new List<byte>();
+				PushByteThread = new System.Threading.Thread(new System.Threading.ThreadStart(ThreadPushQueue));
+				PushByteThread.Start();
+			}
+
+			//	add data and wake up the thread in case we need to
+			lock (PushByteQueue)
+			{
+				PushByteQueue.AddRange(H264Data);
+				Debug.Log("Queue size: " + PushByteQueue.Count);
+				//PushByteThread.Resume();
+			}
+
+			//	check for 
+			return PushByteThreadResult.HasValue ? PushByteThreadResult.Value : 0;
 		}
 
 		//	returns frame time
@@ -289,7 +343,7 @@ public static class PopH264
 			var PopResult = PopFrame(Instance.Value, Plane0Data, Plane0Data.Length, Plane1Data, Plane1Data.Length, Plane2Data, Plane2Data.Length);
 			if (PopResult < 0)
 			{
-				Debug.Log("PopFrame returned " + PopResult);
+				//Debug.Log("PopFrame returned " + PopResult);
 				return null;
 			}
 
