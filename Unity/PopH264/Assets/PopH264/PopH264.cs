@@ -198,7 +198,8 @@ public static class PopH264
 			}
 			if (PushByteThread != null)
 			{
-				//PushByteThread.Abort();
+				//	I think we can safely abort, might need to check. If we don't, depending on how much data we've thrown at the decoder, this could take ages to finish
+				PushByteThread.Abort();
 				PushByteThread.Join();
 				PushByteThread = null;
 			}
@@ -292,7 +293,6 @@ public static class PopH264
 			lock (PushByteQueue)
 			{
 				PushByteQueue.AddRange(H264Data);
-				Debug.Log("Queue size: " + PushByteQueue.Count);
 				//PushByteThread.Resume();
 			}
 

@@ -46,10 +46,10 @@ public class CameraDevice : MonoBehaviour {
 
 	void Update()
 	{
-		if (H264PendingData == null)//|| H264PendingData.Count == 0 )
+		//	gr: be careful with looping in this way, as we'll just queue tons of data to the decoder
+		if (H264PendingData == null )//|| H264PendingData.Count == 0 )
 		{
 			H264PendingData = new List<byte>(H264Data.bytes);
-			Debug.Log("Initial H264PendingData size: " + H264PendingData.Count);
 		}
 
 		if (Decoder != null )
@@ -60,7 +60,7 @@ public class CameraDevice : MonoBehaviour {
 				PopBytesSize = Mathf.Min(PopBytesSize, H264PendingData.Count);
 				if (PopBytesSize == 0)
 				{
-					Debug.Log("Pushed all data");
+					//Debug.Log("Pushed all data");
 					return;
 				}
 
@@ -69,9 +69,10 @@ public class CameraDevice : MonoBehaviour {
 				H264PendingData.RemoveRange(0, PopBytesSize);
 
 				var PushResult = Decoder.PushFrameData(PopBytes);
-				if (PushResult!=0)
+				if (PushResult != 0)
+				{
 					Debug.Log("Push returned: " + PushResult);
-				Debug.Log("H264PendingData has " + H264PendingData.Count + " bytes remaining in file");
+				}
 			};
 
 			var FrameTime = Decoder.GetNextFrame(ref PlaneTextures, ref PlaneFormats);
