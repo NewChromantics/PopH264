@@ -48,6 +48,7 @@
 		BF8AB6C321F2292A008E7E76 /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BF8AB6C221F2292A008E7E76 /* CoreMedia.framework */; };
 		BF8AB6C521F229E2008E7E76 /* PopH264.bundle in CopyFiles */ = {isa = PBXBuildFile; fileRef = BF4A6A141EA16D7D00613A64 /* PopH264.bundle */; };
 		BF8AB6C921F24E22008E7E76 /* PopH264.h in Resources */ = {isa = PBXBuildFile; fileRef = BF8AB63721F20C41008E7E76 /* PopH264.h */; };
+		BF8AB6CB21F24F9D008E7E76 /* InstanceManager.inc in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB6CA21F24F9D008E7E76 /* InstanceManager.inc */; };
 		BFD6076F1EA16EEE0035C814 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = BFD6076E1EA16EEE0035C814 /* Info.plist */; };
 /* End PBXBuildFile section */
 
@@ -154,6 +155,7 @@
 		BF8AB6BE21F228D0008E7E76 /* SoyTime.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SoyTime.h; path = Source/SoyLib/src/SoyTime.h; sourceTree = "<group>"; };
 		BF8AB6C221F2292A008E7E76 /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
 		BF8AB6C721F23712008E7E76 /* PopH264.cs */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = PopH264.cs; path = Unity/PopH264/Assets/PopH264/PopH264.cs; sourceTree = "<group>"; };
+		BF8AB6CA21F24F9D008E7E76 /* InstanceManager.inc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.pascal; name = InstanceManager.inc; path = Source/InstanceManager.inc; sourceTree = "<group>"; };
 		BFD6076E1EA16EEE0035C814 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = SOURCE_ROOT; };
 		BFD607741EA16F0A0035C814 /* IUnityGraphics.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IUnityGraphics.h; path = Source/Unity/IUnityGraphics.h; sourceTree = "<group>"; };
 		BFD607751EA16F0A0035C814 /* IUnityGraphicsD3D9.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IUnityGraphicsD3D9.h; path = Source/Unity/IUnityGraphicsD3D9.h; sourceTree = "<group>"; };
@@ -329,6 +331,7 @@
 				BF8AB63B21F20D4C008E7E76 /* Broadway */,
 				BF8AB63821F20C41008E7E76 /* PopH264.cpp */,
 				BF8AB63721F20C41008E7E76 /* PopH264.h */,
+				BF8AB6CA21F24F9D008E7E76 /* InstanceManager.inc */,
 				BF8AB69F21F21F07008E7E76 /* BroadwayDecoder.cpp */,
 				BF8AB6A021F21F07008E7E76 /* BroadwayDecoder.h */,
 				BFD607731EA16EFC0035C814 /* Unity */,
@@ -438,6 +441,7 @@
 				BF8AB68821F20F37008E7E76 /* h264bsd_neighbour.c in Sources */,
 				BF8AB63921F20C41008E7E76 /* PopH264.cpp in Sources */,
 				BF8AB68921F20F37008E7E76 /* h264bsd_nal_unit.c in Sources */,
+				BF8AB6CB21F24F9D008E7E76 /* InstanceManager.inc in Sources */,
 				BF8AB68521F20F37008E7E76 /* h264bsd_image.c in Sources */,
 				BF8AB68B21F20F37008E7E76 /* h264bsd_stream.c in Sources */,
 				BF8AB69021F20F37008E7E76 /* h264bsd_pic_param_set.c in Sources */,
