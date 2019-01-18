@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		BF8AB63921F20C41008E7E76 /* PopCameraDevice.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB63821F20C41008E7E76 /* PopCameraDevice.cpp */; };
+		BF8AB63921F20C41008E7E76 /* PopH264.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB63821F20C41008E7E76 /* PopH264.cpp */; };
 		BF8AB67B21F20F37008E7E76 /* h264bsd_intra_prediction.c in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB63E21F20F34008E7E76 /* h264bsd_intra_prediction.c */; };
 		BF8AB67C21F20F37008E7E76 /* H264SwDecApi.c in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB63F21F20F34008E7E76 /* H264SwDecApi.c */; };
 		BF8AB67E21F20F37008E7E76 /* h264bsd_macroblock_layer.c in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB64421F20F34008E7E76 /* h264bsd_macroblock_layer.c */; };
@@ -41,8 +41,8 @@
 /* Begin PBXFileReference section */
 		BF0A19C21EA428F4007EBC95 /* Unity */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Unity; sourceTree = "<group>"; };
 		BF4A6A141EA16D7D00613A64 /* PopH264.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PopH264.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
-		BF8AB63721F20C41008E7E76 /* PopCameraDevice.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = PopCameraDevice.hpp; path = Source/PopCameraDevice.hpp; sourceTree = "<group>"; };
-		BF8AB63821F20C41008E7E76 /* PopCameraDevice.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PopCameraDevice.cpp; path = Source/PopCameraDevice.cpp; sourceTree = "<group>"; };
+		BF8AB63721F20C41008E7E76 /* PopH264.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = PopH264.hpp; path = Source/PopH264.hpp; sourceTree = "<group>"; };
+		BF8AB63821F20C41008E7E76 /* PopH264.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PopH264.cpp; path = Source/PopH264.cpp; sourceTree = "<group>"; };
 		BF8AB63B21F20D4C008E7E76 /* Broadway */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Broadway; path = Source/Broadway; sourceTree = "<group>"; };
 		BF8AB63D21F20F34008E7E76 /* DecTestBench.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = DecTestBench.c; path = Source/Broadway/Decoder/src/DecTestBench.c; sourceTree = "<group>"; };
 		BF8AB63E21F20F34008E7E76 /* h264bsd_intra_prediction.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = h264bsd_intra_prediction.c; path = Source/Broadway/Decoder/src/h264bsd_intra_prediction.c; sourceTree = "<group>"; };
@@ -234,8 +234,8 @@
 			children = (
 				BF8AB63A21F20CD9008E7E76 /* Broadway */,
 				BF8AB63B21F20D4C008E7E76 /* Broadway */,
-				BF8AB63821F20C41008E7E76 /* PopCameraDevice.cpp */,
-				BF8AB63721F20C41008E7E76 /* PopCameraDevice.hpp */,
+				BF8AB63821F20C41008E7E76 /* PopH264.cpp */,
+				BF8AB63721F20C41008E7E76 /* PopH264.hpp */,
 				BFD607731EA16EFC0035C814 /* Unity */,
 			);
 			name = Source;
@@ -331,7 +331,7 @@
 				BF8AB69721F20F37008E7E76 /* h264bsd_slice_group_map.c in Sources */,
 				BF8AB68321F20F37008E7E76 /* h264bsd_transform.c in Sources */,
 				BF8AB68821F20F37008E7E76 /* h264bsd_neighbour.c in Sources */,
-				BF8AB63921F20C41008E7E76 /* PopCameraDevice.cpp in Sources */,
+				BF8AB63921F20C41008E7E76 /* PopH264.cpp in Sources */,
 				BF8AB68921F20F37008E7E76 /* h264bsd_nal_unit.c in Sources */,
 				BF8AB68521F20F37008E7E76 /* h264bsd_image.c in Sources */,
 				BF8AB68B21F20F37008E7E76 /* h264bsd_stream.c in Sources */,
