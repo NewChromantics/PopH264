@@ -168,3 +168,71 @@ __export void DestroyInstance(int32_t Instance)
 	SafeCall(Function, __func__, 0 );
 }
 
+
+namespace Decoder
+{
+	void	PopFrame(Broadway::TDecoder& Decoder,int32_t& FrameTimeMs,ArrayBridge<uint8_t>&& Plane0,ArrayBridge<uint8_t>&& Plane1,ArrayBridge<uint8_t>&& Plane2);
+}
+
+void Decoder::PopFrame(Broadway::TDecoder& Decoder,int32_t& FrameTimeMs,ArrayBridge<uint8_t>&& Plane0,ArrayBridge<uint8_t>&& Plane1,ArrayBridge<uint8_t>&& Plane2)
+{
+	//Decoder.PopFrame(Plane0, Plane1, Plane2, FrameTimeMs );
+	throw Soy::AssertException("Todo; Decoder.PopFrame");
+}
+
+__export int32_t PopFrame(int32_t Instance,uint8_t* Plane0,int32_t Plane0Size,uint8_t* Plane1,int32_t Plane1Size,uint8_t* Plane2,int32_t Plane2Size)
+{
+	auto Function = [&]()
+	{
+		auto& Decoder = InstanceManager::GetInstance(Instance);
+		//	Decoder.PopFrame
+		auto Plane0Array = GetRemoteArray(Plane0, Plane0Size);
+		auto Plane1Array = GetRemoteArray(Plane1, Plane1Size);
+		auto Plane2Array = GetRemoteArray(Plane2, Plane2Size);
+		int32_t FrameTimeMs = -1;
+		Decoder::PopFrame( Decoder, FrameTimeMs, GetArrayBridge(Plane0Array), GetArrayBridge(Plane1Array), GetArrayBridge(Plane2Array));
+		return FrameTimeMs;
+	};
+	return SafeCall(Function, __func__, -99 );
+}
+
+__export int32_t PushData(int32_t Instance,uint8_t* Data,int32_t DataSize)
+{
+	auto Function = [&]()
+	{
+		auto& Decoder = InstanceManager::GetInstance(Instance);
+		return 0;
+	};
+	return SafeCall(Function, __func__, 0 );
+}
+
+
+__export void GetMeta(int32_t Instance, int32_t* pMetaValues, int32_t MetaValuesCount)
+{
+	auto Function = [&]()
+	{
+		auto& Device = InstanceManager::GetInstance(Instance);
+		/*
+		auto& Meta = Device.GetMeta();
+		
+		size_t MetaValuesCounter = 0;
+		auto MetaValues = GetRemoteArray(pMetaValues, MetaValuesCount, MetaValuesCounter);
+		
+		BufferArray<SoyPixelsMeta, 3> PlaneMetas;
+		Meta.GetPlanes(GetArrayBridge(PlaneMetas));
+		MetaValues.PushBack(PlaneMetas.GetSize());
+		
+		for ( auto p=0;	p<PlaneMetas.GetSize();	p++ )
+		{
+			auto& PlaneMeta = PlaneMetas[p];
+			MetaValues.PushBack(PlaneMeta.GetWidth());
+			MetaValues.PushBack(PlaneMeta.GetHeight());
+			MetaValues.PushBack(PlaneMeta.GetChannels());
+			MetaValues.PushBack(PlaneMeta.GetFormat());
+			MetaValues.PushBack(PlaneMeta.GetDataSize());
+		}
+		*/
+		return 0;
+	};
+	auto x = SafeCall(Function, __func__, 0 );
+}
