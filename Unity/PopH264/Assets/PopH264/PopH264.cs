@@ -192,10 +192,7 @@ public static class PopH264
 		public void Dispose()
 		{
 			//	stop thread before killing decoder
-			lock(PushByteQueue)
-			{
-				PushByteQueue = null;
-			}
+			PushByteQueue = null;
 			if (PushByteThread != null)
 			{
 				//	I think we can safely abort, might need to check. If we don't, depending on how much data we've thrown at the decoder, this could take ages to finish
