@@ -1,3 +1,6 @@
 [submodule "Source/SoyLib"]
 	path = Source/SoyLib
 	url = https://github.com/SoylentGraham/SoyLib.git
+[submodule "Source/Broadway"]
+	path = Source/Broadway
+	url = https://github.com/mbebenita/Broadway.git
