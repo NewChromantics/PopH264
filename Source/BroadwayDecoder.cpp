@@ -1,7 +1,7 @@
 #include "BroadwayDecoder.h"
 #include <sstream>
-#include "SoyDebug.h"
-#include "SoyPixels.h"
+#include "SoyLib/src/SoyDebug.h"
+#include "SoyLib/src/SoyPixels.h"
 
 
 namespace Broadway

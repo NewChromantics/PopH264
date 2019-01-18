@@ -1,8 +1,8 @@
 #pragma once
 
 #include <functional>
-#include "Array.hpp"
-#include "HeapArray.hpp"
+#include "SoyLib/src/Array.hpp"
+#include "SoyLib/src/HeapArray.hpp"
 
 class SoyPixelsImpl;
 

@@ -18,5 +18,6 @@
 #define __export			extern "C"
 #endif
 
-__export int32_t			GetTestInteger();
 
+__export int32_t			CreateInstance();
+__export void				DestroyInstance(int32_t Instance);
