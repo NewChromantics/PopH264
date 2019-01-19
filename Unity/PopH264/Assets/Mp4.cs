@@ -7,6 +7,35 @@ public class Mp4 : MonoBehaviour {
 
 	public string Filename = "Assets/cat.mov";
 
+	byte HexCharToNibble(char HexChar)
+	{
+		if (HexChar >= 'A' && HexChar <= 'F') return (byte)((HexChar - 'A') + 10);
+		if (HexChar >= 'a' && HexChar <= 'f') return (byte)((HexChar - 'a') + 10);
+		if (HexChar >= '0' && HexChar <= '9') return (byte)((HexChar - '0'));
+		throw new System.Exception(HexChar + " not a hex char");
+	}
+
+	byte[] HexStringToBytes(string HexString)
+	{
+		if (string.IsNullOrEmpty(HexString))
+			return null;
+
+		var Bytes = new List<byte>();
+		for (int i = 0; i < HexString.Length;	i+=2)
+		{
+			var a = HexCharToNibble(HexString[i + 0]);
+			var b = HexCharToNibble(HexString[i + 1]);
+			var Byte = (byte)((a<<4) | b);
+			Bytes.Add(Byte);
+		}
+		return Bytes.ToArray();
+	}
+
+	public string Preconfigured_SPS_HexString = "";
+	public string Preconfigured_PPS_HexString = "";
+	public byte[] Preconfigured_SPS_Bytes	{ get { return HexStringToBytes(Preconfigured_SPS_HexString); } }
+	public byte[] Preconfigured_PPS_Bytes { get { return HexStringToBytes(Preconfigured_PPS_HexString); } }
+
 	public bool PushAllData = false;
 	[Range(1, 1024)]
 	public int PopKbPerFrame = 30;
@@ -37,12 +66,20 @@ public class Mp4 : MonoBehaviour {
 		var Mp4Bytes = System.IO.File.ReadAllBytes(Filename);
 		var Mp4BytesArray = new List<byte>(Mp4Bytes);
 
+		System.Action<byte[]> PushAnnexB = (Bytes) =>
+		{
+			if (H264PendingData == null)
+				H264PendingData = new List<byte>();
+
+			H264PendingData.AddRange(Bytes);
+		};
+
 		System.Action<List<byte[]>> PushAnnexBs = (Bytess) =>
 		{
 			if (H264PendingData == null)
 				H264PendingData = new List<byte>();
 
-			Bytess.ForEach( b=>H264PendingData.AddRange(b));
+			Bytess.ForEach(b => H264PendingData.AddRange(b));
 		};
 
 		System.Action<byte[]> PushH264Sample = (Bytes) =>
@@ -61,20 +98,29 @@ public class Mp4 : MonoBehaviour {
 
 		System.Action<PopX.Mpeg4.TTrack> EnumTrack = (Track) =>
 		{
-			if ( Track.SampleDescriptions[0].Fourcc != "avc1" )
+			var Pps = Preconfigured_PPS_Bytes;
+			var Sps = Preconfigured_SPS_Bytes;
+
+			if (Pps ==null|| Sps==null)
 			{
-				Debug.Log("Skipping track codec: " + Track.SampleDescriptions[0].Fourcc);
-				return;
+				if (Track.SampleDescriptions != null && Track.SampleDescriptions[0].Fourcc != "avc1")
+				{
+					Debug.Log("Skipping track codec: " + Track.SampleDescriptions[0].Fourcc);
+					return;
+				}
+
+				var Header = PopX.H264.ParseAvccHeader(Track.SampleDescriptions[0].AvccAtomData);
+				Pps = Header.PPSs[0];
+				Sps = Header.SPSs[0];
 			}
 
-			var Header = PopX.H264.ParseAvccHeader(Track.SampleDescriptions[0].AvccAtomData);
-			PushAnnexBs(PopX.H264.AvccToAnnexb4(Header, Header.PPSs[0]));
-			PushAnnexBs(PopX.H264.AvccToAnnexb4(Header, Header.SPSs[0]));
+			PushAnnexB(Pps);
+			PushAnnexB(Sps);
 
 			Debug.Log("Found mp4 track " + Track.Samples.Count);
 			foreach ( var Sample in Track.Samples )
 			{
-				ExtractH264Sample(Sample.DataPosition, Sample.DataSize);
+				//ExtractH264Sample(Sample.DataPosition, Sample.DataSize);
 			}
 		};
 
