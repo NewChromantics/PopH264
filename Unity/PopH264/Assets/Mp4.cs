@@ -64,29 +64,12 @@ public class Mp4 : MonoBehaviour {
 		if (!System.IO.File.Exists(Filename))
 			throw new System.Exception("File missing: " + Filename);
 		var Mp4Bytes = System.IO.File.ReadAllBytes(Filename);
-		var Mp4BytesArray = new List<byte>(Mp4Bytes);
 
 		System.Action<byte[]> PushAnnexB = (Bytes) =>
 		{
 			if (H264PendingData == null)
 				H264PendingData = new List<byte>();
 
-			H264PendingData.AddRange(Bytes);
-		};
-
-		System.Action<List<byte[]>> PushAnnexBs = (Bytess) =>
-		{
-			if (H264PendingData == null)
-				H264PendingData = new List<byte>();
-
-			Bytess.ForEach(b => H264PendingData.AddRange(b));
-		};
-
-		System.Action<byte[]> PushH264Sample = (Bytes) =>
-		{
-			if (H264PendingData == null)
-				H264PendingData = new List<byte>();
-			H264PendingData.AddRange(new byte[] { 0, 0, 0, 1 });
 			H264PendingData.AddRange(Bytes);
 		};
 
@@ -121,8 +104,6 @@ public class Mp4 : MonoBehaviour {
 				var Sps = new List<byte>(new byte[] { 0, 0, 0, 1 });
 				Sps.AddRange(Header.SPSs[0]);
 				Sps_AnnexB = Sps.ToArray();
-
-				//PushH264Sample(Pps);	//	add another 0001 if just processing SPS & PPS... todo: change plugin
 
 				PushPacket = (Packet) => { H264.AvccToAnnexb4(Header, Packet, PushAnnexB); };
 			}
