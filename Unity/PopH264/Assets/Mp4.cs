@@ -90,37 +90,64 @@ public class Mp4 : MonoBehaviour {
 			H264PendingData.AddRange(Bytes);
 		};
 
-		System.Action<long, long> ExtractH264Sample = (Position,Size)=>
+		System.Func<long, long,byte[]> ExtractSample = (Position,Size)=>
 		{
 			var SampleBytes = Mp4Bytes.SubArray(Position, Size);
-			PushH264Sample(SampleBytes);
+			return SampleBytes;
 		};
 
 		System.Action<PopX.Mpeg4.TTrack> EnumTrack = (Track) =>
 		{
-			var Pps = Preconfigured_PPS_Bytes;
-			var Sps = Preconfigured_SPS_Bytes;
+			H264.AvccHeader Header;
+			System.Action<byte[]> PushPacket;
 
-			if (Pps ==null|| Sps==null)
+			byte[] Sps_AnnexB;
+			byte[] Pps_AnnexB;
+
+			//	track has header
+			if (Track.SampleDescriptions!= null )
 			{
-				if (Track.SampleDescriptions != null && Track.SampleDescriptions[0].Fourcc != "avc1")
+				if (Track.SampleDescriptions[0].Fourcc != "avc1")
 				{
 					Debug.Log("Skipping track codec: " + Track.SampleDescriptions[0].Fourcc);
 					return;
 				}
 
-				var Header = PopX.H264.ParseAvccHeader(Track.SampleDescriptions[0].AvccAtomData);
-				Pps = Header.PPSs[0];
-				Sps = Header.SPSs[0];
+				Header = PopX.H264.ParseAvccHeader(Track.SampleDescriptions[0].AvccAtomData);
+				var Pps = new List<byte>(new byte[] { 0, 0, 0, 1 });
+				Pps.AddRange(Header.PPSs[0]);
+				Pps_AnnexB = Pps.ToArray();
+
+				var Sps = new List<byte>(new byte[] { 0, 0, 0, 1 });
+				Sps.AddRange(Header.SPSs[0]);
+				Sps_AnnexB = Sps.ToArray();
+
+				//PushH264Sample(Pps);	//	add another 0001 if just processing SPS & PPS... todo: change plugin
+
+				PushPacket = (Packet) => { H264.AvccToAnnexb4(Header, Packet, PushAnnexB); };
+			}
+			else
+			{
+				Debug.Log("Preconfigured");
+				Pps_AnnexB  = Preconfigured_PPS_Bytes;
+				Sps_AnnexB = Preconfigured_SPS_Bytes;
+				PushPacket = PushAnnexB;
 			}
 
-			PushAnnexB(Pps);
-			PushAnnexB(Sps);
+			H264.Profile Profile;
+			float Level;
+			PopX.H264.GetProfileLevel(Sps_AnnexB, out Profile, out Level);
+			if (Profile != H264.Profile.Baseline)
+				Debug.LogWarning("PopH264 currently only supports baseline profile. This is " + Profile + " level=" + Level);
+
+			PushAnnexB(Sps_AnnexB);
+			PushAnnexB(Pps_AnnexB);
 
 			Debug.Log("Found mp4 track " + Track.Samples.Count);
 			foreach ( var Sample in Track.Samples )
 			{
-				//ExtractH264Sample(Sample.DataPosition, Sample.DataSize);
+				var Packet = ExtractSample(Sample.DataPosition, Sample.DataSize);
+				PushPacket(Packet);
 			}
 		};
 
