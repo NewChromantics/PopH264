@@ -39,6 +39,9 @@ public class Mp4 : MonoBehaviour {
 	[Range(1, 1024)]
 	public int PopKbPerFrame = 30;
 
+	[Range(0,20)]
+	public int PushPacketsPerFrameMin = 0;
+
 	List<PopH264.FrameInput> PendingInputFrames;
 	public string MaterialUniform_LumaTexture = "LumaTexture";
 	public string MaterialUniform_LumaFormat = "LumaFormat";
@@ -229,7 +232,9 @@ public class Mp4 : MonoBehaviour {
 				}
 			};
 
-			PushNewData();
+			for (int i = 0; i < PushPacketsPerFrameMin;	i++)
+				PushNewData();
+
 			var FrameTime = Decoder.GetNextFrame(ref PlaneTextures, ref PlaneFormats);
 			if (FrameTime.HasValue)
 			{

@@ -147,6 +147,7 @@ MonoBehaviour:
   Preconfigured_SPS_HexString: 
   PushAllData: 0
   PopKbPerFrame: 30
+  PushPacketsPerFrameMin: 20
   MaterialUniform_LumaTexture: LumaTexture
   MaterialUniform_LumaFormat: LumaFormat
   MaterialUniform_ChromaUTexture: ChromaUTexture
@@ -271,6 +272,7 @@ MonoBehaviour:
   Preconfigured_SPS_HexString: 000000016742C01ED901E08EFFC0220021C400000FA40003A9803C58B9200000000168CB8CB2
   PushAllData: 0
   PopKbPerFrame: 30
+  PushPacketsPerFrameMin: 0
   MaterialUniform_LumaTexture: LumaTexture
   MaterialUniform_LumaFormat: LumaFormat
   MaterialUniform_ChromaUTexture: ChromaUTexture
@@ -395,6 +397,7 @@ MonoBehaviour:
   Preconfigured_SPS_HexString: 
   PushAllData: 0
   PopKbPerFrame: 30
+  PushPacketsPerFrameMin: 0
   MaterialUniform_LumaTexture: LumaTexture
   MaterialUniform_LumaFormat: LumaFormat
   MaterialUniform_ChromaUTexture: ChromaUTexture
@@ -555,6 +558,7 @@ MonoBehaviour:
   Preconfigured_SPS_HexString: 
   PushAllData: 0
   PopKbPerFrame: 30
+  PushPacketsPerFrameMin: 20
   MaterialUniform_LumaTexture: LumaTexture
   MaterialUniform_LumaFormat: LumaFormat
   MaterialUniform_ChromaUTexture: ChromaUTexture
@@ -764,6 +768,7 @@ MonoBehaviour:
   Preconfigured_SPS_HexString: 
   PushAllData: 0
   PopKbPerFrame: 30
+  PushPacketsPerFrameMin: 0
   MaterialUniform_LumaTexture: LumaTexture
   MaterialUniform_LumaFormat: LumaFormat
   MaterialUniform_ChromaUTexture: ChromaUTexture
@@ -1123,6 +1128,7 @@ MonoBehaviour:
   Preconfigured_SPS_HexString: 0000000167640028AC2CA501E0089F97015202020280000003008000001E31300016E360000E4E1FF8C7076850A4580000000168E9093525
   PushAllData: 0
   PopKbPerFrame: 30
+  PushPacketsPerFrameMin: 0
   MaterialUniform_LumaTexture: LumaTexture
   MaterialUniform_LumaFormat: LumaFormat
   MaterialUniform_ChromaUTexture: ChromaUTexture
