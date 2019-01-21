@@ -55,16 +55,19 @@ public class Mp4 : MonoBehaviour {
 
 	public UnityEvent_String OnNewFrameTime;
 
-
 	void OnEnable()
 	{
-		Decoder = new PopH264.Decoder();
-
-
 		if (!System.IO.File.Exists(Filename))
 			throw new System.Exception("File missing: " + Filename);
-		var Mp4Bytes = System.IO.File.ReadAllBytes(Filename);
 
+		var Mp4Bytes = System.IO.File.ReadAllBytes(Filename);
+		LoadMp4(Mp4Bytes);
+	}
+
+	public void LoadMp4(byte[] Mp4Bytes)
+	{
+		Decoder = new PopH264.Decoder();
+	
 		System.Action<byte[]> PushAnnexB = (Bytes) =>
 		{
 			if (H264PendingData == null)
