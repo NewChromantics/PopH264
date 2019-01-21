@@ -81,7 +81,6 @@ public class Mp4 : MonoBehaviour {
 
 		System.Action<PopX.Mpeg4.TTrack> EnumTrack = (Track) =>
 		{
-			H264.AvccHeader Header;
 			System.Action<byte[]> PushPacket;
 
 			byte[] Sps_AnnexB;
@@ -96,6 +95,7 @@ public class Mp4 : MonoBehaviour {
 					return;
 				}
 
+				H264.AvccHeader Header;
 				Header = PopX.H264.ParseAvccHeader(Track.SampleDescriptions[0].AvccAtomData);
 				var Pps = new List<byte>(new byte[] { 0, 0, 0, 1 });
 				Pps.AddRange(Header.PPSs[0]);
@@ -110,9 +110,15 @@ public class Mp4 : MonoBehaviour {
 			else
 			{
 				Debug.Log("Preconfigured");
-				Pps_AnnexB  = Preconfigured_PPS_Bytes;
+				Pps_AnnexB = Preconfigured_PPS_Bytes;
 				Sps_AnnexB = Preconfigured_SPS_Bytes;
-				PushPacket = PushAnnexB;
+
+				//	gr: turns out these are AVCC, not annexb
+				//	gr: should be able to auto detect without header
+				//PushPacket = PushAnnexB;
+				H264.AvccHeader Header = new H264.AvccHeader();
+				Header.NaluLength = 2;
+				PushPacket = (Packet) => { H264.AvccToAnnexb4(Header, Packet, PushAnnexB); };
 			}
 
 			H264.Profile Profile;
