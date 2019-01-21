@@ -1270,6 +1270,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a72cd8dd09c494055ba83b2f3d5db76e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  OnError:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1809756288}
+        m_MethodName: set_text
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_TypeName: UnityEvent_String, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+  OnParsedStream:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: UnityEvent_SmoothStream, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
   Url_Host: poph264test-euwe
   Url_Endpoint: 56909db0-0ba4-45bf-b2ae-0497e6e93049
   Url_Asset: cat_baseline
