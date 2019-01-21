@@ -57,7 +57,11 @@ public class PopIsm : MonoBehaviour
 		//	download mp4 from stream
 		var Track = Stream.GetVideoTrack();
 		var ChunkIndex = 0;
-		var ChunkUrl = Track.GetUrl(Track.Sources[0].BitRate, ChunkIndex, Stream.BaseUrl);
+		var Source = Track.Sources[0];
+		var ChunkUrl = Track.GetUrl(Source.BitRate, ChunkIndex, Stream.BaseUrl);
+
+		//	todo: convert to bytes here and remove from Mp4.cs
+		var TrackSpsAndPps = Source.CodecData_Hex;
 
 		System.Action<string> HandleError = (Error) =>
 		{
@@ -67,6 +71,7 @@ public class PopIsm : MonoBehaviour
 
 		System.Action<byte[]> HandleMp4Bytes = (Bytes) =>
 		{
+			Mp4.Preconfigured_SPS_HexString = TrackSpsAndPps;
 			Mp4.LoadMp4(Bytes);
 			Mp4.enabled = true;
 		};

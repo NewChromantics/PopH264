@@ -70,6 +70,8 @@ public class Mp4 : MonoBehaviour {
 	
 		System.Action<byte[]> PushAnnexB = (Bytes) =>
 		{
+			if (Bytes == null)
+				return;
 			if (H264PendingData == null)
 				H264PendingData = new List<byte>();
 
