@@ -226,6 +226,7 @@ public class Mp4 : MonoBehaviour {
 				}
 			};
 
+			PushNewData();
 			var FrameTime = Decoder.GetNextFrame(ref PlaneTextures, ref PlaneFormats);
 			if (FrameTime.HasValue)
 			{

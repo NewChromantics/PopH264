@@ -13,20 +13,22 @@ class TFrame
 {
 public:
 	std::shared_ptr<SoyPixelsImpl>	mPixels;
-	uint32_t						mTimeMs;
+	int32_t							mFrameNumber;	//	this may be time, specified by user, so is really just Meta
 };
 	
 class TDecoderInstance
 {
 public:
-	void									PushData(const uint8_t* Data,size_t DataSize);
-	void									PopFrame(int32_t& FrameTimeMs,ArrayBridge<uint8_t>&& Plane0,ArrayBridge<uint8_t>&& Plane1,ArrayBridge<uint8_t>&& Plane2);
+	//	input
+	void									PushData(const uint8_t* Data,size_t DataSize,int32_t FrameNumber);
+	
+	//	output
+	void									PopFrame(int32_t& FrameNumber,ArrayBridge<uint8_t>&& Plane0,ArrayBridge<uint8_t>&& Plane1,ArrayBridge<uint8_t>&& Plane2);
 	bool									PopFrame(TFrame& Frame);
-	void									PushFrame(const SoyPixelsImpl& Frame);
+	void									PushFrame(const SoyPixelsImpl& Frame,int32_t FrameNumber);
 	const SoyPixelsMeta&					GetMeta() const	{	return mMeta;	}
 	
 private:
-	uint32_t								mFrameCounter = 0;
 	Broadway::TDecoder						mDecoder;
 	std::mutex								mFramesLock;
 	Array<TFrame>							mFrames;
@@ -52,27 +54,27 @@ BOOL APIENTRY DllMain(HMODULE /* hModule */, DWORD ul_reason_for_call, LPVOID /*
 
 
 
-void TDecoderInstance::PushData(const uint8_t* Data,size_t DataSize)
+void TDecoderInstance::PushData(const uint8_t* Data,size_t DataSize,int32_t FrameNumber)
 {
 	auto DataArray = GetRemoteArray( Data, DataSize );
-	auto PushFrame = [this](const SoyPixelsImpl& Pixels)
+	auto PushFrame = [this,FrameNumber](const SoyPixelsImpl& Pixels)
 	{
-		this->PushFrame( Pixels );
+		this->PushFrame( Pixels, FrameNumber );
 	};
 	mDecoder.Decode( GetArrayBridge(DataArray), PushFrame );
 }
 
-void TDecoderInstance::PopFrame(int32_t& FrameTimeMs,ArrayBridge<uint8_t>&& Plane0,ArrayBridge<uint8_t>&& Plane1,ArrayBridge<uint8_t>&& Plane2)
+void TDecoderInstance::PopFrame(int32_t& FrameNumber,ArrayBridge<uint8_t>&& Plane0,ArrayBridge<uint8_t>&& Plane1,ArrayBridge<uint8_t>&& Plane2)
 {
 	TFrame Frame;
 	if ( !PopFrame( Frame ) )
 	{
-		FrameTimeMs = -1;
+		FrameNumber = -1;
 		return;
 	}
 	
 	//	if we don't set the correct time the c# thinks we have a bad frame!
-	FrameTimeMs = Frame.mTimeMs;
+	FrameNumber = Frame.mFrameNumber;
 	
 	//	emulating TPixelBuffer interface
 	BufferArray<SoyPixelsImpl*, 10> Textures;
@@ -113,10 +115,10 @@ bool TDecoderInstance::PopFrame(TFrame& Frame)
 	return true;
 }
 
-void TDecoderInstance::PushFrame(const SoyPixelsImpl& Frame)
+void TDecoderInstance::PushFrame(const SoyPixelsImpl& Frame,int32_t FrameNumber)
 {
 	TFrame NewFrame;
-	NewFrame.mTimeMs = mFrameCounter++;
+	NewFrame.mFrameNumber = FrameNumber;
 	NewFrame.mPixels.reset( new SoyPixels( Frame ) );
 
 	std::lock_guard<std::mutex> Lock(mFramesLock);
@@ -142,12 +144,12 @@ __export int32_t PopFrame(int32_t Instance,uint8_t* Plane0,int32_t Plane0Size,ui
 	return SafeCall(Function, __func__, -99 );
 }
 
-__export int32_t PushData(int32_t Instance,uint8_t* Data,int32_t DataSize)
+__export int32_t PushData(int32_t Instance,uint8_t* Data,int32_t DataSize,int32_t FrameNumber)
 {
 	auto Function = [&]()
 	{
 		auto& Decoder = InstanceManager::GetInstance(Instance);
-		Decoder.PushData( Data, DataSize );
+		Decoder.PushData( Data, DataSize, FrameNumber );
 		return 0;
 	};
 	return SafeCall(Function, __func__, -1 );
