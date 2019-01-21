@@ -49,7 +49,6 @@
 		BF8AB6C521F229E2008E7E76 /* PopH264.bundle in CopyFiles */ = {isa = PBXBuildFile; fileRef = BF4A6A141EA16D7D00613A64 /* PopH264.bundle */; };
 		BF8AB6C921F24E22008E7E76 /* PopH264.h in Resources */ = {isa = PBXBuildFile; fileRef = BF8AB63721F20C41008E7E76 /* PopH264.h */; };
 		BF8AB6CB21F24F9D008E7E76 /* InstanceManager.inc in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB6CA21F24F9D008E7E76 /* InstanceManager.inc */; };
-		BFD6076F1EA16EEE0035C814 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = BFD6076E1EA16EEE0035C814 /* Info.plist */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -411,7 +410,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				BF8AB6C921F24E22008E7E76 /* PopH264.h in Resources */,
-				BFD6076F1EA16EEE0035C814 /* Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
