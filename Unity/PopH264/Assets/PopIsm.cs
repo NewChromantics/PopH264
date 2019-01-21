@@ -50,15 +50,21 @@ public class PopIsm : MonoBehaviour
 		StartCoroutine(PopX.Ism.GetManifest(Url_Base, Url_Manifest, HandleStream, HandleError) );
 	}
 
+
+
 	public void LoadIntoMp4(PopX.Ism.SmoothStream Stream)
 	{
 		var Mp4 = GetComponent<Mp4>();
 
 		//	download mp4 from stream
 		var Track = Stream.GetVideoTrack();
-		var ChunkIndex = 0;
 		var Source = Track.Sources[0];
-		var ChunkUrl = Track.GetUrl(Source.BitRate, ChunkIndex, Stream.BaseUrl);
+		var ChunkQueueUrls = new List<string>();
+		for (var ChunkIndex = 0; ChunkIndex < Track.ChunkCount; ChunkIndex++)
+		{
+			var ChunkUrl = Track.GetUrl(Source.BitRate, ChunkIndex, Stream.BaseUrl);
+			ChunkQueueUrls.Add(ChunkUrl);
+		}
 
 		//	todo: convert to bytes here and remove from Mp4.cs
 		var TrackSpsAndPps = Source.CodecData_Hex;
@@ -76,30 +82,33 @@ public class PopIsm : MonoBehaviour
 			Mp4.enabled = true;
 		};
 
-		StartCoroutine(LoadMp4(ChunkUrl, HandleError, HandleMp4Bytes));
+		StartCoroutine(LoadMp4(ChunkQueueUrls,HandleError, HandleMp4Bytes));
 	}
 
-	static IEnumerator LoadMp4(string Url,System.Action<string> OnError,System.Action<byte[]> OnBytesDownloaded)
+	static IEnumerator LoadMp4(List<string> Urls,System.Action<string> OnError,System.Action<byte[]> OnBytesDownloaded)
 	{
-		Debug.Log("Fetching " + Url);
-		var www = UnityWebRequest.Get(Url);
-		yield return www.SendWebRequest();
+		foreach (var Url in Urls)
+		{
+			Debug.Log("Fetching " + Url);
+			var www = UnityWebRequest.Get(Url);
+			yield return www.SendWebRequest();
 
-		if (www.isNetworkError || www.isHttpError)
-		{
-			OnError(Url + " error: " + www.error);
-			yield break;
-		}
+			if (www.isNetworkError || www.isHttpError)
+			{
+				OnError(Url + " error: " + www.error);
+				yield break;
+			}
 
-		//	Show results as text
-		try
-		{
-			var Bytes = www.downloadHandler.data;
-			OnBytesDownloaded(Bytes);
-		}
-		catch (System.Exception e)
-		{
-			OnError(e.Message);
+			//	Show results as text
+			try
+			{
+				var Bytes = www.downloadHandler.data;
+				OnBytesDownloaded(Bytes);
+			}
+			catch (System.Exception e)
+			{
+				OnError(e.Message);
+			}
 		}
 	}
 

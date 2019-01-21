@@ -66,7 +66,8 @@ public class Mp4 : MonoBehaviour {
 
 	public void LoadMp4(byte[] Mp4Bytes)
 	{
-		Decoder = new PopH264.Decoder();
+		if ( Decoder == null)
+			Decoder = new PopH264.Decoder();
 	
 		System.Action<byte[]> PushAnnexB = (Bytes) =>
 		{
