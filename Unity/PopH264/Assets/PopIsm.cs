@@ -75,20 +75,22 @@ public class PopIsm : MonoBehaviour
 			OnError.Invoke(Error);
 		};
 
-		System.Action<byte[]> HandleMp4Bytes = (Bytes) =>
+		System.Action<byte[],int> HandleMp4Bytes = (Bytes,ChunkIndex) =>
 		{
+			var TimeOffset = Track.ChunkStartTimes[ChunkIndex];
 			Mp4.Preconfigured_SPS_HexString = TrackSpsAndPps;
-			Mp4.LoadMp4(Bytes);
+			Mp4.LoadMp4(Bytes, TimeOffset);
 			Mp4.enabled = true;
 		};
 
 		StartCoroutine(LoadMp4(ChunkQueueUrls,HandleError, HandleMp4Bytes));
 	}
 
-	static IEnumerator LoadMp4(List<string> Urls,System.Action<string> OnError,System.Action<byte[]> OnBytesDownloaded)
+	static IEnumerator LoadMp4(List<string> Urls,System.Action<string> OnError,System.Action<byte[],int> OnBytesDownloaded)
 	{
-		foreach (var Url in Urls)
+		for (var i = 0; i < Urls.Count;	i++)
 		{
+			var Url = Urls[i];
 			Debug.Log("Fetching " + Url);
 			var www = UnityWebRequest.Get(Url);
 			yield return www.SendWebRequest();
@@ -103,7 +105,7 @@ public class PopIsm : MonoBehaviour
 			try
 			{
 				var Bytes = www.downloadHandler.data;
-				OnBytesDownloaded(Bytes);
+				OnBytesDownloaded(Bytes,i);
 			}
 			catch (System.Exception e)
 			{

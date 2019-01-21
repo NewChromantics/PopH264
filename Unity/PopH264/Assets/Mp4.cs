@@ -97,7 +97,7 @@ public class Mp4 : MonoBehaviour {
 		PendingInputFrames.Add(Frame);
 	}
 
-	public void LoadMp4(byte[] Mp4Bytes)
+	public void LoadMp4(byte[] Mp4Bytes,int TimeOffset=0)
 	{
 		if ( Decoder == null)
 			Decoder = new PopH264.Decoder();	
@@ -169,7 +169,8 @@ public class Mp4 : MonoBehaviour {
 			foreach ( var Sample in Track.Samples )
 			{
 				var Packet = ExtractSample(Sample.DataPosition, Sample.DataSize);
-				var FrameNumber = Sample.PresentationTimeMs;
+				var TimeOffsetMs = (int)(TimeOffset / 10000.0f);
+				var FrameNumber = Sample.PresentationTimeMs + TimeOffsetMs;
 				PushPacket(Packet, FrameNumber);
 			}
 		};
@@ -246,7 +247,7 @@ public class Mp4 : MonoBehaviour {
 	void OnNewFrame()
 	{
 		var mr = GetComponent<MeshRenderer>();
-		var mat = mr.sharedMaterial;
+		var mat = mr.material;
 
 		if (PlaneTextures.Count >= 1)
 		{
