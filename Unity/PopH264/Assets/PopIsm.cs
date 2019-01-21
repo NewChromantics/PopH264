@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
 
-//[System.Serializable]
-//public class UnityEvent_String : UnityEngine.Events.UnityEvent<string> { }
+[System.Serializable]
+public class UnityEvent_String : UnityEngine.Events.UnityEvent<string> { }
 
 [System.Serializable]
 public class UnityEvent_SmoothStream : UnityEngine.Events.UnityEvent<PopX.Ism.SmoothStream> { }

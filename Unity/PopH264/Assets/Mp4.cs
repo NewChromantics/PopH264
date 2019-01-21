@@ -39,7 +39,7 @@ public class Mp4 : MonoBehaviour {
 	[Range(1, 1024)]
 	public int PopKbPerFrame = 30;
 
-	List<byte> H264PendingData;
+	List<PopH264.FrameInput> PendingInputFrames;
 	public string MaterialUniform_LumaTexture = "LumaTexture";
 	public string MaterialUniform_LumaFormat = "LumaFormat";
 	public string MaterialUniform_ChromaUTexture = "ChromaUTexture";
@@ -63,20 +63,42 @@ public class Mp4 : MonoBehaviour {
 		LoadMp4(Mp4Bytes);
 	}
 
+	static T[] CombineTwoArrays<T>(T[] a1, T[] a2)
+	{
+		T[] arrayCombined = new T[a1.Length + a2.Length];
+		System.Buffer.BlockCopy(a1, 0, arrayCombined, 0, a1.Length);
+		System.Buffer.BlockCopy(a2, 0, arrayCombined, a1.Length, a2.Length);
+		return arrayCombined;
+	}
+
+	void PushFrame_AnnexB(byte[] H264Packet,int FrameNumber)
+	{
+		if (PendingInputFrames == null)
+			PendingInputFrames = new List<PopH264.FrameInput>();
+
+		//	if the last frame has the same frame number, append the bytes
+		//	assuming we just have continuation packets (or say, SPS and PPS bundled together)
+		if (PendingInputFrames.Count > 0 )
+		{
+			var LastFrame = PendingInputFrames[PendingInputFrames.Count - 1];
+			if (LastFrame.FrameNumber == FrameNumber)
+			{
+				LastFrame.Bytes = CombineTwoArrays(LastFrame.Bytes, H264Packet);
+				PendingInputFrames[PendingInputFrames.Count - 1] = LastFrame;
+				return;
+			}
+		}
+
+		var Frame = new PopH264.FrameInput();
+		Frame.Bytes = H264Packet;
+		Frame.FrameNumber = FrameNumber;
+		PendingInputFrames.Add(Frame);
+	}
+
 	public void LoadMp4(byte[] Mp4Bytes)
 	{
 		if ( Decoder == null)
-			Decoder = new PopH264.Decoder();
-	
-		System.Action<byte[]> PushAnnexB = (Bytes) =>
-		{
-			if (Bytes == null)
-				return;
-			if (H264PendingData == null)
-				H264PendingData = new List<byte>();
-
-			H264PendingData.AddRange(Bytes);
-		};
+			Decoder = new PopH264.Decoder();	
 
 		System.Func<long, long,byte[]> ExtractSample = (Position,Size)=>
 		{
@@ -86,7 +108,7 @@ public class Mp4 : MonoBehaviour {
 
 		System.Action<PopX.Mpeg4.TTrack> EnumTrack = (Track) =>
 		{
-			System.Action<byte[]> PushPacket;
+			System.Action<byte[],int> PushPacket;
 
 			byte[] Sps_AnnexB;
 			byte[] Pps_AnnexB;
@@ -110,7 +132,10 @@ public class Mp4 : MonoBehaviour {
 				Sps.AddRange(Header.SPSs[0]);
 				Sps_AnnexB = Sps.ToArray();
 
-				PushPacket = (Packet) => { H264.AvccToAnnexb4(Header, Packet, PushAnnexB); };
+				PushPacket = (Packet, FrameNumber) => 
+				{
+					H264.AvccToAnnexb4(Header, Packet, (Bytes) => { PushFrame_AnnexB(Bytes, FrameNumber); } ); 
+				};
 			}
 			else
 			{
@@ -123,7 +148,10 @@ public class Mp4 : MonoBehaviour {
 				//PushPacket = PushAnnexB;
 				H264.AvccHeader Header = new H264.AvccHeader();
 				Header.NaluLength = 2;
-				PushPacket = (Packet) => { H264.AvccToAnnexb4(Header, Packet, PushAnnexB); };
+				PushPacket = (Packet, FrameNumber) => 
+				{
+					H264.AvccToAnnexb4(Header, Packet, (Bytes) => { PushFrame_AnnexB(Bytes, FrameNumber); });
+				};
 			}
 
 			H264.Profile Profile;
@@ -132,19 +160,20 @@ public class Mp4 : MonoBehaviour {
 			if (Profile != H264.Profile.Baseline)
 				Debug.LogWarning("PopH264 currently only supports baseline profile. This is " + Profile + " level=" + Level);
 
-			PushAnnexB(Sps_AnnexB);
-			PushAnnexB(Pps_AnnexB);
+			PushFrame_AnnexB(Sps_AnnexB,0);
+			PushFrame_AnnexB(Pps_AnnexB,0);
 
 			Debug.Log("Found mp4 track " + Track.Samples.Count);
 			foreach ( var Sample in Track.Samples )
 			{
 				var Packet = ExtractSample(Sample.DataPosition, Sample.DataSize);
-				PushPacket(Packet);
+				var FrameNumber = Sample.PresentationTimeMs;
+				PushPacket(Packet, FrameNumber);
 			}
 		};
 
 		PopX.Mpeg4.Parse(Mp4Bytes, EnumTrack);
-		Debug.Log("Extracted " + H264PendingData.Count + " bytes of h264");
+		Debug.Log("Extracted " + PendingInputFrames.Count + " frames/packets of h264");
 	}
 
 	void OnDisable()
@@ -155,18 +184,16 @@ public class Mp4 : MonoBehaviour {
 	}
 
 
-	void Update()
+	void StreamInH264Data()
 	{
-		if (H264PendingData == null)
-		{
-			this.enabled = false;
-			throw new System.Exception("Didnt load any h264 data");
-		}
+		//	todo:
+		//	push in random bytes from file (emulating stream)
+		//	split nal and add pending frames
+		/*
+		 * 
+				}
+				PendingInputFrames
 
-		if (Decoder != null)
-		{
-			System.Action PushNewData = () =>
-			{
 				var PopBytesSize = PushAllData ? H264PendingData.Count : PopKbPerFrame * 1024;
 				PopBytesSize = Mathf.Min(PopBytesSize, H264PendingData.Count);
 				if (PopBytesSize == 0)
@@ -177,11 +204,25 @@ public class Mp4 : MonoBehaviour {
 				var PopBytes = new byte[PopBytesSize];
 				H264PendingData.CopyTo(0, PopBytes, 0, PopBytes.Length);
 				H264PendingData.RemoveRange(0, PopBytesSize);
+				*/
+	}
 
-				var PushResult = Decoder.PushFrameData(PopBytes);
-				if (PushResult != 0)
+	void Update()
+	{
+		if (Decoder != null)
+		{
+			System.Action PushNewData = () =>
+			{
+				StreamInH264Data();
+
+				if (PendingInputFrames.Count > 0)
 				{
-					Debug.Log("Push returned: " + PushResult);
+					var PushResult = Decoder.PushFrameData(PendingInputFrames[0]);
+					PendingInputFrames.RemoveAt(0);
+					if (PushResult != 0)
+					{
+						Debug.Log("Push returned: " + PushResult);
+					}
 				}
 			};
 

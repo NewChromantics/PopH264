@@ -22,7 +22,7 @@ public static class PopH264
 	private static extern void	DestroyInstance(int Instance);
 
 	[DllImport(PluginName, CallingConvention = CallingConvention.Cdecl)]
-	private static extern int	PushData(int Instance,byte[] Data,int DataSize);
+	private static extern int	PushData(int Instance,byte[] Data,int DataSize,int FrameNumber);
 	
 	[DllImport(PluginName, CallingConvention = CallingConvention.Cdecl)]
 	private static extern void	GetMeta(int Instance,int[] MetaValues,int MetaValuesCount);
@@ -164,6 +164,12 @@ public static class PopH264
 		Plane2_PixelDataSize,
 	};
 
+	public struct FrameInput
+	{
+		public byte[] Bytes;
+		public int FrameNumber;
+	};
+
 	public class Decoder : IDisposable
 	{
 		int? Instance = null;
@@ -171,11 +177,10 @@ public static class PopH264
 		//	cache once to avoid allocating each frame
 		List<byte[]> PlaneCaches;
 		byte[] UnusedBuffer = new byte[1];
-
 		bool ThreadedDecoding = true;
-		System.Threading.Thread PushByteThread;
-		List<byte> PushByteQueue;
-		int? PushByteThreadResult = 0;
+		System.Threading.Thread InputThread;
+		List<FrameInput> InputQueue;
+		int? InputThreadResult = 0;
 
 		public Decoder(bool ThreadedDecoding=true)
 		{
@@ -192,13 +197,13 @@ public static class PopH264
 		public void Dispose()
 		{
 			//	stop thread before killing decoder
-			PushByteQueue = null;
-			if (PushByteThread != null)
+			InputQueue = null;
+			if (InputThread != null)
 			{
 				//	I think we can safely abort, might need to check. If we don't, depending on how much data we've thrown at the decoder, this could take ages to finish
-				PushByteThread.Abort();
-				PushByteThread.Join();
-				PushByteThread = null;
+				InputThread.Abort();
+				InputThread.Join();
+				InputThread = null;
 			}
 
 			if (Instance.HasValue)
@@ -251,9 +256,9 @@ public static class PopH264
 
 		void ThreadPushQueue()
 		{
-			while (PushByteQueue != null)
+			while (InputQueue != null)
 			{
-				if (PushByteQueue.Count == 0)
+				if (InputQueue.Count == 0)
 				{
 					System.Threading.Thread.Sleep(100);
 					//	make thread idle properly
@@ -262,39 +267,47 @@ public static class PopH264
 				}
 
 				//	pop off the data
-				byte[] Data;
-				lock (PushByteQueue)
+				FrameInput Frame;
+				lock (InputQueue)
 				{
-					Data = PushByteQueue.ToArray();
-					PushByteQueue.RemoveRange(0, PushByteQueue.Count);
+					Frame = InputQueue[0];
+					InputQueue.RemoveRange(0, 1);
 				}
-				PushByteThreadResult = PushData(Instance.Value, Data, Data.Length);
+				InputThreadResult = PushData(Instance.Value, Frame.Bytes, Frame.Bytes.Length, Frame.FrameNumber );
 			}
 		}
 
-		public int PushFrameData(byte[] H264Data)
+		public int PushFrameData(FrameInput Frame)
 		{
 			if ( !ThreadedDecoding )
 			{
-				return PushData(Instance.Value, H264Data, H264Data.Length);
+				return PushData(Instance.Value, Frame.Bytes, Frame.Bytes.Length, Frame.FrameNumber);
 			}
 
-			if (PushByteThread == null )
+			if (InputThread == null )
 			{
-				PushByteQueue = new List<byte>();
-				PushByteThread = new System.Threading.Thread(new System.Threading.ThreadStart(ThreadPushQueue));
-				PushByteThread.Start();
+				InputQueue = new List<FrameInput>();
+				InputThread = new System.Threading.Thread(new System.Threading.ThreadStart(ThreadPushQueue));
+				InputThread.Start();
 			}
 
 			//	add data and wake up the thread in case we need to
-			lock (PushByteQueue)
+			lock (InputQueue)
 			{
-				PushByteQueue.AddRange(H264Data);
+				InputQueue.Add(Frame);
 				//PushByteThread.Resume();
 			}
 
 			//	check for 
-			return PushByteThreadResult.HasValue ? PushByteThreadResult.Value : 0;
+			return InputThreadResult.HasValue ? InputThreadResult.Value : 0;
+		}
+
+		public int PushFrameData(byte[] H264Data, int FrameNumber)
+		{
+			var NewFrame = new FrameInput();
+			NewFrame.FrameNumber = FrameNumber;
+			NewFrame.Bytes = H264Data;
+			return PushFrameData(NewFrame);
 		}
 
 		//	returns frame time
