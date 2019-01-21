@@ -73,6 +73,8 @@ public class Mp4 : MonoBehaviour {
 
 	void PushFrame_AnnexB(byte[] H264Packet,int FrameNumber)
 	{
+		if (H264Packet == null)
+			return;
 		if (PendingInputFrames == null)
 			PendingInputFrames = new List<PopH264.FrameInput>();
 
