@@ -31,10 +31,9 @@ public class Mp4 : MonoBehaviour {
 		return Bytes.ToArray();
 	}
 
+	//	now sps & pps
 	public string Preconfigured_SPS_HexString = "";
-	public string Preconfigured_PPS_HexString = "";
 	public byte[] Preconfigured_SPS_Bytes	{ get { return HexStringToBytes(Preconfigured_SPS_HexString); } }
-	public byte[] Preconfigured_PPS_Bytes { get { return HexStringToBytes(Preconfigured_PPS_HexString); } }
 
 	public bool PushAllData = false;
 	[Range(1, 1024)]
@@ -115,9 +114,9 @@ public class Mp4 : MonoBehaviour {
 			}
 			else
 			{
-				Debug.Log("Preconfigured");
-				Pps_AnnexB = Preconfigured_PPS_Bytes;
+				//	split this header
 				Sps_AnnexB = Preconfigured_SPS_Bytes;
+				Pps_AnnexB = null;
 
 				//	gr: turns out these are AVCC, not annexb
 				//	gr: should be able to auto detect without header
