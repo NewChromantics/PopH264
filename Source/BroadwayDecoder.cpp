@@ -107,7 +107,9 @@ bool Broadway::TDecoder::DecodeNextPacket(std::function<void(const SoyPixelsImpl
 			if ( mPendingData[i+3] != 1 )	continue;
 			return i;
 		}
-		return 0;
+		//	assume is complete...
+		return (int)mPendingData.GetDataSize();
+		//return 0;
 	};
 	
 	H264SwDecInput Input;

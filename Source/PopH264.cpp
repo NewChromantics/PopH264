@@ -1,5 +1,6 @@
 #include "PopH264.h"
 #include "BroadwayDecoder.h"
+#include "PopH264DecoderInstance.h"
 #include "SoyLib/src/SoyPixels.h"
 
 class TNoParams;
@@ -9,31 +10,6 @@ using TInstanceParams = TNoParams;
 
 #include "InstanceManager.inc"
 
-class TFrame
-{
-public:
-	std::shared_ptr<SoyPixelsImpl>	mPixels;
-	int32_t							mFrameNumber;	//	this may be time, specified by user, so is really just Meta
-};
-	
-class TDecoderInstance
-{
-public:
-	//	input
-	void									PushData(const uint8_t* Data,size_t DataSize,int32_t FrameNumber);
-	
-	//	output
-	void									PopFrame(int32_t& FrameNumber,ArrayBridge<uint8_t>&& Plane0,ArrayBridge<uint8_t>&& Plane1,ArrayBridge<uint8_t>&& Plane2);
-	bool									PopFrame(TFrame& Frame);
-	void									PushFrame(const SoyPixelsImpl& Frame,int32_t FrameNumber);
-	const SoyPixelsMeta&					GetMeta() const	{	return mMeta;	}
-	
-private:
-	Broadway::TDecoder						mDecoder;
-	std::mutex								mFramesLock;
-	Array<TFrame>							mFrames;
-	SoyPixelsMeta							mMeta;
-};
 
 
 
@@ -52,6 +28,10 @@ BOOL APIENTRY DllMain(HMODULE /* hModule */, DWORD ul_reason_for_call, LPVOID /*
 }
 #endif
 
+TDecoderInstance::TDecoderInstance()
+{
+	mDecoder.reset( new Broadway::TDecoder );
+}
 
 
 void TDecoderInstance::PushData(const uint8_t* Data,size_t DataSize,int32_t FrameNumber)
@@ -61,7 +41,7 @@ void TDecoderInstance::PushData(const uint8_t* Data,size_t DataSize,int32_t Fram
 	{
 		this->PushFrame( Pixels, FrameNumber );
 	};
-	mDecoder.Decode( GetArrayBridge(DataArray), PushFrame );
+	mDecoder->Decode( GetArrayBridge(DataArray), PushFrame );
 }
 
 void TDecoderInstance::PopFrame(int32_t& FrameNumber,ArrayBridge<uint8_t>&& Plane0,ArrayBridge<uint8_t>&& Plane1,ArrayBridge<uint8_t>&& Plane2)
