@@ -59,6 +59,9 @@ public class Mp4 : MonoBehaviour {
 
 	void OnEnable()
 	{
+		if (string.IsNullOrEmpty(Filename))
+			return;
+
 		if (!System.IO.File.Exists(Filename))
 			throw new System.Exception("File missing: " + Filename);
 
@@ -171,10 +174,18 @@ public class Mp4 : MonoBehaviour {
 			Debug.Log("Found mp4 track " + Track.Samples.Count);
 			foreach ( var Sample in Track.Samples )
 			{
-				var Packet = ExtractSample(Sample.DataPosition, Sample.DataSize);
-				var TimeOffsetMs = (int)(TimeOffset / 10000.0f);
-				var FrameNumber = Sample.PresentationTimeMs + TimeOffsetMs;
-				PushPacket(Packet, FrameNumber);
+				try
+				{
+					var Packet = ExtractSample(Sample.DataPosition, Sample.DataSize);
+					var TimeOffsetMs = (int)(TimeOffset / 10000.0f);
+					var FrameNumber = Sample.PresentationTimeMs + TimeOffsetMs;
+					PushPacket(Packet, FrameNumber);
+				}
+				catch(System.Exception e)
+				{
+					Debug.LogException(e);
+					break;
+				}
 			}
 		};
 

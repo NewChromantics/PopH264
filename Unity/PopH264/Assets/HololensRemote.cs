@@ -133,13 +133,18 @@ public class HololensRemote : MonoBehaviour {
 	static IEnumerator LoadMp4(string Url,string HttpAuth,int PushAfterXBytes,System.Action<string> OnError, System.Action<byte[]> OnBytesDownloaded)
 	{
 		var Mp4Bytes = new List<byte>();
+		bool Done = false;
 		System.Action<byte[]> OnDownloadedChunk = (Bytes) =>
 		{
 			//	todo: split at NAL packet, there is no header! but try and get content type
 			Debug.Log("downloaded " + Bytes.Length + " bytes...");
 			Mp4Bytes.AddRange(Bytes);
-			if (Mp4Bytes.Count > PushAfterXBytes)
+
+			if (Mp4Bytes.Count > PushAfterXBytes && !Done)
+			{
+				Done = true;
 				OnBytesDownloaded.Invoke(Mp4Bytes.ToArray());
+			}
 		};
 
 		{
