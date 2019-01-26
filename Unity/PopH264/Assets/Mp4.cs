@@ -221,7 +221,7 @@ public class Mp4 : MonoBehaviour {
 			{
 				StreamInH264Data();
 
-				if (PendingInputFrames.Count > 0)
+				if (PendingInputFrames != null && PendingInputFrames.Count > 0)
 				{
 					var PushResult = Decoder.PushFrameData(PendingInputFrames[0]);
 					PendingInputFrames.RemoveAt(0);
