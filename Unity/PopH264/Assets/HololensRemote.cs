@@ -54,7 +54,9 @@ public class HololensRemote : MonoBehaviour {
 		StartCoroutine(LoadMp4(MonitorUrl, authorization, LoadMp4AfterBytes, HandleError, HandleMp4Bytes));
 	}
 
-	class Cert : CertificateHandler
+    //  SSL isn't going to work on 2017
+#if UNITY_2018_OR_NEWER
+    class Cert : CertificateHandler
 	{
 		protected override bool ValidateCertificate(byte[] certificateData)
 		{
@@ -62,8 +64,9 @@ public class HololensRemote : MonoBehaviour {
 		}
 
 	};
+#endif
 
-	string Authenticate(string username, string password)
+    string Authenticate(string username, string password)
 	{
 		string auth = username + ":" + password;
 		auth = System.Convert.ToBase64String(System.Text.Encoding.GetEncoding("ISO-8859-1").GetBytes(auth));
@@ -150,7 +153,9 @@ public class HololensRemote : MonoBehaviour {
 		{
 			Debug.Log("Fetching " + Url);
 			var www = UnityWebRequest.Get(Url);
+#if UNITY_2018_OR_NEWER
 			www.certificateHandler = new Cert();
+#endif
 			www.downloadHandler = new DownloadStreamer(OnDownloadedChunk);
 
 			if(HttpAuth != null )
