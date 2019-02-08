@@ -1,7 +1,0 @@
-﻿  PopCameraDevice.cpp
-LINK : warning LNK4075: ignoring '/INCREMENTAL' due to '/PROFILE' specification
-PopCameraDevice.obj : warning LNK4075: ignoring '/EDITANDCONTINUE' due to '/OPT:LBR' specification
-  PopH264.vcxproj -> D:\PopH264\PopH264.visualstudio\x64\Debug\PopH264.dll
-  PopH264.vcxproj -> D:\PopH264\PopH264.visualstudio\x64\Debug\PopH264.pdb (Full PDB)
-          1 file(s) copied.
-          1 file(s) copied.
