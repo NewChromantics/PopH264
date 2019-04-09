@@ -1,5 +1,8 @@
 #pragma once
 
+//	if you're using this header to link to the DLL, you'll probbaly need the lib :)
+//#pragma comment(lib, "PopH264.lib")
+
 #include <stdint.h>
 
 
@@ -13,14 +16,6 @@
 
 #endif
 
-/*
-#if defined(TARGET_WINDOWS)
-#include <SDKDDKVer.h>
-#define NOMINMAX
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#endif
-*/
 
 
 __export int32_t			CreateInstance();
