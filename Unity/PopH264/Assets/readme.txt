@@ -7,3 +7,7 @@ Remember... need a baseline profile (need to figure out max supported!)
 
 https://docs.microsoft.com/en-us/azure/media-services/previous/media-services-portal-vod-get-started
 
+
+Convert to baseline 
+
+`ffmpeg -i key.mp4 -c:v libx264 -profile:v baseline -level 3 key_baseline.mp4`
