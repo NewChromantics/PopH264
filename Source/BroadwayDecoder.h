@@ -29,12 +29,12 @@ public:
 	TDecoder();
 	~TDecoder();
 	
-	void			Decode(ArrayBridge<uint8_t>&& PacketData,std::function<void(const SoyPixelsImpl&)> OnFrameDecoded);
+	void			Decode(ArrayBridge<uint8_t>&& PacketData,std::function<void(const SoyPixelsImpl&,SoyTime)> OnFrameDecoded);
 
 private:
 	void			OnMeta(const H264SwDecInfo& Meta);
-	void			OnPicture(const H264SwDecPicture& Picture,const H264SwDecInfo& Meta,std::function<void(const SoyPixelsImpl&)> OnFrameDecoded);
-	bool			DecodeNextPacket(std::function<void(const SoyPixelsImpl&)> OnFrameDecoded);	//	returns true if more data to proccess
+	void			OnPicture(const H264SwDecPicture& Picture,const H264SwDecInfo& Meta,std::function<void(const SoyPixelsImpl&,SoyTime)> OnFrameDecoded,SoyTime DecodeDuration);
+	bool			DecodeNextPacket(std::function<void(const SoyPixelsImpl&,SoyTime)> OnFrameDecoded);	//	returns true if more data to proccess
 	
 public:
 	H264SwDecInst	mDecoderInstance = nullptr;

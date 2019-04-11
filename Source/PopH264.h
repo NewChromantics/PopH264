@@ -13,18 +13,24 @@
 
 #endif
 
-/*
-#if defined(TARGET_WINDOWS)
-#include <SDKDDKVer.h>
-#define NOMINMAX
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#endif
-*/
 
+//	forward declare this c++ class. May need to export the class...
+#if defined(__cplusplus)
+namespace PopH264
+{
+	class TDecoderInstance;
+}
+#define EXPORTCLASS	PopH264::TDecoderInstance
+#else
+#define EXPORTCLASS	void
+#endif
 
 __export int32_t			CreateInstance();
 __export void				DestroyInstance(int32_t Instance);
+
+//	for C++ interfaces, to give access to known types and callbacks
+//	todo: proper shared_ptr sharing, dllexport class etc. this is essentially unsafe, but caller can manage this between CreateInstance and DestroyInstance
+__export EXPORTCLASS*		GetInstancePtr(int32_t Instance);
 
 //	todo: document values with a function that outputs labels!
 __export void				GetMeta(int32_t Instance,int32_t* MetaValues,int32_t MetaValuesCount);

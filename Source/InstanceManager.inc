@@ -145,3 +145,13 @@ __export void DestroyInstance(int32_t Instance)
 	SafeCall(Function, __func__, 0 );
 }
 
+
+__export TInstanceObject* GetInstancePtr(int32_t Instance)
+{
+	auto Function = [&]()
+	{
+		auto& Object = InstanceManager::GetInstance(Instance);
+		return &Object;
+	};
+	return SafeCall<TInstanceObject*>( Function, __func__, nullptr );
+}

@@ -89,7 +89,7 @@ void Broadway::IsOkay(H264SwDecRet Result,const char* Context)
 }
 
 //	returns true if more data to proccess
-bool Broadway::TDecoder::DecodeNextPacket(std::function<void(const SoyPixelsImpl&)> OnFrameDecoded)
+bool Broadway::TDecoder::DecodeNextPacket(std::function<void(const SoyPixelsImpl&,SoyTime)> OnFrameDecoded)
 {
 	if ( mPendingData.IsEmpty() )
 		return false;
@@ -126,14 +126,15 @@ bool Broadway::TDecoder::DecodeNextPacket(std::function<void(const SoyPixelsImpl
 	Output.pStrmCurrPos = nullptr;
 	
 	
-	Soy::TScopeTimerPrint Timer("H264 Decode",5);
+	Soy::TScopeTimerPrint Timer("H264 Decode",15);
 	auto Result = H264SwDecDecode( mDecoderInstance, &Input, &Output );
-	Timer.Stop();
+	auto DecodeDuration = Timer.Stop();
 	IsOkay( Result, "H264SwDecDecode" );
 	
 	//	calc what data wasn't used
 	auto BytesProcessed = static_cast<ssize_t>(Output.pStrmCurrPos - Input.pStream);
-	std::Debug << "H264SwDecDecode result: " << GetDecodeResultString(Result) << ". Bytes processed: "  << BytesProcessed << "/" << Input.dataLen << std::endl;
+	//	todo: keep this meta for external debugging
+	//std::Debug << "H264SwDecDecode result: " << GetDecodeResultString(Result) << ". Bytes processed: "  << BytesProcessed << "/" << Input.dataLen << std::endl;
 	
 	//	gr: can we delete data here? or do calls below use this data...
 	{
@@ -163,7 +164,8 @@ bool Broadway::TDecoder::DecodeNextPacket(std::function<void(const SoyPixelsImpl
 		//	android just does both https://android.googlesource.com/platform/frameworks/av/+/2b6f22dc64d456471a1dc6df09d515771d1427c8/media/libstagefright/codecs/on2/h264dec/source/EvaluationTestBench.c#158
 		case H264SWDEC_PIC_RDY:
 		{
-			Soy::TScopeTimerPrint PictureTimer("H264 Picture Decode",5);
+			//	gr: this should be fast, it just extracts references from the buffer
+			Soy::TScopeTimerPrint PictureTimer("H264 Picture Decode",1);
 			//	if no callback, just skip image extraction
 			if ( !OnFrameDecoded )
 			{
@@ -193,7 +195,7 @@ bool Broadway::TDecoder::DecodeNextPacket(std::function<void(const SoyPixelsImpl
 					   decPicture.nbrOfErrMBs);
 				*/
 				//	YuvToRgb( decPicture.pOutputPicture, pRgbPicture );
-				OnPicture( Picture, Meta, OnFrameDecoded );
+				OnPicture( Picture, Meta, OnFrameDecoded, DecodeDuration );
 			}
 			return true;
 		}
@@ -209,7 +211,7 @@ bool Broadway::TDecoder::DecodeNextPacket(std::function<void(const SoyPixelsImpl
 
 
 
-void Broadway::TDecoder::Decode(ArrayBridge<uint8_t>&& PacketData,std::function<void(const SoyPixelsImpl&)> OnFrameDecoded)
+void Broadway::TDecoder::Decode(ArrayBridge<uint8_t>&& PacketData,std::function<void(const SoyPixelsImpl&,SoyTime)> OnFrameDecoded)
 {
 	{
 		std::lock_guard<std::mutex> Lock(mPendingDataLock);
@@ -229,13 +231,13 @@ void Broadway::TDecoder::OnMeta(const H264SwDecInfo& Meta)
 	
 }
 
-void Broadway::TDecoder::OnPicture(const H264SwDecPicture& Picture,const H264SwDecInfo& Meta,std::function<void(const SoyPixelsImpl&)> OnFrameDecoded)
+void Broadway::TDecoder::OnPicture(const H264SwDecPicture& Picture,const H264SwDecInfo& Meta,std::function<void(const SoyPixelsImpl&,SoyTime)> OnFrameDecoded,SoyTime DecodeDuration)
 {
 	//		headers just say
 	//	u32 *pOutputPicture;    /* Pointer to the picture, YUV format       */
 	auto Format = SoyPixelsFormat::Yuv_8_8_8_Full;
 	SoyPixelsMeta PixelMeta( Meta.picWidth, Meta.picHeight, Format );
-	std::Debug << "Decoded picture " << PixelMeta << std::endl;
+	//std::Debug << "Decoded picture " << PixelMeta << std::endl;
 	
 	//	gr: wish we knew exactly how many bytes Picture.pOutputPicture pointed at!
 	//		but demos all use this measurement
@@ -245,7 +247,7 @@ void Broadway::TDecoder::OnPicture(const H264SwDecPicture& Picture,const H264SwD
 	auto* Pixels8 = reinterpret_cast<uint8_t*>(Picture.pOutputPicture);
 	SoyPixelsRemote Pixels( Pixels8, DataSize, PixelMeta );
 	if ( OnFrameDecoded )
-		OnFrameDecoded( Pixels );
+		OnFrameDecoded( Pixels, DecodeDuration );
 }
 
 
