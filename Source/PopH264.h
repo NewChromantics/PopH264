@@ -1,5 +1,8 @@
 #pragma once
 
+//	if you're using this header to link to the DLL, you'll probbaly need the lib :)
+//#pragma comment(lib, "PopH264.lib")
+
 #include <stdint.h>
 
 

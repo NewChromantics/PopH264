@@ -279,6 +279,7 @@
     <ClCompile>
       <PrecompiledHeader>
       </PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link />
     <Link />
@@ -286,13 +287,7 @@
     <Link>
       <Profile>true</Profile>
     </Link>
-    <PostBuildEvent>
-      <Command>SET PathDll=$(TargetPath)
-SET PathPdb=%PathDll:dll=pdb%
-copy /y $(TargetPath) $(ProjectDir)..\Unity\PopH264\Assets\PopH264
-copy /y %PathPdb% $(ProjectDir)..\Unity\PopH264\Assets\PopH264
-</Command>
-    </PostBuildEvent>
+    <PostBuildEvent />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Master|x64'">
     <ClCompile>
@@ -305,19 +300,14 @@ copy /y %PathPdb% $(ProjectDir)..\Unity\PopH264\Assets\PopH264
     <Link>
       <Profile>true</Profile>
     </Link>
-    <PostBuildEvent>
-      <Command>SET PathDll=$(TargetPath)
-SET PathPdb=%PathDll:dll=pdb%
-copy /y $(TargetPath) $(ProjectDir)..\Unity\PopH264\Assets\PopH264
-copy /y %PathPdb% $(ProjectDir)..\Unity\PopH264\Assets\PopH264
-</Command>
-    </PostBuildEvent>
+    <PostBuildEvent />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <PrecompiledHeader>
       </PrecompiledHeader>
       <PreprocessorDefinitions>ENABLE_DIRECTX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link />
     <Link />
@@ -325,13 +315,7 @@ copy /y %PathPdb% $(ProjectDir)..\Unity\PopH264\Assets\PopH264
     <Link>
       <Profile>true</Profile>
     </Link>
-    <PostBuildEvent>
-      <Command>SET PathDll=$(TargetPath)
-SET PathPdb=%PathDll:dll=pdb%
-copy /y $(TargetPath) $(ProjectDir)..\Unity\PopH264\Assets\PopH264
-copy /y %PathPdb% $(ProjectDir)..\Unity\PopH264\Assets\PopH264
-</Command>
-    </PostBuildEvent>
+    <PostBuildEvent />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Master|Win32'">
     <ClCompile>
@@ -345,13 +329,7 @@ copy /y %PathPdb% $(ProjectDir)..\Unity\PopH264\Assets\PopH264
     <Link>
       <Profile>true</Profile>
     </Link>
-    <PostBuildEvent>
-      <Command>SET PathDll=$(TargetPath)
-SET PathPdb=%PathDll:dll=pdb%
-copy /y $(TargetPath) $(ProjectDir)..\Unity\PopH264\Assets\PopH264
-copy /y %PathPdb% $(ProjectDir)..\Unity\PopH264\Assets\PopH264
-</Command>
-    </PostBuildEvent>
+    <PostBuildEvent />
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -22,11 +22,21 @@
     <ClCompile>
       <FloatingPointExceptions>true</FloatingPointExceptions>
       <Optimization>Disabled</Optimization>
-      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <FullProgramDatabaseFile>true</FullProgramDatabaseFile>
     </Link>
+    <PostBuildEvent>
+      <Command>SET PathDll=$(TargetPath)
+SET PathPdb=%PathDll:dll=pdb%
+SET PathLib=%PathDll:dll=lib%
+SET PathHeader=$(ProjectDir)..\source\PopH264.h
+copy /y %PathDll% $(ProjectDir)..\Unity\PopH264\Assets\PopH264
+copy /y %PathPdb% $(ProjectDir)..\Unity\PopH264\Assets\PopH264
+copy /y %PathLib% $(ProjectDir)..\Unity\PopH264\Assets\PopH264
+copy /y %PathHeader% $(ProjectDir)..\Unity\PopH264\Assets\PopH264</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup />
 </Project>
