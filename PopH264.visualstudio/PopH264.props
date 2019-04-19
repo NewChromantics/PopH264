@@ -32,10 +32,13 @@
 SET PathPdb=%PathDll:dll=pdb%
 SET PathLib=%PathDll:dll=lib%
 SET PathHeader=$(ProjectDir)..\source\PopH264.h
+SET PathHeader2=$(ProjectDir)..\source\PopH264DecoderInstance.h
 copy /y %PathDll% $(ProjectDir)..\Unity\PopH264\Assets\PopH264
 copy /y %PathPdb% $(ProjectDir)..\Unity\PopH264\Assets\PopH264
 copy /y %PathLib% $(ProjectDir)..\Unity\PopH264\Assets\PopH264
-copy /y %PathHeader% $(ProjectDir)..\Unity\PopH264\Assets\PopH264</Command>
+copy /y %PathHeader% $(ProjectDir)..\Unity\PopH264\Assets\PopH264
+copy /y %PathHeader2% $(ProjectDir)..\Unity\PopH264\Assets\PopH264
+</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup />

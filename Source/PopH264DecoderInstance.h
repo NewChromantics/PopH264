@@ -13,10 +13,11 @@ namespace Broadway
 
 namespace PopH264
 {
+	class TFrame;
 	class TDecoderInstance;
 }
 
-class TFrame
+class PopH264::TFrame
 {
 public:
 	std::shared_ptr<SoyPixelsImpl>	mPixels;
