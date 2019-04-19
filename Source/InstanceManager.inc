@@ -125,7 +125,7 @@ RETURN SafeCall(FUNC Function,const char* FunctionName,RETURN ErrorReturn)
 
 
 
-__export int32_t CreateInstance()
+__export int32_t PopH264_CreateInstance()
 {
 	auto Function = [&]()
 	{
@@ -135,7 +135,7 @@ __export int32_t CreateInstance()
 	return SafeCall( Function, __func__, -1 );
 }
 
-__export void DestroyInstance(int32_t Instance)
+__export void PopH264_DestroyInstance(int32_t Instance)
 {
 	auto Function = [&]()
 	{
@@ -146,7 +146,7 @@ __export void DestroyInstance(int32_t Instance)
 }
 
 
-__export TInstanceObject* GetInstancePtr(int32_t Instance)
+__export TInstanceObject* PopH264_GetInstancePtr(int32_t Instance)
 {
 	auto Function = [&]()
 	{

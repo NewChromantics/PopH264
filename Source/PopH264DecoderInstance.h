@@ -5,13 +5,6 @@
 #include "SoyLib/src/SoyPixels.h"
 
 
-#if defined(_MSC_VER) && !defined(TARGET_PS4)
-	#define __export_c			extern "C" __declspec(dllexport)
-#else
-	#define __export_c			extern "C"
-#endif
-
-
 class SoyPixelsImpl;
 namespace Broadway
 {
@@ -20,7 +13,7 @@ namespace Broadway
 
 namespace PopH264
 {
-
+	class TDecoderInstance;
 }
 
 class TFrame

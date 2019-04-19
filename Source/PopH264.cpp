@@ -112,7 +112,7 @@ void PopH264::TDecoderInstance::PushFrame(const SoyPixelsImpl& Frame,int32_t Fra
 
 	
 
-__export int32_t PopFrame(int32_t Instance,uint8_t* Plane0,int32_t Plane0Size,uint8_t* Plane1,int32_t Plane1Size,uint8_t* Plane2,int32_t Plane2Size)
+__export int32_t PopH264_PopFrame(int32_t Instance,uint8_t* Plane0,int32_t Plane0Size,uint8_t* Plane1,int32_t Plane1Size,uint8_t* Plane2,int32_t Plane2Size)
 {
 	auto Function = [&]()
 	{
@@ -128,7 +128,7 @@ __export int32_t PopFrame(int32_t Instance,uint8_t* Plane0,int32_t Plane0Size,ui
 	return SafeCall(Function, __func__, -99 );
 }
 
-__export int32_t PushData(int32_t Instance,uint8_t* Data,int32_t DataSize,int32_t FrameNumber)
+__export int32_t PopH264_PushData(int32_t Instance,uint8_t* Data,int32_t DataSize,int32_t FrameNumber)
 {
 	auto Function = [&]()
 	{
@@ -140,7 +140,7 @@ __export int32_t PushData(int32_t Instance,uint8_t* Data,int32_t DataSize,int32_
 }
 
 
-__export void GetMeta(int32_t Instance, int32_t* pMetaValues, int32_t MetaValuesCount)
+__export void PopH264_GetMeta(int32_t Instance, int32_t* pMetaValues, int32_t MetaValuesCount)
 {
 	auto Function = [&]()
 	{
@@ -167,5 +167,5 @@ __export void GetMeta(int32_t Instance, int32_t* pMetaValues, int32_t MetaValues
 		
 		return 0;
 	};
-	auto x = SafeCall(Function, __func__, 0 );
+	SafeCall(Function, __func__, 0 );
 }
