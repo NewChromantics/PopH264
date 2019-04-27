@@ -35,7 +35,7 @@ public:
 	
 	//	output
 	void									PopFrame(int32_t& FrameNumber,ArrayBridge<uint8_t>&& Plane0,ArrayBridge<uint8_t>&& Plane1,ArrayBridge<uint8_t>&& Plane2);
-	bool									PopFrame(TFrame& Frame);
+	__declspec(dllexport) bool				PopFrame(TFrame& Frame);
 	void									PushFrame(const SoyPixelsImpl& Frame,int32_t FrameNumber,std::chrono::milliseconds DecodeDurationMs);
 	const SoyPixelsMeta&					GetMeta() const	{	return mMeta;	}
 	
