@@ -16,19 +16,19 @@ public static class PopH264
 
 
 	[DllImport(PluginName, CallingConvention = CallingConvention.Cdecl)]
-	private static extern int	CreateInstance();
+	private static extern int	PopH264_CreateInstance();
 
 	[DllImport(PluginName, CallingConvention = CallingConvention.Cdecl)]
-	private static extern void	DestroyInstance(int Instance);
+	private static extern void	PopH264_DestroyInstance(int Instance);
 
 	[DllImport(PluginName, CallingConvention = CallingConvention.Cdecl)]
-	private static extern int	PushData(int Instance,byte[] Data,int DataSize,int FrameNumber);
+	private static extern int	PopH264_PushData(int Instance,byte[] Data,int DataSize,int FrameNumber);
 	
 	[DllImport(PluginName, CallingConvention = CallingConvention.Cdecl)]
-	private static extern void	GetMeta(int Instance,int[] MetaValues,int MetaValuesCount);
+	private static extern void	PopH264_GetMeta(int Instance,int[] MetaValues,int MetaValuesCount);
 	
 	[DllImport(PluginName, CallingConvention = CallingConvention.Cdecl)]
-	private static extern int	PopFrame(int Instance,byte[] Plane0,int Plane0Size,byte[] Plane1,int Plane1Size,byte[] Plane2,int Plane2Size);
+	private static extern int	PopH264_PopFrame(int Instance,byte[] Plane0,int Plane0Size,byte[] Plane1,int Plane1Size,byte[] Plane2,int Plane2Size);
 
 	//	copied directly from https://github.com/SoylentGraham/SoyLib/blob/master/src/SoyPixels.h#L16
 	public enum SoyPixelsFormat
@@ -185,7 +185,7 @@ public static class PopH264
 		public Decoder(bool ThreadedDecoding=true)
 		{
 			this.ThreadedDecoding = ThreadedDecoding;
-			Instance = CreateInstance();
+			Instance = PopH264_CreateInstance();
 			if (Instance.Value <= 0)
 				throw new System.Exception("Failed to create decoder instance");
 		}
@@ -207,7 +207,7 @@ public static class PopH264
 			}
 
 			if (Instance.HasValue)
-				DestroyInstance(Instance.Value);
+				PopH264_DestroyInstance(Instance.Value);
 			Instance = null;
 		}
 
@@ -273,7 +273,7 @@ public static class PopH264
 					Frame = InputQueue[0];
 					InputQueue.RemoveRange(0, 1);
 				}
-				InputThreadResult = PushData(Instance.Value, Frame.Bytes, Frame.Bytes.Length, Frame.FrameNumber );
+				InputThreadResult = PopH264_PushData(Instance.Value, Frame.Bytes, Frame.Bytes.Length, Frame.FrameNumber );
 			}
 		}
 
@@ -281,7 +281,7 @@ public static class PopH264
 		{
 			if ( !ThreadedDecoding )
 			{
-				return PushData(Instance.Value, Frame.Bytes, Frame.Bytes.Length, Frame.FrameNumber);
+				return PopH264_PushData(Instance.Value, Frame.Bytes, Frame.Bytes.Length, Frame.FrameNumber);
 			}
 
 			if (InputThread == null )
@@ -314,7 +314,7 @@ public static class PopH264
 		public int? GetNextFrame(ref List<Texture2D> Planes, ref List<SoyPixelsFormat> PixelFormats)
 		{
 			var MetaValues = new int[100];
-			GetMeta(Instance.Value, MetaValues, MetaValues.Length);
+			PopH264_GetMeta(Instance.Value, MetaValues, MetaValues.Length);
 			var PlaneCount = MetaValues[(int)MetaIndex.PlaneCount];
 			if (PlaneCount <= 0)
 			{
@@ -350,7 +350,7 @@ public static class PopH264
 			var Plane0Data = (PlaneCaches.Count >= 1 && PlaneCaches[0] != null) ? PlaneCaches[0] : UnusedBuffer;
 			var Plane1Data = (PlaneCaches.Count >= 2 && PlaneCaches[1] != null) ? PlaneCaches[1] : UnusedBuffer;
 			var Plane2Data = (PlaneCaches.Count >= 3 && PlaneCaches[2] != null) ? PlaneCaches[2] : UnusedBuffer;
-			var PopResult = PopFrame(Instance.Value, Plane0Data, Plane0Data.Length, Plane1Data, Plane1Data.Length, Plane2Data, Plane2Data.Length);
+			var PopResult = PopH264_PopFrame(Instance.Value, Plane0Data, Plane0Data.Length, Plane1Data, Plane1Data.Length, Plane2Data, Plane2Data.Length);
 			if (PopResult < 0)
 			{
 				//Debug.Log("PopFrame returned " + PopResult);
