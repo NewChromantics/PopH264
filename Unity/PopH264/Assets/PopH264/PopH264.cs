@@ -83,6 +83,8 @@ public static class PopH264
 		Yuv_844_Ntsc,
 		Yuv_844_Smptec,
 
+		Pad0,	//	pixelformats getting out of sync, change this to a string
+
 		ChromaUV_8_8,       //	8 bit plane, 8 bit plane
 		ChromaUV_88,        //	16 bit interleaved plane
 		ChromaU_8,          //	single plane

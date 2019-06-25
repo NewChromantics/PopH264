@@ -66,8 +66,8 @@
 		#define YYuv_8888_Full	18
 		#define YYuv_8888_Ntsc	19
 		#define ChromaUV_88	25
-		#define Chroma_U	26
-		#define Chroma_V	27
+		#define Chroma_U	27
+		#define Chroma_V	28
 		#define ChromaVU_88	998
 
 			float Flip;
