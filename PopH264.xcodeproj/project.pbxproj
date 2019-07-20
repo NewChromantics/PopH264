@@ -40,6 +40,9 @@
 		BF8AB6CB21F24F9D008E7E76 /* InstanceManager.inc in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB6CA21F24F9D008E7E76 /* InstanceManager.inc */; };
 		BFF1C6E922E3C65800AFDFD5 /* BroadwayAll.c in Sources */ = {isa = PBXBuildFile; fileRef = BFF1C6E822E3C65800AFDFD5 /* BroadwayAll.c */; };
 		BFF1C6EA22E3C65800AFDFD5 /* BroadwayAll.c in Sources */ = {isa = PBXBuildFile; fileRef = BFF1C6E822E3C65800AFDFD5 /* BroadwayAll.c */; };
+		BFF1C71022E3CF8B00AFDFD5 /* SoyArray.h in Headers */ = {isa = PBXBuildFile; fileRef = BFF1C70E22E3CF8A00AFDFD5 /* SoyArray.h */; };
+		BFF1C71122E3CF8B00AFDFD5 /* SoyArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFF1C70F22E3CF8B00AFDFD5 /* SoyArray.cpp */; };
+		BFF1C71222E3CF8B00AFDFD5 /* SoyArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFF1C70F22E3CF8B00AFDFD5 /* SoyArray.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -161,6 +164,8 @@
 		BFF1C6E622E3A1D600AFDFD5 /* SoyFilesystem.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SoyFilesystem.h; path = Source/SoyLib/src/SoyFilesystem.h; sourceTree = "<group>"; };
 		BFF1C6E722E3A57200AFDFD5 /* SoyDebug.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SoyDebug.cpp; path = Source/SoyLib/src/SoyDebug.cpp; sourceTree = "<group>"; };
 		BFF1C6E822E3C65800AFDFD5 /* BroadwayAll.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = BroadwayAll.c; path = Source/BroadwayAll.c; sourceTree = "<group>"; };
+		BFF1C70E22E3CF8A00AFDFD5 /* SoyArray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SoyArray.h; path = Source/SoyLib/src/SoyArray.h; sourceTree = "<group>"; };
+		BFF1C70F22E3CF8B00AFDFD5 /* SoyArray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SoyArray.cpp; path = Source/SoyLib/src/SoyArray.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -298,26 +303,28 @@
 		BF8AB6A221F225C5008E7E76 /* SoyLib */ = {
 			isa = PBXGroup;
 			children = (
-				BF8AB6B421F22817008E7E76 /* memheap.cpp */,
-				BF8AB6BA21F228B8008E7E76 /* SoyTypes.cpp */,
-				BF8AB6BC21F228D0008E7E76 /* SoyTime.cpp */,
-				BF8AB6BE21F228D0008E7E76 /* SoyTime.h */,
-				BFF1C6E722E3A57200AFDFD5 /* SoyDebug.cpp */,
-				BF8AB6BD21F228D0008E7E76 /* SoyTime.mm */,
-				BF8AB6B921F228B8008E7E76 /* SoyTypes.h */,
-				BF8AB6B521F22818008E7E76 /* MemHeap.hpp */,
-				BFF1C6E622E3A1D600AFDFD5 /* SoyFilesystem.h */,
-				BF8AB6B721F22895008E7E76 /* SoyDebug.mm */,
 				BF8AB6A521F22602008E7E76 /* Array.hpp */,
+				BF8AB6A321F22602008E7E76 /* HeapArray.hpp */,
+				BF8AB6B421F22817008E7E76 /* memheap.cpp */,
+				BF8AB6B521F22818008E7E76 /* MemHeap.hpp */,
+				BFF1C70F22E3CF8B00AFDFD5 /* SoyArray.cpp */,
+				BFF1C70E22E3CF8A00AFDFD5 /* SoyArray.h */,
 				BF8AB6AF21F227EF008E7E76 /* SoyAssert.cpp */,
 				BF8AB6AE21F227EF008E7E76 /* SoyAssert.h */,
-				BF8AB6A321F22602008E7E76 /* HeapArray.hpp */,
-				BF8AB6A421F22602008E7E76 /* SoyDebug.cpp */,
+				BFF1C6E722E3A57200AFDFD5 /* SoyDebug.cpp */,
 				BF8AB6A821F22602008E7E76 /* SoyDebug.h */,
-				BF8AB6B221F22801008E7E76 /* SoyString.cpp */,
-				BF8AB6B121F22801008E7E76 /* SoyString.h */,
+				BF8AB6B721F22895008E7E76 /* SoyDebug.mm */,
+				BFF1C6E622E3A1D600AFDFD5 /* SoyFilesystem.h */,
 				BF8AB6A621F22602008E7E76 /* SoyPixels.cpp */,
 				BF8AB6A721F22602008E7E76 /* SoyPixels.h */,
+				BF8AB6B221F22801008E7E76 /* SoyString.cpp */,
+				BF8AB6B121F22801008E7E76 /* SoyString.h */,
+				BF8AB6BC21F228D0008E7E76 /* SoyTime.cpp */,
+				BF8AB6BE21F228D0008E7E76 /* SoyTime.h */,
+				BF8AB6BD21F228D0008E7E76 /* SoyTime.mm */,
+				BF8AB6BA21F228B8008E7E76 /* SoyTypes.cpp */,
+				BF8AB6B921F228B8008E7E76 /* SoyTypes.h */,
+				BF8AB6A421F22602008E7E76 /* SoyDebug.cpp */,
 			);
 			name = SoyLib;
 			sourceTree = "<group>";
@@ -375,6 +382,7 @@
 			files = (
 				BF459CEA21F7D70000CED59D /* PopH264DecoderInstance.h in Headers */,
 				BF459CE921F7D70000CED59D /* PopH264.h in Headers */,
+				BFF1C71022E3CF8B00AFDFD5 /* SoyArray.h in Headers */,
 				BF459CE221F7D60500CED59D /* PopH264Framework.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -512,6 +520,7 @@
 				BF459CF821F7DB4400CED59D /* SoyTime.cpp in Sources */,
 				BF459CFA21F7DB4400CED59D /* SoyDebug.mm in Sources */,
 				BF459CF621F7DB3A00CED59D /* memheap.cpp in Sources */,
+				BFF1C71222E3CF8B00AFDFD5 /* SoyArray.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -520,6 +529,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				BFF1C6E922E3C65800AFDFD5 /* BroadwayAll.c in Sources */,
+				BFF1C71122E3CF8B00AFDFD5 /* SoyArray.cpp in Sources */,
 				BF8AB6C021F228D0008E7E76 /* SoyTime.mm in Sources */,
 				BF8AB6B321F22801008E7E76 /* SoyString.cpp in Sources */,
 				BF8AB6AA21F22602008E7E76 /* SoyPixels.cpp in Sources */,
