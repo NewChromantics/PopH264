@@ -21,7 +21,7 @@ if [ -z "$ANDROID_API" ]; then
 	ANDROID_API="23"
 fi
 
-MAXCONCURRENTBUILDS=16
+MAXCONCURRENTBUILDS=8
 
 echo "Android targets..."
 #android list targets
