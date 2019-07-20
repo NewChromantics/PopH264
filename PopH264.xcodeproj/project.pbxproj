@@ -24,62 +24,8 @@
 		BF459CFC21F7DB4400CED59D /* SoyDebug.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB6A421F22602008E7E76 /* SoyDebug.cpp */; };
 		BF459CFD21F7DB4400CED59D /* SoyString.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB6B221F22801008E7E76 /* SoyString.cpp */; };
 		BF459CFE21F7DB4400CED59D /* SoyPixels.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB6A621F22602008E7E76 /* SoyPixels.cpp */; };
-		BF459CFF21F7DB4E00CED59D /* extraFlags.c in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB65B21F20F35008E7E76 /* extraFlags.c */; };
-		BF459D0021F7DB5000CED59D /* h264bsd_byte_stream.c in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB65821F20F35008E7E76 /* h264bsd_byte_stream.c */; };
-		BF459D0121F7DB5200CED59D /* h264bsd_cavlc.c in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB66C21F20F36008E7E76 /* h264bsd_cavlc.c */; };
-		BF459D0221F7DB5600CED59D /* h264bsd_conceal.c in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB65421F20F35008E7E76 /* h264bsd_conceal.c */; };
-		BF459D0321F7DB6F00CED59D /* h264bsd_deblocking.c in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB65C21F20F35008E7E76 /* h264bsd_deblocking.c */; };
-		BF459D0421F7DB6F00CED59D /* h264bsd_decoder.c in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB64A21F20F35008E7E76 /* h264bsd_decoder.c */; };
-		BF459D0521F7DB6F00CED59D /* h264bsd_dpb.c in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB65D21F20F35008E7E76 /* h264bsd_dpb.c */; };
-		BF459D0621F7DB6F00CED59D /* h264bsd_image.c in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB65021F20F35008E7E76 /* h264bsd_image.c */; };
-		BF459D0721F7DB6F00CED59D /* h264bsd_inter_prediction.c in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB67721F20F37008E7E76 /* h264bsd_inter_prediction.c */; };
-		BF459D0821F7DB6F00CED59D /* h264bsd_intra_prediction.c in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB63E21F20F34008E7E76 /* h264bsd_intra_prediction.c */; };
-		BF459D0921F7DB6F00CED59D /* h264bsd_macroblock_layer.c in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB64421F20F34008E7E76 /* h264bsd_macroblock_layer.c */; };
-		BF459D0A21F7DB6F00CED59D /* h264bsd_nal_unit.c in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB65621F20F35008E7E76 /* h264bsd_nal_unit.c */; };
-		BF459D0B21F7DB6F00CED59D /* h264bsd_neighbour.c in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB65521F20F35008E7E76 /* h264bsd_neighbour.c */; };
-		BF459D0C21F7DB6F00CED59D /* h264bsd_pic_order_cnt.c in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB67621F20F37008E7E76 /* h264bsd_pic_order_cnt.c */; };
-		BF459D0D21F7DB6F00CED59D /* h264bsd_pic_param_set.c in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB65E21F20F36008E7E76 /* h264bsd_pic_param_set.c */; };
-		BF459D0E21F7DB6F00CED59D /* h264bsd_reconstruct.c in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB64F21F20F35008E7E76 /* h264bsd_reconstruct.c */; };
-		BF459D0F21F7DB8200CED59D /* h264bsd_seq_param_set.c in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB65F21F20F36008E7E76 /* h264bsd_seq_param_set.c */; };
-		BF459D1021F7DB8200CED59D /* h264bsd_slice_data.c in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB65321F20F35008E7E76 /* h264bsd_slice_data.c */; };
-		BF459D1121F7DB8200CED59D /* h264bsd_slice_group_map.c in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB67221F20F36008E7E76 /* h264bsd_slice_group_map.c */; };
-		BF459D1221F7DB8200CED59D /* h264bsd_slice_header.c in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB65A21F20F35008E7E76 /* h264bsd_slice_header.c */; };
-		BF459D1321F7DB8200CED59D /* h264bsd_storage.c in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB67821F20F37008E7E76 /* h264bsd_storage.c */; };
-		BF459D1421F7DB8200CED59D /* h264bsd_stream.c in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB65921F20F35008E7E76 /* h264bsd_stream.c */; };
-		BF459D1521F7DB8200CED59D /* h264bsd_transform.c in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB64E21F20F35008E7E76 /* h264bsd_transform.c */; };
-		BF459D1621F7DB8200CED59D /* h264bsd_util.c in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB66A21F20F36008E7E76 /* h264bsd_util.c */; };
-		BF459D1721F7DB8200CED59D /* h264bsd_vlc.c in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB64521F20F34008E7E76 /* h264bsd_vlc.c */; };
-		BF459D1821F7DB8200CED59D /* h264bsd_vui.c in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB64B21F20F35008E7E76 /* h264bsd_vui.c */; };
-		BF459D1921F7DB8200CED59D /* H264SwDecApi.c in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB63F21F20F34008E7E76 /* H264SwDecApi.c */; };
 		BF459D1A21F7DB9900CED59D /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BF459CED21F7D73B00CED59D /* CoreMedia.framework */; };
 		BF8AB63921F20C41008E7E76 /* PopH264.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB63821F20C41008E7E76 /* PopH264.cpp */; };
-		BF8AB67B21F20F37008E7E76 /* h264bsd_intra_prediction.c in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB63E21F20F34008E7E76 /* h264bsd_intra_prediction.c */; };
-		BF8AB67C21F20F37008E7E76 /* H264SwDecApi.c in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB63F21F20F34008E7E76 /* H264SwDecApi.c */; };
-		BF8AB67E21F20F37008E7E76 /* h264bsd_macroblock_layer.c in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB64421F20F34008E7E76 /* h264bsd_macroblock_layer.c */; };
-		BF8AB67F21F20F37008E7E76 /* h264bsd_vlc.c in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB64521F20F34008E7E76 /* h264bsd_vlc.c */; };
-		BF8AB68121F20F37008E7E76 /* h264bsd_decoder.c in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB64A21F20F35008E7E76 /* h264bsd_decoder.c */; };
-		BF8AB68221F20F37008E7E76 /* h264bsd_vui.c in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB64B21F20F35008E7E76 /* h264bsd_vui.c */; };
-		BF8AB68321F20F37008E7E76 /* h264bsd_transform.c in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB64E21F20F35008E7E76 /* h264bsd_transform.c */; };
-		BF8AB68421F20F37008E7E76 /* h264bsd_reconstruct.c in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB64F21F20F35008E7E76 /* h264bsd_reconstruct.c */; };
-		BF8AB68521F20F37008E7E76 /* h264bsd_image.c in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB65021F20F35008E7E76 /* h264bsd_image.c */; };
-		BF8AB68621F20F37008E7E76 /* h264bsd_slice_data.c in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB65321F20F35008E7E76 /* h264bsd_slice_data.c */; };
-		BF8AB68721F20F37008E7E76 /* h264bsd_conceal.c in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB65421F20F35008E7E76 /* h264bsd_conceal.c */; };
-		BF8AB68821F20F37008E7E76 /* h264bsd_neighbour.c in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB65521F20F35008E7E76 /* h264bsd_neighbour.c */; };
-		BF8AB68921F20F37008E7E76 /* h264bsd_nal_unit.c in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB65621F20F35008E7E76 /* h264bsd_nal_unit.c */; };
-		BF8AB68A21F20F37008E7E76 /* h264bsd_byte_stream.c in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB65821F20F35008E7E76 /* h264bsd_byte_stream.c */; };
-		BF8AB68B21F20F37008E7E76 /* h264bsd_stream.c in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB65921F20F35008E7E76 /* h264bsd_stream.c */; };
-		BF8AB68C21F20F37008E7E76 /* h264bsd_slice_header.c in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB65A21F20F35008E7E76 /* h264bsd_slice_header.c */; };
-		BF8AB68D21F20F37008E7E76 /* extraFlags.c in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB65B21F20F35008E7E76 /* extraFlags.c */; };
-		BF8AB68E21F20F37008E7E76 /* h264bsd_deblocking.c in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB65C21F20F35008E7E76 /* h264bsd_deblocking.c */; };
-		BF8AB68F21F20F37008E7E76 /* h264bsd_dpb.c in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB65D21F20F35008E7E76 /* h264bsd_dpb.c */; };
-		BF8AB69021F20F37008E7E76 /* h264bsd_pic_param_set.c in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB65E21F20F36008E7E76 /* h264bsd_pic_param_set.c */; };
-		BF8AB69121F20F37008E7E76 /* h264bsd_seq_param_set.c in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB65F21F20F36008E7E76 /* h264bsd_seq_param_set.c */; };
-		BF8AB69421F20F37008E7E76 /* h264bsd_util.c in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB66A21F20F36008E7E76 /* h264bsd_util.c */; };
-		BF8AB69521F20F37008E7E76 /* h264bsd_cavlc.c in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB66C21F20F36008E7E76 /* h264bsd_cavlc.c */; };
-		BF8AB69721F20F37008E7E76 /* h264bsd_slice_group_map.c in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB67221F20F36008E7E76 /* h264bsd_slice_group_map.c */; };
-		BF8AB69821F20F37008E7E76 /* h264bsd_pic_order_cnt.c in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB67621F20F37008E7E76 /* h264bsd_pic_order_cnt.c */; };
-		BF8AB69921F20F37008E7E76 /* h264bsd_inter_prediction.c in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB67721F20F37008E7E76 /* h264bsd_inter_prediction.c */; };
-		BF8AB69A21F20F37008E7E76 /* h264bsd_storage.c in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB67821F20F37008E7E76 /* h264bsd_storage.c */; };
 		BF8AB6A121F21F08008E7E76 /* BroadwayDecoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB69F21F21F07008E7E76 /* BroadwayDecoder.cpp */; };
 		BF8AB6A921F22602008E7E76 /* SoyDebug.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB6A421F22602008E7E76 /* SoyDebug.cpp */; };
 		BF8AB6AA21F22602008E7E76 /* SoyPixels.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB6A621F22602008E7E76 /* SoyPixels.cpp */; };
@@ -92,6 +38,8 @@
 		BF8AB6C021F228D0008E7E76 /* SoyTime.mm in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB6BD21F228D0008E7E76 /* SoyTime.mm */; };
 		BF8AB6C921F24E22008E7E76 /* PopH264.h in Resources */ = {isa = PBXBuildFile; fileRef = BF8AB63721F20C41008E7E76 /* PopH264.h */; };
 		BF8AB6CB21F24F9D008E7E76 /* InstanceManager.inc in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB6CA21F24F9D008E7E76 /* InstanceManager.inc */; };
+		BFF1C6E922E3C65800AFDFD5 /* BroadwayAll.c in Sources */ = {isa = PBXBuildFile; fileRef = BFF1C6E822E3C65800AFDFD5 /* BroadwayAll.c */; };
+		BFF1C6EA22E3C65800AFDFD5 /* BroadwayAll.c in Sources */ = {isa = PBXBuildFile; fileRef = BFF1C6E822E3C65800AFDFD5 /* BroadwayAll.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -209,6 +157,10 @@
 		BFD607771EA16F0A0035C814 /* IUnityGraphicsD3D12.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IUnityGraphicsD3D12.h; path = Source/Unity/IUnityGraphicsD3D12.h; sourceTree = "<group>"; };
 		BFD607781EA16F0A0035C814 /* IUnityGraphicsMetal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IUnityGraphicsMetal.h; path = Source/Unity/IUnityGraphicsMetal.h; sourceTree = "<group>"; };
 		BFD607791EA16F0A0035C814 /* IUnityInterface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IUnityInterface.h; path = Source/Unity/IUnityInterface.h; sourceTree = "<group>"; };
+		BFF1C6E322E377D100AFDFD5 /* PopH264.Android */ = {isa = PBXFileReference; lastKnownFileType = folder; path = PopH264.Android; sourceTree = "<group>"; };
+		BFF1C6E622E3A1D600AFDFD5 /* SoyFilesystem.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SoyFilesystem.h; path = Source/SoyLib/src/SoyFilesystem.h; sourceTree = "<group>"; };
+		BFF1C6E722E3A57200AFDFD5 /* SoyDebug.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SoyDebug.cpp; path = Source/SoyLib/src/SoyDebug.cpp; sourceTree = "<group>"; };
+		BFF1C6E822E3C65800AFDFD5 /* BroadwayAll.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = BroadwayAll.c; path = Source/BroadwayAll.c; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -242,6 +194,7 @@
 		BF4A6A0B1EA16D7C00613A64 = {
 			isa = PBXGroup;
 			children = (
+				BFF1C6E322E377D100AFDFD5 /* PopH264.Android */,
 				BF0A19C21EA428F4007EBC95 /* Unity */,
 				BFD6076D1EA16ED20035C814 /* Source */,
 				BF4A6A161EA16D7D00613A64 /* Osx */,
@@ -349,9 +302,11 @@
 				BF8AB6BA21F228B8008E7E76 /* SoyTypes.cpp */,
 				BF8AB6BC21F228D0008E7E76 /* SoyTime.cpp */,
 				BF8AB6BE21F228D0008E7E76 /* SoyTime.h */,
+				BFF1C6E722E3A57200AFDFD5 /* SoyDebug.cpp */,
 				BF8AB6BD21F228D0008E7E76 /* SoyTime.mm */,
 				BF8AB6B921F228B8008E7E76 /* SoyTypes.h */,
 				BF8AB6B521F22818008E7E76 /* MemHeap.hpp */,
+				BFF1C6E622E3A1D600AFDFD5 /* SoyFilesystem.h */,
 				BF8AB6B721F22895008E7E76 /* SoyDebug.mm */,
 				BF8AB6A521F22602008E7E76 /* Array.hpp */,
 				BF8AB6AF21F227EF008E7E76 /* SoyAssert.cpp */,
@@ -390,6 +345,7 @@
 				BF459CDD21F7D60500CED59D /* FrameworkInfo.plist */,
 				BF459CDE21F7D60500CED59D /* PopH264Framework.h */,
 				BF8AB6CA21F24F9D008E7E76 /* InstanceManager.inc */,
+				BFF1C6E822E3C65800AFDFD5 /* BroadwayAll.c */,
 				BF8AB69F21F21F07008E7E76 /* BroadwayDecoder.cpp */,
 				BF8AB6A021F21F07008E7E76 /* BroadwayDecoder.h */,
 				BFD607731EA16EFC0035C814 /* Unity */,
@@ -424,6 +380,23 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXHeadersBuildPhase section */
+
+/* Begin PBXLegacyTarget section */
+		BFF1C6DE22E3769B00AFDFD5 /* PopH264Android */ = {
+			isa = PBXLegacyTarget;
+			buildArgumentsString = "$(ACTION)";
+			buildConfigurationList = BFF1C6E122E3769B00AFDFD5 /* Build configuration list for PBXLegacyTarget "PopH264Android" */;
+			buildPhases = (
+			);
+			buildToolPath = PopH264.Android/build.sh;
+			buildWorkingDirectory = "";
+			dependencies = (
+			);
+			name = PopH264Android;
+			passBuildSettingsInEnvironment = 1;
+			productName = PopH264Android;
+		};
+/* End PBXLegacyTarget section */
 
 /* Begin PBXNativeTarget section */
 		BF459CD421F7D5C700CED59D /* PopH264Framework */ = {
@@ -479,6 +452,9 @@
 						CreatedOnToolsVersion = 8.1;
 						ProvisioningStyle = Automatic;
 					};
+					BFF1C6DE22E3769B00AFDFD5 = {
+						CreatedOnToolsVersion = 10.1;
+					};
 				};
 			};
 			buildConfigurationList = BF4A6A0F1EA16D7C00613A64 /* Build configuration list for PBXProject "PopH264" */;
@@ -495,6 +471,7 @@
 			targets = (
 				BF4A6A131EA16D7C00613A64 /* PopH264 */,
 				BF459CD421F7D5C700CED59D /* PopH264Framework */,
+				BFF1C6DE22E3769B00AFDFD5 /* PopH264Android */,
 			);
 		};
 /* End PBXProject section */
@@ -524,43 +501,17 @@
 			buildActionMask = 2147483647;
 			files = (
 				BF459CF421F7DB1B00CED59D /* PopH264.cpp in Sources */,
-				BF459D1921F7DB8200CED59D /* H264SwDecApi.c in Sources */,
-				BF459D0E21F7DB6F00CED59D /* h264bsd_reconstruct.c in Sources */,
-				BF459D0D21F7DB6F00CED59D /* h264bsd_pic_param_set.c in Sources */,
-				BF459D0621F7DB6F00CED59D /* h264bsd_image.c in Sources */,
-				BF459D0121F7DB5200CED59D /* h264bsd_cavlc.c in Sources */,
-				BF459D1121F7DB8200CED59D /* h264bsd_slice_group_map.c in Sources */,
 				BF459CF721F7DB3C00CED59D /* SoyTypes.cpp in Sources */,
-				BF459D1721F7DB8200CED59D /* h264bsd_vlc.c in Sources */,
-				BF459D1221F7DB8200CED59D /* h264bsd_slice_header.c in Sources */,
-				BF459D0321F7DB6F00CED59D /* h264bsd_deblocking.c in Sources */,
-				BF459D0721F7DB6F00CED59D /* h264bsd_inter_prediction.c in Sources */,
-				BF459D1521F7DB8200CED59D /* h264bsd_transform.c in Sources */,
+				BFF1C6EA22E3C65800AFDFD5 /* BroadwayAll.c in Sources */,
 				BF459CF921F7DB4400CED59D /* SoyTime.mm in Sources */,
-				BF459D0021F7DB5000CED59D /* h264bsd_byte_stream.c in Sources */,
-				BF459D1821F7DB8200CED59D /* h264bsd_vui.c in Sources */,
-				BF459D0C21F7DB6F00CED59D /* h264bsd_pic_order_cnt.c in Sources */,
-				BF459D1621F7DB8200CED59D /* h264bsd_util.c in Sources */,
 				BF459CFB21F7DB4400CED59D /* SoyAssert.cpp in Sources */,
-				BF459D0F21F7DB8200CED59D /* h264bsd_seq_param_set.c in Sources */,
 				BF459CFD21F7DB4400CED59D /* SoyString.cpp in Sources */,
-				BF459D0921F7DB6F00CED59D /* h264bsd_macroblock_layer.c in Sources */,
 				BF459CF521F7DB1E00CED59D /* BroadwayDecoder.cpp in Sources */,
-				BF459D1421F7DB8200CED59D /* h264bsd_stream.c in Sources */,
-				BF459CFF21F7DB4E00CED59D /* extraFlags.c in Sources */,
-				BF459D1321F7DB8200CED59D /* h264bsd_storage.c in Sources */,
-				BF459D0521F7DB6F00CED59D /* h264bsd_dpb.c in Sources */,
 				BF459CFE21F7DB4400CED59D /* SoyPixels.cpp in Sources */,
 				BF459CFC21F7DB4400CED59D /* SoyDebug.cpp in Sources */,
 				BF459CF821F7DB4400CED59D /* SoyTime.cpp in Sources */,
-				BF459D0A21F7DB6F00CED59D /* h264bsd_nal_unit.c in Sources */,
 				BF459CFA21F7DB4400CED59D /* SoyDebug.mm in Sources */,
-				BF459D0B21F7DB6F00CED59D /* h264bsd_neighbour.c in Sources */,
-				BF459D0821F7DB6F00CED59D /* h264bsd_intra_prediction.c in Sources */,
-				BF459D0221F7DB5600CED59D /* h264bsd_conceal.c in Sources */,
-				BF459D1021F7DB8200CED59D /* h264bsd_slice_data.c in Sources */,
 				BF459CF621F7DB3A00CED59D /* memheap.cpp in Sources */,
-				BF459D0421F7DB6F00CED59D /* h264bsd_decoder.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -568,45 +519,19 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BFF1C6E922E3C65800AFDFD5 /* BroadwayAll.c in Sources */,
 				BF8AB6C021F228D0008E7E76 /* SoyTime.mm in Sources */,
-				BF8AB69821F20F37008E7E76 /* h264bsd_pic_order_cnt.c in Sources */,
-				BF8AB68621F20F37008E7E76 /* h264bsd_slice_data.c in Sources */,
-				BF8AB69521F20F37008E7E76 /* h264bsd_cavlc.c in Sources */,
-				BF8AB68A21F20F37008E7E76 /* h264bsd_byte_stream.c in Sources */,
 				BF8AB6B321F22801008E7E76 /* SoyString.cpp in Sources */,
 				BF8AB6AA21F22602008E7E76 /* SoyPixels.cpp in Sources */,
-				BF8AB68221F20F37008E7E76 /* h264bsd_vui.c in Sources */,
 				BF8AB6A921F22602008E7E76 /* SoyDebug.cpp in Sources */,
-				BF8AB68C21F20F37008E7E76 /* h264bsd_slice_header.c in Sources */,
-				BF8AB69721F20F37008E7E76 /* h264bsd_slice_group_map.c in Sources */,
 				BF8AB6A121F21F08008E7E76 /* BroadwayDecoder.cpp in Sources */,
 				BF8AB6BF21F228D0008E7E76 /* SoyTime.cpp in Sources */,
-				BF8AB68321F20F37008E7E76 /* h264bsd_transform.c in Sources */,
 				BF8AB6B821F22895008E7E76 /* SoyDebug.mm in Sources */,
 				BF8AB6B021F227EF008E7E76 /* SoyAssert.cpp in Sources */,
-				BF8AB68821F20F37008E7E76 /* h264bsd_neighbour.c in Sources */,
 				BF8AB63921F20C41008E7E76 /* PopH264.cpp in Sources */,
-				BF8AB68921F20F37008E7E76 /* h264bsd_nal_unit.c in Sources */,
 				BF8AB6CB21F24F9D008E7E76 /* InstanceManager.inc in Sources */,
-				BF8AB68521F20F37008E7E76 /* h264bsd_image.c in Sources */,
-				BF8AB68B21F20F37008E7E76 /* h264bsd_stream.c in Sources */,
-				BF8AB69021F20F37008E7E76 /* h264bsd_pic_param_set.c in Sources */,
-				BF8AB68121F20F37008E7E76 /* h264bsd_decoder.c in Sources */,
-				BF8AB67B21F20F37008E7E76 /* h264bsd_intra_prediction.c in Sources */,
-				BF8AB67E21F20F37008E7E76 /* h264bsd_macroblock_layer.c in Sources */,
-				BF8AB67F21F20F37008E7E76 /* h264bsd_vlc.c in Sources */,
-				BF8AB68E21F20F37008E7E76 /* h264bsd_deblocking.c in Sources */,
-				BF8AB68421F20F37008E7E76 /* h264bsd_reconstruct.c in Sources */,
-				BF8AB69921F20F37008E7E76 /* h264bsd_inter_prediction.c in Sources */,
-				BF8AB69121F20F37008E7E76 /* h264bsd_seq_param_set.c in Sources */,
 				BF8AB6B621F22818008E7E76 /* memheap.cpp in Sources */,
 				BF8AB6BB21F228B8008E7E76 /* SoyTypes.cpp in Sources */,
-				BF8AB68F21F20F37008E7E76 /* h264bsd_dpb.c in Sources */,
-				BF8AB68D21F20F37008E7E76 /* extraFlags.c in Sources */,
-				BF8AB68721F20F37008E7E76 /* h264bsd_conceal.c in Sources */,
-				BF8AB69A21F20F37008E7E76 /* h264bsd_storage.c in Sources */,
-				BF8AB67C21F20F37008E7E76 /* H264SwDecApi.c in Sources */,
-				BF8AB69421F20F37008E7E76 /* h264bsd_util.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -615,6 +540,7 @@
 /* Begin XCBuildConfiguration section */
 		BF459CDB21F7D5C700CED59D /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = BF8AB69B21F20F7C008E7E76 /* PopH264.xcconfig */;
 			buildSettings = {
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -654,6 +580,7 @@
 		};
 		BF459CDC21F7D5C700CED59D /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = BF8AB69B21F20F7C008E7E76 /* PopH264.xcconfig */;
 			buildSettings = {
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -692,7 +619,6 @@
 		};
 		BF4A6A181EA16D7D00613A64 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = BF8AB69B21F20F7C008E7E76 /* PopH264.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -740,7 +666,6 @@
 		};
 		BF4A6A191EA16D7D00613A64 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = BF8AB69B21F20F7C008E7E76 /* PopH264.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -781,6 +706,7 @@
 		};
 		BF4A6A1B1EA16D7D00613A64 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = BF8AB69B21F20F7C008E7E76 /* PopH264.xcconfig */;
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = "$(SRCROOT)/Source/BundleInfo.plist";
@@ -794,6 +720,7 @@
 		};
 		BF4A6A1C1EA16D7D00613A64 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = BF8AB69B21F20F7C008E7E76 /* PopH264.xcconfig */;
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = "$(SRCROOT)/Source/BundleInfo.plist";
@@ -802,6 +729,20 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				WRAPPER_EXTENSION = bundle;
+			};
+			name = Release;
+		};
+		BFF1C6DF22E3769B00AFDFD5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				UNITY_ASSET_PLUGIN_PATH = "$(SOURCE_ROOT)/Unity/PopH264/Assets/PopH264";
+			};
+			name = Debug;
+		};
+		BFF1C6E022E3769B00AFDFD5 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				UNITY_ASSET_PLUGIN_PATH = "$(SOURCE_ROOT)/Unity/PopH264/Assets/PopH264";
 			};
 			name = Release;
 		};
@@ -831,6 +772,15 @@
 			buildConfigurations = (
 				BF4A6A1B1EA16D7D00613A64 /* Debug */,
 				BF4A6A1C1EA16D7D00613A64 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		BFF1C6E122E3769B00AFDFD5 /* Build configuration list for PBXLegacyTarget "PopH264Android" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BFF1C6DF22E3769B00AFDFD5 /* Debug */,
+				BFF1C6E022E3769B00AFDFD5 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

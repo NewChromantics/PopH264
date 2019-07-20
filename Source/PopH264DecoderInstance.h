@@ -25,6 +25,12 @@ public:
 	std::chrono::milliseconds		mDecodeDuration;	//	time the last packet that resulted in this picture took to decode
 };
 
+#if defined(_MSC_VER)
+#define __exportfunc __declspec(dllexport)
+#else
+#define __exportfunc
+#endif
+
 class PopH264::TDecoderInstance
 {
 public:
@@ -35,7 +41,7 @@ public:
 	
 	//	output
 	void									PopFrame(int32_t& FrameNumber,ArrayBridge<uint8_t>&& Plane0,ArrayBridge<uint8_t>&& Plane1,ArrayBridge<uint8_t>&& Plane2);
-	__declspec(dllexport) bool				PopFrame(TFrame& Frame);
+	__exportfunc bool						PopFrame(TFrame& Frame);
 	void									PushFrame(const SoyPixelsImpl& Frame,int32_t FrameNumber,std::chrono::milliseconds DecodeDurationMs);
 	const SoyPixelsMeta&					GetMeta() const	{	return mMeta;	}
 	
