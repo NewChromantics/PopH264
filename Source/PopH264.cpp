@@ -1,5 +1,12 @@
 #include "PopH264.h"
+
+#if !defined(TARGET_LUMIN)
+#define ENABLE_BROADWAY
+#endif
+
+#if defined(ENABLE_BROADWAY)
 #include "BroadwayDecoder.h"
+#endif
 #include "PopH264DecoderInstance.h"
 #include "SoyLib/src/SoyPixels.h"
 
@@ -9,7 +16,9 @@ using TInstanceParams = TNoParams;
 
 #include "InstanceManager.inc"
 
-
+#if defined(TARGET_LUMIN)
+const char* Platform::LogIdentifer = "PopH264";
+#endif
 
 
 #if defined(TARGET_WINDOWS)
@@ -29,18 +38,26 @@ BOOL APIENTRY DllMain(HMODULE /* hModule */, DWORD ul_reason_for_call, LPVOID /*
 
 PopH264::TDecoderInstance::TDecoderInstance()
 {
+#if defined(ENABLE_BROADWAY)
 	mDecoder.reset( new Broadway::TDecoder );
+#else
+	throw Soy::AssertException("No decoder supported");
+#endif
 }
 
 
 void PopH264::TDecoderInstance::PushData(const uint8_t* Data,size_t DataSize,int32_t FrameNumber)
 {
+#if defined(ENABLE_BROADWAY)
 	auto DataArray = GetRemoteArray( Data, DataSize );
 	auto PushFrame = [this,FrameNumber](const SoyPixelsImpl& Pixels,SoyTime DecodeDuration)
 	{
 		this->PushFrame( Pixels, FrameNumber, DecodeDuration.GetMilliSeconds() );
 	};
 	mDecoder->Decode( GetArrayBridge(DataArray), PushFrame );
+#else
+	throw Soy::AssertException("No decoder supported");
+#endif
 }
 
 void PopH264::TDecoderInstance::PopFrame(int32_t& FrameNumber,ArrayBridge<uint8_t>&& Plane0,ArrayBridge<uint8_t>&& Plane1,ArrayBridge<uint8_t>&& Plane2)
