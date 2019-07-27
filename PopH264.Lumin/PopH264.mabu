@@ -1,0 +1,15 @@
+KIND = shared
+# SRCS = ../Source/PopH264.cpp
+SRCS = ../Source/Test.cpp
+
+# INCS = /Volumes/Code/MagicLeap/mlsdk/v0.21.0/include \
+# ../Source/
+
+DEFS = TARGET_LUMIN
+
+# USES = ml_sdk stdc++
+# SHLIBS = ml_privileges
+
+# OPTIONS = \
+#	standard-c++/11 \
+#	stl/libgnustl

@@ -66,6 +66,7 @@
 		BF459CDF21F7D60500CED59D /* BundleInfo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = BundleInfo.plist; path = Source/BundleInfo.plist; sourceTree = "<group>"; };
 		BF459CED21F7D73B00CED59D /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
 		BF4A6A141EA16D7D00613A64 /* PopH264.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PopH264.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
+		BF53E82622EC8B59008253CD /* PopH264.Lumin */ = {isa = PBXFileReference; lastKnownFileType = folder; path = PopH264.Lumin; sourceTree = "<group>"; };
 		BF8AB63721F20C41008E7E76 /* PopH264.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PopH264.h; path = Source/PopH264.h; sourceTree = "<group>"; };
 		BF8AB63821F20C41008E7E76 /* PopH264.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PopH264.cpp; path = Source/PopH264.cpp; sourceTree = "<group>"; };
 		BF8AB63B21F20D4C008E7E76 /* Broadway */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Broadway; path = Source/Broadway; sourceTree = "<group>"; };
@@ -198,6 +199,7 @@
 		BF4A6A0B1EA16D7C00613A64 = {
 			isa = PBXGroup;
 			children = (
+				BF53E82622EC8B59008253CD /* PopH264.Lumin */,
 				BFF1C6E322E377D100AFDFD5 /* PopH264.Android */,
 				BF0A19C21EA428F4007EBC95 /* Unity */,
 				BFD6076D1EA16ED20035C814 /* Source */,
@@ -389,6 +391,20 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXLegacyTarget section */
+		BF53E82722EC8C1D008253CD /* PopH264Lumin */ = {
+			isa = PBXLegacyTarget;
+			buildArgumentsString = "-b $(MABU_FILENAME) -t $(MABU_BUILD_TARGET) --out PopH264.Lumin/$(MABU_BUILD_TARGET)/";
+			buildConfigurationList = BF53E82822EC8C1D008253CD /* Build configuration list for PBXLegacyTarget "PopH264Lumin" */;
+			buildPhases = (
+			);
+			buildToolPath = "$(MAGIC_LEAP_SDK_PATH)/mabu";
+			buildWorkingDirectory = "$(SRC_ROOT)";
+			dependencies = (
+			);
+			name = PopH264Lumin;
+			passBuildSettingsInEnvironment = 1;
+			productName = PopH264Lumin;
+		};
 		BFF1C6DE22E3769B00AFDFD5 /* PopH264Android */ = {
 			isa = PBXLegacyTarget;
 			buildArgumentsString = "$(ACTION)";
@@ -459,6 +475,9 @@
 						CreatedOnToolsVersion = 8.1;
 						ProvisioningStyle = Automatic;
 					};
+					BF53E82722EC8C1D008253CD = {
+						CreatedOnToolsVersion = 10.1;
+					};
 					BFF1C6DE22E3769B00AFDFD5 = {
 						CreatedOnToolsVersion = 10.1;
 					};
@@ -479,6 +498,7 @@
 				BF4A6A131EA16D7C00613A64 /* PopH264 */,
 				BF459CD421F7D5C700CED59D /* PopH264Framework */,
 				BFF1C6DE22E3769B00AFDFD5 /* PopH264Android */,
+				BF53E82722EC8C1D008253CD /* PopH264Lumin */,
 			);
 		};
 /* End PBXProject section */
@@ -740,6 +760,24 @@
 			};
 			name = Release;
 		};
+		BF53E82922EC8C1D008253CD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				MABU_BUILD_TARGET = ml1;
+				MABU_FILENAME = PopH264.Lumin/PopH264.mabu;
+				MAGIC_LEAP_SDK_PATH = /Volumes/Code/MagicLeap/mlsdk/v0.21.0/;
+			};
+			name = Debug;
+		};
+		BF53E82A22EC8C1D008253CD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				MABU_BUILD_TARGET = release_ml1;
+				MABU_FILENAME = PopH264.Lumin/PopH264.mabu;
+				MAGIC_LEAP_SDK_PATH = /Volumes/Code/MagicLeap/mlsdk/v0.21.0/;
+			};
+			name = Release;
+		};
 		BFF1C6DF22E3769B00AFDFD5 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -780,6 +818,15 @@
 			buildConfigurations = (
 				BF4A6A1B1EA16D7D00613A64 /* Debug */,
 				BF4A6A1C1EA16D7D00613A64 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		BF53E82822EC8C1D008253CD /* Build configuration list for PBXLegacyTarget "PopH264Lumin" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BF53E82922EC8C1D008253CD /* Debug */,
+				BF53E82A22EC8C1D008253CD /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
