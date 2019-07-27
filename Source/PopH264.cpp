@@ -1,8 +1,6 @@
 #include "PopH264.h"
 
-#if !defined(TARGET_LUMIN)
 #define ENABLE_BROADWAY
-#endif
 
 #if defined(ENABLE_BROADWAY)
 #include "BroadwayDecoder.h"

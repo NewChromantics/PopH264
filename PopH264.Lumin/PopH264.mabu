@@ -1,7 +1,9 @@
 KIND = shared
 SRCS = \
-../Source/PopH264.cpp	\
 ../Source/Test.cpp \
+../Source/PopH264.cpp	\
+../Source/BroadwayDecoder.cpp \
+../Source/BroadwayAll.c	\
 ../Source/SoyLib/src/memheap.cpp \
 ../Source/SoyLib/src/SoyArray.cpp \
 ../Source/SoyLib/src/SoyAssert.cpp \
@@ -13,6 +15,8 @@ SRCS = \
 
 INCS = \
 /Volumes/Code/MagicLeap/mlsdk/v0.21.0/include \
+../Source/Broadway/Decoder/inc/	\
+../Source/Broadway/Decoder/src/	\
 ../Source/
 
 DEFS = TARGET_LUMIN
