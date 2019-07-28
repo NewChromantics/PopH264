@@ -46,16 +46,12 @@ PopH264::TDecoderInstance::TDecoderInstance()
 
 void PopH264::TDecoderInstance::PushData(const uint8_t* Data,size_t DataSize,int32_t FrameNumber)
 {
-#if defined(ENABLE_BROADWAY)
 	auto DataArray = GetRemoteArray( Data, DataSize );
 	auto PushFrame = [this,FrameNumber](const SoyPixelsImpl& Pixels,SoyTime DecodeDuration)
 	{
 		this->PushFrame( Pixels, FrameNumber, DecodeDuration.GetMilliSeconds() );
 	};
 	mDecoder->Decode( GetArrayBridge(DataArray), PushFrame );
-#else
-	throw Soy::AssertException("No decoder supported");
-#endif
 }
 
 void PopH264::TDecoderInstance::PopFrame(int32_t& FrameNumber,ArrayBridge<uint8_t>&& Plane0,ArrayBridge<uint8_t>&& Plane1,ArrayBridge<uint8_t>&& Plane2)

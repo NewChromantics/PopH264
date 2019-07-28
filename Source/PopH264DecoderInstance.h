@@ -3,10 +3,11 @@
 #include <memory>
 #include "SoyLib/src/Array.hpp"
 #include "SoyLib/src/SoyPixels.h"
-
+#include "TDecoder.h"
 
 class SoyPixelsImpl;
-namespace Broadway
+
+namespace PopH264
 {
 	class TDecoder;
 }
@@ -49,7 +50,7 @@ public:
 	std::function<void()>					mOnNewFrame;	//	called when a new frame is pushed
 	
 private:
-	std::shared_ptr<Broadway::TDecoder>		mDecoder;
+	std::shared_ptr<PopH264::TDecoder>		mDecoder;
 	std::mutex								mFramesLock;
 	Array<TFrame>							mFrames;
 	SoyPixelsMeta							mMeta;
