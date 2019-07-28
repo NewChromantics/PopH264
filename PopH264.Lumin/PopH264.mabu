@@ -5,6 +5,7 @@ SRCS = \
 ../Source/TDecoder.cpp \
 ../Source/BroadwayDecoder.cpp \
 ../Source/BroadwayAll.c	\
+../Source/MagicLeapDecoder.cpp \
 ../Source/SoyLib/src/memheap.cpp \
 ../Source/SoyLib/src/SoyArray.cpp \
 ../Source/SoyLib/src/SoyAssert.cpp \
@@ -25,7 +26,7 @@ INCS = \
 
 DEFS = TARGET_LUMIN
 
-USES = ml_sdk stdc++
+USES = ml_sdk stdc++ ml_media
 # SHLIBS = ml_privileges
 
 # OPTIONS = \

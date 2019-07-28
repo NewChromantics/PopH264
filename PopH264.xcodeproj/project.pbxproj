@@ -72,6 +72,9 @@
 		BF53E82B22ECB934008253CD /* v0.21.0 */ = {isa = PBXFileReference; lastKnownFileType = folder; name = v0.21.0; path = ../MagicLeap/mlsdk/v0.21.0; sourceTree = "<group>"; };
 		BF53E82C22EDC6A6008253CD /* TDecoder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = TDecoder.h; path = Source/TDecoder.h; sourceTree = "<group>"; };
 		BF53E82D22EDC989008253CD /* TDecoder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TDecoder.cpp; path = Source/TDecoder.cpp; sourceTree = "<group>"; };
+		BF53E83022EDCC7E008253CD /* MagicLeapDecoder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MagicLeapDecoder.cpp; path = Source/MagicLeapDecoder.cpp; sourceTree = "<group>"; };
+		BF53E83122EDCC7F008253CD /* MagicLeapDecoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MagicLeapDecoder.h; path = Source/MagicLeapDecoder.h; sourceTree = "<group>"; };
+		BF53E83222EE024E008253CD /* SoyTypes_Lumin.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SoyTypes_Lumin.h; path = Source/SoyLib/src/SoyTypes_Lumin.h; sourceTree = "<group>"; };
 		BF8AB63721F20C41008E7E76 /* PopH264.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PopH264.h; path = Source/PopH264.h; sourceTree = "<group>"; };
 		BF8AB63821F20C41008E7E76 /* PopH264.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PopH264.cpp; path = Source/PopH264.cpp; sourceTree = "<group>"; };
 		BF8AB63B21F20D4C008E7E76 /* Broadway */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Broadway; path = Source/Broadway; sourceTree = "<group>"; };
@@ -328,6 +331,7 @@
 				BF8AB6BC21F228D0008E7E76 /* SoyTime.cpp */,
 				BF8AB6BE21F228D0008E7E76 /* SoyTime.h */,
 				BF8AB6BD21F228D0008E7E76 /* SoyTime.mm */,
+				BF53E83222EE024E008253CD /* SoyTypes_Lumin.h */,
 				BF8AB6BA21F228B8008E7E76 /* SoyTypes.cpp */,
 				BF8AB6B921F228B8008E7E76 /* SoyTypes.h */,
 			);
@@ -353,6 +357,8 @@
 				BF459CDF21F7D60500CED59D /* BundleInfo.plist */,
 				BF459CDD21F7D60500CED59D /* FrameworkInfo.plist */,
 				BF8AB6CA21F24F9D008E7E76 /* InstanceManager.inc */,
+				BF53E83022EDCC7E008253CD /* MagicLeapDecoder.cpp */,
+				BF53E83122EDCC7F008253CD /* MagicLeapDecoder.h */,
 				BF8AB63821F20C41008E7E76 /* PopH264.cpp */,
 				BF8AB63721F20C41008E7E76 /* PopH264.h */,
 				BF8AB69B21F20F7C008E7E76 /* PopH264.xcconfig */,
