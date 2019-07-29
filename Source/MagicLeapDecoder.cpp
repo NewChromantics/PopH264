@@ -154,8 +154,7 @@ MagicLeap::TDecoder::TDecoder()
 	auto OnInputBufferAvailible = [](MLHandle Codec,int64_t BufferIndex,void* pThis)
 	{
 		auto& This = *static_cast<MagicLeap::TDecoder*>(pThis);
-		//This.OnInputBufferAvailible();
-		std::Debug << "OnInputBufferAvailible(" << BufferIndex << ")" << std::endl;
+		This.OnInputBufferAvailible(BufferIndex);
 	};
 	
 	auto OnOutputBufferAvailible = [](MLHandle Codec,int64_t BufferIndex,MLMediaCodecBufferInfo* BufferInfo,void* pThis)
@@ -218,8 +217,8 @@ MagicLeap::TDecoder::TDecoder()
 	MLMediaFormat_Key_CSD0
 	*/
 	
-	MLHandle Crypto = ML_INVALID_HANDLE;
-	//MLHandle Crypto = 0;	//	gr: INVALID_HANDLE doesnt work
+	//MLHandle Crypto = ML_INVALID_HANDLE;
+	MLHandle Crypto = 0;	//	gr: INVALID_HANDLE doesnt work
 	Result = MLMediaCodecConfigure( mHandle, Format, Crypto );
 	IsOkay( Result, "MLMediaCodecConfigure" );
 	
@@ -255,7 +254,136 @@ bool MagicLeap::TDecoder::DecodeNextPacket(std::function<void(const SoyPixelsImp
 	if ( mPendingData.IsEmpty() )
 		return false;
 	
-	throw Soy::AssertException("todo");
+	auto GetNextNalOffset = [this]
+	{
+		for ( int i=3;	i<mPendingData.GetDataSize();	i++ )
+		{
+			if ( mPendingData[i+0] != 0 )	continue;
+			if ( mPendingData[i+1] != 0 )	continue;
+			if ( mPendingData[i+2] != 0 )	continue;
+			if ( mPendingData[i+3] != 1 )	continue;
+			return i;
+		}
+		//	assume is complete...
+		return (int)mPendingData.GetDataSize();
+		//return 0;
+	};
+	
+	
+	
+	//	waiting for input buffers
+	//	gr: this is maybe just a signal there IS some processing space...
+	if ( mInputBuffers.IsEmpty() )
+	{
+		std::Debug << __func__ << " waiting for input buffers" << std::endl;
+		return true;
+	}
+	
+	auto Timeout = 0;	//	return immediately
+	
+	//	API says MLMediaCodecDequeueInputBuffer output is index
+	//	but everything referring to it, says it's a handle (uint64!)
+	int64_t BufferIndex = -1;
+	auto Result = MLMediaCodecDequeueInputBuffer( mHandle, Timeout, &BufferIndex );
+	IsOkay( Result, "MLMediaCodecDequeueInputBuffer" );
+	
+	if ( BufferIndex == MLMediaCodec_TryAgainLater )
+	{
+		std::Debug << __func__ << " MLMediaCodec_TryAgainLater" << std::endl;
+		return true;
+	}
+
+	if ( BufferIndex == MLMediaCodec_FormatChanged )
+	{
+		std::Debug << __func__ << " MLMediaCodec_FormatChanged" << std::endl;
+		return true;
+	}
+	
+	//	gr: need to reset all buffers?
+	if ( BufferIndex == MLMediaCodec_OutputBuffersChanged )
+	{
+		std::Debug << __func__ << " MLMediaCodec_OutputBuffersChanged" << std::endl;
+		return true;
+	}
+
+	if ( BufferIndex < 0 )
+	{
+		std::stringstream Error;
+		Error << "MLMediaCodecDequeueInputBuffer dequeued buffer index " << BufferIndex;
+		throw Soy::AssertException(Error);
+	}
+	
+	try
+	{
+		auto BufferHandle = static_cast<MLHandle>( BufferIndex );
+		uint8_t* Buffer = nullptr;
+		size_t BufferSize = 0;
+		Result = MLMediaCodecGetInputBufferPointer( mHandle, BufferHandle, &Buffer, &BufferSize );
+		IsOkay( Result, "MLMediaCodecGetInputBufferPointer" );
+		if ( Buffer == nullptr )
+		{
+			std::stringstream Error;
+			Error << "MLMediaCodecGetInputBufferPointer gave us null buffer (size=" << BufferSize << ")";
+			throw Soy::AssertException(Error);
+		}
+
+		size_t DataSize = 0;
+		{
+			std::lock_guard<std::mutex> Lock( mPendingDataLock );
+			auto GetNextNalOffset = [this]
+			{
+				for ( int i=3;	i<mPendingData.GetDataSize();	i++ )
+				{
+					if ( mPendingData[i+0] != 0 )	continue;
+					if ( mPendingData[i+1] != 0 )	continue;
+					if ( mPendingData[i+2] != 0 )	continue;
+					if ( mPendingData[i+3] != 1 )	continue;
+					return i;
+				}
+				//	assume is complete...
+				return (int)mPendingData.GetDataSize();
+				//return 0;
+			};
+			
+			DataSize = GetNextNalOffset();
+			auto* Data = mPendingData.GetArray();
+			if ( DataSize > BufferSize )
+			{
+				std::stringstream Error;
+				Error << "MLMediaCodecGetInputBufferPointer buffer size(" << BufferSize << ") too small for pending nal packet size (" << DataSize << ")";
+				throw Soy::AssertException(Error);
+			}
+
+			//	fill buffer
+			memcpy( Buffer, Data, DataSize );
+		}
+		
+		//	process buffer
+		int64_t DataOffset = 0;
+		uint64_t PresentationTimeMicroSecs = mPacketCounter;
+		mPacketCounter++;
+		int Flags = 0;
+		//Flags |= MLMediaCodecBufferFlag_KeyFrame;
+		//Flags |= MLMediaCodecBufferFlag_CodecConfig;
+		//Flags |= MLMediaCodecBufferFlag_EOS;
+		Result = MLMediaCodecQueueInputBuffer( mHandle, BufferHandle, DataOffset, DataSize, PresentationTimeMicroSecs, Flags );
+		IsOkay( Result, "MLMediaCodecQueueInputBuffer" );
+		
+		RemovePendingData( DataSize );
+	}
+	catch(std::exception& e)
+	{
+		//	gr: maybe MLMediaCodecFlush()
+		std::Debug << "Exception processing input buffer: " << e.what() << ". Flush frames here?" << std::endl;
+	}
+	
+	return true;
+}
+
+void MagicLeap::TDecoder::OnInputBufferAvailible(int64_t BufferIndex)
+{
+	std::lock_guard<std::mutex> Lock(mInputBufferLock);
+	mInputBuffers.PushBack(BufferIndex);
 }
 
 /*

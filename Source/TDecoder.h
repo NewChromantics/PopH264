@@ -20,6 +20,8 @@ public:
 protected:
 	virtual bool	DecodeNextPacket(std::function<void(const SoyPixelsImpl&,SoyTime)> OnFrameDecoded)=0;	//	returns true if more data to proccess
 	
+	void			RemovePendingData(size_t Size);
+	
 protected:
 	std::mutex		mPendingDataLock;
 	Array<uint8_t>	mPendingData;

@@ -17,3 +17,11 @@ void PopH264::TDecoder::Decode(ArrayBridge<uint8_t>&& PacketData,std::function<v
 	}
 }
 
+
+void PopH264::TDecoder::RemovePendingData(size_t Size)
+{
+	std::lock_guard<std::mutex> Lock(mPendingDataLock);
+	mPendingData.RemoveBlock(0, Size);
+}
+
+
