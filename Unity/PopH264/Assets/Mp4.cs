@@ -1,9 +1,28 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using PopX;
 
+[System.Serializable]
+public class UnityEvent_String : UnityEngine.Events.UnityEvent<string> { }
+
+
 public class Mp4 : MonoBehaviour {
+
+	enum PacketFormat
+	{
+		Avcc,
+		AnnexB
+	};
+
+	struct TPendingSample
+	{
+		public PacketFormat Format;
+		public uint MdatIndex;
+		public long DataPosition;
+		public long DataSize;
+		public int PresentationTime;
+	}
 
 	public string Filename = "Assets/cat.mov";
 
@@ -35,14 +54,27 @@ public class Mp4 : MonoBehaviour {
 	public string Preconfigured_SPS_HexString = "";
 	public byte[] Preconfigured_SPS_Bytes	{ get { return HexStringToBytes(Preconfigured_SPS_HexString); } }
 
-	public bool PushAllData = false;
-	[Range(1, 1024)]
-	public int PopKbPerFrame = 30;
+	public bool VerboseDebug = false;
 
-	[Range(0,20)]
-	public int PushPacketsPerFrameMin = 0;
+	[Range(0, 20)]
+	public int DecodeImagesPerFrame = 1;
+	[Range(0, 20)]
+	public int DecodeSamplesPerFrame = 1;
+	[Range(0, 20)]
+	public int DecodePacketsPerFrame = 1;
+	[Range(0, 20)]
+	public int DecodeMp4AtomsPerFrame = 1;
 
-	List<PopH264.FrameInput> PendingInputFrames;
+
+	List<PopH264.FrameInput> PendingInputFrames;    //	h264 packets per-frame
+	List<TPendingSample> PendingInputSamples;		//	references to all samples that are scheduled, but we may not have data for yet (and may need conversion to a packet)
+	List<byte> PendingMp4Bytes; //	encoded mp4 data we haven't processed
+	long Mp4BytesRead = 0;      //	amount of data we've processed from the start of the asset, so we know correct file offsets
+
+	//	assuming only one for now
+	int? H264TrackIndex = null;    
+	H264.AvccHeader? H264TrackHeader = null;
+
 	public string MaterialUniform_LumaTexture = "LumaTexture";
 	public string MaterialUniform_LumaFormat = "LumaFormat";
 	public string MaterialUniform_ChromaUTexture = "ChromaUTexture";
@@ -55,18 +87,42 @@ public class Mp4 : MonoBehaviour {
 	List<PopH264.SoyPixelsFormat> PlaneFormats;
 	PopH264.Decoder Decoder;
 
+	[Header("If you assign this, the material will blit an RGB output to this texture")]
+	public RenderTexture RgbTextureOutput;
+	[Header("If YUV material not set, will try and use material on MeshRenderer")]
+	public Material YuvShader;
+
+	struct MdatBlock
+	{
+		public TAtom Atom;
+		public byte[] Bytes;
+		public long Mp4Offset;	//	where did this mdat start 
+	}
+	Dictionary<uint, MdatBlock> Mdats;
+	uint NextMdat = 0;
+	bool MDatBeforeTrack = false;	//	this is a bit hacky atm, but we can get mdat before tracks
+
 	public UnityEvent_String OnNewFrameTime;
+	public UnityEvent_String OnDebugUpdate;
 
 	void OnEnable()
 	{
 		if (string.IsNullOrEmpty(Filename))
 			return;
 
+		//	hacky
+		if (!System.IO.File.Exists(Filename))
+		{
+			var StreamingAssetsFilename = Application.streamingAssetsPath + "/" + Filename;
+			if (System.IO.File.Exists(StreamingAssetsFilename))
+				Filename = StreamingAssetsFilename;
+		}
+
 		if (!System.IO.File.Exists(Filename))
 			throw new System.Exception("File missing: " + Filename);
 
 		var Mp4Bytes = System.IO.File.ReadAllBytes(Filename);
-		LoadMp4(Mp4Bytes);
+		PushData(Mp4Bytes);
 	}
 
 	static T[] CombineTwoArrays<T>(T[] a1, T[] a2)
@@ -103,16 +159,55 @@ public class Mp4 : MonoBehaviour {
 		PendingInputFrames.Add(Frame);
 	}
 
-	public void LoadMp4(byte[] Mp4Bytes,int TimeOffset=0)
+	public void PushData(byte[] Bytes)
 	{
-		if ( Decoder == null)
-			Decoder = new PopH264.Decoder();	
+		if (PendingMp4Bytes==null)
+			PendingMp4Bytes = new List<byte>();
 
-		System.Func<long, long,byte[]> ExtractSample = (Position,Size)=>
+		PendingMp4Bytes.AddRange(Bytes);
+		//	wake up threads etc that sort of thing
+	}
+
+	void CullMdatBlocks(int DiscardBlockIndex)
+	{
+		//	any before old block (and inclusive) we don't need any more
+		var AllIndexes = new List<uint>(Mdats.Keys);
+		foreach(var Index in AllIndexes)
 		{
-			var SampleBytes = Mp4Bytes.SubArray(Position, Size);
-			return SampleBytes;
-		};
+			if (Index > DiscardBlockIndex)
+				continue;
+			Mdats.Remove(Index);
+		}
+	}
+
+	bool HasMdat(uint MdatIndex)
+	{
+		return Mdats.ContainsKey(MdatIndex);
+	}
+
+	byte[] GetDataBytes(uint MdatIndex, long Position, long Size)
+	{
+		if (!HasMdat(MdatIndex))
+			throw new System.Exception("Not yet recieved mdat #" + MdatIndex);
+
+		var Meta = Mdats[MdatIndex];
+		return Meta.Bytes.SubArray(Position, Size);
+	}
+
+	byte[] GetMp4Bytes(long Position,long Size)
+	{
+		//	gr: is this position mdat-relative? if so, need to record which mdat this sample is relative to, and same mdat positions
+		var PendingPosition = Position - Mp4BytesRead;
+		if (PendingPosition + Size >= this.PendingMp4Bytes.Count)
+			throw new System.Exception("Looking for bytes we haven't yet recieved: " + Position + "/" + Mp4BytesRead + "+" + PendingMp4Bytes.Count);
+
+		var SampleBytes = this.PendingMp4Bytes.SubArray(PendingPosition, Size);
+		return SampleBytes;
+	}
+
+	void ParseNextMp4Header()
+	{
+		int TimeOffset = 0;
 
 		System.Action<PopX.Mpeg4.TTrack> EnumTrack = (Track) =>
 		{
@@ -121,17 +216,18 @@ public class Mp4 : MonoBehaviour {
 			byte[] Sps_AnnexB;
 			byte[] Pps_AnnexB;
 
-			//	track has header
-			if (Track.SampleDescriptions!= null )
+			//	track has header (so if we have moov and moof's, this only comes up once, and that's when we need to decode SPS/PPS
+			if (Track.SampleDescriptions != null)
 			{
 				if (Track.SampleDescriptions[0].Fourcc != "avc1")
-				{
-					Debug.Log("Skipping track codec: " + Track.SampleDescriptions[0].Fourcc);
-					return;
-				}
+					throw new System.Exception("Expecting fourcc avc1, got " + Track.SampleDescriptions[0].Fourcc);
 
 				H264.AvccHeader Header;
 				Header = PopX.H264.ParseAvccHeader(Track.SampleDescriptions[0].AvccAtomData);
+
+				//	wrong place to assign this! should be when we assign the track index
+				H264TrackHeader = Header;
+
 				var Pps = new List<byte>(new byte[] { 0, 0, 0, 1 });
 				Pps.AddRange(Header.PPSs[0]);
 				Pps_AnnexB = Pps.ToArray();
@@ -140,13 +236,14 @@ public class Mp4 : MonoBehaviour {
 				Sps.AddRange(Header.SPSs[0]);
 				Sps_AnnexB = Sps.ToArray();
 
-				PushPacket = (Packet, FrameNumber) => 
+				PushPacket = (Packet, FrameNumber) =>
 				{
-					H264.AvccToAnnexb4(Header, Packet, (Bytes) => { PushFrame_AnnexB(Bytes, FrameNumber); } ); 
+					H264.AvccToAnnexb4(Header, Packet, (Bytes) => { PushFrame_AnnexB(Bytes, FrameNumber); });
 				};
 			}
-			else
+			else if (Preconfigured_SPS_Bytes != null && Preconfigured_SPS_Bytes.Length > 0)
 			{
+				throw new System.Exception("Need to refactor to process preconfigured SPS before handling tracks");
 				//	split this header
 				Sps_AnnexB = Preconfigured_SPS_Bytes;
 				Pps_AnnexB = null;
@@ -156,114 +253,335 @@ public class Mp4 : MonoBehaviour {
 				//PushPacket = PushAnnexB;
 				H264.AvccHeader Header = new H264.AvccHeader();
 				Header.NaluLength = 2;
-				PushPacket = (Packet, FrameNumber) => 
+				PushPacket = (Packet, FrameNumber) =>
 				{
 					H264.AvccToAnnexb4(Header, Packet, (Bytes) => { PushFrame_AnnexB(Bytes, FrameNumber); });
 				};
 			}
-
-			H264.Profile Profile;
-			float Level;
-			PopX.H264.GetProfileLevel(Sps_AnnexB, out Profile, out Level);
-			if (Profile != H264.Profile.Baseline)
-				Debug.LogWarning("PopH264 currently only supports baseline profile. This is " + Profile + " level=" + Level);
-
-			PushFrame_AnnexB(Sps_AnnexB,0);
-			PushFrame_AnnexB(Pps_AnnexB,0);
-
-			Debug.Log("Found mp4 track " + Track.Samples.Count);
-			foreach ( var Sample in Track.Samples )
+			else
 			{
-				try
+				//	track without header, assume it's already come via moov and this is a moof
+				Sps_AnnexB = null;
+				Pps_AnnexB = null;
+				PushPacket = null;
+			}
+
+
+			//	load h264 header
+			if (Sps_AnnexB != null)
+			{
+				H264.Profile Profile;
+				float Level;
+				PopX.H264.GetProfileLevel(Sps_AnnexB, out Profile, out Level);
+				if (Profile != H264.Profile.Baseline)
+					Debug.LogWarning("PopH264 currently only supports baseline profile. This is " + Profile + " level=" + Level);
+
+				PushFrame_AnnexB(Sps_AnnexB, 0);
+				PushFrame_AnnexB(Pps_AnnexB, 0);
+			}
+
+			//	load samples
+			if (Track.Samples == null)
+			{
+				if (VerboseDebug)
+					Debug.Log("Mp4 Track with null samples (next mdat="+ NextMdat+")");
+			}
+			else
+			{
+				//	gr: is there a better mdat ident? don't think so, it's just the upcoming one in mpeg sequence
+				//	gr: sometimes, the mdat is before the tracks...
+				//	gr: the sample offset also needs correcting
+				var MdatIndex = MDatBeforeTrack ? NextMdat-1 : 0;
+				long SampleDataPositionOffset = 0;
+				if (MDatBeforeTrack && Mdats.ContainsKey(MdatIndex))
 				{
-					var Packet = ExtractSample(Sample.DataPosition, Sample.DataSize);
-					var TimeOffsetMs = (int)(TimeOffset / 10000.0f);
-					var FrameNumber = Sample.PresentationTimeMs + TimeOffsetMs;
-					PushPacket(Packet, FrameNumber);
+					var Mdat = Mdats[MdatIndex];
+					SampleDataPositionOffset = -Mdat.Mp4Offset;
 				}
-				catch(System.Exception e)
+
+				if (VerboseDebug)
+					Debug.Log("Found mp4 track " + Track.Samples.Count + " for next mdat: "+ MdatIndex);
+
+				foreach (var Sample in Track.Samples)
 				{
-					Debug.LogException(e);
-					break;
+					try
+					{
+						var NewSample = new TPendingSample();
+						if (PendingInputSamples == null)
+							PendingInputSamples = new List<TPendingSample>();
+
+						NewSample.MdatIndex = MdatIndex;
+						NewSample.DataPosition = Sample.DataPosition + SampleDataPositionOffset;
+						NewSample.DataSize = Sample.DataSize;
+						var TimeOffsetMs = (int)(TimeOffset / 10000.0f);
+						NewSample.PresentationTime = Sample.PresentationTimeMs + TimeOffsetMs;
+						NewSample.Format = PacketFormat.Avcc;
+						PendingInputSamples.Add(NewSample);
+					}
+					catch (System.Exception e)
+					{
+						Debug.LogException(e);
+						break;
+					}
 				}
 			}
+		
 		};
 
-		PopX.Mpeg4.Parse(Mp4Bytes, EnumTrack);
-		Debug.Log("Extracted " + PendingInputFrames.Count + " frames/packets of h264");
+		System.Action<List<PopX.Mpeg4.TTrack>> EnumTracks = (Tracks)=>
+		{
+			//	moof headers don't have track headers, so we should have our track by now
+			//	this track may be the original though, so hunt down the h264 one
+			if (!H264TrackIndex.HasValue)
+			{
+				for (int t = 0; t < Tracks.Count; t++)
+				{
+					var Track = Tracks[t];
+					if (Track.SampleDescriptions == null)
+						continue;
+
+					if (Track.SampleDescriptions[0].Fourcc != "avc1")
+					{
+						Debug.Log("Skipping track codec: " + Track.SampleDescriptions[0].Fourcc);
+						continue;
+					}
+
+					H264TrackIndex = t;
+				}
+			}
+
+			if (!H264TrackIndex.HasValue)
+				throw new System.Exception("Couldn't find avc1 track");
+
+			EnumTrack(Tracks[H264TrackIndex.Value]);
+		};
+
+		System.Action<PopX.TAtom> EnumMdat = (MdatAtom) =>
+		{
+			if (!H264TrackIndex.HasValue)
+				MDatBeforeTrack = true;
+
+			//	this is the meta for the pending mdat
+			var MdatIndex = NextMdat;
+					
+			if (Mdats == null)
+				Mdats = new Dictionary<uint, MdatBlock>();
+
+			var Mdat = new MdatBlock();
+			Mdat.Atom = MdatAtom;
+
+			//	grab mdat bytes as we discard them when walking mp4
+			//	the filedata here is relative to what we put into the parser!
+			Mdat.Mp4Offset = Mp4BytesRead + MdatAtom.FileDataOffset;
+			Mdat.Bytes = GetMp4Bytes(Mdat.Mp4Offset, MdatAtom.DataSize);
+
+			if ( VerboseDebug )
+				Debug.Log("Got MDat " + MdatIndex + " x" + Mdat.Bytes.Length + " bytes");
+			Mdats.Add(MdatIndex, Mdat);
+
+			//	increment once everything succeeds
+			NextMdat++;
+		};
+
+		//	ideally only once we've verified we have an mp4, but before moov. Maybe just if an ftyp is found
+		if (Decoder == null)
+			Decoder = new PopH264.Decoder();
+
+		long BytesRead;
+		var Mp4Bytes = PendingMp4Bytes.ToArray();
+		PopX.Mpeg4.ParseNextAtom(Mp4Bytes, out BytesRead, EnumTracks, EnumMdat);
+		PendingMp4Bytes.RemoveRange(0, (int)BytesRead);
+
+		Mp4BytesRead += BytesRead;
 	}
 
 	void OnDisable()
 	{
+		//	reset everything
 		if (Decoder != null)
 			Decoder.Dispose();
 		Decoder = null;
+
+		PendingInputFrames = null;
+		PendingInputSamples = null;
+		PendingMp4Bytes = null;
+		Mp4BytesRead = 0;
+
+		H264TrackIndex = null;
+		H264TrackHeader = null;
+
+		Mdats = null;
+		NextMdat = 0;	//	could be wise not to reset this to weed out bugs
 	}
 
 
-	void StreamInH264Data()
+	//	gah why cant I lamda generics
+	int GetCountString<T>(List<T> Array,int Div=1)
 	{
-		//	todo:
-		//	push in random bytes from file (emulating stream)
-		//	split nal and add pending frames
-		/*
-		 * 
-				}
-				PendingInputFrames
-
-				var PopBytesSize = PushAllData ? H264PendingData.Count : PopKbPerFrame * 1024;
-				PopBytesSize = Mathf.Min(PopBytesSize, H264PendingData.Count);
-				if (PopBytesSize == 0)
-				{
-					return;
-				}
-
-				var PopBytes = new byte[PopBytesSize];
-				H264PendingData.CopyTo(0, PopBytes, 0, PopBytes.Length);
-				H264PendingData.RemoveRange(0, PopBytesSize);
-				*/
+		if (Array == null)
+			return -1;
+		return Array.Count / Div;
 	}
 
 	void Update()
 	{
-		if (Decoder != null)
+		//	update debug output
 		{
-			System.Action PushNewData = () =>
-			{
-				StreamInH264Data();
+			string Debug = "";
+			Debug += "Kb: " + GetCountString(this.PendingMp4Bytes,1024);
+			Debug += "Samples: " + GetCountString(this.PendingInputSamples);
+			Debug += "Packets: " + GetCountString(this.PendingInputFrames);
+			this.OnDebugUpdate.Invoke(Debug);
+		}
 
-				if (PendingInputFrames != null && PendingInputFrames.Count > 0)
-				{
-					var PushResult = Decoder.PushFrameData(PendingInputFrames[0]);
-					PendingInputFrames.RemoveAt(0);
-					if (PushResult != 0)
-					{
-						Debug.Log("Push returned: " + PushResult);
-					}
-				}
+		//	always try and get next image
+		{
+			for (var i = 0; i < DecodeImagesPerFrame; i++)
+				DecodeNextFrameImage();
+		}
+
+		//	if we have frames/packets to decode, do them
+		try
+		{
+			for (var i = 0; i < DecodePacketsPerFrame;	i++ )
+				DecodeNextFramePacket();
+		}
+		catch (System.Exception e)
+		{
+			Debug.LogException(e, this);
+		}
+
+		//	convert samples to input frames, if data is availible
+		//	gr: maybe process next mp4 IF this fails
+		try
+		{
+			for (var i = 0; i < DecodeSamplesPerFrame; i++)
+				DecodeNextSample();
+		}
+		catch (System.Exception e)
+		{
+			//	if there's an error, we probably don't have enough mp4 data
+			Debug.LogException(e, this);
+		}
+
+
+		//	decode more of the mp4 (may need to do inital header, or a moof header, or next mdat, before we can do a frame again
+		try
+		{
+			for (var i = 0; i < DecodeMp4AtomsPerFrame; i++)
+				ParseNextMp4Header();
+		}
+		catch (System.Exception e)
+		{
+			Debug.LogException(e, this);
+		}
+
+
+	}
+
+	void DecodeNextSample()
+	{
+		if (PendingInputSamples == null || PendingInputSamples.Count == 0)
+			return;
+
+		var Sample = PendingInputSamples[0];
+
+		//	fail silently if mdat not availible yet
+		if (!VerboseDebug)
+			if (!HasMdat(Sample.MdatIndex))
+				return;
+
+		//	grab data
+		var SampleBytes = GetDataBytes( Sample.MdatIndex, Sample.DataPosition, Sample.DataSize);
+
+		//	need to convert?
+		if ( Sample.Format == PacketFormat.Avcc )
+		{
+			System.Action<byte[]> OnAnnexB = (AnnexBBytes) =>
+			{
+				PushFrame_AnnexB(AnnexBBytes, Sample.PresentationTime);
 			};
+			PopX.H264.AvccToAnnexb4(H264TrackHeader.Value, SampleBytes, OnAnnexB);
+		}
+		else if ( Sample.Format == PacketFormat.AnnexB )
+		{
+			PushFrame_AnnexB(SampleBytes, Sample.PresentationTime);
+		}
 
-			for (int i = 0; i < PushPacketsPerFrameMin;	i++)
-				PushNewData();
+		PendingInputSamples.RemoveAt(0);
 
-			var FrameTime = Decoder.GetNextFrame(ref PlaneTextures, ref PlaneFormats);
-			if (FrameTime.HasValue)
-			{
-				OnNewFrame();
-				OnNewFrameTime.Invoke("" + FrameTime.Value);
-			}
-			else
-			{
-				PushNewData();
-			}
+		//	we've processed this sample, we're assuming we won't need any samples in previous mdat blocks now
+		//	could play it safe and do -1
+		if (Sample.MdatIndex > 0)
+			CullMdatBlocks((int)Sample.MdatIndex - 1);
+	}
+
+	void DecodeNextFramePacket()
+	{
+		if (PendingInputFrames == null || PendingInputFrames.Count == 0)
+			return;
+
+		var PushResult = Decoder.PushFrameData(PendingInputFrames[0]);
+		PendingInputFrames.RemoveAt(0);
+		if (PushResult != 0)
+		{
+			//	decoder error
+			Debug.LogError("Decoder Push returned: " + PushResult + " (decoder error!)");
 		}
 	}
+
+	bool DecodeNextFrameImage()
+	{
+		if (Decoder == null)
+			return false;
+		var FrameTime = Decoder.GetNextFrame(ref PlaneTextures, ref PlaneFormats);
+		if (!FrameTime.HasValue)
+			return false;
+
+		OnNewFrame();
+		OnNewFrameTime.Invoke("" + FrameTime.Value);
+		return true;
+	}
+
 
 
 	void OnNewFrame()
 	{
-		var mr = GetComponent<MeshRenderer>();
-		var mat = mr.material;
+		UpdateMaterial(YuvShader);
+		UpdateMaterial(GetComponent<MeshRenderer>());
+		UpdateRgbTexture();
+	}
+
+	void UpdateRgbTexture()
+	{
+		if (RgbTextureOutput == null)
+			return;
+
+		var Material = YuvShader;
+		if (Material == null)
+		{
+			var mr = GetComponent<MeshRenderer>();
+			Material = mr.material;
+		}
+		if (Material == null)
+			throw new System.Exception("Trying to blit to RGB texture, but no YUV shader");
+
+		Graphics.Blit(null, RgbTextureOutput, Material);
+	}
+
+	void UpdateMaterial(MeshRenderer MeshRenderer)
+	{
+		var mat = MeshRenderer.material;
+		UpdateMaterial(mat);
+	}
+
+
+
+	void UpdateMaterial(Material mat)
+	{
+		if (mat == null)
+			return;
+	
 
 		if (PlaneTextures.Count >= 1)
 		{
@@ -285,6 +603,7 @@ public class Mp4 : MonoBehaviour {
 			if (SetMaterialFormat)
 				mat.SetInt(MaterialUniform_ChromaVFormat, (int)PlaneFormats[2]);
 		}
+
 
 	}
 
