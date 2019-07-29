@@ -1,12 +1,19 @@
 #include "PopH264.h"
+#include "PopH264DecoderInstance.h"
+#include "SoyLib/src/SoyPixels.h"
+
+#if defined(TARGET_LUMIN)
+#include "MagicLeapDecoder.h"
+#endif
 
 #define ENABLE_BROADWAY
 
 #if defined(ENABLE_BROADWAY)
 #include "BroadwayDecoder.h"
 #endif
-#include "PopH264DecoderInstance.h"
-#include "SoyLib/src/SoyPixels.h"
+
+
+
 
 class TNoParams;
 using TInstanceObject = PopH264::TDecoderInstance;
@@ -36,7 +43,9 @@ BOOL APIENTRY DllMain(HMODULE /* hModule */, DWORD ul_reason_for_call, LPVOID /*
 
 PopH264::TDecoderInstance::TDecoderInstance()
 {
-#if defined(ENABLE_BROADWAY)
+#if defined(TARGET_LUMIN)
+	mDecoder.reset( new MagicLeap::TDecoder );
+#elif defined(ENABLE_BROADWAY)
 	mDecoder.reset( new Broadway::TDecoder );
 #else
 	throw Soy::AssertException("No decoder supported");
