@@ -7,6 +7,14 @@ using PopX;
 public class UnityEvent_String : UnityEngine.Events.UnityEvent<string> { }
 
 
+[System.Serializable]
+public struct VideoBlitTexture
+{
+	public RenderTexture RgbTexture;
+	public Material YuvMaterial;
+}
+
+
 public class Mp4 : MonoBehaviour {
 
 	enum PacketFormat
@@ -87,10 +95,8 @@ public class Mp4 : MonoBehaviour {
 	List<PopH264.SoyPixelsFormat> PlaneFormats;
 	PopH264.Decoder Decoder;
 
-	[Header("If you assign this, the material will blit an RGB output to this texture")]
-	public RenderTexture RgbTextureOutput;
-	[Header("If YUV material not set, will try and use material on MeshRenderer")]
-	public Material YuvShader;
+	[Header("Whenever there's a new frame, all these blits will be processed")]
+	public List<VideoBlitTexture> RgbTextureBlits;
 
 	struct MdatBlock
 	{
@@ -191,6 +197,7 @@ public class Mp4 : MonoBehaviour {
 			throw new System.Exception("Not yet recieved mdat #" + MdatIndex);
 
 		var Meta = Mdats[MdatIndex];
+		Position -= Meta.Mp4Offset;
 		return Meta.Bytes.SubArray(Position, Size);
 	}
 
@@ -198,7 +205,7 @@ public class Mp4 : MonoBehaviour {
 	{
 		//	gr: is this position mdat-relative? if so, need to record which mdat this sample is relative to, and same mdat positions
 		var PendingPosition = Position - Mp4BytesRead;
-		if (PendingPosition + Size >= this.PendingMp4Bytes.Count)
+		if (PendingPosition + Size > this.PendingMp4Bytes.Count)
 			throw new System.Exception("Looking for bytes we haven't yet recieved: " + Position + "/" + Mp4BytesRead + "+" + PendingMp4Bytes.Count);
 
 		var SampleBytes = this.PendingMp4Bytes.SubArray(PendingPosition, Size);
@@ -207,6 +214,10 @@ public class Mp4 : MonoBehaviour {
 
 	void ParseNextMp4Header()
 	{
+		//	nothing to parse
+		if ( PendingMp4Bytes.Count==0)
+			return;
+
 		int TimeOffset = 0;
 
 		System.Action<PopX.Mpeg4.TTrack> EnumTrack = (Track) =>
@@ -292,12 +303,6 @@ public class Mp4 : MonoBehaviour {
 				//	gr: sometimes, the mdat is before the tracks...
 				//	gr: the sample offset also needs correcting
 				var MdatIndex = MDatBeforeTrack ? NextMdat-1 : 0;
-				long SampleDataPositionOffset = 0;
-				if (MDatBeforeTrack && Mdats.ContainsKey(MdatIndex))
-				{
-					var Mdat = Mdats[MdatIndex];
-					SampleDataPositionOffset = -Mdat.Mp4Offset;
-				}
 
 				if (VerboseDebug)
 					Debug.Log("Found mp4 track " + Track.Samples.Count + " for next mdat: "+ MdatIndex);
@@ -311,7 +316,7 @@ public class Mp4 : MonoBehaviour {
 							PendingInputSamples = new List<TPendingSample>();
 
 						NewSample.MdatIndex = MdatIndex;
-						NewSample.DataPosition = Sample.DataPosition + SampleDataPositionOffset;
+						NewSample.DataPosition = Sample.DataPosition;
 						NewSample.DataSize = Sample.DataSize;
 						var TimeOffsetMs = (int)(TimeOffset / 10000.0f);
 						NewSample.PresentationTime = Sample.PresentationTimeMs + TimeOffsetMs;
@@ -358,6 +363,9 @@ public class Mp4 : MonoBehaviour {
 
 		System.Action<PopX.TAtom> EnumMdat = (MdatAtom) =>
 		{
+			if (VerboseDebug)
+				Debug.Log("EnumMdat( NextMdat=" + NextMdat);
+
 			if (!H264TrackIndex.HasValue)
 				MDatBeforeTrack = true;
 
@@ -547,30 +555,35 @@ public class Mp4 : MonoBehaviour {
 
 	void OnNewFrame()
 	{
-		UpdateMaterial(YuvShader);
+		//	update params on material
 		UpdateMaterial(GetComponent<MeshRenderer>());
-		UpdateRgbTexture();
+		UpdateBlits();
 	}
 
-	void UpdateRgbTexture()
+	void UpdateBlit(VideoBlitTexture Blit)
 	{
-		if (RgbTextureOutput == null)
+		if (Blit.RgbTexture == null)
+			return;
+		if (Blit.YuvMaterial == null)
 			return;
 
-		var Material = YuvShader;
-		if (Material == null)
-		{
-			var mr = GetComponent<MeshRenderer>();
-			Material = mr.material;
-		}
-		if (Material == null)
-			throw new System.Exception("Trying to blit to RGB texture, but no YUV shader");
+		UpdateMaterial(Blit.YuvMaterial);
+		Graphics.Blit(null, Blit.RgbTexture, Blit.YuvMaterial);
+	}
 
-		Graphics.Blit(null, RgbTextureOutput, Material);
+	void UpdateBlits()
+	{
+		if (RgbTextureBlits == null)
+			return;
+
+		foreach (var Blit in RgbTextureBlits)
+			UpdateBlit(Blit);
 	}
 
 	void UpdateMaterial(MeshRenderer MeshRenderer)
 	{
+		if (MeshRenderer == null)
+			return;
 		var mat = MeshRenderer.material;
 		UpdateMaterial(mat);
 	}
