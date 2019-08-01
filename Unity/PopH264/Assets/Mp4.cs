@@ -64,6 +64,17 @@ public class Mp4 : MonoBehaviour {
 
 	public bool VerboseDebug = false;
 
+	[Header("Make this false to sync DecodeToVideoTime manually")]
+	public bool AutoTrackTimeOnEnable = true;
+	float? StartTime = null;    //	set this to time.time on enable if AutoTrackTimeOnEnable
+
+	public UnityEngine.Events.UnityEvent OnFinished;
+
+	[Range(0, 20)]
+	public float DecodeToVideoTime = 0;
+	public int DecodeToVideoTimeMs { get { return (int)(DecodeToVideoTime * 1000.0f); } }
+
+	//	these values dictate how much processing time we give to each step
 	[Range(0, 20)]
 	public int DecodeImagesPerFrame = 1;
 	[Range(0, 20)]
@@ -74,10 +85,12 @@ public class Mp4 : MonoBehaviour {
 	public int DecodeMp4AtomsPerFrame = 1;
 
 
-	List<PopH264.FrameInput> PendingInputFrames;    //	h264 packets per-frame
+	List<PopH264.FrameInput> PendingInputFrames;	//	h264 packets per-frame
 	List<TPendingSample> PendingInputSamples;		//	references to all samples that are scheduled, but we may not have data for yet (and may need conversion to a packet)
-	List<byte> PendingMp4Bytes; //	encoded mp4 data we haven't processed
-	long Mp4BytesRead = 0;      //	amount of data we've processed from the start of the asset, so we know correct file offsets
+	List<byte> PendingMp4Bytes;						//	encoded mp4 data we haven't processed
+	long Mp4BytesRead = 0;							//	amount of data we've processed from the start of the asset, so we know correct file offsets
+	List<int> PendingOutputFrameTimes;              //	frames we've submitted to the h264 decoder, that we're expecting to come out
+	int? LastFrameTime = null;						//	maybe a better way of storing this
 
 	//	assuming only one for now
 	int? H264TrackIndex = null;    
@@ -129,6 +142,11 @@ public class Mp4 : MonoBehaviour {
 
 		var Mp4Bytes = System.IO.File.ReadAllBytes(Filename);
 		PushData(Mp4Bytes);
+
+		if (AutoTrackTimeOnEnable)
+		{
+			StartTime = Time.time;
+		}
 	}
 
 	static T[] CombineTwoArrays<T>(T[] a1, T[] a2)
@@ -307,6 +325,14 @@ public class Mp4 : MonoBehaviour {
 				if (VerboseDebug)
 					Debug.Log("Found mp4 track " + Track.Samples.Count + " for next mdat: "+ MdatIndex);
 
+				if ( Track.Samples.Count > 0 )
+				{
+					var LastSampleTime = Track.Samples[Track.Samples.Count - 1].PresentationTimeMs;
+					if (!LastFrameTime.HasValue)
+						LastFrameTime = LastSampleTime;
+					LastFrameTime = Mathf.Max(LastFrameTime.Value, LastSampleTime);
+				}
+
 				foreach (var Sample in Track.Samples)
 				{
 					try
@@ -419,7 +445,9 @@ public class Mp4 : MonoBehaviour {
 		H264TrackHeader = null;
 
 		Mdats = null;
-		NextMdat = 0;	//	could be wise not to reset this to weed out bugs
+		NextMdat = 0;   //	could be wise not to reset this to weed out bugs
+
+		StartTime = null;
 	}
 
 
@@ -433,6 +461,12 @@ public class Mp4 : MonoBehaviour {
 
 	void Update()
 	{
+		//	auto track time
+		if (StartTime.HasValue)
+		{
+			DecodeToVideoTime = Time.time - StartTime.Value;
+		}
+
 		//	update debug output
 		{
 			string Debug = "";
@@ -444,7 +478,7 @@ public class Mp4 : MonoBehaviour {
 
 		//	always try and get next image
 		{
-			for (var i = 0; i < DecodeImagesPerFrame; i++)
+			for (var i = 0; i < DecodeImagesPerFrame;	i++)
 				DecodeNextFrameImage();
 		}
 
@@ -529,25 +563,70 @@ public class Mp4 : MonoBehaviour {
 		if (PendingInputFrames == null || PendingInputFrames.Count == 0)
 			return;
 
-		var PushResult = Decoder.PushFrameData(PendingInputFrames[0]);
-		PendingInputFrames.RemoveAt(0);
+		var PendingInputFrame = PendingInputFrames[0];
+		if ( VerboseDebug )
+			Debug.Log("Push frame data #" + PendingInputFrame.FrameNumber);
+		var PushResult = Decoder.PushFrameData(PendingInputFrame);
 		if (PushResult != 0)
 		{
 			//	decoder error
 			Debug.LogError("Decoder Push returned: " + PushResult + " (decoder error!)");
 		}
+
+		if (PendingOutputFrameTimes == null)
+			PendingOutputFrameTimes = new List<int>();
+		PendingOutputFrameTimes.Add(PendingInputFrame.FrameNumber);
+		PendingInputFrames.RemoveAt(0);
 	}
 
+	//	returns if any frames decoded.
 	bool DecodeNextFrameImage()
 	{
 		if (Decoder == null)
 			return false;
+
+		//	only pull out next frame, if we WANT the pending frame times
+		if (PendingOutputFrameTimes == null || PendingOutputFrameTimes.Count == 0 )
+			return false;
+
+		//	not reached next frame yet
+		if (DecodeToVideoTimeMs < PendingOutputFrameTimes[0])
+			return false;
+
 		var FrameTime = Decoder.GetNextFrame(ref PlaneTextures, ref PlaneFormats);
+
+		//	nothing decoded
 		if (!FrameTime.HasValue)
 			return false;
 
+		var ExpectedTime = PendingOutputFrameTimes[0];
+		//	gr: there's something off here, we don't seem to decode early frames
+		//		is the decoder skipping frames? (no!) or are the times offset?
+		//	anyway, once we get a frame in the future, we shouldn't expect any older ones, so clear the pending list up to this frame
+		if ( FrameTime.Value != ExpectedTime )
+		{
+			if ( VerboseDebug )
+				Debug.Log("Decoded frame " + FrameTime.Value + ", expected " + ExpectedTime + " when seeking to " + DecodeToVideoTimeMs);
+		}
+
+		//	remove all the frames we may have skipped over
+		while (PendingOutputFrameTimes.Count > 0)
+		{
+			if (PendingOutputFrameTimes[0] > FrameTime.Value)
+				break;
+			PendingOutputFrameTimes.RemoveAt(0);
+		}
+
 		OnNewFrame();
 		OnNewFrameTime.Invoke("" + FrameTime.Value);
+
+		if (LastFrameTime.HasValue && LastFrameTime.Value == FrameTime.Value)
+		{
+			if (VerboseDebug)
+				Debug.Log("Decoded last frame");
+			OnFinished.Invoke();
+		}
+
 		return true;
 	}
 
