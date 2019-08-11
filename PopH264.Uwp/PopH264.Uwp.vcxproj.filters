@@ -42,7 +42,12 @@
     <ClCompile Include="..\Source\SoyLib\src\SoyTypes.cpp">
       <Filter>SoyLib</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\SoyLib\src\SoyTime.cpp" />
+    <ClCompile Include="..\Source\TDecoder.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\SoyLib\src\SoyTime.cpp">
+      <Filter>SoyLib</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\BroadwayDecoder.h">
@@ -93,7 +98,12 @@
     <ClInclude Include="..\Source\SoyLib\src\SoyTypes_Windows.h">
       <Filter>SoyLib</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\SoyLib\src\SoyTime.h" />
+    <ClInclude Include="..\Source\TDecoder.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\SoyLib\src\SoyTime.h">
+      <Filter>SoyLib</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Source\InstanceManager.inc">

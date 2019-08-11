@@ -246,7 +246,8 @@ public static class PopH264
 			if (!Plane)
 			{
 				var MipMap = false;
-				Plane = new Texture2D(Width, Height, Format, MipMap);
+				var Linear = true;
+				Plane = new Texture2D(Width, Height, Format, MipMap,Linear);
 			}
 
 			return Plane;

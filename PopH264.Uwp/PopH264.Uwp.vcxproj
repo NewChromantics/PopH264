@@ -39,6 +39,7 @@
     <ClCompile Include="..\Source\SoyLib\src\SoyThread.cpp" />
     <ClCompile Include="..\Source\SoyLib\src\SoyTime.cpp" />
     <ClCompile Include="..\Source\SoyLib\src\SoyTypes.cpp" />
+    <ClCompile Include="..\Source\TDecoder.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\BroadwayDecoder.h" />
@@ -58,6 +59,7 @@
     <ClInclude Include="..\Source\SoyLib\src\SoyTime.h" />
     <ClInclude Include="..\Source\SoyLib\src\SoyTypes.h" />
     <ClInclude Include="..\Source\SoyLib\src\SoyTypes_Windows.h" />
+    <ClInclude Include="..\Source\TDecoder.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Source\InstanceManager.inc" />

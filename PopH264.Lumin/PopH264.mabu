@@ -1,13 +1,32 @@
 KIND = shared
-# SRCS = ../Source/PopH264.cpp
-SRCS = ../Source/Test.cpp
+SRCS = \
+../Source/Test.cpp \
+../Source/PopH264.cpp	\
+../Source/TDecoder.cpp \
+../Source/BroadwayDecoder.cpp \
+../Source/BroadwayAll.c	\
+../Source/MagicLeapDecoder.cpp \
+../Source/SoyLib/src/memheap.cpp \
+../Source/SoyLib/src/SoyArray.cpp \
+../Source/SoyLib/src/SoyAssert.cpp \
+../Source/SoyLib/src/SoyDebug.cpp \
+../Source/SoyLib/src/SoyPixels.cpp \
+../Source/SoyLib/src/SoyString.cpp \
+../Source/SoyLib/src/SoyTime.cpp \
+../Source/SoyLib/src/SoyTypes.cpp \
 
-# INCS = /Volumes/Code/MagicLeap/mlsdk/v0.21.0/include \
-# ../Source/
+
+INCS = \
+/Volumes/Code/MagicLeap/mlsdk/v0.21.0/include \
+../Source/Broadway/Decoder/inc/	\
+../Source/Broadway/Decoder/src/	\
+../Source/	\
+../Source/SoyLib/src/	\
+
 
 DEFS = TARGET_LUMIN
 
-# USES = ml_sdk stdc++
+USES = ml_sdk stdc++ ml_media
 # SHLIBS = ml_privileges
 
 # OPTIONS = \

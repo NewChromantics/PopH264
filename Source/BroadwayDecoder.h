@@ -3,6 +3,7 @@
 #include <functional>
 #include "SoyLib/src/Array.hpp"
 #include "SoyLib/src/HeapArray.hpp"
+#include "TDecoder.h"
 
 class SoyPixelsImpl;
 
@@ -23,21 +24,17 @@ namespace Broadway
 }
 
 
-class Broadway::TDecoder
+class Broadway::TDecoder : public PopH264::TDecoder
 {
 public:
 	TDecoder();
 	~TDecoder();
-	
-	void			Decode(ArrayBridge<uint8_t>&& PacketData,std::function<void(const SoyPixelsImpl&,SoyTime)> OnFrameDecoded);
 
 private:
 	void			OnMeta(const H264SwDecInfo& Meta);
 	void			OnPicture(const H264SwDecPicture& Picture,const H264SwDecInfo& Meta,std::function<void(const SoyPixelsImpl&,SoyTime)> OnFrameDecoded,SoyTime DecodeDuration);
-	bool			DecodeNextPacket(std::function<void(const SoyPixelsImpl&,SoyTime)> OnFrameDecoded);	//	returns true if more data to proccess
+	virtual bool	DecodeNextPacket(std::function<void(const SoyPixelsImpl&,SoyTime)> OnFrameDecoded) override;	//	returns true if more data to proccess
 	
-public:
+private:
 	H264SwDecInst	mDecoderInstance = nullptr;
-	std::mutex		mPendingDataLock;
-	Array<uint8_t>	mPendingData;
 };
