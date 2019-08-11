@@ -12,8 +12,12 @@ using System.Collections.Generic;
 /// </summary>
 public static class PopH264
 {
+#if UNITY_UWP
+	private const string PluginName = "PopH264.Uwp";
+#error building uwp
+#else
 	private const string PluginName = "PopH264";
-
+#endif
 
 	[DllImport(PluginName, CallingConvention = CallingConvention.Cdecl)]
 	private static extern int	PopH264_CreateInstance();
