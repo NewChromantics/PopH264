@@ -25,6 +25,8 @@
 		BF151FF1238478B000A70EBF /* PopH264Framework.h in Headers */ = {isa = PBXBuildFile; fileRef = BF459CDE21F7D60500CED59D /* PopH264Framework.h */; };
 		BF151FF2238478B300A70EBF /* PopH264DecoderInstance.h in Headers */ = {isa = PBXBuildFile; fileRef = BF459C7F21F7C97400CED59D /* PopH264DecoderInstance.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		BF151FF3238478B700A70EBF /* PopH264.h in Headers */ = {isa = PBXBuildFile; fileRef = BF8AB63721F20C41008E7E76 /* PopH264.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		BF151FFB23847C2B00A70EBF /* TDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = BF53E82C22EDC6A6008253CD /* TDecoder.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		BF151FFC23847C2C00A70EBF /* TDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = BF53E82C22EDC6A6008253CD /* TDecoder.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		BF459CE221F7D60500CED59D /* PopH264Framework.h in Headers */ = {isa = PBXBuildFile; fileRef = BF459CDE21F7D60500CED59D /* PopH264Framework.h */; };
 		BF459CE521F7D6B500CED59D /* PopH264.bundle in CopyFiles */ = {isa = PBXBuildFile; fileRef = BF4A6A141EA16D7D00613A64 /* PopH264.bundle */; };
 		BF459CE921F7D70000CED59D /* PopH264.h in Headers */ = {isa = PBXBuildFile; fileRef = BF8AB63721F20C41008E7E76 /* PopH264.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -436,6 +438,7 @@
 			files = (
 				BF151FF2238478B300A70EBF /* PopH264DecoderInstance.h in Headers */,
 				BF151FF3238478B700A70EBF /* PopH264.h in Headers */,
+				BF151FFC23847C2C00A70EBF /* TDecoder.h in Headers */,
 				BF151FF1238478B000A70EBF /* PopH264Framework.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -446,6 +449,7 @@
 			files = (
 				BF459CEA21F7D70000CED59D /* PopH264DecoderInstance.h in Headers */,
 				BF459CE921F7D70000CED59D /* PopH264.h in Headers */,
+				BF151FFB23847C2B00A70EBF /* TDecoder.h in Headers */,
 				BF459CE221F7D60500CED59D /* PopH264Framework.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
