@@ -21,7 +21,7 @@ using TInstanceParams = TNoParams;
 
 #include "InstanceManager.inc"
 
-#if defined(TARGET_LUMIN)
+#if defined(TARGET_LUMIN) || defined(TARGET_ANDROID)
 const char* Platform::LogIdentifer = "PopH264";
 #endif
 

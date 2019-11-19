@@ -79,6 +79,7 @@ LOCAL_LDLIBS  	+= -llog			# logging
 # todo: generate from input from xcode
 LOCAL_SRC_FILES  := \
 $(SRC)/Source/PopH264.cpp \
+$(SRC)/Source/TDecoder.cpp \
 $(SRC)/Source/BroadwayDecoder.cpp \
 $(SRC)/Source/BroadwayAll.c \
 

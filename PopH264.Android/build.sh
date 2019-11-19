@@ -21,6 +21,11 @@ if [ -z "$ANDROID_API" ]; then
 	ANDROID_API="23"
 fi
 
+if [ "$ANDROID_ABI" == "" ]; then
+	echo "ANDROID_ABI (eg. armeabi-v7a) not specified"
+	exit 1;
+fi
+
 MAXCONCURRENTBUILDS=8
 
 echo "Android targets..."
@@ -46,8 +51,20 @@ fi
 #instead the app using vrlib can set it 
 if [ $ACTION == "release" ]; then
 	echo "Android/build.sh: $ACTION..."
-	$ANDROID_NDK/ndk-build -j$MAXCONCURRENTBUILDS NDK_DEBUG=0 NDK_PROJECT_PATH=$SOURCE_ROOT/PopH264.Android/
-	RESULT=$?
+
+ANDROID_ABI=x86_64
+$ANDROID_NDK/ndk-build -j$MAXCONCURRENTBUILDS NDK_DEBUG=0 NDK_PROJECT_PATH=$SOURCE_ROOT/PopH264.Android/
+
+ANDROID_ABI=armeabi-v7a
+$ANDROID_NDK/ndk-build -j$MAXCONCURRENTBUILDS NDK_DEBUG=0 NDK_PROJECT_PATH=$SOURCE_ROOT/PopH264.Android/
+
+#ANDROID_ABI=x86
+#$ANDROID_NDK/ndk-build -j$MAXCONCURRENTBUILDS NDK_DEBUG=0 NDK_PROJECT_PATH=$SOURCE_ROOT/PopH264.Android/
+
+#ANDROID_ABI=arm64-v8a
+#$ANDROID_NDK/ndk-build -j$MAXCONCURRENTBUILDS NDK_DEBUG=0 NDK_PROJECT_PATH=$SOURCE_ROOT/PopH264.Android/
+
+RESULT=$?
 
 	if [[ $RESULT -ne 0 ]]; then
 		exit $RESULT

@@ -3,7 +3,7 @@ APP_PLATFORM 	:= $(ANDROID_API)
 
 # This needs to be defined to avoid compile errors like:
 # Error: selected processor does not support ARM mode `ldrex r0,[r3]'
-APP_ABI 		:= armeabi-v7a
+APP_ABI 		:= $(ANDROID_ABI)
 
 # set some defines
 # gr: the code below goes wrong if GCC_PREPROCESSOR_DEFINITIONS is empty (ends up with -D-std)
