@@ -15,8 +15,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "BF53E82722EC8C1D008253CD"
-               BuildableName = "PopH264Lumin"
-               BlueprintName = "PopH264Lumin"
+               BuildableName = "PopH264_Lumin"
+               BlueprintName = "PopH264_Lumin"
                ReferencedContainer = "container:PopH264.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -46,8 +46,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "BF53E82722EC8C1D008253CD"
-            BuildableName = "PopH264Lumin"
-            BlueprintName = "PopH264Lumin"
+            BuildableName = "PopH264_Lumin"
+            BlueprintName = "PopH264_Lumin"
             ReferencedContainer = "container:PopH264.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
@@ -64,8 +64,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "BF53E82722EC8C1D008253CD"
-            BuildableName = "PopH264Lumin"
-            BlueprintName = "PopH264Lumin"
+            BuildableName = "PopH264_Lumin"
+            BlueprintName = "PopH264_Lumin"
             ReferencedContainer = "container:PopH264.xcodeproj">
          </BuildableReference>
       </MacroExpansion>

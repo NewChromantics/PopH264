@@ -1,0 +1,12 @@
+//	config for OSX bundle apps
+//#include "PopApp.xcconfig"
+
+
+GCC_PREPROCESSOR_DEFINITIONS = $(inherited) TARGET_IOS
+INFOPLIST_FILE = $(SRCROOT)/Info.plist
+
+BROADWAY_PATH = $(SRCROOT)/Source/Broadway/Decoder
+HEADER_SEARCH_PATHS = $(HEADER_SEARCH_PATHS) $(inherited) $(BROADWAY_PATH)/inc
+LIBRARY_SEARCH_PATHS = $(LIBRARY_SEARCH_PATHS) $(inherited)
+
+OTHER_CFLAGS = -Wno-ambiguous-macro
