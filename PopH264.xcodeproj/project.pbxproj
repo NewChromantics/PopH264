@@ -27,8 +27,24 @@
 		BF151FF3238478B700A70EBF /* PopH264.h in Headers */ = {isa = PBXBuildFile; fileRef = BF8AB63721F20C41008E7E76 /* PopH264.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		BF151FFB23847C2B00A70EBF /* TDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = BF53E82C22EDC6A6008253CD /* TDecoder.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		BF151FFC23847C2C00A70EBF /* TDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = BF53E82C22EDC6A6008253CD /* TDecoder.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		BF1520662385899C00A70EBF /* MagicLeapDecoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF53E83022EDCC7E008253CD /* MagicLeapDecoder.cpp */; };
+		BF152069238589DB00A70EBF /* libml_mediacodec.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BF152068238589DB00A70EBF /* libml_mediacodec.dylib */; };
+		BF15206B23858F2400A70EBF /* libml_mediacodeclist.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BF15206A23858F2400A70EBF /* libml_mediacodeclist.dylib */; };
+		BF15206D23858F2C00A70EBF /* libml_mediaformat.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BF15206C23858F2C00A70EBF /* libml_mediaformat.dylib */; };
+		BF15206F23858F2F00A70EBF /* libml_media_ccparser.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BF15206E23858F2F00A70EBF /* libml_media_ccparser.dylib */; };
+		BF15207023858F8D00A70EBF /* libml_media_ccparser.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BF15206E23858F2F00A70EBF /* libml_media_ccparser.dylib */; settings = {ATTRIBUTES = (Required, ); }; };
+		BF15207123858F8F00A70EBF /* libml_mediacodec.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BF152068238589DB00A70EBF /* libml_mediacodec.dylib */; settings = {ATTRIBUTES = (Required, ); }; };
+		BF15207223858F9400A70EBF /* libml_mediaformat.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BF15206C23858F2C00A70EBF /* libml_mediaformat.dylib */; settings = {ATTRIBUTES = (Required, ); }; };
+		BF15207323858F9700A70EBF /* libml_mediacodeclist.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BF15206A23858F2400A70EBF /* libml_mediacodeclist.dylib */; settings = {ATTRIBUTES = (Required, ); }; };
+		BF15207423858FCF00A70EBF /* MagicLeapDecoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF53E83022EDCC7E008253CD /* MagicLeapDecoder.cpp */; };
+		BF152077238590F200A70EBF /* libml_mediacodec.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = BF152076238590F100A70EBF /* libml_mediacodec.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		BF152079238590FE00A70EBF /* libml_mediaformat.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = BF152078238590FE00A70EBF /* libml_mediaformat.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		BF15207B2385910800A70EBF /* libml_mediacodeclist.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = BF15207A2385910800A70EBF /* libml_mediacodeclist.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		BF15207D2385930B00A70EBF /* libml_media_ccparser.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = BF15207C2385930B00A70EBF /* libml_media_ccparser.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		BF152080238595CA00A70EBF /* SoyRuntimeLibrary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF15207F238595C700A70EBF /* SoyRuntimeLibrary.cpp */; };
+		BF152081238595CA00A70EBF /* SoyRuntimeLibrary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF15207F238595C700A70EBF /* SoyRuntimeLibrary.cpp */; };
+		BF152082238595CD00A70EBF /* SoyRuntimeLibrary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF15207F238595C700A70EBF /* SoyRuntimeLibrary.cpp */; };
 		BF459CE221F7D60500CED59D /* PopH264Framework.h in Headers */ = {isa = PBXBuildFile; fileRef = BF459CDE21F7D60500CED59D /* PopH264Framework.h */; };
-		BF459CE521F7D6B500CED59D /* PopH264.bundle in CopyFiles */ = {isa = PBXBuildFile; fileRef = BF4A6A141EA16D7D00613A64 /* PopH264.bundle */; };
 		BF459CE921F7D70000CED59D /* PopH264.h in Headers */ = {isa = PBXBuildFile; fileRef = BF8AB63721F20C41008E7E76 /* PopH264.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		BF459CEA21F7D70000CED59D /* PopH264DecoderInstance.h in Headers */ = {isa = PBXBuildFile; fileRef = BF459C7F21F7C97400CED59D /* PopH264DecoderInstance.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		BF459CEE21F7D73B00CED59D /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BF459CED21F7D73B00CED59D /* CoreMedia.framework */; };
@@ -66,13 +82,16 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		BF8AB6C421F229B0008E7E76 /* CopyFiles */ = {
+		BF152075238590E000A70EBF /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
-			dstPath = "$(SRCROOT)/Unity/PopH264/Assets/PopH264";
-			dstSubfolderSpec = 0;
+			dstPath = "";
+			dstSubfolderSpec = 10;
 			files = (
-				BF459CE521F7D6B500CED59D /* PopH264.bundle in CopyFiles */,
+				BF152077238590F200A70EBF /* libml_mediacodec.dylib in CopyFiles */,
+				BF15207D2385930B00A70EBF /* libml_media_ccparser.dylib in CopyFiles */,
+				BF152079238590FE00A70EBF /* libml_mediaformat.dylib in CopyFiles */,
+				BF15207B2385910800A70EBF /* libml_mediacodeclist.dylib in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -85,6 +104,17 @@
 		BF151FEF2384789700A70EBF /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS12.1.sdk/System/Library/Frameworks/CoreMedia.framework; sourceTree = DEVELOPER_DIR; };
 		BF151FF42384795600A70EBF /* PopH264_Osx.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = PopH264_Osx.xcconfig; sourceTree = "<group>"; };
 		BF151FF52384795600A70EBF /* PopH264_Ios.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = PopH264_Ios.xcconfig; sourceTree = "<group>"; };
+		BF152067238589C800A70EBF /* v0.22.0 */ = {isa = PBXFileReference; lastKnownFileType = folder; name = v0.22.0; path = ../MagicLeap/mlsdk/v0.22.0; sourceTree = "<group>"; };
+		BF152068238589DB00A70EBF /* libml_mediacodec.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libml_mediacodec.dylib; path = ../MagicLeap/mlsdk/v0.22.0/lib/osx/libml_mediacodec.dylib; sourceTree = "<group>"; };
+		BF15206A23858F2400A70EBF /* libml_mediacodeclist.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libml_mediacodeclist.dylib; path = ../MagicLeap/mlsdk/v0.22.0/lib/osx/libml_mediacodeclist.dylib; sourceTree = "<group>"; };
+		BF15206C23858F2C00A70EBF /* libml_mediaformat.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libml_mediaformat.dylib; path = ../MagicLeap/mlsdk/v0.22.0/lib/osx/libml_mediaformat.dylib; sourceTree = "<group>"; };
+		BF15206E23858F2F00A70EBF /* libml_media_ccparser.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libml_media_ccparser.dylib; path = ../MagicLeap/mlsdk/v0.22.0/lib/osx/libml_media_ccparser.dylib; sourceTree = "<group>"; };
+		BF152076238590F100A70EBF /* libml_mediacodec.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libml_mediacodec.dylib; path = ../MagicLeap/mlsdk/v0.22.0/lib/osx/libml_mediacodec.dylib; sourceTree = "<group>"; };
+		BF152078238590FE00A70EBF /* libml_mediaformat.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libml_mediaformat.dylib; path = ../MagicLeap/mlsdk/v0.22.0/lib/osx/libml_mediaformat.dylib; sourceTree = "<group>"; };
+		BF15207A2385910800A70EBF /* libml_mediacodeclist.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libml_mediacodeclist.dylib; path = ../MagicLeap/mlsdk/v0.22.0/lib/osx/libml_mediacodeclist.dylib; sourceTree = "<group>"; };
+		BF15207C2385930B00A70EBF /* libml_media_ccparser.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libml_media_ccparser.dylib; path = ../MagicLeap/mlsdk/v0.22.0/lib/osx/libml_media_ccparser.dylib; sourceTree = "<group>"; };
+		BF15207E238595C700A70EBF /* SoyRuntimeLibrary.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SoyRuntimeLibrary.h; path = Source/SoyLib/src/SoyRuntimeLibrary.h; sourceTree = "<group>"; };
+		BF15207F238595C700A70EBF /* SoyRuntimeLibrary.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SoyRuntimeLibrary.cpp; path = Source/SoyLib/src/SoyRuntimeLibrary.cpp; sourceTree = "<group>"; };
 		BF459C7F21F7C97400CED59D /* PopH264DecoderInstance.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PopH264DecoderInstance.h; path = Source/PopH264DecoderInstance.h; sourceTree = "<group>"; };
 		BF459CD521F7D5C700CED59D /* PopH264_Osx.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = PopH264_Osx.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		BF459CDD21F7D60500CED59D /* FrameworkInfo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = FrameworkInfo.plist; path = Source/FrameworkInfo.plist; sourceTree = "<group>"; };
@@ -212,6 +242,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				BF459D1A21F7DB9900CED59D /* CoreMedia.framework in Frameworks */,
+				BF15206D23858F2C00A70EBF /* libml_mediaformat.dylib in Frameworks */,
+				BF15206B23858F2400A70EBF /* libml_mediacodeclist.dylib in Frameworks */,
+				BF15206F23858F2F00A70EBF /* libml_media_ccparser.dylib in Frameworks */,
+				BF152069238589DB00A70EBF /* libml_mediacodec.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -220,6 +254,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				BF459CEE21F7D73B00CED59D /* CoreMedia.framework in Frameworks */,
+				BF15207323858F9700A70EBF /* libml_mediacodeclist.dylib in Frameworks */,
+				BF15207023858F8D00A70EBF /* libml_media_ccparser.dylib in Frameworks */,
+				BF15207223858F9400A70EBF /* libml_mediaformat.dylib in Frameworks */,
+				BF15207123858F8F00A70EBF /* libml_mediacodec.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -238,6 +276,10 @@
 			isa = PBXGroup;
 			children = (
 				BF151FEF2384789700A70EBF /* CoreMedia.framework */,
+				BF152068238589DB00A70EBF /* libml_mediacodec.dylib */,
+				BF15206C23858F2C00A70EBF /* libml_mediaformat.dylib */,
+				BF15206E23858F2F00A70EBF /* libml_media_ccparser.dylib */,
+				BF15206A23858F2400A70EBF /* libml_mediacodeclist.dylib */,
 				BF459CED21F7D73B00CED59D /* CoreMedia.framework */,
 			);
 			name = Frameworks;
@@ -246,6 +288,11 @@
 		BF4A6A0B1EA16D7C00613A64 = {
 			isa = PBXGroup;
 			children = (
+				BF15207C2385930B00A70EBF /* libml_media_ccparser.dylib */,
+				BF15207A2385910800A70EBF /* libml_mediacodeclist.dylib */,
+				BF152078238590FE00A70EBF /* libml_mediaformat.dylib */,
+				BF152076238590F100A70EBF /* libml_mediacodec.dylib */,
+				BF152067238589C800A70EBF /* v0.22.0 */,
 				BF53E82B22ECB934008253CD /* v0.21.0 */,
 				BF53E82622EC8B59008253CD /* PopH264.Lumin */,
 				BFF1C6E322E377D100AFDFD5 /* PopH264.Android */,
@@ -361,6 +408,8 @@
 				BFF1C70F22E3CF8B00AFDFD5 /* SoyArray.cpp */,
 				BFF1C70E22E3CF8A00AFDFD5 /* SoyArray.h */,
 				BF8AB6AF21F227EF008E7E76 /* SoyAssert.cpp */,
+				BF15207F238595C700A70EBF /* SoyRuntimeLibrary.cpp */,
+				BF15207E238595C700A70EBF /* SoyRuntimeLibrary.h */,
 				BF8AB6AE21F227EF008E7E76 /* SoyAssert.h */,
 				BF8AB6A421F22602008E7E76 /* SoyDebug.cpp */,
 				BF8AB6A821F22602008E7E76 /* SoyDebug.h */,
@@ -531,7 +580,7 @@
 				BF4A6A101EA16D7C00613A64 /* Sources */,
 				BF4A6A111EA16D7C00613A64 /* Frameworks */,
 				BF4A6A121EA16D7C00613A64 /* Resources */,
-				BF8AB6C421F229B0008E7E76 /* CopyFiles */,
+				BF152075238590E000A70EBF /* CopyFiles */,
 			);
 			buildRules = (
 			);
@@ -625,6 +674,7 @@
 			files = (
 				BF151FE12384787200A70EBF /* BroadwayAll.c in Sources */,
 				BF151FE72384788600A70EBF /* SoyAssert.cpp in Sources */,
+				BF152082238595CD00A70EBF /* SoyRuntimeLibrary.cpp in Sources */,
 				BF151FE52384788600A70EBF /* memheap.cpp in Sources */,
 				BF151FEE2384788600A70EBF /* SoyTypes.cpp in Sources */,
 				BF151FE22384787800A70EBF /* BroadwayDecoder.cpp in Sources */,
@@ -644,6 +694,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BF1520662385899C00A70EBF /* MagicLeapDecoder.cpp in Sources */,
 				BF459CF421F7DB1B00CED59D /* PopH264.cpp in Sources */,
 				BF459CF721F7DB3C00CED59D /* SoyTypes.cpp in Sources */,
 				BFF1C6EA22E3C65800AFDFD5 /* BroadwayAll.c in Sources */,
@@ -653,6 +704,7 @@
 				BF459CFD21F7DB4400CED59D /* SoyString.cpp in Sources */,
 				BF459CF521F7DB1E00CED59D /* BroadwayDecoder.cpp in Sources */,
 				BF459CFE21F7DB4400CED59D /* SoyPixels.cpp in Sources */,
+				BF152081238595CA00A70EBF /* SoyRuntimeLibrary.cpp in Sources */,
 				BF459CFC21F7DB4400CED59D /* SoyDebug.cpp in Sources */,
 				BF459CF821F7DB4400CED59D /* SoyTime.cpp in Sources */,
 				BF459CFA21F7DB4400CED59D /* SoyDebug.mm in Sources */,
@@ -679,6 +731,8 @@
 				BF8AB63921F20C41008E7E76 /* PopH264.cpp in Sources */,
 				BF8AB6CB21F24F9D008E7E76 /* InstanceManager.inc in Sources */,
 				BF8AB6B621F22818008E7E76 /* memheap.cpp in Sources */,
+				BF152080238595CA00A70EBF /* SoyRuntimeLibrary.cpp in Sources */,
+				BF15207423858FCF00A70EBF /* MagicLeapDecoder.cpp in Sources */,
 				BF8AB6BB21F228B8008E7E76 /* SoyTypes.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -890,8 +944,9 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MAGIC_LEAP_SDK_PATH = /Volumes/Code/MagicLeap/mlsdk/v0.22.0/;
 				MTL_ENABLE_DEBUG_INFO = YES;
-				ONLY_ACTIVE_ARCH = YES;
+				ONLY_ACTIVE_ARCH = NO;
 				SDKROOT = macosx;
 			};
 			name = Debug;
@@ -931,17 +986,21 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MAGIC_LEAP_SDK_PATH = /Volumes/Code/MagicLeap/mlsdk/v0.22.0/;
 				MTL_ENABLE_DEBUG_INFO = NO;
+				ONLY_ACTIVE_ARCH = NO;
 				SDKROOT = macosx;
 			};
 			name = Release;
 		};
 		BF4A6A1B1EA16D7D00613A64 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = BF151FF42384795600A70EBF /* PopH264_Osx.xcconfig */;
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = "$(SRCROOT)/Source/BundleInfo.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks @loader_path/../Frameworks ../Frameworks @loader_path";
 				PRODUCT_BUNDLE_IDENTIFIER = com.NewChromantics.PopH264;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -951,10 +1010,12 @@
 		};
 		BF4A6A1C1EA16D7D00613A64 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = BF151FF42384795600A70EBF /* PopH264_Osx.xcconfig */;
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = "$(SRCROOT)/Source/BundleInfo.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks @loader_path/../Frameworks ../Frameworks @loader_path";
 				PRODUCT_BUNDLE_IDENTIFIER = com.NewChromantics.PopH264;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -967,7 +1028,6 @@
 			buildSettings = {
 				MABU_BUILD_TARGET = ml1;
 				MABU_FILENAME = PopH264.Lumin/PopH264.mabu;
-				MAGIC_LEAP_SDK_PATH = /Volumes/Code/MagicLeap/mlsdk/v0.21.0/;
 			};
 			name = Debug;
 		};
@@ -976,7 +1036,6 @@
 			buildSettings = {
 				MABU_BUILD_TARGET = release_ml1;
 				MABU_FILENAME = PopH264.Lumin/PopH264.mabu;
-				MAGIC_LEAP_SDK_PATH = /Volumes/Code/MagicLeap/mlsdk/v0.21.0/;
 			};
 			name = Release;
 		};

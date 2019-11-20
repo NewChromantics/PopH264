@@ -10,8 +10,9 @@ namespace MagicLeap
 	void	IsOkay(MLResult Result,std::stringstream& Context);
 	void	EnumCodecs(std::function<void(const std::string&)> Enum);
 	
-	const auto*	DefaultH264Codec = "OMX.Nvidia.h264.decode";
-	//const auto*	DefaultH264Codec = "OMX.google.h264.decoder";
+	
+	const auto*	DefaultH264Codec = "OMX.Nvidia.h264.decode";	//	hardware
+	//const auto*	DefaultH264Codec = "OMX.google.h264.decoder";	//	software according to https://forum.magicleap.com/hc/en-us/community/posts/360041748952-Follow-up-on-Multimedia-Decoder-API
 	
 	//	got this mime from googling;
 	//	http://hello-qd.blogspot.com/2013/05/choose-decoder-and-encoder-by-google.html
@@ -98,7 +99,8 @@ OMX.google.vp8.encoder
 	*/
 	uint64_t Count = 0;
 	auto Result = MLMediaCodecListCountCodecs(&Count);
-
+	IsOkay( Result, "MLMediaCodecListCountCodecs" );
+	
 	for ( auto c=0;	c<Count;	c++ )
 	{
 		try
@@ -118,6 +120,7 @@ OMX.google.vp8.encoder
 }
 
 
+
 MagicLeap::TDecoder::TDecoder()
 {
 	auto EnumCodec = [](const std::string& Name)
@@ -125,8 +128,6 @@ MagicLeap::TDecoder::TDecoder()
 		std::Debug << "Codec: " << Name << std::endl;
 	};
 	EnumCodecs( EnumCodec );
-
-	
 	
 	
 	std::string CodecName = DefaultH264Codec;
@@ -154,6 +155,7 @@ MagicLeap::TDecoder::TDecoder()
 	auto OnInputBufferAvailible = [](MLHandle Codec,int64_t BufferIndex,void* pThis)
 	{
 		auto& This = *static_cast<MagicLeap::TDecoder*>(pThis);
+		std::Debug << "OnOutputBufferAvailible( Codec=" << Codec << " BufferIndex=" << BufferIndex << ")" << std::endl;
 		This.OnInputBufferAvailible(BufferIndex);
 	};
 	
@@ -202,8 +204,15 @@ MagicLeap::TDecoder::TDecoder()
 
 	//	configure
 	MLHandle Format = ML_INVALID_HANDLE;
-	Result = MLMediaFormatCreateVideo( H264MimeType, 1024, 1024, &Format );
+	Result = MLMediaFormatCreateVideo( H264MimeType, 1280, 720, &Format );
 	IsOkay( Result, "MLMediaFormatCreateVideo" );
+	std::Debug << "Got format: " << Format << std::endl;
+
+	//	configure with SPS & PPS
+	int8_t CSD_Buffer[]= { 0, 0, 0, 1, 103, 100, 0, 40, -84, 52, -59, 1, -32, 17, 31, 120, 11, 80, 16, 16, 31, 0, 0, 3, 3, -23, 0, 0, -22, 96, -108, 0, 0, 0, 1, 104, -18, 60, -128 };
+	auto* CSD_Bufferu8 = (uint8_t*)CSD_Buffer;
+	MLMediaFormatByteArray CSD_ByteArray {CSD_Bufferu8, sizeof(CSD_Buffer)};
+	MLMediaFormatSetKeyByteBuffer( Format, "csd-0", &CSD_ByteArray);
 	/*
 	MLMediaFormat_Key_CSD0
 	// create media format with the given mime and resolution
@@ -226,6 +235,7 @@ MagicLeap::TDecoder::TDecoder()
 	IsOkay( Result, "MLMediaCodecStart" );
 	
 	//	MLMediaCodecFlush makes all inputs invalid... flush on close?
+	std::Debug << "Created TDecoder (" << CodecName << ")" << std::endl;
 }
 
 MagicLeap::TDecoder::~TDecoder()
@@ -268,8 +278,8 @@ bool MagicLeap::TDecoder::DecodeNextPacket(std::function<void(const SoyPixelsImp
 		return (int)mPendingData.GetDataSize();
 		//return 0;
 	};
-	
-	
+
+	//	https://forum.magicleap.com/hc/en-us/community/posts/360041748952-Follow-up-on-Multimedia-Decoder-API
 	
 	//	waiting for input buffers
 	//	gr: this is maybe just a signal there IS some processing space...
@@ -279,7 +289,8 @@ bool MagicLeap::TDecoder::DecodeNextPacket(std::function<void(const SoyPixelsImp
 		return true;
 	}
 	
-	auto Timeout = 0;	//	return immediately
+	//auto Timeout = 0;	//	return immediately
+	auto Timeout = -1;	//	block
 	
 	//	API says MLMediaCodecDequeueInputBuffer output is index
 	//	but everything referring to it, says it's a handle (uint64!)
@@ -315,6 +326,8 @@ bool MagicLeap::TDecoder::DecodeNextPacket(std::function<void(const SoyPixelsImp
 	
 	try
 	{
+		std::Debug << "Got input buffer #" << BufferIndex << std::endl;
+		
 		auto BufferHandle = static_cast<MLHandle>( BufferIndex );
 		uint8_t* Buffer = nullptr;
 		size_t BufferSize = 0;
@@ -382,6 +395,7 @@ bool MagicLeap::TDecoder::DecodeNextPacket(std::function<void(const SoyPixelsImp
 
 void MagicLeap::TDecoder::OnInputBufferAvailible(int64_t BufferIndex)
 {
+	std::Debug << "OnInputBufferAvailible(" << BufferIndex << ")" << std::endl;
 	std::lock_guard<std::mutex> Lock(mInputBufferLock);
 	mInputBuffers.PushBack(BufferIndex);
 }

@@ -1,8 +1,5 @@
 #pragma once
 
-#if !defined(TARGET_LUMIN)
-#error Trying to compile MagicLeap Decoder on non-Lumin target
-#endif
 
 #include "TDecoder.h"
 #include <ml_media_codec.h>

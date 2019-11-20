@@ -2,11 +2,16 @@
 #include "PopH264DecoderInstance.h"
 #include "SoyLib/src/SoyPixels.h"
 
-#if defined(TARGET_LUMIN)
-#include "MagicLeapDecoder.h"
+//	gr: this works on osx, but currently, none of the functions are implemented :)
+#if defined(TARGET_LUMIN)// || defined(TARGET_OSX)
+#define ENABLE_MAGICLEAP_DECODER
 #endif
 
 #define ENABLE_BROADWAY
+
+#if defined(ENABLE_MAGICLEAP_DECODER)
+#include "MagicLeapDecoder.h"
+#endif
 
 #if defined(ENABLE_BROADWAY)
 #include "BroadwayDecoder.h"
@@ -43,7 +48,7 @@ BOOL APIENTRY DllMain(HMODULE /* hModule */, DWORD ul_reason_for_call, LPVOID /*
 
 PopH264::TDecoderInstance::TDecoderInstance()
 {
-#if defined(TARGET_LUMIN)
+#if defined(ENABLE_MAGICLEAP_DECODER)
 	mDecoder.reset( new MagicLeap::TDecoder );
 #elif defined(ENABLE_BROADWAY)
 	mDecoder.reset( new Broadway::TDecoder );
