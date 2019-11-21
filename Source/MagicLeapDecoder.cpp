@@ -211,7 +211,7 @@ SoyPixelsMeta MagicLeap::GetPixelMeta(MLHandle Format)
 	//	SDK says for  MLMediaCodecAcquireNextAvailableFrame;
 	//		Note: The returned buffer's color format is multi-planar YUV420. Since our
 	//		underlying hardware interops do not support multiplanar formats, advanced
-	auto PixelFormat = SoyPixelsFormat::Yuv_8_88_Ntsc;
+	auto PixelFormat = SoyPixelsFormat::YYuv_8888_Full;
 
 	std::Debug << "Format; ";
 	std::Debug << " Width=" << Width;
@@ -443,6 +443,11 @@ MagicLeap::TDecoder::~TDecoder()
 //	returns true if more data to proccess
 bool MagicLeap::TDecoder::DecodeNextPacket(std::function<void(const SoyPixelsImpl&,SoyTime)> OnFrameDecoded)
 {
+	//	pop any pending frames from output thread
+	//	then push new data
+	mOutputThread.PopFrames( OnFrameDecoded );
+	
+	
 	if ( mPendingData.IsEmpty() )
 		return false;
 	
@@ -1893,13 +1898,17 @@ bool MagicLeap::TOutputThread::CanSleep()
 void MagicLeap::TOutputThread::PopFrames(std::function<void(const SoyPixelsImpl&,SoyTime)>& OnFrameDecoded)
 {
 	if ( !mDecodedPixelsValid )
+	{
+		std::Debug << "PopFrame, no frame" << std::endl;
 		return;
+	}
 	
 	//	pop any pixels we've got
 	std::lock_guard<std::mutex> Lock(mDecodedPixelsLock);
 	SoyTime DecodeDuration;
 	OnFrameDecoded( mDecodedPixels, DecodeDuration );
 	mDecodedPixelsValid = false;
+	std::Debug << "PopFrame, gave out " << mDecodedPixels.GetMeta() << std::endl;
 }
 
 
@@ -1930,10 +1939,10 @@ void MagicLeap::TOutputThread::PopOutputBuffer(int64_t OutputBufferIndex)
 		IsOkay( Result, "MLMediaCodecReleaseOutputBuffer");
 	};
 	
-	std::Debug << "Got OutputBuffer(" << OutputBufferIndex << ") DataSize=" << DataSize << " DataPtr=" << Data << std::endl;
+	std::Debug << "Got OutputBuffer(" << OutputBufferIndex << ") DataSize=" << DataSize << " DataPtr=0x" << std::hex << (size_t)(Data) << std::dec << std::endl;
 	if ( Data == nullptr || DataSize == 0 )
 	{
-		std::Debug << "Got OutputBuffer(" << OutputBufferIndex << ") DataSize=" << DataSize << " DataPtr=" << Data << std::endl;
+		std::Debug << "Got OutputBuffer(" << OutputBufferIndex << ") DataSize=" << DataSize << " DataPtr=0x" << std::hex << (size_t)(Data) << std::dec << std::endl;
 		ReleaseBuffer();
 		return;
 	}
