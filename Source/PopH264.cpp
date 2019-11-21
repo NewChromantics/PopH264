@@ -23,10 +23,10 @@ namespace PopH264
 	const int32_t MODE_HARDWARE = 1;
 }
 
-class TDecoderParams
+class TInstanceParams
 {
 public:
-	TDecoderParams(int32_t Mode) :
+	TInstanceParams(int32_t Mode) :
 		Mode	( Mode )
 	{
 	}
@@ -34,7 +34,6 @@ public:
 };
 
 #define TInstanceObject	PopH264::TDecoderInstance
-#define TInstanceParams	TDecoderParams
 
 #include "InstanceManager.inc"
 
@@ -60,14 +59,14 @@ BOOL APIENTRY DllMain(HMODULE /* hModule */, DWORD ul_reason_for_call, LPVOID /*
 
 PopH264::TDecoderInstance::TDecoderInstance(int32_t Mode)
 {
-#if defined(ENABLE_MAGICLEAP_DECODER)
-	if ( Mode == MODE_HARDWARE )
+	auto PushFrame = [this](const SoyPixelsImpl& Pixels,int32_t FrameNumber,SoyTime DecodeDuration)
 	{
-		auto PushFrame = [this](const SoyPixelsImpl& Pixels,int32_t FrameNumber,SoyTime DecodeDuration)
-		{
-			this->PushFrame( Pixels, FrameNumber, DecodeDuration.GetMilliSeconds() );
-		};
-		mDecoder.reset( new MagicLeap::TDecoder(PushFrame) );
+		this->PushFrame( Pixels, FrameNumber, DecodeDuration.GetMilliSeconds() );
+	};
+#if defined(ENABLE_MAGICLEAP_DECODER)
+	if ( Mode != MODE_BROADWAY )
+	{
+		mDecoder.reset( new MagicLeap::TDecoder( Mode, PushFrame ) );
 	}
 #elif defined(ENABLE_BROADWAY)
 	mDecoder.reset( new Broadway::TDecoder );

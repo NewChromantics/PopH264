@@ -11,8 +11,11 @@ namespace MagicLeap
 	void	IsOkay(MLResult Result,std::stringstream& Context);
 	void	EnumCodecs(std::function<void(const std::string&)> Enum);
 	
-	const auto*	DefaultH264Codec = "OMX.Nvidia.h264.decode";	//	hardware
-	//const auto*	DefaultH264Codec = "OMX.google.h264.decoder";	//	software according to https://forum.magicleap.com/hc/en-us/community/posts/360041748952-Follow-up-on-Multimedia-Decoder-API
+	const int32_t	Mode_Nvidia = 1;
+	const int32_t	Mode_Google = 2;
+
+	const auto*		NvidiaH264Codec = "OMX.Nvidia.h264.decode";	//	hardware
+	const auto*		GoogleH264Codec = "OMX.google.h264.decoder";	//	software according to https://forum.magicleap.com/hc/en-us/community/posts/360041748952-Follow-up-on-Multimedia-Decoder-API
 	
 	//	got this mime from googling;
 	//	http://hello-qd.blogspot.com/2013/05/choose-decoder-and-encoder-by-google.html
@@ -295,9 +298,23 @@ OMX.google.vp8.encoder
 	}
 }
 
+std::string MagicLeap::GetCodec(int32_t Mode)
+{
+	switch ( Mode )
+	{
+		case Mode_Nvidia:	return NvidiaH264Codec;
+		case Mode_Google:	return GoogleH264Codec;
+
+		default:
+			break;
+	}
+	std::stringstream Error;
+	Error << "Unknown mode(" << Mode << ") for MagicLeap decoder";
+	throw Soy::AssertException(Error);
+}
 
 
-MagicLeap::TDecoder::TDecoder(std::function<void(const SoyPixelsImpl&,int32_t,SoyTime)> PushFrame) :
+MagicLeap::TDecoder::TDecoder(int32_t Mode,std::function<void(const SoyPixelsImpl&,int32_t,SoyTime)> PushFrame) :
 	mOutputThread	( PushFrame )
 {
 	auto EnumCodec = [](const std::string& Name)
@@ -305,9 +322,8 @@ MagicLeap::TDecoder::TDecoder(std::function<void(const SoyPixelsImpl&,int32_t,So
 		std::Debug << "Codec: " << Name << std::endl;
 	};
 	EnumCodecs( EnumCodec );
-	
-	
-	std::string CodecName = DefaultH264Codec;
+
+	auto CodecName = GetCodec( Mode );
 	bool IsMime = Soy::StringBeginsWith(CodecName,"video/",false);
 	auto CreateByType = IsMime ? MLMediaCodecCreation_ByType : MLMediaCodecCreation_ByName;
 

@@ -172,6 +172,13 @@ public static class PopH264
 		public int FrameNumber;
 	};
 
+	public enum DecoderMode
+	{
+		Software = 0,
+		MagicLeap_Nvidia = 1,
+		MagicLeap_Google = 2,
+	};
+
 	public class Decoder : IDisposable
 	{
 		int? Instance = null;
@@ -184,10 +191,11 @@ public static class PopH264
 		List<FrameInput> InputQueue;
 		int? InputThreadResult = 0;
 
-		public Decoder(bool HardwareDecoding,bool ThreadedDecoding)
+		public Decoder(DecoderMode DecoderMode,bool ThreadedDecoding)
 		{
 			this.ThreadedDecoding = ThreadedDecoding;
-			Instance = PopH264_CreateInstance( HardwareDecoding ? 1 : 0);
+			int Mode = (int)DecoderMode;
+			Instance = PopH264_CreateInstance(Mode);
 			if (Instance.Value <= 0)
 				throw new System.Exception("Failed to create decoder instance");
 		}
