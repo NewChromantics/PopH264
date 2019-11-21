@@ -16,11 +16,8 @@ namespace MagicLeap
 class MagicLeap::TOutputThread : public SoyWorkerThread
 {
 public:
-	TOutputThread();
-	
-	//	pop last pixels
-	void			PopFrames(std::function<void(const SoyPixelsImpl&,SoyTime)>& OnFrameDecoded);
-	
+	TOutputThread(std::function<void(const SoyPixelsImpl&,int32_t,SoyTime)>& PushFrame);
+
 	virtual bool	Iteration() override;
 	virtual bool	CanSleep() override;
 	
@@ -28,28 +25,26 @@ public:
 	
 private:
 	void			PopOutputBuffer(int64_t OutputBuffer);
+	void			PushFrame(const SoyPixelsImpl& Pixels);
 
 private:
 	//	list of buffers with some pending output data
 	std::mutex		mOutputBuffersLock;
 	Array<int64_t>	mOutputBuffers;
+	int32_t			mFrameNumber = 0;	//	need to get this from buffers but... where can I get the meta from...
 	
 	MLHandle		mCodecHandle = ML_INVALID_HANDLE;
 	SoyPixelsMeta	mPixelFormat;		//	this may need syncing with buffers
 	
-	//	sit on just the last pixels for now
-	std::mutex		mDecodedPixelsLock;
-	SoyPixels		mDecodedPixels;
-	bool			mDecodedPixelsValid = false;
+	std::function<void(const SoyPixelsImpl&,int32_t,SoyTime)>	mPushFrame;
 };
-
 
 
 
 class MagicLeap::TDecoder : public PopH264::TDecoder
 {
 public:
-	TDecoder();
+	TDecoder(std::function<void(const SoyPixelsImpl&,int32_t,SoyTime)> PushFrame);
 	~TDecoder();
 
 private:

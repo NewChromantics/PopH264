@@ -17,12 +17,24 @@
 #include "BroadwayDecoder.h"
 #endif
 
+namespace PopH264
+{
+	const int32_t MODE_BROADWAY = 0;
+	const int32_t MODE_HARDWARE = 1;
+}
 
+class TDecoderParams
+{
+public:
+	TDecoderParams(int32_t Mode) :
+		Mode	( Mode )
+	{
+	}
+	int32_t Mode = -1;
+};
 
-
-class TNoParams;
-using TInstanceObject = PopH264::TDecoderInstance;
-using TInstanceParams = TNoParams;
+#define TInstanceObject	PopH264::TDecoderInstance
+#define TInstanceParams	TDecoderParams
 
 #include "InstanceManager.inc"
 
@@ -46,14 +58,23 @@ BOOL APIENTRY DllMain(HMODULE /* hModule */, DWORD ul_reason_for_call, LPVOID /*
 }
 #endif
 
-PopH264::TDecoderInstance::TDecoderInstance()
+PopH264::TDecoderInstance::TDecoderInstance(int32_t Mode)
 {
 #if defined(ENABLE_MAGICLEAP_DECODER)
-	mDecoder.reset( new MagicLeap::TDecoder );
+	if ( Mode == MODE_HARDWARE )
+	{
+		auto PushFrame = [this](const SoyPixelsImpl& Pixels,int32_t FrameNumber,SoyTime DecodeDuration)
+		{
+			this->PushFrame( Pixels, FrameNumber, DecodeDuration.GetMilliSeconds() );
+		};
+		mDecoder.reset( new MagicLeap::TDecoder(PushFrame) );
+	}
 #elif defined(ENABLE_BROADWAY)
 	mDecoder.reset( new Broadway::TDecoder );
 #else
-	throw Soy::AssertException("No decoder supported");
+	std::stringstream Error;
+	Error << "No decoder supported (mode=" << Params.Mode << ")";
+	throw Soy::AssertException(Error);
 #endif
 }
 
@@ -130,6 +151,7 @@ void PopH264::TDecoderInstance::PushFrame(const SoyPixelsImpl& Frame,int32_t Fra
 		std::lock_guard<std::mutex> Lock(mFramesLock);
 		mFrames.PushBack(NewFrame);
 		mMeta = Frame.GetMeta();
+		std::Debug << mFrames.GetSize() << " frames pending" << std::endl;
 	}
 	if ( mOnNewFrame )
 		mOnNewFrame();
@@ -182,7 +204,7 @@ __export void PopH264_GetMeta(int32_t Instance, int32_t* pMetaValues, int32_t Me
 		
 		for ( auto p=0;	p<PlaneMetas.GetSize();	p++ )
 		{
-			//auto& PlaneMeta = PlaneMetas[p];
+			auto& PlaneMeta = PlaneMetas[p];
 			//std::Debug << "Outputting plane " << p << "/" << PlaneMetas.GetSize() << "; " << PlaneMeta << std::endl;
 			MetaValues.PushBack(PlaneMeta.GetWidth());
 			MetaValues.PushBack(PlaneMeta.GetHeight());

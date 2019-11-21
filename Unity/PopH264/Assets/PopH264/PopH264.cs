@@ -16,7 +16,7 @@ public static class PopH264
 
 
 	[DllImport(PluginName, CallingConvention = CallingConvention.Cdecl)]
-	private static extern int	PopH264_CreateInstance();
+	private static extern int	PopH264_CreateInstance(int Mode);
 
 	[DllImport(PluginName, CallingConvention = CallingConvention.Cdecl)]
 	private static extern void	PopH264_DestroyInstance(int Instance);
@@ -184,10 +184,10 @@ public static class PopH264
 		List<FrameInput> InputQueue;
 		int? InputThreadResult = 0;
 
-		public Decoder(bool ThreadedDecoding=true)
+		public Decoder(bool HardwareDecoding,bool ThreadedDecoding)
 		{
 			this.ThreadedDecoding = ThreadedDecoding;
-			Instance = PopH264_CreateInstance();
+			Instance = PopH264_CreateInstance( HardwareDecoding ? 1 : 0);
 			if (Instance.Value <= 0)
 				throw new System.Exception("Failed to create decoder instance");
 		}

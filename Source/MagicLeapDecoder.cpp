@@ -297,7 +297,8 @@ OMX.google.vp8.encoder
 
 
 
-MagicLeap::TDecoder::TDecoder()
+MagicLeap::TDecoder::TDecoder(std::function<void(const SoyPixelsImpl&,int32_t,SoyTime)> PushFrame) :
+	mOutputThread	( PushFrame )
 {
 	auto EnumCodec = [](const std::string& Name)
 	{
@@ -445,11 +446,6 @@ MagicLeap::TDecoder::~TDecoder()
 //	returns true if more data to proccess
 bool MagicLeap::TDecoder::DecodeNextPacket(std::function<void(const SoyPixelsImpl&,SoyTime)> OnFrameDecoded)
 {
-	//	pop any pending frames from output thread
-	//	then push new data
-	mOutputThread.PopFrames( OnFrameDecoded );
-	
-	
 	if ( mPendingData.IsEmpty() )
 		return false;
 	
@@ -1874,8 +1870,9 @@ void Broadway::TDecoder::OnPicture(const H264SwDecPicture& Picture,const H264SwD
  }
 */
 
-MagicLeap::TOutputThread::TOutputThread() :
-	SoyWorkerThread	("MagicLeapOutputThread", SoyWorkerWaitMode::Wake )
+MagicLeap::TOutputThread::TOutputThread(std::function<void(const SoyPixelsImpl&,int32_t,SoyTime)>& PushFrame) :
+	SoyWorkerThread	("MagicLeapOutputThread", SoyWorkerWaitMode::Wake ),
+	mPushFrame		( PushFrame )
 {
 	Start();
 }
@@ -1897,21 +1894,6 @@ bool MagicLeap::TOutputThread::CanSleep()
 	return false;
 }
 
-void MagicLeap::TOutputThread::PopFrames(std::function<void(const SoyPixelsImpl&,SoyTime)>& OnFrameDecoded)
-{
-	if ( !mDecodedPixelsValid )
-	{
-		std::Debug << "PopFrame, no frame" << std::endl;
-		return;
-	}
-	
-	//	pop any pixels we've got
-	std::lock_guard<std::mutex> Lock(mDecodedPixelsLock);
-	SoyTime DecodeDuration;
-	OnFrameDecoded( mDecodedPixels, DecodeDuration );
-	std::Debug << "PopFrame, gave out " << mDecodedPixels.GetMeta() << std::endl;
-	mDecodedPixelsValid = false;
-}
 
 
 void MagicLeap::TOutputThread::PopOutputBuffer(int64_t OutputBufferIndex)
@@ -1975,11 +1957,7 @@ void MagicLeap::TOutputThread::PopOutputBuffer(int64_t OutputBufferIndex)
 		//	output pixels!
 		auto* DataMutable = const_cast<uint8_t*>( Data );
 		SoyPixelsRemote NewPixels( DataMutable, DataSize, mPixelFormat );
-		{
-			std::lock_guard<std::mutex> Lock(mDecodedPixelsLock);
-			mDecodedPixels.Copy( NewPixels );
-			mDecodedPixelsValid = true;
-		}
+		PushFrame( NewPixels );
 		ReleaseBuffer();
 	}
 	catch(std::exception& e)
@@ -1991,17 +1969,17 @@ void MagicLeap::TOutputThread::PopOutputBuffer(int64_t OutputBufferIndex)
 }
 
 
+void MagicLeap::TOutputThread::PushFrame(const SoyPixelsImpl& Pixels)
+{
+	SoyTime DecodeDuration;
+	mFrameNumber++;
+	mPushFrame( Pixels, mFrameNumber, DecodeDuration );
+}
+
 bool MagicLeap::TOutputThread::Iteration()
 {
 	if ( mOutputBuffers.IsEmpty() )
 		return true;
-
-	//	wait for frame to be used
-	if ( mDecodedPixelsValid )
-	{
-		std::this_thread::sleep_for( std::chrono::milliseconds(100) );
-		return true;
-	}
 	
 	//	read a buffer
 	int64_t BufferIndex = -1;

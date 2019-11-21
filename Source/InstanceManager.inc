@@ -42,7 +42,7 @@ uint32_t InstanceManager::CreateInstance(const TInstanceParams& Params)
 	//	alloc device
 	try
 	{
-		auto Object = std::make_shared<TInstanceObject>();
+		auto Object = std::make_shared<TInstanceObject>( Params.Mode );
 		if ( Object )
 			return InstanceManager::AssignInstance(Object);
 	}
@@ -125,11 +125,12 @@ RETURN SafeCall(FUNC Function,const char* FunctionName,RETURN ErrorReturn)
 
 
 
-__export int32_t PopH264_CreateInstance()
+__export int32_t PopH264_CreateInstance(int32_t Mode)
 {
 	auto Function = [&]()
 	{
-		auto InstanceId = InstanceManager::CreateInstance( TInstanceParams() );
+		TInstanceParams Params(Mode);
+		auto InstanceId = InstanceManager::CreateInstance( Params );
 		return InstanceId;
 	};
 	return SafeCall( Function, __func__, -1 );
