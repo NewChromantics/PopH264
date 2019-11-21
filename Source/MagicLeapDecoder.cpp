@@ -211,7 +211,7 @@ SoyPixelsMeta MagicLeap::GetPixelMeta(MLHandle Format)
 	//	SDK says for  MLMediaCodecAcquireNextAvailableFrame;
 	//		Note: The returned buffer's color format is multi-planar YUV420. Since our
 	//		underlying hardware interops do not support multiplanar formats, advanced
-	auto PixelFormat = SoyPixelsFormat::YYuv_8888_Full;
+	auto PixelFormat = SoyPixelsFormat::Yuv_8_8_8_Full;
 
 	std::Debug << "Format; ";
 	std::Debug << " Width=" << Width;
@@ -1939,14 +1939,14 @@ void MagicLeap::TOutputThread::PopOutputBuffer(int64_t OutputBufferIndex)
 		IsOkay( Result, "MLMediaCodecReleaseOutputBuffer");
 	};
 	
-	std::Debug << "Got OutputBuffer(" << OutputBufferIndex << ") DataSize=" << DataSize << " DataPtr=0x" << std::hex << (size_t)(Data) << std::dec << std::endl;
 	if ( Data == nullptr || DataSize == 0 )
 	{
-		std::Debug << "Got OutputBuffer(" << OutputBufferIndex << ") DataSize=" << DataSize << " DataPtr=0x" << std::hex << (size_t)(Data) << std::dec << std::endl;
+		std::Debug << "Got Invalid OutputBuffer(" << OutputBufferIndex << ") DataSize=" << DataSize << " DataPtr=0x" << std::hex << (size_t)(Data) << std::dec << std::endl;
 		ReleaseBuffer();
 		return;
 	}
 	
+	std::Debug << "Got OutputBuffer(" << OutputBufferIndex << ") DataSize=" << DataSize << " DataPtr=0x" << std::hex << (size_t)(Data) << std::dec << std::endl;
 	try
 	{
 		//	if data is null, then output is a surface
