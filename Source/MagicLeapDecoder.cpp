@@ -11,8 +11,8 @@ namespace MagicLeap
 	void	IsOkay(MLResult Result,std::stringstream& Context);
 	void	EnumCodecs(std::function<void(const std::string&)> Enum);
 	
-	//const auto*	DefaultH264Codec = "OMX.Nvidia.h264.decode";	//	hardware
-	const auto*	DefaultH264Codec = "OMX.google.h264.decoder";	//	software according to https://forum.magicleap.com/hc/en-us/community/posts/360041748952-Follow-up-on-Multimedia-Decoder-API
+	const auto*	DefaultH264Codec = "OMX.Nvidia.h264.decode";	//	hardware
+	//const auto*	DefaultH264Codec = "OMX.google.h264.decoder";	//	software according to https://forum.magicleap.com/hc/en-us/community/posts/360041748952-Follow-up-on-Multimedia-Decoder-API
 	
 	//	got this mime from googling;
 	//	http://hello-qd.blogspot.com/2013/05/choose-decoder-and-encoder-by-google.html
@@ -24,7 +24,8 @@ namespace MagicLeap
 	MLMediaFormatKey	MLMediaFormat_Key_CSD0 = "csd-0";
 
 
-	SoyPixelsMeta		GetPixelMeta(MLHandle Format);
+	SoyPixelsFormat::Type	GetPixelFormat(int32_t ColourFormat);
+	SoyPixelsMeta			GetPixelMeta(MLHandle Format);
 }
 
 
@@ -75,94 +76,94 @@ void MagicLeap::IsOkay(MLResult Result,const char* Context)
 	throw Soy::AssertException( Error );
 }
 
-/*
+
 SoyPixelsFormat::Type MagicLeap::GetPixelFormat(int32_t ColourFormat)
 {
+	//	http://developer.android.com/reference/android/media/MediaCodecInfo.CodecCapabilities.html
+	enum
+	{
+	COLOR_Format12bitRGB444	= 3,
+	COLOR_Format16bitARGB1555 = 5,
+	COLOR_Format16bitARGB4444 = 4,
+	COLOR_Format16bitBGR565 = 7,
+	COLOR_Format16bitRGB565 = 6,
+	COLOR_Format18BitBGR666 = 41,
+	COLOR_Format18bitARGB1665 = 9,
+	COLOR_Format18bitRGB666 = 8,
+	COLOR_Format19bitARGB1666 = 10,
+	COLOR_Format24BitABGR6666 = 43,
+	COLOR_Format24BitARGB6666 = 42,
+	COLOR_Format24bitARGB1887 = 13,
+	COLOR_Format24bitBGR888 = 12,
+	COLOR_Format24bitRGB888 = 11,
+	COLOR_Format32bitABGR8888 = 0x7f00a000,
+	COLOR_Format32bitARGB8888 = 16,
+	COLOR_Format32bitBGRA8888 = 15,
+	COLOR_Format8bitRGB332 = 2,
+	COLOR_FormatCbYCrY = 27,
+	COLOR_FormatCrYCbY = 28,
+	COLOR_FormatL16 = 36,
+	COLOR_FormatL2 = 33,
+	COLOR_FormatL32 = 38,
+	COLOR_FormatL4 = 34,
+	COLOR_FormatL8 = 35,
+	COLOR_FormatMonochrome = 1,
+	COLOR_FormatRGBAFlexible = 0x7f36a888,
+	COLOR_FormatRGBFlexible = 0x7f36b888,
+	COLOR_FormatRawBayer10bit = 31,
+	COLOR_FormatRawBayer8bit = 30,
+	COLOR_FormatRawBayer8bitcompressed = 32,
+	COLOR_FormatSurface = 0x7f000789,
+	COLOR_FormatYCbYCr = 25,
+	COLOR_FormatYCrYCb = 26,
+	COLOR_FormatYUV411PackedPlanar = 18,
+	COLOR_FormatYUV411Planar = 17,
+	COLOR_FormatYUV420Flexible = 0x7f420888,
+	COLOR_FormatYUV420PackedPlanar = 20,
+	COLOR_FormatYUV420PackedSemiPlanar = 39,
+	COLOR_FormatYUV420Planar = 19,
+	COLOR_FormatYUV420SemiPlanar = 21,
+	COLOR_FormatYUV422Flexible = 0x7f422888,
+	COLOR_FormatYUV422PackedPlanar = 23,
+	COLOR_FormatYUV422PackedSemiPlanar = 40,
+	COLOR_FormatYUV422Planar = 22,
+	COLOR_FormatYUV422SemiPlanar = 24,
+	COLOR_FormatYUV444Flexible = 0x7f444888,
+	COLOR_FormatYUV444Interleaved = 29,
+	COLOR_QCOM_FormatYUV420SemiPlanar = 0x7fa30c00,
+	COLOR_TI_FormatYUV420PackedSemiPlanar = 0x7f000100,
 
- enum
- {
- //	http://developer.android.com/reference/android/media/MediaCodecInfo.CodecCapabilities.html
- COLOR_Format12bitRGB444	= 3,
- COLOR_Format16bitARGB1555 = 5,
- COLOR_Format16bitARGB4444 = 4,
- COLOR_Format16bitBGR565 = 7,
- COLOR_Format16bitRGB565 = 6,
- COLOR_Format18BitBGR666 = 41,
- COLOR_Format18bitARGB1665 = 9,
- COLOR_Format18bitRGB666 = 8,
- COLOR_Format19bitARGB1666 = 10,
- COLOR_Format24BitABGR6666 = 43,
- COLOR_Format24BitARGB6666 = 42,
- COLOR_Format24bitARGB1887 = 13,
- COLOR_Format24bitBGR888 = 12,
- COLOR_Format24bitRGB888 = 11,
- COLOR_Format32bitABGR8888 = 0x7f00a000,
- COLOR_Format32bitARGB8888 = 16,
- COLOR_Format32bitBGRA8888 = 15,
- COLOR_Format8bitRGB332 = 2,
- COLOR_FormatCbYCrY = 27,
- COLOR_FormatCrYCbY = 28,
- COLOR_FormatL16 = 36,
- COLOR_FormatL2 = 33,
- COLOR_FormatL32 = 38,
- COLOR_FormatL4 = 34,
- COLOR_FormatL8 = 35,
- COLOR_FormatMonochrome = 1,
- COLOR_FormatRGBAFlexible = 0x7f36a888,
- COLOR_FormatRGBFlexible = 0x7f36b888,
- COLOR_FormatRawBayer10bit = 31,
- COLOR_FormatRawBayer8bit = 30,
- COLOR_FormatRawBayer8bitcompressed = 32,
- COLOR_FormatSurface = 0x7f000789,
- COLOR_FormatYCbYCr = 25,
- COLOR_FormatYCrYCb = 26,
- COLOR_FormatYUV411PackedPlanar = 18,
- COLOR_FormatYUV411Planar = 17,
- COLOR_FormatYUV420Flexible = 0x7f420888,
- COLOR_FormatYUV420PackedPlanar = 20,
- COLOR_FormatYUV420PackedSemiPlanar = 39,
- COLOR_FormatYUV420Planar = 19,
- COLOR_FormatYUV420SemiPlanar = 21,
- COLOR_FormatYUV422Flexible = 0x7f422888,
- COLOR_FormatYUV422PackedPlanar = 23,
- COLOR_FormatYUV422PackedSemiPlanar = 40,
- COLOR_FormatYUV422Planar = 22,
- COLOR_FormatYUV422SemiPlanar = 24,
- COLOR_FormatYUV444Flexible = 0x7f444888,
- COLOR_FormatYUV444Interleaved = 29,
- COLOR_QCOM_FormatYUV420SemiPlanar = 0x7fa30c00,
- COLOR_TI_FormatYUV420PackedSemiPlanar = 0x7f000100,
- 
- //	gr: mystery format (when using surface texture)
- COLOR_FORMAT_UNKNOWN_MAYBE_SURFACE = 261,
- 
- //	note4 is giving us a pixel format of this, even when we have a surface texture. Renders okay.
- //	gr; in non-opengl mode, the colour space is broken!
- //		it is not the same as Yuv_8_8_8_Full (but close). The name is a big hint of this.
- //		probably more like Yuv_8_88 but line by line.
- OMX_QCOM_COLOR_FormatYVU420SemiPlanarInterlace = 0x7FA30C04,	//	2141391876
- };
- 
- //	nvidia decoder gives 262
- //	google decoder gives 19
- //	these match
- //	http://developer.android.com/reference/android/media/MediaCodecInfo.CodecCapabilities.html
+	//	gr: mystery format (when using surface texture)
+	COLOR_FORMAT_UNKNOWN_MAYBE_SURFACE = 261,
+	
+	//	magic leap + nvidia decoder
+	COLOR_FORMAT_UNKNOWN_NVIDIA_SURFACE = 262,
+
+	//	note4 is giving us a pixel format of this, even when we have a surface texture. Renders okay.
+	//	gr; in non-opengl mode, the colour space is broken!
+	//		it is not the same as Yuv_8_8_8_Full (but close). The name is a big hint of this.
+	//		probably more like Yuv_8_88 but line by line.
+	OMX_QCOM_COLOR_FormatYVU420SemiPlanarInterlace = 0x7FA30C04,	//	2141391876
+	};
+	
+	//	nvidia decoder gives 262
+	//	google decoder gives 19
+	//	these match
+	//	http://developer.android.com/reference/android/media/MediaCodecInfo.CodecCapabilities.html
 
 	switch (ColourFormat)
 	{
-		case MLSurfaceFormat_Unknown:	throw Soy::AssertException("Format is MLSurfaceFormat_Unknown");
-			COLOR_Format12bitRGB444
-			case
-	}{
-		case <#constant#>:
-			<#statements#>
-			break;
-			
-		default:
-			break;
+		case COLOR_FormatYUV420Planar:				return SoyPixelsFormat::Yuv_8_8_8_Full;
+		case COLOR_FormatYUV420SemiPlanar:			return SoyPixelsFormat::Yuv_8_88_Full;
+		case COLOR_FORMAT_UNKNOWN_NVIDIA_SURFACE:	return SoyPixelsFormat::Yuv_8_8_8_Full;
+		default:break;
 	}
+	
+	std::stringstream Error;
+	Error << "Unhandled colour format #" << ColourFormat << std::endl;
+	throw Soy::AssertException(Error);
 }
-*/
+
 SoyPixelsMeta MagicLeap::GetPixelMeta(MLHandle Format)
 {
 	auto GetKey_integer = [&](MLMediaFormatKey Key)
@@ -201,6 +202,7 @@ SoyPixelsMeta MagicLeap::GetPixelMeta(MLHandle Format)
 	//GetKey<string>(MLMediaFormat_Key_Mime
 	DebugKey(MLMediaFormat_Key_Frame_Rate);
 	DebugKey(MLMediaFormat_Key_Color_Format);
+	auto ColourFormat = GetKey_integer(MLMediaFormat_Key_Color_Format);
 	DebugKey(MLMediaFormat_Key_Crop_Left);
 	DebugKey(MLMediaFormat_Key_Crop_Right);
 	DebugKey(MLMediaFormat_Key_Crop_Bottom);
@@ -211,7 +213,7 @@ SoyPixelsMeta MagicLeap::GetPixelMeta(MLHandle Format)
 	//	SDK says for  MLMediaCodecAcquireNextAvailableFrame;
 	//		Note: The returned buffer's color format is multi-planar YUV420. Since our
 	//		underlying hardware interops do not support multiplanar formats, advanced
-	auto PixelFormat = SoyPixelsFormat::Yuv_8_8_8_Full;
+	auto PixelFormat = GetPixelFormat(ColourFormat);
 
 	std::Debug << "Format; ";
 	std::Debug << " Width=" << Width;
@@ -1907,8 +1909,8 @@ void MagicLeap::TOutputThread::PopFrames(std::function<void(const SoyPixelsImpl&
 	std::lock_guard<std::mutex> Lock(mDecodedPixelsLock);
 	SoyTime DecodeDuration;
 	OnFrameDecoded( mDecodedPixels, DecodeDuration );
-	mDecodedPixelsValid = false;
 	std::Debug << "PopFrame, gave out " << mDecodedPixels.GetMeta() << std::endl;
+	mDecodedPixelsValid = false;
 }
 
 
@@ -1949,6 +1951,25 @@ void MagicLeap::TOutputThread::PopOutputBuffer(int64_t OutputBufferIndex)
 	std::Debug << "Got OutputBuffer(" << OutputBufferIndex << ") DataSize=" << DataSize << " DataPtr=0x" << std::hex << (size_t)(Data) << std::dec << std::endl;
 	try
 	{
+		static bool DumpData = false;
+		if ( DumpData )
+		{
+			std::stringstream DumpStr;
+			DumpStr << "const uint8_t PixelDump[" << DataSize << "] = \n{\n";
+			DumpStr << std::hex;
+			for ( auto i=0;	i<DataSize;	i++ )
+			{
+				if ( i == mPixelFormat.GetWidth() )
+				{
+					DumpStr << "\t";
+				}
+				auto px = Data[i];
+				DumpStr << "0x" << px << ", ";
+			}
+			DumpStr << "};\n";
+			std::Debug << DumpStr.str();
+		}
+		
 		//	if data is null, then output is a surface
 		
 		//	output pixels!
@@ -1975,6 +1996,13 @@ bool MagicLeap::TOutputThread::Iteration()
 	if ( mOutputBuffers.IsEmpty() )
 		return true;
 
+	//	wait for frame to be used
+	if ( mDecodedPixelsValid )
+	{
+		std::this_thread::sleep_for( std::chrono::milliseconds(100) );
+		return true;
+	}
+	
 	//	read a buffer
 	int64_t BufferIndex = -1;
 	{

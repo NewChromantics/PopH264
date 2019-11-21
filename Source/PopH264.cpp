@@ -182,7 +182,8 @@ __export void PopH264_GetMeta(int32_t Instance, int32_t* pMetaValues, int32_t Me
 		
 		for ( auto p=0;	p<PlaneMetas.GetSize();	p++ )
 		{
-			auto& PlaneMeta = PlaneMetas[p];
+			//auto& PlaneMeta = PlaneMetas[p];
+			//std::Debug << "Outputting plane " << p << "/" << PlaneMetas.GetSize() << "; " << PlaneMeta << std::endl;
 			MetaValues.PushBack(PlaneMeta.GetWidth());
 			MetaValues.PushBack(PlaneMeta.GetHeight());
 			MetaValues.PushBack(PlaneMeta.GetChannels());
