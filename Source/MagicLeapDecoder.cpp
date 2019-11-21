@@ -10,9 +10,8 @@ namespace MagicLeap
 	void	IsOkay(MLResult Result,std::stringstream& Context);
 	void	EnumCodecs(std::function<void(const std::string&)> Enum);
 	
-	
-	const auto*	DefaultH264Codec = "OMX.Nvidia.h264.decode";	//	hardware
-	//const auto*	DefaultH264Codec = "OMX.google.h264.decoder";	//	software according to https://forum.magicleap.com/hc/en-us/community/posts/360041748952-Follow-up-on-Multimedia-Decoder-API
+	//const auto*	DefaultH264Codec = "OMX.Nvidia.h264.decode";	//	hardware
+	const auto*	DefaultH264Codec = "OMX.google.h264.decoder";	//	software according to https://forum.magicleap.com/hc/en-us/community/posts/360041748952-Follow-up-on-Multimedia-Decoder-API
 	
 	//	got this mime from googling;
 	//	http://hello-qd.blogspot.com/2013/05/choose-decoder-and-encoder-by-google.html
@@ -22,8 +21,10 @@ namespace MagicLeap
 	//	not in the ML api
 	//	https://forum.magicleap.com/hc/en-us/community/posts/360048067552-Setting-csd-0-byte-buffer-using-MLMediaFormatSetKeyByteBuffer
 	MLMediaFormatKey	MLMediaFormat_Key_CSD0 = "csd-0";
-}
 
+
+	SoyPixelsMeta		GetPixelMeta(MLHandle Format);
+}
 
 
 
@@ -40,13 +41,181 @@ void MagicLeap::IsOkay(MLResult Result,const char* Context)
 {
 	if ( Result == MLResult_Ok )
 		return;
+
+	//	error from MLMediaCodecGetOutputBufferPointer
+	//	-1086652416	0xBF3B0000	0xBF3B 48955
 	
+	//	missing key
+	//#-1086652414)
+
+	//	error in flush
+	//	-1086652416
+	
+	const char* ResultString = nullptr;
+
+	if ( Result == -1086652414 )
+	{
+		ResultString = "Missing Key from MLMediaFormatGetKeyValueXXX";
+	}
+	
+	if ( !ResultString )
+		ResultString = MLGetResultString(Result);
+	
+	auto Results16 = static_cast<int16_t>( static_cast<uint32_t>(Result) >> 16 );
+	auto Resultu16 = static_cast<uint16_t>( static_cast<uint32_t>(Result) >> 16 );
+
 	//	gr: sometimes we get unknown so, put error nmber in
-	auto* ResultString = MLGetResultString(Result);
-	
 	std::stringstream Error;
-	Error << "Error in " << Context << ": " << ResultString << " (#" << static_cast<int>(Result) << ")";
+	Error << "Error in " << Context << ": " << ResultString << " (0x" << std::hex <<  static_cast<uint32_t>(Result) << std::dec << "/" << Results16 << "/" << Resultu16 << ")";
 	throw Soy::AssertException( Error );
+}
+
+/*
+SoyPixelsFormat::Type MagicLeap::GetPixelFormat(int32_t ColourFormat)
+{
+
+ enum
+ {
+ //	http://developer.android.com/reference/android/media/MediaCodecInfo.CodecCapabilities.html
+ COLOR_Format12bitRGB444	= 3,
+ COLOR_Format16bitARGB1555 = 5,
+ COLOR_Format16bitARGB4444 = 4,
+ COLOR_Format16bitBGR565 = 7,
+ COLOR_Format16bitRGB565 = 6,
+ COLOR_Format18BitBGR666 = 41,
+ COLOR_Format18bitARGB1665 = 9,
+ COLOR_Format18bitRGB666 = 8,
+ COLOR_Format19bitARGB1666 = 10,
+ COLOR_Format24BitABGR6666 = 43,
+ COLOR_Format24BitARGB6666 = 42,
+ COLOR_Format24bitARGB1887 = 13,
+ COLOR_Format24bitBGR888 = 12,
+ COLOR_Format24bitRGB888 = 11,
+ COLOR_Format32bitABGR8888 = 0x7f00a000,
+ COLOR_Format32bitARGB8888 = 16,
+ COLOR_Format32bitBGRA8888 = 15,
+ COLOR_Format8bitRGB332 = 2,
+ COLOR_FormatCbYCrY = 27,
+ COLOR_FormatCrYCbY = 28,
+ COLOR_FormatL16 = 36,
+ COLOR_FormatL2 = 33,
+ COLOR_FormatL32 = 38,
+ COLOR_FormatL4 = 34,
+ COLOR_FormatL8 = 35,
+ COLOR_FormatMonochrome = 1,
+ COLOR_FormatRGBAFlexible = 0x7f36a888,
+ COLOR_FormatRGBFlexible = 0x7f36b888,
+ COLOR_FormatRawBayer10bit = 31,
+ COLOR_FormatRawBayer8bit = 30,
+ COLOR_FormatRawBayer8bitcompressed = 32,
+ COLOR_FormatSurface = 0x7f000789,
+ COLOR_FormatYCbYCr = 25,
+ COLOR_FormatYCrYCb = 26,
+ COLOR_FormatYUV411PackedPlanar = 18,
+ COLOR_FormatYUV411Planar = 17,
+ COLOR_FormatYUV420Flexible = 0x7f420888,
+ COLOR_FormatYUV420PackedPlanar = 20,
+ COLOR_FormatYUV420PackedSemiPlanar = 39,
+ COLOR_FormatYUV420Planar = 19,
+ COLOR_FormatYUV420SemiPlanar = 21,
+ COLOR_FormatYUV422Flexible = 0x7f422888,
+ COLOR_FormatYUV422PackedPlanar = 23,
+ COLOR_FormatYUV422PackedSemiPlanar = 40,
+ COLOR_FormatYUV422Planar = 22,
+ COLOR_FormatYUV422SemiPlanar = 24,
+ COLOR_FormatYUV444Flexible = 0x7f444888,
+ COLOR_FormatYUV444Interleaved = 29,
+ COLOR_QCOM_FormatYUV420SemiPlanar = 0x7fa30c00,
+ COLOR_TI_FormatYUV420PackedSemiPlanar = 0x7f000100,
+ 
+ //	gr: mystery format (when using surface texture)
+ COLOR_FORMAT_UNKNOWN_MAYBE_SURFACE = 261,
+ 
+ //	note4 is giving us a pixel format of this, even when we have a surface texture. Renders okay.
+ //	gr; in non-opengl mode, the colour space is broken!
+ //		it is not the same as Yuv_8_8_8_Full (but close). The name is a big hint of this.
+ //		probably more like Yuv_8_88 but line by line.
+ OMX_QCOM_COLOR_FormatYVU420SemiPlanarInterlace = 0x7FA30C04,	//	2141391876
+ };
+ 
+ //	nvidia decoder gives 262
+ //	google decoder gives 19
+ //	these match
+ //	http://developer.android.com/reference/android/media/MediaCodecInfo.CodecCapabilities.html
+
+	switch (ColourFormat)
+	{
+		case MLSurfaceFormat_Unknown:	throw Soy::AssertException("Format is MLSurfaceFormat_Unknown");
+			COLOR_Format12bitRGB444
+			case
+	}{
+		case <#constant#>:
+			<#statements#>
+			break;
+			
+		default:
+			break;
+	}
+}
+*/
+SoyPixelsMeta MagicLeap::GetPixelMeta(MLHandle Format)
+{
+	auto GetKey_integer = [&](MLMediaFormatKey Key)
+	{
+		//MLMediaFormatGetKeyValueInt32
+		//MLMediaFormatGetKeyValueInt64
+		//MLMediaFormatGetKeyValueFloat
+		//	string
+		//ML_API MLResult ML_CALL MLMediaFormatGetKeySize(MLHandle handle, MLMediaFormatKey name, size_t *out_size);
+		//ML_API MLResult ML_CALL MLMediaFormatGetKeyString(MLHandle handle, MLMediaFormatKey name, char *out_string);
+		
+		//MLMediaFormatGetKeyByteBuffer
+		int32_t Value = 0;
+		auto Result = MLMediaFormatGetKeyValueInt32( Format, Key, &Value );
+		IsOkay( Result, Key );
+		return Value;
+	};
+	
+	auto DebugKey = [&](MLMediaFormatKey Key)
+	{
+		try
+		{
+			auto Value = GetKey_integer(Key);
+			std::Debug << "Format key " << Key << "=" << Value << std::endl;
+		}
+		catch(std::exception& e)
+		{
+			std::Debug << "Format key " << Key << " error " << e.what() << std::endl;
+		}
+	};
+	
+	DebugKey( MLMediaFormat_Key_Duration);
+	auto Width = GetKey_integer(MLMediaFormat_Key_Width);
+	auto Height = GetKey_integer(MLMediaFormat_Key_Height);
+	DebugKey( MLMediaFormat_Key_Stride );
+	//GetKey<string>(MLMediaFormat_Key_Mime
+	DebugKey(MLMediaFormat_Key_Frame_Rate);
+	DebugKey(MLMediaFormat_Key_Color_Format);
+	DebugKey(MLMediaFormat_Key_Crop_Left);
+	DebugKey(MLMediaFormat_Key_Crop_Right);
+	DebugKey(MLMediaFormat_Key_Crop_Bottom);
+	DebugKey(MLMediaFormat_Key_Crop_Top);
+	//GetKey_long(MLMediaFormat_Key_Repeat_Previous_Frame_After
+	
+	//	there's a colour format key, but totally undocumented
+	//	SDK says for  MLMediaCodecAcquireNextAvailableFrame;
+	//		Note: The returned buffer's color format is multi-planar YUV420. Since our
+	//		underlying hardware interops do not support multiplanar formats, advanced
+	auto PixelFormat = SoyPixelsFormat::Yuv_8_88_Ntsc;
+
+	std::Debug << "Format; ";
+	std::Debug << " Width=" << Width;
+	std::Debug << " Height=" << Height;
+	std::Debug << " PixelFormat=" << PixelFormat;
+	std::Debug << std::endl;
+
+	SoyPixelsMeta Meta( Width, Height, PixelFormat );
+	return Meta;
 }
 
 
@@ -163,12 +332,14 @@ MagicLeap::TDecoder::TDecoder()
 	{
 		auto& This = *static_cast<MagicLeap::TDecoder*>(pThis);
 		std::Debug << "OnOutputBufferAvailible( Codec=" << Codec << " BufferIndex=" << BufferIndex << ")" << std::endl;
+		This.OnOutputBufferAvailible(BufferIndex);
 	};
 	
 	auto OnOutputFormatChanged = [](MLHandle Codec,MLHandle NewFormat,void* pThis)
 	{
 		auto& This = *static_cast<MagicLeap::TDecoder*>(pThis);
 		std::Debug << "OnOutputFormatChanged" << std::endl;
+		This.OnOutputFormatChanged( NewFormat );
 	};
 	
 	auto OnError = [](MLHandle Codec,int ErrorCode,void* pThis)
@@ -193,7 +364,6 @@ MagicLeap::TDecoder::TDecoder()
 	//	gr: not sure if this can be a temporary or not, demo on forums has a static
 	MLMediaCodecCallbacks Callbacks;
 	Callbacks.on_input_buffer_available = OnInputBufferAvailible;
-	//Callbacks.on_input_buffer_available = nullptr;
 	Callbacks.on_output_buffer_available = OnOutputBufferAvailible;
 	Callbacks.on_output_format_changed = OnOutputFormatChanged;
 	Callbacks.on_error = OnError;
@@ -205,7 +375,7 @@ MagicLeap::TDecoder::TDecoder()
 
 	//	configure
 	MLHandle Format = ML_INVALID_HANDLE;
-	Result = MLMediaFormatCreateVideo( H264MimeType, 1280, 720, &Format );
+	Result = MLMediaFormatCreateVideo( H264MimeType, 1920, 1080, &Format );
 	IsOkay( Result, "MLMediaFormatCreateVideo" );
 	std::Debug << "Got format: " << Format << std::endl;
 
@@ -226,6 +396,12 @@ MagicLeap::TDecoder::TDecoder()
 		MLMediaFormatSetKeyInt64(format_handle, MLMediaFormat_Key_Duration, duration_us);
 	MLMediaFormat_Key_CSD0
 	*/
+	
+	
+	//	force software mode
+	Result = MLMediaCodecSetSurfaceHint( mHandle, MLMediaCodecSurfaceHint_Software );
+	IsOkay( Result, "MLMediaCodecSetSurfaceHint(software)" );
+
 	
 	//MLHandle Crypto = ML_INVALID_HANDLE;
 	MLHandle Crypto = 0;	//	gr: INVALID_HANDLE doesnt work
@@ -336,7 +512,7 @@ bool MagicLeap::TDecoder::DecodeNextPacket(std::function<void(const SoyPixelsImp
 	*/
 	try
 	{
-		std::Debug << "Got input buffer #" << BufferIndex << std::endl;
+		std::Debug << "Pushing to input buffer #" << BufferIndex << std::endl;
 		
 		auto BufferHandle = static_cast<MLHandle>( BufferIndex );
 		uint8_t* Buffer = nullptr;
@@ -392,6 +568,7 @@ bool MagicLeap::TDecoder::DecodeNextPacket(std::function<void(const SoyPixelsImp
 		Result = MLMediaCodecQueueInputBuffer( mHandle, BufferHandle, DataOffset, DataSize, PresentationTimeMicroSecs, Flags );
 		IsOkay( Result, "MLMediaCodecQueueInputBuffer" );
 		
+		std::Debug << "MLMediaCodecQueueInputBuffer( BufferIndex=" << BufferIndex << " DataSize=" << DataSize << " presentationtime=" << PresentationTimeMicroSecs << ") success" << std::endl;
 		RemovePendingData( DataSize );
 	}
 	catch(std::exception& e)
@@ -409,6 +586,29 @@ void MagicLeap::TDecoder::OnInputBufferAvailible(int64_t BufferIndex)
 	std::lock_guard<std::mutex> Lock(mInputBufferLock);
 	mInputBuffers.PushBack(BufferIndex);
 }
+
+void MagicLeap::TDecoder::OnOutputBufferAvailible(int64_t BufferIndex)
+{
+	mOutputThread.OnOutputBufferAvailible( mHandle, mOutputPixelMeta, BufferIndex );
+}
+
+void MagicLeap::TDecoder::OnOutputFormatChanged(MLHandle NewFormat)
+{
+	//	gr: we should do this like a queue for the output thread
+	//		for streams that can change format mid-way
+	//	todo: make test streams that change format!
+	std::Debug << "Getting output format" << std::endl;
+	try
+	{
+		mOutputPixelMeta = GetPixelMeta( NewFormat );
+		std::Debug << "New output format is " << mOutputPixelMeta << std::endl;
+	}
+	catch(std::exception& e)
+	{
+		std::Debug << __PRETTY_FUNCTION__ << " Exception " << e.what() << std::endl;
+	}
+}
+
 
 /*
 void Broadway::TDecoder::OnPicture(const H264SwDecPicture& Picture,const H264SwDecInfo& Meta,std::function<void(const SoyPixelsImpl&,SoyTime)> OnFrameDecoded,SoyTime DecodeDuration)
@@ -1661,3 +1861,124 @@ void Broadway::TDecoder::OnPicture(const H264SwDecPicture& Picture,const H264SwD
  
  }
 */
+
+MagicLeap::TOutputThread::TOutputThread() :
+	SoyWorkerThread	("MagicLeapOutputThread", SoyWorkerWaitMode::Wake )
+{
+	Start();
+}
+
+void MagicLeap::TOutputThread::OnOutputBufferAvailible(MLHandle CodecHandle,SoyPixelsMeta PixelFormat,int64_t BufferIndex)
+{
+	std::lock_guard<std::mutex> Lock(mOutputBuffersLock);
+	mOutputBuffers.PushBack( BufferIndex );
+	mCodecHandle = CodecHandle;
+	mPixelFormat = PixelFormat;
+	Wake();
+}
+
+bool MagicLeap::TOutputThread::CanSleep()
+{
+	if ( mOutputBuffers.IsEmpty() )
+		return true;
+	
+	return false;
+}
+
+void MagicLeap::TOutputThread::PopFrames(std::function<void(const SoyPixelsImpl&,SoyTime)>& OnFrameDecoded)
+{
+	if ( !mDecodedPixelsValid )
+		return;
+	
+	//	pop any pixels we've got
+	std::lock_guard<std::mutex> Lock(mDecodedPixelsLock);
+	SoyTime DecodeDuration;
+	OnFrameDecoded( mDecodedPixels, DecodeDuration );
+	mDecodedPixelsValid = false;
+}
+
+
+void MagicLeap::TOutputThread::PopOutputBuffer(int64_t OutputBufferIndex)
+{
+	//	gr: hold onto pointer and don't release buffer until it's been read,to avoid a copy
+	//		did this on android and it was a boost
+	Soy::TScopeTimerPrint Timer(__PRETTY_FUNCTION__,0);
+	auto BufferHandle = static_cast<MLHandle>( OutputBufferIndex );
+	const uint8_t* Data = nullptr;
+	size_t DataSize = -1;
+	/*
+	MLMediaCodecBufferInfo BufferMeta;
+	int16_t Timeout = 0;
+	int64_t NewBufferIndex = -1;
+	auto Result = MLMediaCodecDequeueOutputBuffer( mCodecHandle, &BufferMeta, Timeout, &NewBufferIndex );
+	IsOkay( Result, "MLMediaCodecDequeueOutputBuffer");
+	std::Debug << "MLMediaCodecDequeueOutputBuffer returned buffer index " << NewBufferIndex << " compared to " << OutputBufferIndex << " time=" << BufferMeta.presentation_time_us << std::endl;
+	*/
+	auto Result = MLMediaCodecGetOutputBufferPointer( mCodecHandle, BufferHandle, &Data, &DataSize );
+	IsOkay( Result, "MLMediaCodecGetOutputBufferPointer");
+	
+	auto ReleaseBuffer = [&]()
+	{
+		//	release back!
+		bool Render = false;
+		auto Result = MLMediaCodecReleaseOutputBuffer( mCodecHandle, BufferHandle, Render );
+		IsOkay( Result, "MLMediaCodecReleaseOutputBuffer");
+	};
+	
+	std::Debug << "Got OutputBuffer(" << OutputBufferIndex << ") DataSize=" << DataSize << " DataPtr=" << Data << std::endl;
+	if ( Data == nullptr || DataSize == 0 )
+	{
+		std::Debug << "Got OutputBuffer(" << OutputBufferIndex << ") DataSize=" << DataSize << " DataPtr=" << Data << std::endl;
+		ReleaseBuffer();
+		return;
+	}
+	
+	try
+	{
+		//	if data is null, then output is a surface
+		
+		//	output pixels!
+		auto* DataMutable = const_cast<uint8_t*>( Data );
+		SoyPixelsRemote NewPixels( DataMutable, DataSize, mPixelFormat );
+		{
+			std::lock_guard<std::mutex> Lock(mDecodedPixelsLock);
+			mDecodedPixels.Copy( NewPixels );
+			mDecodedPixelsValid = true;
+		}
+		ReleaseBuffer();
+	}
+	catch(std::exception& e)
+	{
+		//	rethrow but make sure we return the buffer first
+		ReleaseBuffer();
+		throw;
+	}
+}
+
+
+bool MagicLeap::TOutputThread::Iteration()
+{
+	if ( mOutputBuffers.IsEmpty() )
+		return true;
+
+	//	read a buffer
+	int64_t BufferIndex = -1;
+	{
+		std::lock_guard<std::mutex> Lock(mOutputBuffersLock);
+		BufferIndex = mOutputBuffers.PopAt(0);
+	}
+	try
+	{
+		PopOutputBuffer( BufferIndex );
+	}
+	catch(std::exception& e)
+	{
+		std::Debug << "Exception getting output buffer " << BufferIndex << "; " << e.what() << std::endl;
+		std::lock_guard<std::mutex> Lock(mOutputBuffersLock);
+		auto& ElementZero = *mOutputBuffers.InsertBlock(0,1);
+		ElementZero = BufferIndex;
+		std::this_thread::sleep_for( std::chrono::seconds(4) );
+	}
+		
+	return true;
+}

@@ -3,7 +3,7 @@
 #include "SoyLib/src/SoyPixels.h"
 
 //	gr: this works on osx, but currently, none of the functions are implemented :)
-#if defined(TARGET_LUMIN)// || defined(TARGET_OSX)
+#if defined(TARGET_LUMIN) || defined(TARGET_OSX)
 #define ENABLE_MAGICLEAP_DECODER
 #endif
 
