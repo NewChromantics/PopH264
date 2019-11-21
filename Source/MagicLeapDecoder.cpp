@@ -3,6 +3,7 @@
 #include <ml_media_codec.h>
 #include <ml_media_codeclist.h>
 #include <ml_media_format.h>
+#include <ml_media_error.h>
 
 namespace MagicLeap
 {
@@ -36,26 +37,30 @@ void MagicLeap::IsOkay(MLResult Result,std::stringstream& Context)
 	auto Str = Context.str();
 	IsOkay( Result, Str.c_str() );
 }
-	
+
 void MagicLeap::IsOkay(MLResult Result,const char* Context)
 {
 	if ( Result == MLResult_Ok )
 		return;
 
-	//	error from MLMediaCodecGetOutputBufferPointer
-	//	-1086652416	0xBF3B0000	0xBF3B 48955
-	
-	//	missing key
-	//#-1086652414)
+	//	specific media errors
+	auto HasPrefix = [&](MLResult Prefix)
+	{
+		auto And = Result & Prefix;
+		return And == Prefix;
+	};
 
-	//	error in flush
-	//	-1086652416
-	
 	const char* ResultString = nullptr;
 
-	if ( Result == -1086652414 )
+	if ( HasPrefix(MLResultAPIPrefix_MediaGeneric) ||
+		HasPrefix(MLResultAPIPrefix_Media) ||
+		HasPrefix(MLResultAPIPrefix_MediaDRM) ||
+		HasPrefix(MLResultAPIPrefix_MediaOMX) ||
+		HasPrefix(MLResultAPIPrefix_MediaOMXExtensions) ||
+		HasPrefix(MLResultAPIPrefix_MediaOMXVendors) ||
+		HasPrefix(MLResultAPIPrefix_MediaPlayer) )
 	{
-		ResultString = "Missing Key from MLMediaFormatGetKeyValueXXX";
+		ResultString = MLMediaResultGetString( Result );
 	}
 	
 	if ( !ResultString )
