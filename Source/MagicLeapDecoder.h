@@ -16,27 +16,30 @@ namespace MagicLeap
 class MagicLeap::TOutputThread : public SoyWorkerThread
 {
 public:
-	TOutputThread(std::function<void(const SoyPixelsImpl&,int32_t,SoyTime)>& PushFrame);
+	TOutputThread();
 
 	virtual bool	Iteration() override;
 	virtual bool	CanSleep() override;
 	
+	void			PushOnOutputFrameFunc(std::function<void(const SoyPixelsImpl&,SoyTime)>& PushFrameFunc);
+	void			OnInputSubmitted(int32_t PresentationTime);
 	void			OnOutputBufferAvailible(MLHandle CodecHandle,SoyPixelsMeta PixelFormat,int64_t BufferIndex);
+	std::string		GetDebugState();
 	
 private:
 	void			PopOutputBuffer(int64_t OutputBuffer);
 	void			PushFrame(const SoyPixelsImpl& Pixels);
 
 private:
+	std::mutex		mPushFunctionsLock;
+	Array<std::function<void(const SoyPixelsImpl&,SoyTime)>>	mPushFunctions;
+
 	//	list of buffers with some pending output data
 	std::mutex		mOutputBuffersLock;
 	Array<int64_t>	mOutputBuffers;
-	int32_t			mFrameNumber = 0;	//	need to get this from buffers but... where can I get the meta from...
 	
 	MLHandle		mCodecHandle = ML_INVALID_HANDLE;
 	SoyPixelsMeta	mPixelFormat;		//	this may need syncing with buffers
-	
-	std::function<void(const SoyPixelsImpl&,int32_t,SoyTime)>	mPushFrame;
 };
 
 
@@ -44,7 +47,7 @@ private:
 class MagicLeap::TDecoder : public PopH264::TDecoder
 {
 public:
-	TDecoder(int32_t Mode,std::function<void(const SoyPixelsImpl&,int32_t,SoyTime)> PushFrame);
+	TDecoder(int32_t Mode);
 	~TDecoder();
 
 private:
@@ -54,6 +57,8 @@ private:
 	void			OnOutputBufferAvailible(int64_t BufferIndex);
 	void			OnOutputFormatChanged(MLHandle NewFormat);
 	
+	std::string		GetDebugState();
+
 private:
 	MLHandle		mHandle = ML_INVALID_HANDLE;
 	

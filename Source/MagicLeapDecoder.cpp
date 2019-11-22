@@ -11,11 +11,12 @@ namespace MagicLeap
 	void			IsOkay(MLResult Result,std::stringstream& Context);
 	void			EnumCodecs(std::function<void(const std::string&)> Enum);
 	
-	const int32_t		Mode_Nvidia = 1;
-	const int32_t		Mode_Google = 2;
+	constexpr int32_t		Mode_Nvidia = 1;
+	constexpr int32_t		Mode_Google = 2;
+	constexpr bool			ForceSoftwareOutput = true;
 
-	const auto*			NvidiaH264Codec = "OMX.Nvidia.h264.decode";	//	hardware
-	const auto*			GoogleH264Codec = "OMX.google.h264.decoder";	//	software according to https://forum.magicleap.com/hc/en-us/community/posts/360041748952-Follow-up-on-Multimedia-Decoder-API
+	constexpr auto*			NvidiaH264Codec = "OMX.Nvidia.h264.decode";	//	hardware
+	constexpr auto*			GoogleH264Codec = "OMX.google.h264.decoder";	//	software according to https://forum.magicleap.com/hc/en-us/community/posts/360041748952-Follow-up-on-Multimedia-Decoder-API
 	std::string			GetCodec(int32_t Mode);
 
 	//	got this mime from googling;
@@ -314,8 +315,7 @@ std::string MagicLeap::GetCodec(int32_t Mode)
 }
 
 
-MagicLeap::TDecoder::TDecoder(int32_t Mode,std::function<void(const SoyPixelsImpl&,int32_t,SoyTime)> PushFrame) :
-	mOutputThread	( PushFrame )
+MagicLeap::TDecoder::TDecoder(int32_t Mode)
 {
 	auto EnumCodec = [](const std::string& Name)
 	{
@@ -423,9 +423,11 @@ MagicLeap::TDecoder::TDecoder(int32_t Mode,std::function<void(const SoyPixelsImp
 	
 	
 	//	force software mode
-	Result = MLMediaCodecSetSurfaceHint( mHandle, MLMediaCodecSurfaceHint_Software );
-	IsOkay( Result, "MLMediaCodecSetSurfaceHint(software)" );
-
+	if ( ForceSoftwareOutput )
+	{
+		Result = MLMediaCodecSetSurfaceHint( mHandle, MLMediaCodecSurfaceHint_Software );
+		IsOkay( Result, "MLMediaCodecSetSurfaceHint(software)" );
+	}
 	
 	//MLHandle Crypto = ML_INVALID_HANDLE;
 	MLHandle Crypto = 0;	//	gr: INVALID_HANDLE doesnt work
@@ -462,6 +464,13 @@ MagicLeap::TDecoder::~TDecoder()
 //	returns true if more data to proccess
 bool MagicLeap::TDecoder::DecodeNextPacket(std::function<void(const SoyPixelsImpl&,SoyTime)> OnFrameDecoded)
 {
+	std::Debug << "DecodeNextPacket (pendingdata x" << mPendingData.GetSize() << ") " << GetDebugState() << mOutputThread.GetDebugState() << std::endl;
+
+	//	current setup currently treats each packet here as a new frame (mp4 chunked)
+	//	so for every packet coming in, there should be one output
+	//	gr: this doesn't ring true for PPS/SPS data though?
+	mOutputThread.PushOnOutputFrameFunc( OnFrameDecoded );
+	
 	if ( mPendingData.IsEmpty() )
 		return false;
 	
@@ -585,13 +594,16 @@ bool MagicLeap::TDecoder::DecodeNextPacket(std::function<void(const SoyPixelsImp
 		int64_t DataOffset = 0;
 		uint64_t PresentationTimeMicroSecs = mPacketCounter;
 		mPacketCounter++;
+
 		int Flags = 0;
 		//Flags |= MLMediaCodecBufferFlag_KeyFrame;
 		//Flags |= MLMediaCodecBufferFlag_CodecConfig;
 		//Flags |= MLMediaCodecBufferFlag_EOS;
 		Result = MLMediaCodecQueueInputBuffer( mHandle, BufferHandle, DataOffset, DataSize, PresentationTimeMicroSecs, Flags );
 		IsOkay( Result, "MLMediaCodecQueueInputBuffer" );
-		
+	
+		mOutputThread.OnInputSubmitted( PresentationTimeMicroSecs );
+
 		std::Debug << "MLMediaCodecQueueInputBuffer( BufferIndex=" << BufferIndex << " DataSize=" << DataSize << " presentationtime=" << PresentationTimeMicroSecs << ") success" << std::endl;
 		RemovePendingData( DataSize );
 	}
@@ -606,14 +618,17 @@ bool MagicLeap::TDecoder::DecodeNextPacket(std::function<void(const SoyPixelsImp
 
 void MagicLeap::TDecoder::OnInputBufferAvailible(int64_t BufferIndex)
 {
-	std::Debug << "OnInputBufferAvailible(" << BufferIndex << ")" << std::endl;
-	std::lock_guard<std::mutex> Lock(mInputBufferLock);
-	mInputBuffers.PushBack(BufferIndex);
+	{
+		std::lock_guard<std::mutex> Lock(mInputBufferLock);
+		mInputBuffers.PushBack(BufferIndex);
+	}
+	std::Debug << "OnInputBufferAvailible(" << BufferIndex << ") " << GetDebugState() << mOutputThread.GetDebugState() << std::endl;
 }
 
 void MagicLeap::TDecoder::OnOutputBufferAvailible(int64_t BufferIndex)
 {
 	mOutputThread.OnOutputBufferAvailible( mHandle, mOutputPixelMeta, BufferIndex );
+	std::Debug << "OnOutputBufferAvailible(" << BufferIndex << ") " << GetDebugState() << mOutputThread.GetDebugState() << std::endl;
 }
 
 void MagicLeap::TDecoder::OnOutputFormatChanged(MLHandle NewFormat)
@@ -1886,11 +1901,23 @@ void Broadway::TDecoder::OnPicture(const H264SwDecPicture& Picture,const H264SwD
  }
 */
 
-MagicLeap::TOutputThread::TOutputThread(std::function<void(const SoyPixelsImpl&,int32_t,SoyTime)>& PushFrame) :
-	SoyWorkerThread	("MagicLeapOutputThread", SoyWorkerWaitMode::Wake ),
-	mPushFrame		( PushFrame )
+MagicLeap::TOutputThread::TOutputThread() :
+	SoyWorkerThread	("MagicLeapOutputThread", SoyWorkerWaitMode::Wake )
 {
 	Start();
+}
+
+
+void MagicLeap::TOutputThread::OnInputSubmitted(int32_t PresentationTime)
+{
+	//	std::lock_guard<std::mutex> Lock(mPendingPresentationTimesLock);
+	//	mPendingPresentationTimes.PushBack( PresentationTime );
+}
+
+void MagicLeap::TOutputThread::PushOnOutputFrameFunc(std::function<void(const SoyPixelsImpl&,SoyTime)>& PushFrameFunc)
+{
+	std::lock_guard<std::mutex> Lock(mPushFunctionsLock);
+	mPushFunctions.PushBack( PushFrameFunc );
 }
 
 void MagicLeap::TOutputThread::OnOutputBufferAvailible(MLHandle CodecHandle,SoyPixelsMeta PixelFormat,int64_t BufferIndex)
@@ -1914,6 +1941,16 @@ bool MagicLeap::TOutputThread::CanSleep()
 
 void MagicLeap::TOutputThread::PopOutputBuffer(int64_t OutputBufferIndex)
 {
+	{
+		std::lock_guard<std::mutex> Lock(mPushFunctionsLock);
+		if ( mPushFunctions.IsEmpty() )
+		{
+			std::stringstream Error;
+			Error << "PopOutputBuffer(" << OutputBufferIndex << ") but no push funcs yet (probably race condition)";
+			throw Soy::AssertException( Error );
+		}
+	}
+	
 	//	gr: hold onto pointer and don't release buffer until it's been read,to avoid a copy
 	//		did this on android and it was a boost
 	Soy::TScopeTimerPrint Timer(__PRETTY_FUNCTION__,0);
@@ -1987,9 +2024,18 @@ void MagicLeap::TOutputThread::PopOutputBuffer(int64_t OutputBufferIndex)
 
 void MagicLeap::TOutputThread::PushFrame(const SoyPixelsImpl& Pixels)
 {
+	std::lock_guard<std::mutex> Lock(mPushFunctionsLock);
+	if ( mPushFunctions.IsEmpty() )
+	{
+		std::stringstream Error;
+		Error << "Got frame to output, but ran out of push functions. Should have been checked before";
+		throw Soy::AssertException( Error );
+	}
+	
+	auto PushFunc = mPushFunctions.PopAt(0);
+
 	SoyTime DecodeDuration;
-	mFrameNumber++;
-	mPushFrame( Pixels, mFrameNumber, DecodeDuration );
+	PushFunc( Pixels, DecodeDuration );
 }
 
 bool MagicLeap::TOutputThread::Iteration()
@@ -2009,12 +2055,36 @@ bool MagicLeap::TOutputThread::Iteration()
 	}
 	catch(std::exception& e)
 	{
-		std::Debug << "Exception getting output buffer " << BufferIndex << "; " << e.what() << std::endl;
+		std::Debug << "Exception getting output buffer " << BufferIndex << "; " << e.what() << GetDebugState() << std::endl;
 		std::lock_guard<std::mutex> Lock(mOutputBuffersLock);
 		auto& ElementZero = *mOutputBuffers.InsertBlock(0,1);
 		ElementZero = BufferIndex;
-		std::this_thread::sleep_for( std::chrono::seconds(4) );
+		std::this_thread::sleep_for( std::chrono::seconds(1) );
 	}
 		
 	return true;
+}
+
+std::string MagicLeap::TDecoder::GetDebugState()
+{
+	std::lock_guard<std::mutex> Lock(mInputBufferLock);
+	
+	std::stringstream Debug;
+	Debug << " mInputBuffers[";
+	for ( auto i=0;	i<mInputBuffers.GetSize();	i++ )
+		Debug << mInputBuffers[i] << ",";
+	Debug << "] ";
+	return Debug.str();
+}
+
+std::string MagicLeap::TOutputThread::GetDebugState()
+{
+	std::lock_guard<std::mutex> Lock(mOutputBuffersLock);
+	
+	std::stringstream Debug;
+	Debug << " mOutputBuffers[";
+	for ( auto i=0;	i<mOutputBuffers.GetSize();	i++ )
+		Debug << mOutputBuffers[i] << ",";
+	Debug << "] PushFuncs x" << mPushFunctions.GetSize() << " ";
+	return Debug.str();
 }

@@ -59,14 +59,10 @@ BOOL APIENTRY DllMain(HMODULE /* hModule */, DWORD ul_reason_for_call, LPVOID /*
 
 PopH264::TDecoderInstance::TDecoderInstance(int32_t Mode)
 {
-	auto PushFrame = [this](const SoyPixelsImpl& Pixels,int32_t FrameNumber,SoyTime DecodeDuration)
-	{
-		this->PushFrame( Pixels, FrameNumber, DecodeDuration.GetMilliSeconds() );
-	};
 #if defined(ENABLE_MAGICLEAP_DECODER)
 	if ( Mode != MODE_BROADWAY )
 	{
-		mDecoder.reset( new MagicLeap::TDecoder( Mode, PushFrame ) );
+		mDecoder.reset( new MagicLeap::TDecoder( Mode ) );
 		return;
 	}
 #endif
@@ -130,6 +126,7 @@ void PopH264::TDecoderInstance::PopFrame(int32_t& FrameNumber,ArrayBridge<uint8_
 		PlaneDstPixels.Copy(PlaneSrcPixelsMin);
 	}
 
+	std::Debug << "PoppedFrame(" << FrameNumber << ") Frames Ready x" << mFrames.GetSize() << std::endl;
 }
 
 bool PopH264::TDecoderInstance::PopFrame(TFrame& Frame)
