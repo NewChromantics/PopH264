@@ -44,7 +44,7 @@ private:
 class MagicLeap::TDecoder : public PopH264::TDecoder
 {
 public:
-	TDecoder(std::function<void(const SoyPixelsImpl&,int32_t,SoyTime)> PushFrame);
+	TDecoder(int32_t Mode,std::function<void(const SoyPixelsImpl&,int32_t,SoyTime)> PushFrame);
 	~TDecoder();
 
 private:

@@ -49,8 +49,8 @@ uint32_t InstanceManager::CreateInstance(const TInstanceParams& Params)
 	catch(std::exception& e)
 	{
 		std::Debug << e.what() << std::endl;
+		throw;
 	}
-	
 	
 	throw Soy::AssertException("Failed to create instance");
 }

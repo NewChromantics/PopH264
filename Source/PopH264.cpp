@@ -67,14 +67,18 @@ PopH264::TDecoderInstance::TDecoderInstance(int32_t Mode)
 	if ( Mode != MODE_BROADWAY )
 	{
 		mDecoder.reset( new MagicLeap::TDecoder( Mode, PushFrame ) );
+		return;
 	}
-#elif defined(ENABLE_BROADWAY)
-	mDecoder.reset( new Broadway::TDecoder );
-#else
-	std::stringstream Error;
-	Error << "No decoder supported (mode=" << Params.Mode << ")";
-	throw Soy::AssertException(Error);
 #endif
+	
+#if defined(ENABLE_BROADWAY)
+	mDecoder.reset( new Broadway::TDecoder );
+	return;
+#endif
+	
+	std::stringstream Error;
+	Error << "No decoder supported (mode=" << Mode << ")";
+	throw Soy::AssertException(Error);
 }
 
 

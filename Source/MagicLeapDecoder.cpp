@@ -7,25 +7,25 @@
 
 namespace MagicLeap
 {
-	void	IsOkay(MLResult Result,const char* Context);
-	void	IsOkay(MLResult Result,std::stringstream& Context);
-	void	EnumCodecs(std::function<void(const std::string&)> Enum);
+	void			IsOkay(MLResult Result,const char* Context);
+	void			IsOkay(MLResult Result,std::stringstream& Context);
+	void			EnumCodecs(std::function<void(const std::string&)> Enum);
 	
-	const int32_t	Mode_Nvidia = 1;
-	const int32_t	Mode_Google = 2;
+	const int32_t		Mode_Nvidia = 1;
+	const int32_t		Mode_Google = 2;
 
-	const auto*		NvidiaH264Codec = "OMX.Nvidia.h264.decode";	//	hardware
-	const auto*		GoogleH264Codec = "OMX.google.h264.decoder";	//	software according to https://forum.magicleap.com/hc/en-us/community/posts/360041748952-Follow-up-on-Multimedia-Decoder-API
-	
+	const auto*			NvidiaH264Codec = "OMX.Nvidia.h264.decode";	//	hardware
+	const auto*			GoogleH264Codec = "OMX.google.h264.decoder";	//	software according to https://forum.magicleap.com/hc/en-us/community/posts/360041748952-Follow-up-on-Multimedia-Decoder-API
+	std::string			GetCodec(int32_t Mode);
+
 	//	got this mime from googling;
 	//	http://hello-qd.blogspot.com/2013/05/choose-decoder-and-encoder-by-google.html
-	const auto* H264MimeType = "video/avc";
+	const auto*			H264MimeType = "video/avc";
 	
 	//	CSD-0 (from android mediacodec api)
 	//	not in the ML api
 	//	https://forum.magicleap.com/hc/en-us/community/posts/360048067552-Setting-csd-0-byte-buffer-using-MLMediaFormatSetKeyByteBuffer
-	MLMediaFormatKey	MLMediaFormat_Key_CSD0 = "csd-0";
-
+	MLMediaFormatKey		MLMediaFormat_Key_CSD0 = "csd-0";
 
 	SoyPixelsFormat::Type	GetPixelFormat(int32_t ColourFormat);
 	SoyPixelsMeta			GetPixelMeta(MLHandle Format);
