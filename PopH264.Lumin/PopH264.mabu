@@ -14,10 +14,11 @@ SRCS = \
 ../Source/SoyLib/src/SoyString.cpp \
 ../Source/SoyLib/src/SoyTime.cpp \
 ../Source/SoyLib/src/SoyTypes.cpp \
+../Source/SoyLib/src/SoyThread.cpp \
 
 
 INCS = \
-/Volumes/Code/MagicLeap/mlsdk/v0.21.0/include \
+/Volumes/Code/MagicLeap/mlsdk/v0.22.0/include \
 ../Source/Broadway/Decoder/inc/	\
 ../Source/Broadway/Decoder/src/	\
 ../Source/	\

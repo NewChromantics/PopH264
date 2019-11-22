@@ -4,7 +4,7 @@
    version = "1.3">
    <BuildAction
       parallelizeBuildables = "YES"
-      buildImplicitDependencies = "YES">
+      buildImplicitDependencies = "NO">
       <BuildActionEntries>
          <BuildActionEntry
             buildForTesting = "YES"
@@ -29,8 +29,50 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "BF459CD421F7D5C700CED59D"
-               BuildableName = "PopH264Framework.framework"
-               BlueprintName = "PopH264Framework"
+               BuildableName = "PopH264_Osx.framework"
+               BlueprintName = "PopH264_Osx"
+               ReferencedContainer = "container:PopH264.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "BF151FD82384786600A70EBF"
+               BuildableName = "PopH264_Ios.framework"
+               BlueprintName = "PopH264_Ios"
+               ReferencedContainer = "container:PopH264.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "BF53E82722EC8C1D008253CD"
+               BuildableName = "PopH264_Lumin"
+               BlueprintName = "PopH264_Lumin"
+               ReferencedContainer = "container:PopH264.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "BFF1C6DE22E3769B00AFDFD5"
+               BuildableName = "PopH264_Android"
+               BlueprintName = "PopH264_Android"
                ReferencedContainer = "container:PopH264.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -46,9 +88,9 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "BF4A6A131EA16D7C00613A64"
-            BuildableName = "PopH264.bundle"
-            BlueprintName = "PopH264"
+            BlueprintIdentifier = "BF459CD421F7D5C700CED59D"
+            BuildableName = "PopH264_Osx.framework"
+            BlueprintName = "PopH264_Osx"
             ReferencedContainer = "container:PopH264.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
@@ -74,9 +116,9 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "BF4A6A131EA16D7C00613A64"
-            BuildableName = "PopH264.bundle"
-            BlueprintName = "PopH264"
+            BlueprintIdentifier = "BF459CD421F7D5C700CED59D"
+            BuildableName = "PopH264_Osx.framework"
+            BlueprintName = "PopH264_Osx"
             ReferencedContainer = "container:PopH264.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
@@ -98,9 +140,9 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "BF4A6A131EA16D7C00613A64"
-            BuildableName = "PopH264.bundle"
-            BlueprintName = "PopH264"
+            BlueprintIdentifier = "BF459CD421F7D5C700CED59D"
+            BuildableName = "PopH264_Osx.framework"
+            BlueprintName = "PopH264_Osx"
             ReferencedContainer = "container:PopH264.xcodeproj">
          </BuildableReference>
       </MacroExpansion>

@@ -2,26 +2,46 @@
 #include "PopH264DecoderInstance.h"
 #include "SoyLib/src/SoyPixels.h"
 
-#if defined(TARGET_LUMIN)
-#include "MagicLeapDecoder.h"
+//	gr: this works on osx, but currently, none of the functions are implemented :)
+#if defined(TARGET_LUMIN) //|| defined(TARGET_OSX)
+#define ENABLE_MAGICLEAP_DECODER
 #endif
 
 #define ENABLE_BROADWAY
+
+#if defined(ENABLE_MAGICLEAP_DECODER)
+#include "MagicLeapDecoder.h"
+#endif
 
 #if defined(ENABLE_BROADWAY)
 #include "BroadwayDecoder.h"
 #endif
 
+namespace PopH264
+{
+	const Soy::TVersion	Version(1,1,0);
+	const int32_t		MODE_BROADWAY = 0;
+	const int32_t		MODE_HARDWARE = 1;
+}
 
 
 
-class TNoParams;
-using TInstanceObject = PopH264::TDecoderInstance;
-using TInstanceParams = TNoParams;
+
+class TInstanceParams
+{
+public:
+	TInstanceParams(int32_t Mode) :
+		Mode	( Mode )
+	{
+	}
+	int32_t Mode = -1;
+};
+
+#define TInstanceObject	PopH264::TDecoderInstance
 
 #include "InstanceManager.inc"
 
-#if defined(TARGET_LUMIN)
+#if defined(TARGET_LUMIN) || defined(TARGET_ANDROID)
 const char* Platform::LogIdentifer = "PopH264";
 #endif
 
@@ -41,15 +61,24 @@ BOOL APIENTRY DllMain(HMODULE /* hModule */, DWORD ul_reason_for_call, LPVOID /*
 }
 #endif
 
-PopH264::TDecoderInstance::TDecoderInstance()
+PopH264::TDecoderInstance::TDecoderInstance(int32_t Mode)
 {
-#if defined(TARGET_LUMIN)
-	mDecoder.reset( new MagicLeap::TDecoder );
-#elif defined(ENABLE_BROADWAY)
-	mDecoder.reset( new Broadway::TDecoder );
-#else
-	throw Soy::AssertException("No decoder supported");
+#if defined(ENABLE_MAGICLEAP_DECODER)
+	if ( Mode != MODE_BROADWAY )
+	{
+		mDecoder.reset( new MagicLeap::TDecoder( Mode ) );
+		return;
+	}
 #endif
+	
+#if defined(ENABLE_BROADWAY)
+	mDecoder.reset( new Broadway::TDecoder );
+	return;
+#endif
+	
+	std::stringstream Error;
+	Error << "No decoder supported (mode=" << Mode << ")";
+	throw Soy::AssertException(Error);
 }
 
 
@@ -62,6 +91,7 @@ void PopH264::TDecoderInstance::PushData(const uint8_t* Data,size_t DataSize,int
 	};
 	mDecoder->Decode( GetArrayBridge(DataArray), PushFrame );
 }
+
 
 void PopH264::TDecoderInstance::PopFrame(int32_t& FrameNumber,ArrayBridge<uint8_t>&& Plane0,ArrayBridge<uint8_t>&& Plane1,ArrayBridge<uint8_t>&& Plane2)
 {
@@ -101,6 +131,7 @@ void PopH264::TDecoderInstance::PopFrame(int32_t& FrameNumber,ArrayBridge<uint8_
 		PlaneDstPixels.Copy(PlaneSrcPixelsMin);
 	}
 
+	std::Debug << "PoppedFrame(" << FrameNumber << ") Frames Ready x" << mFrames.GetSize() << std::endl;
 }
 
 bool PopH264::TDecoderInstance::PopFrame(TFrame& Frame)
@@ -125,6 +156,7 @@ void PopH264::TDecoderInstance::PushFrame(const SoyPixelsImpl& Frame,int32_t Fra
 		std::lock_guard<std::mutex> Lock(mFramesLock);
 		mFrames.PushBack(NewFrame);
 		mMeta = Frame.GetMeta();
+		std::Debug << mFrames.GetSize() << " frames pending" << std::endl;
 	}
 	if ( mOnNewFrame )
 		mOnNewFrame();
@@ -178,6 +210,7 @@ __export void PopH264_GetMeta(int32_t Instance, int32_t* pMetaValues, int32_t Me
 		for ( auto p=0;	p<PlaneMetas.GetSize();	p++ )
 		{
 			auto& PlaneMeta = PlaneMetas[p];
+			//std::Debug << "Outputting plane " << p << "/" << PlaneMetas.GetSize() << "; " << PlaneMeta << std::endl;
 			MetaValues.PushBack(PlaneMeta.GetWidth());
 			MetaValues.PushBack(PlaneMeta.GetHeight());
 			MetaValues.PushBack(PlaneMeta.GetChannels());
@@ -189,3 +222,4 @@ __export void PopH264_GetMeta(int32_t Instance, int32_t* pMetaValues, int32_t Me
 	};
 	SafeCall(Function, __func__, 0 );
 }
+

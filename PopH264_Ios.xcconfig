@@ -2,7 +2,7 @@
 //#include "PopApp.xcconfig"
 
 
-GCC_PREPROCESSOR_DEFINITIONS = $(inherited) TARGET_OSX
+GCC_PREPROCESSOR_DEFINITIONS = $(inherited) TARGET_IOS
 INFOPLIST_FILE = $(SRCROOT)/Info.plist
 
 BROADWAY_PATH = $(SRCROOT)/Source/Broadway/Decoder

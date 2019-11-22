@@ -11,16 +11,17 @@ using System.Collections.Generic;
 ///	Low level interface
 /// </summary>
 public static class PopH264
-{
 #if UNITY_UWP
 	private const string PluginName = "PopH264.Uwp";
 #error building uwp
 #else
 	private const string PluginName = "PopH264";
 #endif
+	[DllImport(PluginName, CallingConvention = CallingConvention.Cdecl)]
+	private static extern int	PopH264_GetVersion();
 
 	[DllImport(PluginName, CallingConvention = CallingConvention.Cdecl)]
-	private static extern int	PopH264_CreateInstance();
+	private static extern int	PopH264_CreateInstance(int Mode);
 
 	[DllImport(PluginName, CallingConvention = CallingConvention.Cdecl)]
 	private static extern void	PopH264_DestroyInstance(int Instance);
@@ -176,6 +177,13 @@ public static class PopH264
 		public int FrameNumber;
 	};
 
+	public enum DecoderMode
+	{
+		Software = 0,
+		MagicLeap_Nvidia = 1,
+		MagicLeap_Google = 2,
+	};
+
 	public class Decoder : IDisposable
 	{
 		int? Instance = null;
@@ -188,10 +196,15 @@ public static class PopH264
 		List<FrameInput> InputQueue;
 		int? InputThreadResult = 0;
 
-		public Decoder(bool ThreadedDecoding=true)
+		public Decoder(DecoderMode DecoderMode,bool ThreadedDecoding)
 		{
+			//	show version on first call
+			var Version = PopH264_GetVersion();
+			Debug.Log("PopH264 version " + Version);			
+			
 			this.ThreadedDecoding = ThreadedDecoding;
-			Instance = PopH264_CreateInstance();
+			int Mode = (int)DecoderMode;
+			Instance = PopH264_CreateInstance(Mode);
 			if (Instance.Value <= 0)
 				throw new System.Exception("Failed to create decoder instance");
 		}

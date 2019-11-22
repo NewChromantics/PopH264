@@ -14,9 +14,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "BF53E82722EC8C1D008253CD"
-               BuildableName = "PopH264_Lumin"
-               BlueprintName = "PopH264_Lumin"
+               BlueprintIdentifier = "BF4A6A131EA16D7C00613A64"
+               BuildableName = "PopH264.bundle"
+               BlueprintName = "PopH264"
                ReferencedContainer = "container:PopH264.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -33,7 +33,7 @@
       </AdditionalOptions>
    </TestAction>
    <LaunchAction
-      buildConfiguration = "Release"
+      buildConfiguration = "Debug"
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       launchStyle = "0"
@@ -45,9 +45,9 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "BF53E82722EC8C1D008253CD"
-            BuildableName = "PopH264_Lumin"
-            BlueprintName = "PopH264_Lumin"
+            BlueprintIdentifier = "BF4A6A131EA16D7C00613A64"
+            BuildableName = "PopH264.bundle"
+            BlueprintName = "PopH264"
             ReferencedContainer = "container:PopH264.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
@@ -63,9 +63,9 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "BF53E82722EC8C1D008253CD"
-            BuildableName = "PopH264_Lumin"
-            BlueprintName = "PopH264_Lumin"
+            BlueprintIdentifier = "BF4A6A131EA16D7C00613A64"
+            BuildableName = "PopH264.bundle"
+            BlueprintName = "PopH264"
             ReferencedContainer = "container:PopH264.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
