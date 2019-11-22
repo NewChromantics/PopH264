@@ -28,14 +28,14 @@
 		BF151FFB23847C2B00A70EBF /* TDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = BF53E82C22EDC6A6008253CD /* TDecoder.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		BF151FFC23847C2C00A70EBF /* TDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = BF53E82C22EDC6A6008253CD /* TDecoder.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		BF1520662385899C00A70EBF /* MagicLeapDecoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF53E83022EDCC7E008253CD /* MagicLeapDecoder.cpp */; };
-		BF152069238589DB00A70EBF /* libml_mediacodec.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BF152068238589DB00A70EBF /* libml_mediacodec.dylib */; };
-		BF15206B23858F2400A70EBF /* libml_mediacodeclist.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BF15206A23858F2400A70EBF /* libml_mediacodeclist.dylib */; };
-		BF15206D23858F2C00A70EBF /* libml_mediaformat.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BF15206C23858F2C00A70EBF /* libml_mediaformat.dylib */; };
-		BF15206F23858F2F00A70EBF /* libml_media_ccparser.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BF15206E23858F2F00A70EBF /* libml_media_ccparser.dylib */; };
-		BF15207023858F8D00A70EBF /* libml_media_ccparser.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BF15206E23858F2F00A70EBF /* libml_media_ccparser.dylib */; settings = {ATTRIBUTES = (Required, ); }; };
-		BF15207123858F8F00A70EBF /* libml_mediacodec.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BF152068238589DB00A70EBF /* libml_mediacodec.dylib */; settings = {ATTRIBUTES = (Required, ); }; };
-		BF15207223858F9400A70EBF /* libml_mediaformat.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BF15206C23858F2C00A70EBF /* libml_mediaformat.dylib */; settings = {ATTRIBUTES = (Required, ); }; };
-		BF15207323858F9700A70EBF /* libml_mediacodeclist.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BF15206A23858F2400A70EBF /* libml_mediacodeclist.dylib */; settings = {ATTRIBUTES = (Required, ); }; };
+		BF152069238589DB00A70EBF /* libml_mediacodec.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BF152068238589DB00A70EBF /* libml_mediacodec.dylib */; settings = {ATTRIBUTES = (Weak, ); }; };
+		BF15206B23858F2400A70EBF /* libml_mediacodeclist.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BF15206A23858F2400A70EBF /* libml_mediacodeclist.dylib */; settings = {ATTRIBUTES = (Weak, ); }; };
+		BF15206D23858F2C00A70EBF /* libml_mediaformat.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BF15206C23858F2C00A70EBF /* libml_mediaformat.dylib */; settings = {ATTRIBUTES = (Weak, ); }; };
+		BF15206F23858F2F00A70EBF /* libml_media_ccparser.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BF15206E23858F2F00A70EBF /* libml_media_ccparser.dylib */; settings = {ATTRIBUTES = (Weak, ); }; };
+		BF15207023858F8D00A70EBF /* libml_media_ccparser.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BF15206E23858F2F00A70EBF /* libml_media_ccparser.dylib */; settings = {ATTRIBUTES = (Weak, ); }; };
+		BF15207123858F8F00A70EBF /* libml_mediacodec.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BF152068238589DB00A70EBF /* libml_mediacodec.dylib */; settings = {ATTRIBUTES = (Weak, ); }; };
+		BF15207223858F9400A70EBF /* libml_mediaformat.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BF15206C23858F2C00A70EBF /* libml_mediaformat.dylib */; settings = {ATTRIBUTES = (Weak, ); }; };
+		BF15207323858F9700A70EBF /* libml_mediacodeclist.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BF15206A23858F2400A70EBF /* libml_mediacodeclist.dylib */; settings = {ATTRIBUTES = (Weak, ); }; };
 		BF15207423858FCF00A70EBF /* MagicLeapDecoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF53E83022EDCC7E008253CD /* MagicLeapDecoder.cpp */; };
 		BF152077238590F200A70EBF /* libml_mediacodec.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = BF152076238590F100A70EBF /* libml_mediacodec.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		BF152079238590FE00A70EBF /* libml_mediaformat.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = BF152078238590FE00A70EBF /* libml_mediaformat.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
@@ -78,6 +78,10 @@
 		BFBC07EF2386C0BB0070BCB4 /* SoyThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFBC07ED2386C0B50070BCB4 /* SoyThread.cpp */; };
 		BFBC07F02386C0BC0070BCB4 /* SoyThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFBC07ED2386C0B50070BCB4 /* SoyThread.cpp */; };
 		BFBC07F12386C0BC0070BCB4 /* SoyThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFBC07ED2386C0B50070BCB4 /* SoyThread.cpp */; };
+		BFBC07F323882F9D0070BCB4 /* libml_mediaerror.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BFBC07F223882F9D0070BCB4 /* libml_mediaerror.dylib */; settings = {ATTRIBUTES = (Weak, ); }; };
+		BFBC07F523882FBA0070BCB4 /* libml_mediaerror.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = BFBC07F423882FB90070BCB4 /* libml_mediaerror.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		BFBC07F623882FC30070BCB4 /* libml_mediaerror.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BFBC07F423882FB90070BCB4 /* libml_mediaerror.dylib */; settings = {ATTRIBUTES = (Weak, ); }; };
+		BFBC07F8238831F80070BCB4 /* PopH264_Osx.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = BF459CD521F7D5C700CED59D /* PopH264_Osx.framework */; };
 		BFF1C6E922E3C65800AFDFD5 /* BroadwayAll.c in Sources */ = {isa = PBXBuildFile; fileRef = BFF1C6E822E3C65800AFDFD5 /* BroadwayAll.c */; };
 		BFF1C6EA22E3C65800AFDFD5 /* BroadwayAll.c in Sources */ = {isa = PBXBuildFile; fileRef = BFF1C6E822E3C65800AFDFD5 /* BroadwayAll.c */; };
 		BFF1C71122E3CF8B00AFDFD5 /* SoyArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFF1C70F22E3CF8B00AFDFD5 /* SoyArray.cpp */; };
@@ -94,7 +98,18 @@
 				BF152077238590F200A70EBF /* libml_mediacodec.dylib in CopyFiles */,
 				BF15207D2385930B00A70EBF /* libml_media_ccparser.dylib in CopyFiles */,
 				BF152079238590FE00A70EBF /* libml_mediaformat.dylib in CopyFiles */,
+				BFBC07F523882FBA0070BCB4 /* libml_mediaerror.dylib in CopyFiles */,
 				BF15207B2385910800A70EBF /* libml_mediacodeclist.dylib in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BFBC07F7238831E60070BCB4 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 16;
+			files = (
+				BFBC07F8238831F80070BCB4 /* PopH264_Osx.framework in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -220,6 +235,8 @@
 		BF8AB6CA21F24F9D008E7E76 /* InstanceManager.inc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.pascal; name = InstanceManager.inc; path = Source/InstanceManager.inc; sourceTree = "<group>"; };
 		BFBC07ED2386C0B50070BCB4 /* SoyThread.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SoyThread.cpp; path = Source/SoyLib/src/SoyThread.cpp; sourceTree = "<group>"; };
 		BFBC07EE2386C0B50070BCB4 /* SoyThread.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SoyThread.h; path = Source/SoyLib/src/SoyThread.h; sourceTree = "<group>"; };
+		BFBC07F223882F9D0070BCB4 /* libml_mediaerror.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libml_mediaerror.dylib; path = ../MagicLeap/mlsdk/v0.22.0/lib/osx/libml_mediaerror.dylib; sourceTree = "<group>"; };
+		BFBC07F423882FB90070BCB4 /* libml_mediaerror.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libml_mediaerror.dylib; path = ../MagicLeap/mlsdk/v0.22.0/lib/osx/libml_mediaerror.dylib; sourceTree = "<group>"; };
 		BFD607741EA16F0A0035C814 /* IUnityGraphics.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IUnityGraphics.h; path = Source/Unity/IUnityGraphics.h; sourceTree = "<group>"; };
 		BFD607751EA16F0A0035C814 /* IUnityGraphicsD3D9.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IUnityGraphicsD3D9.h; path = Source/Unity/IUnityGraphicsD3D9.h; sourceTree = "<group>"; };
 		BFD607761EA16F0A0035C814 /* IUnityGraphicsD3D11.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IUnityGraphicsD3D11.h; path = Source/Unity/IUnityGraphicsD3D11.h; sourceTree = "<group>"; };
@@ -249,6 +266,7 @@
 				BF459D1A21F7DB9900CED59D /* CoreMedia.framework in Frameworks */,
 				BF15206D23858F2C00A70EBF /* libml_mediaformat.dylib in Frameworks */,
 				BF15206B23858F2400A70EBF /* libml_mediacodeclist.dylib in Frameworks */,
+				BFBC07F623882FC30070BCB4 /* libml_mediaerror.dylib in Frameworks */,
 				BF15206F23858F2F00A70EBF /* libml_media_ccparser.dylib in Frameworks */,
 				BF152069238589DB00A70EBF /* libml_mediacodec.dylib in Frameworks */,
 			);
@@ -260,6 +278,7 @@
 			files = (
 				BF459CEE21F7D73B00CED59D /* CoreMedia.framework in Frameworks */,
 				BF15207323858F9700A70EBF /* libml_mediacodeclist.dylib in Frameworks */,
+				BFBC07F323882F9D0070BCB4 /* libml_mediaerror.dylib in Frameworks */,
 				BF15207023858F8D00A70EBF /* libml_media_ccparser.dylib in Frameworks */,
 				BF15207223858F9400A70EBF /* libml_mediaformat.dylib in Frameworks */,
 				BF15207123858F8F00A70EBF /* libml_mediacodec.dylib in Frameworks */,
@@ -283,6 +302,7 @@
 				BF151FEF2384789700A70EBF /* CoreMedia.framework */,
 				BF152068238589DB00A70EBF /* libml_mediacodec.dylib */,
 				BF15206C23858F2C00A70EBF /* libml_mediaformat.dylib */,
+				BFBC07F223882F9D0070BCB4 /* libml_mediaerror.dylib */,
 				BF15206E23858F2F00A70EBF /* libml_media_ccparser.dylib */,
 				BF15206A23858F2400A70EBF /* libml_mediacodeclist.dylib */,
 				BF459CED21F7D73B00CED59D /* CoreMedia.framework */,
@@ -293,6 +313,7 @@
 		BF4A6A0B1EA16D7C00613A64 = {
 			isa = PBXGroup;
 			children = (
+				BFBC07F423882FB90070BCB4 /* libml_mediaerror.dylib */,
 				BF15207C2385930B00A70EBF /* libml_media_ccparser.dylib */,
 				BF15207A2385910800A70EBF /* libml_mediacodeclist.dylib */,
 				BF152078238590FE00A70EBF /* libml_mediaformat.dylib */,
@@ -570,6 +591,7 @@
 				BF459CD121F7D5C700CED59D /* Sources */,
 				BF459CD221F7D5C700CED59D /* Frameworks */,
 				BF459CD321F7D5C700CED59D /* Resources */,
+				BFBC07F7238831E60070BCB4 /* CopyFiles */,
 			);
 			buildRules = (
 			);
@@ -953,6 +975,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				INSTALL_PATH = "$(SRCROOT)/Unity/PopH264/Assets/PopH264";
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				MAGIC_LEAP_SDK_PATH = /Volumes/Code/MagicLeap/mlsdk/v0.22.0/;
 				MTL_ENABLE_DEBUG_INFO = YES;
@@ -995,6 +1018,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				INSTALL_PATH = "$(SRCROOT)/Unity/PopH264/Assets/PopH264";
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				MAGIC_LEAP_SDK_PATH = /Volumes/Code/MagicLeap/mlsdk/v0.22.0/;
 				MTL_ENABLE_DEBUG_INFO = NO;

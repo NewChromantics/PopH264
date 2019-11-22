@@ -25,6 +25,8 @@ namespace PopH264
 #define EXPORTCLASS	void
 #endif
 
+__export int32_t			PopH264_GetVersion();
+
 __export int32_t			PopH264_CreateInstance(int32_t Mode);
 __export void				PopH264_DestroyInstance(int32_t Instance);
 

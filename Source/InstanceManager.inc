@@ -156,3 +156,13 @@ __export TInstanceObject* PopH264_GetInstancePtr(int32_t Instance)
 	};
 	return SafeCall<TInstanceObject*>( Function, __func__, nullptr );
 }
+
+
+__export int32_t PopH264_GetVersion()
+{
+	auto Function = [&]()
+	{
+		return PopH264::Version.GetMillion();
+	};
+	return SafeCall( Function, __func__, -1 );
+}

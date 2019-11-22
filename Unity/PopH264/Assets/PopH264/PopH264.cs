@@ -13,7 +13,9 @@ using System.Collections.Generic;
 public static class PopH264
 {
 	private const string PluginName = "PopH264";
-
+	
+	[DllImport(PluginName, CallingConvention = CallingConvention.Cdecl)]
+	private static extern int	PopH264_GetVersion();
 
 	[DllImport(PluginName, CallingConvention = CallingConvention.Cdecl)]
 	private static extern int	PopH264_CreateInstance(int Mode);
@@ -193,6 +195,10 @@ public static class PopH264
 
 		public Decoder(DecoderMode DecoderMode,bool ThreadedDecoding)
 		{
+			//	show version on first call
+			var Version = PopH264_GetVersion();
+			Debug.Log("PopH264 version " + Version);			
+			
 			this.ThreadedDecoding = ThreadedDecoding;
 			int Mode = (int)DecoderMode;
 			Instance = PopH264_CreateInstance(Mode);

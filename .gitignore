@@ -43,3 +43,5 @@ PopH264\.Android/libs/armeabi-v7a/
 PopH264\.Lumin/release_ml1/
 
 PopH264\.Android/obj/
+
+PopH264.Lumin/ml1/debug_lumin_clang-3.8_aarch64/

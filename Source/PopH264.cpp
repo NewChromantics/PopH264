@@ -3,7 +3,7 @@
 #include "SoyLib/src/SoyPixels.h"
 
 //	gr: this works on osx, but currently, none of the functions are implemented :)
-#if defined(TARGET_LUMIN) || defined(TARGET_OSX)
+#if defined(TARGET_LUMIN) //|| defined(TARGET_OSX)
 #define ENABLE_MAGICLEAP_DECODER
 #endif
 
@@ -19,9 +19,13 @@
 
 namespace PopH264
 {
-	const int32_t MODE_BROADWAY = 0;
-	const int32_t MODE_HARDWARE = 1;
+	const Soy::TVersion	Version(1,1,0);
+	const int32_t		MODE_BROADWAY = 0;
+	const int32_t		MODE_HARDWARE = 1;
 }
+
+
+
 
 class TInstanceParams
 {
@@ -87,6 +91,7 @@ void PopH264::TDecoderInstance::PushData(const uint8_t* Data,size_t DataSize,int
 	};
 	mDecoder->Decode( GetArrayBridge(DataArray), PushFrame );
 }
+
 
 void PopH264::TDecoderInstance::PopFrame(int32_t& FrameNumber,ArrayBridge<uint8_t>&& Plane0,ArrayBridge<uint8_t>&& Plane1,ArrayBridge<uint8_t>&& Plane2)
 {
@@ -217,3 +222,4 @@ __export void PopH264_GetMeta(int32_t Instance, int32_t* pMetaValues, int32_t Me
 	};
 	SafeCall(Function, __func__, 0 );
 }
+
