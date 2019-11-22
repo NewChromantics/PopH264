@@ -499,7 +499,7 @@ void MagicLeap::TInputThread::PushInputBuffer(int64_t BufferIndex)
 	//		current system means this packet is dropped (or could unpop, but then we'll be stuck anyway)
 	//	gr: as we can submit an offset, we could LOCK the pending data, submit, then unlock & delete and save a copy
 	size_t BufferWrittenSize = 0;
-	auto BufferArray = GetRemoteArray( Buffer, BufferWrittenSize, BufferSize );
+	auto BufferArray = GetRemoteArray( Buffer, BufferSize, BufferWrittenSize );
 	mPopPendingData( GetArrayBridge(BufferArray) );
 
 	//	process buffer
