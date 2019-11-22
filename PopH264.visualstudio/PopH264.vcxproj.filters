@@ -174,6 +174,9 @@
     <ClCompile Include="..\Source\Broadway\Decoder\src\TestBenchMultipleInstance.c">
       <Filter>Broadway</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source\TDecoder.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\SoyLib\src\Array.hpp">
@@ -337,6 +340,9 @@
     </ClInclude>
     <ClInclude Include="..\Source\Broadway\Decoder\src\h264bsd_slice_group_map.h">
       <Filter>Broadway</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\TDecoder.h">
+      <Filter>Source</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
