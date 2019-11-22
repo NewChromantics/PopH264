@@ -315,7 +315,8 @@ std::string MagicLeap::GetCodec(int32_t Mode)
 }
 
 
-MagicLeap::TDecoder::TDecoder(int32_t Mode)
+MagicLeap::TDecoder::TDecoder(int32_t Mode) :
+	mInputThread	( std::bind(&TDecoder::PopPendingData, this, std::placeholders::_1 ), std::bind(&TDecoder::HasPendingData, this ) )
 {
 	auto EnumCodec = [](const std::string& Name)
 	{
@@ -471,158 +472,68 @@ bool MagicLeap::TDecoder::DecodeNextPacket(std::function<void(const SoyPixelsImp
 	//	gr: this doesn't ring true for PPS/SPS data though?
 	mOutputThread.PushOnOutputFrameFunc( OnFrameDecoded );
 	
-	if ( mPendingData.IsEmpty() )
-		return false;
-	
-	auto GetNextNalOffset = [this]
-	{
-		for ( int i=3;	i<mPendingData.GetDataSize();	i++ )
-		{
-			if ( mPendingData[i+0] != 0 )	continue;
-			if ( mPendingData[i+1] != 0 )	continue;
-			if ( mPendingData[i+2] != 0 )	continue;
-			if ( mPendingData[i+3] != 1 )	continue;
-			return i;
-		}
-		//	assume is complete...
-		return (int)mPendingData.GetDataSize();
-		//return 0;
-	};
+	mInputThread.Wake();
+	return false;
+}
 
-	//	https://forum.magicleap.com/hc/en-us/community/posts/360041748952-Follow-up-on-Multimedia-Decoder-API
-	
-	//	waiting for input buffers
-	//	gr: this is maybe just a signal there IS some processing space...
-	if ( mInputBuffers.IsEmpty() )
-	{
-		std::Debug << __func__ << " waiting for input buffers" << std::endl;
-		return false;
-	}
-	
-	int64_t BufferIndex;
-	{
-		std::lock_guard<std::mutex> Lock(mInputBufferLock);
-		BufferIndex = mInputBuffers.PopAt(0);
-	}
-	/*	gr: dont dequeue in async mode.
-	 //	https://forum.magicleap.com/hc/en-us/community/posts/360055134771-Stagefright-assert-after-calling-MLMediaCodecDequeueInputBuffer?page=1#community_comment_360008477771
-	 //	This asserts on magic leap, on android it just carries on, but sholdnt be being used
-	//auto Timeout = 0;	//	return immediately
-	auto Timeout = -1;	//	block
-	
-	//	API says MLMediaCodecDequeueInputBuffer output is index
-	//	but everything referring to it, says it's a handle (uint64!)
-	int64_t BufferIndex = -1;
-	std::Debug << __func__ << " MLMediaCodecDequeueInputBuffer( timeout=" << Timeout << ")" << std::endl;
-	auto Result = MLMediaCodecDequeueInputBuffer( mHandle, Timeout, &BufferIndex );
-	IsOkay( Result, "MLMediaCodecDequeueInputBuffer" );
-	
-	if ( BufferIndex == MLMediaCodec_TryAgainLater )
-	{
-		std::Debug << __func__ << " MLMediaCodec_TryAgainLater" << std::endl;
-		return true;
-	}
 
-	if ( BufferIndex == MLMediaCodec_FormatChanged )
-	{
-		std::Debug << __func__ << " MLMediaCodec_FormatChanged" << std::endl;
-		return true;
-	}
-	
-	//	gr: need to reset all buffers?
-	if ( BufferIndex == MLMediaCodec_OutputBuffersChanged )
-	{
-		std::Debug << __func__ << " MLMediaCodec_OutputBuffersChanged" << std::endl;
-		return true;
-	}
-
-	if ( BufferIndex < 0 )
+void MagicLeap::TInputThread::PushInputBuffer(int64_t BufferIndex)
+{
+	//	gr: we can grab a buffer without submitted it, so this is okay if we fail here
+	std::Debug << "Pushing to input buffer #" << BufferIndex << std::endl;
+		
+	auto BufferHandle = static_cast<MLHandle>( BufferIndex );
+	uint8_t* Buffer = nullptr;
+	size_t BufferSize = 0;
+	auto Result = MLMediaCodecGetInputBufferPointer( mHandle, BufferHandle, &Buffer, &BufferSize );
+	IsOkay( Result, "MLMediaCodecGetInputBufferPointer" );
+	if ( Buffer == nullptr )
 	{
 		std::stringstream Error;
-		Error << "MLMediaCodecDequeueInputBuffer dequeued buffer index " << BufferIndex;
+		Error << "MLMediaCodecGetInputBufferPointer gave us null buffer (size=" << BufferSize << ")";
 		throw Soy::AssertException(Error);
 	}
-	*/
-	try
-	{
-		std::Debug << "Pushing to input buffer #" << BufferIndex << std::endl;
-		
-		auto BufferHandle = static_cast<MLHandle>( BufferIndex );
-		uint8_t* Buffer = nullptr;
-		size_t BufferSize = 0;
-		auto Result = MLMediaCodecGetInputBufferPointer( mHandle, BufferHandle, &Buffer, &BufferSize );
-		IsOkay( Result, "MLMediaCodecGetInputBufferPointer" );
-		if ( Buffer == nullptr )
-		{
-			std::stringstream Error;
-			Error << "MLMediaCodecGetInputBufferPointer gave us null buffer (size=" << BufferSize << ")";
-			throw Soy::AssertException(Error);
-		}
 
-		size_t DataSize = 0;
-		{
-			std::lock_guard<std::mutex> Lock( mPendingDataLock );
-			auto GetNextNalOffset = [this]
-			{
-				for ( int i=3;	i<mPendingData.GetDataSize();	i++ )
-				{
-					if ( mPendingData[i+0] != 0 )	continue;
-					if ( mPendingData[i+1] != 0 )	continue;
-					if ( mPendingData[i+2] != 0 )	continue;
-					if ( mPendingData[i+3] != 1 )	continue;
-					return i;
-				}
-				//	assume is complete...
-				return (int)mPendingData.GetDataSize();
-				//return 0;
-			};
-			
-			DataSize = GetNextNalOffset();
-			auto* Data = mPendingData.GetArray();
-			if ( DataSize > BufferSize )
-			{
-				std::stringstream Error;
-				Error << "MLMediaCodecGetInputBufferPointer buffer size(" << BufferSize << ") too small for pending nal packet size (" << DataSize << ")";
-				throw Soy::AssertException(Error);
-			}
+	//	grab next packet
+	//	gr: problem here, if the packet is bigger than the input buffer, we won't have anywhere to put it
+	//		current system means this packet is dropped (or could unpop, but then we'll be stuck anyway)
+	//	gr: as we can submit an offset, we could LOCK the pending data, submit, then unlock & delete and save a copy
+	size_t BufferWrittenSize = 0;
+	auto BufferArray = GetRemoteArray( Buffer, BufferWrittenSize, BufferSize );
+	mPopPendingData( GetArrayBridge(BufferArray) );
 
-			//	fill buffer
-			memcpy( Buffer, Data, DataSize );
-		}
-		
-		//	process buffer
-		int64_t DataOffset = 0;
-		uint64_t PresentationTimeMicroSecs = mPacketCounter;
-		mPacketCounter++;
+	//	process buffer
+	int64_t DataOffset = 0;
+	uint64_t PresentationTimeMicroSecs = mPacketCounter;
+	mPacketCounter++;
 
-		int Flags = 0;
-		//Flags |= MLMediaCodecBufferFlag_KeyFrame;
-		//Flags |= MLMediaCodecBufferFlag_CodecConfig;
-		//Flags |= MLMediaCodecBufferFlag_EOS;
-		Result = MLMediaCodecQueueInputBuffer( mHandle, BufferHandle, DataOffset, DataSize, PresentationTimeMicroSecs, Flags );
-		IsOkay( Result, "MLMediaCodecQueueInputBuffer" );
+	int Flags = 0;
+	//Flags |= MLMediaCodecBufferFlag_KeyFrame;
+	//Flags |= MLMediaCodecBufferFlag_CodecConfig;
+	//Flags |= MLMediaCodecBufferFlag_EOS;
+	Result = MLMediaCodecQueueInputBuffer( mHandle, BufferHandle, DataOffset, BufferWrittenSize, PresentationTimeMicroSecs, Flags );
+	IsOkay( Result, "MLMediaCodecQueueInputBuffer" );
 	
-		mOutputThread.OnInputSubmitted( PresentationTimeMicroSecs );
+	OnInputSubmitted( PresentationTimeMicroSecs );
 
-		std::Debug << "MLMediaCodecQueueInputBuffer( BufferIndex=" << BufferIndex << " DataSize=" << DataSize << " presentationtime=" << PresentationTimeMicroSecs << ") success" << std::endl;
-		RemovePendingData( DataSize );
-	}
-	catch(std::exception& e)
+	std::Debug << "MLMediaCodecQueueInputBuffer( BufferIndex=" << BufferIndex << " DataSize=" << BufferWrittenSize << "/" << BufferSize << " presentationtime=" << PresentationTimeMicroSecs << ") success" << std::endl;
+}
+
+
+void MagicLeap::TInputThread::OnInputBufferAvailible(MLHandle CodecHandle,int64_t BufferIndex)
+{
 	{
-		//	gr: maybe MLMediaCodecFlush()
-		std::Debug << "Exception processing input buffer: " << e.what() << ". Flush frames here?" << std::endl;
+		std::lock_guard<std::mutex> Lock(mInputBuffersLock);
+		mHandle = CodecHandle;
+		mInputBuffers.PushBack(BufferIndex);
 	}
-	
-	return true;
+	std::Debug << "OnInputBufferAvailible(" << BufferIndex << ") " << GetDebugState() << std::endl;
+	Wake();
 }
 
 void MagicLeap::TDecoder::OnInputBufferAvailible(int64_t BufferIndex)
 {
-	{
-		std::lock_guard<std::mutex> Lock(mInputBufferLock);
-		mInputBuffers.PushBack(BufferIndex);
-	}
-	std::Debug << "OnInputBufferAvailible(" << BufferIndex << ") " << GetDebugState() << mOutputThread.GetDebugState() << std::endl;
+	mInputThread.OnInputBufferAvailible( mHandle, BufferIndex );
 }
 
 void MagicLeap::TDecoder::OnOutputBufferAvailible(int64_t BufferIndex)
@@ -672,1235 +583,6 @@ void Broadway::TDecoder::OnPicture(const H264SwDecPicture& Picture,const H264SwD
 */
 
 
-
-
-/*
- 
- 
- 
- #include <stdlib.h>
- 
- #include <unistd.h>
- 
- 
- 
- 
- #include <ml_codec.h>
- 
- #include <ml_media_extractor.h>
- 
- #include <ml_media_format.h>
- 
- #include <ml_media_crypto.h>
- 
- #include <ml_media_error.h>
- 
- #include <Logging.h>
- 
- 
- 
- 
- #define MIN(a,b) (((a)<(b))?(a):(b))
- 
- 
- 
- 
- #define CHECK_SUCCESS(func)                         \
- 
- do {                                              \
- 
- MLResult result_ = (func);                      \
- 
- if (MLResult_Ok != result_) {                   \
- 
- char str[512] = (#func);                      \
- 
- const char delim[2] = "(";                    \
- 
- char *funcName = strtok(str, delim);          \
- 
- ML_LOG_ERROR("%s failed with %d", funcName, result_); \
- 
- return result_;                                 \
- 
- }                                               \
- 
- } while(0)
- 
- 
- 
- 
- #define CHECK_FAIL(func)                   \
- 
- do {                                     \
- 
- if (false == (func)) {                 \
- 
- char str[200] = (#func);             \
- 
- const char delim[2] = "(";           \
- 
- char *funcName = strtok(str, delim); \
- 
- ML_LOG_ERROR("%s failed", funcName);         \
- 
- return false;                        \
- 
- }                                      \
- 
- } while(0)
- 
- 
- 
- 
- // callbacks forward declaration
- 
- static void onInputBufferAvailable(MLHandle codec, int64_t index, void* cbData);
- 
- static void onOutputBufferAvailable(MLHandle codec, int64_t index, MLMediaCodecBufferInfo* bufferInfo, void* cbData);
- 
- static void onOutputFormatChanged(MLHandle codec, MLHandle format, void* cbData);
- 
- static void onError(MLHandle codec, int errorCode, void* cbData);
- 
- static void onFrameRendered(MLHandle codec, int64_t ptsUs, int64_t systemTimeNs, void* cbData);
- 
- static void onVideoFrameAvailable(MLHandle codec, void* cbData);
- 
- 
- 
- 
- class MediaCodecPlayer {
- 
- 
- 
- 
- public:
- 
- static MediaCodecPlayer* createStreamingMediaPlayer();
- 
- MLResult setSource(const char *fileName);
- 
- MLResult start();
- 
- 
- 
- 
- inline uint64_t getDuration() const { return mDurationUs; };
- 
- inline int getPosition() const { return mPosition; };
- 
- 
- 
- 
- // TODO: Add pause, seek, stop and other functions
- 
- MLResult seek() {}
- 
- MLResult pause() {}
- 
- MLResult resume() {}
- 
- MLResult stop() {}
- 
- 
- 
- 
- // callback handlers - I recommend handling all these in an another thread
- 
- void onInputBufferAvailable(MLHandle codec, int64_t index);
- 
- void onOutputBufferAvailable(MLHandle codec, int64_t index, MLMediaCodecBufferInfo* bufferInfo);
- 
- void onOutputFormatChanged(MLHandle codec, MLHandle format);
- 
- void onError(MLHandle codec, int errorCode);
- 
- void onFrameRendered(MLHandle codec, int64_t ptsUs, int64_t systemTimeNs);
- 
- void onVideoFrameAvailable(MLHandle codec);
- 
- 
- 
- 
- private:
- 
- MediaCodecPlayer();
- 
- ~MediaCodecPlayer();
- 
- MediaCodecPlayer(const MediaDrmClient&) = delete;
- 
- MediaCodecPlayer(MediaDrmClient&&) = delete;
- 
- MediaCodecPlayer& operator=(const MediaDrmClient&) = delete;
- 
- MediaCodecPlayer& operator=(MediaDrmClient&&) = delete;
- 
- 
- 
- 
- MLResult setupMediaExtractor(const char* fileName);
- 
- void playbackLoop();
- 
- MLResult queueSecureInputBuffer(MLHandle codec, int64_t inputBufIndex, int64_t presentationTimeUs);
- 
- MLResult processInputSample(MLHandle* codec);
- 
- MLResult processOutputSample(MLHandle codec);
- 
- void handleDecodedFrame(MLHandle codec, const MLMediaCodecBufferInfo* info, int64_t bufidx);
- 
- void cleanUp();
- 
- 
- 
- 
- private:
- 
- MLHandle            mExtractor = ML_INVALID_HANDLE;
- 
- MLHandle            mVideoCodec = ML_INVALID_HANDLE;
- 
- MLHandle            mAudioCodec = ML_INVALID_HANDLE;
- 
- MLHandle            mCrypto = ML_INVALID_HANDLE;
- 
- MLHandle            mDrm = ML_INVALID_HANDLE;
- 
- MLHandle            mNativeFrameBuffer = ML_INVALID_HANDLE;
- 
- MLHandle            mAudioHandle = ML_INVALID_HANDLE;
- 
- uint64_t            mLastPresentationTimeUs = 0L;
- 
- uint64_t            mDurationUs = 0L;
- 
- int64_t             mAudioTrakIndex = -1L;
- 
- int64_t             mVideoTrakIndex = -1L;
- 
- int                 mPosition = 0;
- 
- bool                mSawInputEOS = false;
- 
- bool                mSawOutputEOS = false;
- 
- std::vector<int64_t> mVideoIndexList;
- 
- std::vector<int64_t> mAudioIndexList;
- 
- };
- 
- 
- 
- 
- MediaCodecPlayer::MediaCodecPlayer() { }
- 
- 
- 
- 
- MediaCodecPlayer::~MediaCodecPlayer() { cleanup(); }
- 
- 
- 
- 
- bool MediaCodecPlayer::construct() {
- 
- // TODO: Spawn a thread which will wait on start/pause/seek/stop and handling of callback events
- 
- return true;
- 
- }
- 
- 
- 
- 
- static MLMediaCodecCallbacks callbacksSync = {
- 
- nullptr,
- 
- nullptr,
- 
- nullptr,
- 
- nullptr,
- 
- nullptr,
- 
- onVideoFrameAvailable,
- 
- };
- 
- 
- 
- 
- static MLMediaCodecCallbacks callbacksAsync = {
- 
- onInputBufferAvailable,
- 
- onOutputBufferAvailable,
- 
- onOutputFormatChanged,
- 
- onError,
- 
- onFrameRendered,
- 
- onVideoFrameAvailable,
- 
- };
- 
- 
- 
- 
- static const int64_t kTimeOut = 2000LL;
- 
- 
- 
- 
- static inline int64_t systemnanotime() {
- 
- struct timespec now;
- 
- clock_gettime(CLOCK_MONOTONIC, &now);
- 
- return now.tv_sec * 1000000000LL + now.tv_nsec;
- 
- }
- 
- 
- 
- 
- static void onInputBufferAvailable(MLHandle codec, int64_t index, void* cbData) {
- 
- MediaCodecPlayer* self = (MediaCodecPlayer*)cbData;
- 
- if (self != nullptr) {
- 
- // TODO: Make it an async call by letting another thread handle it as noted earlier
- 
- onInputBufferAvailable(codec, index);
- 
- }
- 
- }
- 
- 
- 
- 
- void MediaCodecPlayer::onInputBufferAvailable(MLHandle codec, int64_t index) {
- 
- // Maintain 2 list of indexes - one for audio and one for video
- 
- // Push this index into corresponding queue
- 
- if (codec == mVideoCodec) {
- 
- mVideoIndexList.push_back(index);
- 
- } else if (codec == mAudioCodec) {
- 
- mAudioIndexList.push_back(index);
- 
- }
- 
- 
- 
- // Do this as long as there is an entry in either of the index list in a loop
- 
- size_t readCount = mAudioIndexList.size() + mVideoIndexList.size();
- 
- while (readCount != 0) {
- 
- int64_t trackIndex = -1;
- 
- if (MLResultOk == MLMediaExtractorGetSampleTrackIndex(mExtractor, &trackIndex)) {
- 
- MLHandle codec = ML_INVALID_HANDLE;
- 
- if (mAudioTrakIndex == trackIndex) {
- 
- codec = mAudioCodec;
- 
- index = mAudioIndexList.front();
- 
- mAudioIndexList.pop_front();
- 
- } else if (mVideoTrakIndex == trackIndex) {
- 
- codec = mVideoCodec;
- 
- index = mVideoIndexList.front();
- 
- mVideoIndexList.pop_front();
- 
- }
- 
- readSampleAndFeedCodec(codec, index);
- 
- }
- 
- readCount--;
- 
- }
- 
- }
- 
- 
- 
- 
- static void onOutputBufferAvailable(MLHandle codec, int64_t index, MLMediaCodecBufferInfo* bufferInfo, void* cbData) {
- 
- MediaCodecPlayer* self = (MediaCodecPlayer*)cbData;
- 
- if (self != nullptr) {
- 
- // TODO: Make it an async call by letting another thread handle it as noted earlier
- 
- self->onOutputBufferAvailable(codec, index, bufferInfo);
- 
- }
- 
- }
- 
- 
- 
- 
- void MediaCodecPlayer::onOutputBufferAvailable(MLHandle codec, int64_t index, MLMediaCodecBufferInfo* bufferInfo) {
- 
- handleDecodedFrame(codec, bufferInfo, index);
- 
- }
- 
- 
- 
- 
- static void onOutputFormatChanged(MLHandle codec, MLHandle format, void* cbData) {
- 
- MediaCodecPlayer* self = (MediaCodecPlayer*)cbData;
- 
- if (self != nullptr) {
- 
- // TODO: Make it an async call by letting another thread handle it as noted earlier
- 
- self->onOutputFormatChanged(codec, format);
- 
- }
- 
- }
- 
- 
- 
- 
- void MediaCodecPlayer::onOutputFormatChanged(MLHandle codec, MLHandle format) {
- 
- // This is where we get to know the actual format of the media
- 
- // What we get through MLMediaExtractorGetTrackFormat is an gestimation
- 
- // Use the format to create MLAudio handle
- 
- }
- 
- 
- 
- 
- static void onError(MLHandle codec, int errorCode, void* cbData) {
- 
- MediaCodecPlayer* self = (MediaCodecPlayer*)cbData;
- 
- if (self != nullptr) {
- 
- // TODO: Make it an async call by letting another thread handle it as noted earlier
- 
- self->onError(codec, errorCode);
- 
- }
- 
- }
- 
- 
- 
- 
- void MediaCodecPlayer::onError(MLHandle codec, int errorCode) {
- 
- // TODO: Notify the user about the possible error
- 
- }
- 
- 
- 
- 
- static void onFrameRendered(MLHandle codec, int64_t ptsUs, int64_t systemTimeNs, void* cbData) {
- 
- MediaCodecPlayer* self = (MediaCodecPlayer*)cbData;
- 
- if (self != nullptr) {
- 
- // TODO: Make it an async call by letting another thread handle it as noted earlier
- 
- self->onFrameRendered(codec, ptsUs, systemTimeNs);
- 
- }
- 
- }
- 
- 
- 
- 
- void MediaCodecPlayer::onFrameRendered(MLHandle codec, int64_t ptsUs, int64_t systemTimeNs) {
- 
- // TODO: Its just info only call - you can ignore it
- 
- }
- 
- 
- 
- 
- static void onVideoFrameAvailable(MLHandle codec, void* cbData) {
- 
- MediaCodecPlayer* self = (MediaCodecPlayer*)cbData;
- 
- if (self != nullptr) {
- 
- // TODO: Make it an async call by letting another thread handle it as noted earlier
- 
- self->onVideoFrameAvailable(codec);
- 
- }
- 
- }
- 
- 
- 
- 
- MLResult MediaCodecPlayer::onVideoFrameAvailable(MLHandle codec) {
- 
- // codec has to be mVideoCodec  if (mVideoCodec != codec) { ERROR!! }
- 
- CHECK_SUCCESS(MLMediaCodecAcquireNextAvailableFrame(mVideoCodec, &mNativeFrameBuffer));
- 
- // TODO: Render the native buffer now ==> render(mNativeFrameBuffer);
- 
- CHECK_SUCCESS(MLMediaCodecReleaseFrame(mVideoCodec, mNativeFrameBuffer));
- 
- return MLResult_Ok;
- 
- }
- 
- 
- 
- 
- MLResult MediaCodecPlayer::queueSecureInputBuffer(MLHandle codec, int64_t inputBufIndex, int64_t presentationTimeUs) {
- 
- MLHandle info = 0;
- 
- // Encrypted sample - get the crypto info
- 
- CHECK_SUCCESS(MLMediaExtractorGetSampleCryptoInfo(mExtractor, &info));
- 
- CHECK_SUCCESS(MLMediaCodecQueueSecureInputBuffer(codec,
- 
- (MLHandle)inputBufIndex, 0, info, presentationTimeUs, 0));
- 
- MLMediaExtractorReleaseCryptoInfo(mExtractor, &info);
- 
- return MLResult_Ok;
- 
- }
- 
- 
- 
- 
- MLResult MediaCodecPlayer::readSampleAndFeedCodec(MLHandle codec, int64_t bufidx) {
- 
- size_t   bufsize      = 0;
- 
- uint8_t* buf         = nullptr;
- 
- int64_t  sampleSize     = -1;
- 
- int64_t  presentationTimeUs = -1;
- 
- 
- 
- 
- CHECK_SUCCESS(MLMediaCodecGetInputBufferPointer(codec, bufidx, &buf, &bufsize));
- 
- if (nullptr == buf) {
- 
- ML_LOG_ERROR("Input buffer pointer is nullptr!");
- 
- return MLResult_UnspecifiedFailure;
- 
- }
- 
- 
- 
- 
- CHECK_SUCCESS(MLMediaExtractorReadSampleData(mExtractor, buf, bufsize, 0, &sampleSize));
- 
- 
- 
- 
- if (sampleSize < 0) {
- 
- sampleSize = 0;
- 
- mSawInputEOS = true;
- 
- ML_LOG_INFO("Found (Source) Media Content EOS");
- 
- }
- 
- 
- 
- 
- CHECK_SUCCESS(MLMediaExtractorGetSampleTime(mExtractor, &presentationTimeUs));
- 
- int sample_flags = 0;
- 
- CHECK_SUCCESS(MLMediaExtractorGetSampleFlags(mExtractor, &sample_flags));
- 
- if (!mSawInputEOS && mCrypto &&
- 
- (sample_flags & MLMediaExtractorSampleFlag_Encrypted)) {
- 
- // TODO: NOTE that I didn't do MediaCrypto setup while configuring
- 
- CHECK_SUCCESS(queueSecureInputBuffer(codec, bufidx, presentationTimeUs));
- 
- } else {
- 
- CHECK_SUCCESS(MLMediaCodecQueueInputBuffer(codec, (MLHandle)bufidx, 0,
- 
- sampleSize, presentationTimeUs,
- 
- mSawInputEOS ? MLMediaCodecBufferFlag_EOS : 0));
- 
- }
- 
- 
- 
- 
- MLMediaExtractorAdvance(mExtractor);
- 
- return MLResult_Ok;
- 
- }
- 
- 
- 
- 
- MLResult MediaCodecPlayer::processInputSample(MLHandle* codec) {
- 
- int64_t bufidx       = MLMediaCodec_TryAgainLater;
- 
- size_t  bufsize      = 0;
- 
- uint8_t *buf         = nullptr;
- 
- int64_t sampleSize     = -1;
- 
- int64_t presentationTimeUs = -1;
- 
- int64_t track_index = -1;
- 
- 
- 
- 
- *codec = ML_INVALID_HANDLE;
- 
- if (mSawInputEOS) {
- 
- return MLResult_Ok;
- 
- }
- 
- 
- 
- 
- CHECK_SUCCESS(MLMediaExtractorGetSampleTrackIndex(mExtractor, &track_index));
- 
- if (track_index < 0) {
- 
- ML_LOG_INFO("Encountered Media Input EOS!");
- 
- mSawInputEOS = true;
- 
- return MLResult_Ok;
- 
- }
- 
- 
- 
- 
- if (track_index == mAudioTrakIndex) {
- 
- *codec = mAudioCodec;
- 
- } else if (track_index == mVideoTrakIndex) {
- 
- *codec = mVideoCodec;
- 
- }
- 
- 
- 
- 
- if (*codec == ML_INVALID_HANDLE) {
- 
- ML_LOG_ERROR("We haven't setup Codec for this track[%ld]!", track_index);
- 
- return MLResult_Ok;
- 
- }
- 
- 
- 
- 
- do {
- 
- // Wait until we have a free slot in codec
- 
- CHECK_SUCCESS(MLMediaCodecDequeueInputBuffer(*codec, kTimeOut, &bufidx));
- 
- if (bufidx == MLMediaCodec_TryAgainLater) {
- 
- usleep(100);
- 
- } else {
- 
- break;
- 
- }
- 
- } while (true);
- 
- 
- 
- 
- return readSampleAndFeedCodec(*codec, bufidx);
- 
- }
- 
- 
- 
- 
- 
- 
- 
- void MediaCodecPlayer::handleDecodedFrame(MLHandle codec, const MLMediaCodecBufferInfo* info, int64_t bufidx) {
- 
- if (0 <= bufidx) {
- 
- if (info->flags & MLMediaCodecBufferFlag_EOS) {
- 
- ML_LOG_INFO("Found Output EOS");
- 
- mSawOutputEOS = true;
- 
- }
- 
- 
- 
- 
- int64_t presentationNano = info->presentation_time_us * 1000;
- 
- mPosition = info->presentation_time_us / 1000;
- 
- 
- 
- 
- // TODO: If you want to render this - device a AV sync mechanism
- 
- // Something like delay the rendering if its way ahead of current PTS
- 
- 
- 
- 
- if (mSawInputEOS && !mSawOutputEOS) {
- 
- ML_LOG_INFO("Current Position[%ld] Duration[%ld] LastPresentation[%ld]",
- 
- info->presentation_time_us, mDurationUs, mLastPresentationTimeUs);
- 
- if ((uint64_t)info->presentation_time_us >= mDurationUs) {
- 
- ML_LOG_INFO("Current Position[%ld] crossed Duration[%ld] - Found Output EOS",
- 
- info->presentation_time_us, mDurationUs);
- 
- mSawOutputEOS = true;
- 
- } else if (mLastPresentationTimeUs == (uint64_t)info->presentation_time_us) {
- 
- ML_LOG_INFO("The Current Position hasn't moved since last decode - Found Output EOS");
- 
- mSawOutputEOS = true;
- 
- }
- 
- }
- 
- if (bIsVideoTrack) {
- 
- // Video stream decoding: synchronous rendering and releasing
- 
- // Note that, in this case we get this callback ==> onVideoFrameAvailable
- 
- CHECK_SUCCESS(MLMediaCodecReleaseOutputBuffer(codec, (MLHandle)bufidx, info->size != 0));
- 
- } else {
- 
- // Audio stream decoding: Get the decoded sample and play the audio
- 
- size_t bufSize = 0;
- 
- const uint8_t* pBuf = nullptr;
- 
- CHECK_SUCCESS(MLMediaCodecGetOutputBufferPointer(codec, (MLHandle)bufidx, &pBuf, &bufSize));
- 
- if (pBuf) {
- 
- // write the decoded audio sample into Audio output ==> TODO: use MLAudio APIs
- 
- }
- 
- // release the output buffer now
- 
- CHECK_SUCCESS(MLMediaCodecReleaseOutputBuffer(codec, bufidx, false));
- 
- }
- 
- mLastPresentationTimeUs = info->presentation_time_us;
- 
- }
- 
- }
- 
- 
- 
- 
- MLResult MediaCodecPlayer::processOutputSample(MLHandle codec) {
- 
- bool bIsVideoTrack = false;
- 
- int64_t bufidx = MLMediaCodec_TryAgainLater;
- 
- MLMediaCodecBufferInfo info = {};
- 
- 
- 
- 
- if (codec == ML_INVALID_HANDLE) {
- 
- return MLResult_UnspecifiedFailure;
- 
- }
- 
- 
- 
- 
- if (mSawOutputEOS) {
- 
- return MLResult_Ok;
- 
- }
- 
- 
- 
- 
- if (codec == mVideoCodec) {
- 
- bIsVideoTrack = true;
- 
- }
- 
- 
- 
- 
- CHECK_SUCCESS(MLMediaCodecDequeueOutputBuffer(codec, &info, 0, &bufidx));
- 
- if (0 <= bufidx) {
- 
- handleDecodedFrame(codec, &info, bufidx);
- 
- } else if (bufidx == MLMediaCodec_OutputBuffersChanged) {
- 
- ML_LOG_INFO("Output buffers changed");
- 
- } else if (bufidx == MLMediaCodec_FormatChanged) {
- 
- MLHandle format = 0;
- 
- CHECK_SUCCESS(MLMediaCodecGetOutputFormat(codec, &format));
- 
- char* newFormat = (char*)malloc(MAX_FORMAT_STRING_SIZE);
- 
- CHECK_SUCCESS(MLMediaFormatObjectToString(format, newFormat));
- 
- ML_LOG_INFO("Format changed to: %s", newFormat);
- 
- // If we picked an audio track, let's setup the audio output
- 
- int32_t sampleRate   = 0;
- 
- int32_t channelCount = 0;
- 
- if (MLResult_Ok == MLMediaFormatGetKeyValueInt32(format, MLMediaFormat_Key_Sample_Rate, &sampleRate)) {
- 
- if (MLResult_Ok == MLMediaFormatGetKeyValueInt32(format, MLMediaFormat_Key_Channel_Count, &channelCount)) {
- 
- ML_LOG_INFO("Audio sampling rate[%i] channel count[%i]", sampleRate, channelCount);
- 
- if (sampleRate != 0 && channelCount != 0) {
- 
- createAudioStream(sampleRate, channelCount);
- 
- }
- 
- }
- 
- }
- 
- free(newFormat);
- 
- } else if (bufidx == MLMediaCodec_TryAgainLater) {
- 
- // If the input has been consumed already, signal end of output as well
- 
- if (mSawInputEOS) {
- 
- mSawOutputEOS = true;
- 
- }
- 
- } else {
- 
- ML_LOG_ERROR("Unexpected info code: %zd", bufidx);
- 
- return MLResult_UnspecifiedFailure;
- 
- }
- 
- 
- 
- 
- return MLResult_Ok;
- 
- }
- 
- 
- 
- 
- void MediaCodecPlayer::playbackLoop() {
- 
- while (!sawInputEOS || !mSawOutputEOS) {
- 
- MLHandle codec = ML_INVALID_HANDLE;
- 
- auto res = processInputSample(&codec);
- 
- if (res != MLResult_Ok) {
- 
- ML_LOG_ERROR("processInputSample failed!");
- 
- } else {
- 
- if (codec != ML_INVALID_HANDLE && processOutputSample(codec) != MLResult_Ok) {
- 
- ML_LOG_ERROR("processOutputSample failed!");
- 
- } else if (codec == ML_INVALID_HANDLE && mSawInputEOS) {
- 
- while (!mSawOutputEOS) {
- 
- processOutputSample(mAudioCodec);
- 
- processOutputSample(mVideoCodec);
- 
- }
- 
- }
- 
- }
- 
- }
- 
- return;
- 
- }
- 
- 
- 
- 
- MLResult MediaCodecPlayer::setupMediaExtractor(const char* fileName) {
- 
- // Use media extractor to acquire media info from the content
- 
- MLResult result = MLMediaExtractorCreate(&mExtractor);
- 
- if (result == MLResult_Ok && mExtractor != ML_INVALID_HANDLE) {
- 
- result == MLMediaExtractorSetDataSourceForPath(mExtractor, fileName);
- 
- }
- 
- return result;
- 
- }
- 
- 
- 
- 
- 
- 
- 
- MediaCodecPlayer* MediaCodecPlayer::createStreamingMediaPlayer() {
- 
- MediaCodecPlayer* self = new MediaCodecPlayer();
- 
- if (self) {
- 
- if (self->construct() != true) {
- 
- delete self;
- 
- self = nullptr;
- 
- }
- 
- }
- 
- return self;
- 
- }
- 
- 
- 
- 
- MLResult MediaCodecPlayer::setSource(const char *fileName) {
- 
- MLHandle format;
- 
- MLResult result = MLResult_UnspecifiedFailure;
- 
- int64_t  durationUs = 0;
- 
- size_t   numTracks = 0;
- 
- int32_t  sampleRate = 0;
- 
- int32_t  channelCount = 0;
- 
- char     mime[MAX_KEY_STRING_SIZE] = "";
- 
- 
- 
- 
- if (nullptr == fileName || strlen(fileName) <= 0) {
- 
- return result;
- 
- }
- 
- 
- 
- 
- CHECK_SUCCESS(setupMediaExtractor(fileName));
- 
- CHECK_SUCCESS(MLMediaExtractorGetTrackCount(mExtractor, &numTracks));
- 
- 
- 
- 
- for (size_t trackIndex = 0; trackIndex < numTracks; trackIndex++) {
- 
- bool bIsVideo = false;
- 
- bool bIsAudio = false;
- 
- CHECK_SUCCESS(MLMediaExtractorGetTrackFormat(mExtractor, trackIndex, &format));
- 
- CHECK_SUCCESS(MLMediaFormatGetKeyString(format, MLMediaFormat_Key_Mime, mime));
- 
- CHECK_SUCCESS(MLMediaFormatGetKeyValueInt64(format, MLMediaFormat_Key_Duration, &durationUs));
- 
- if (0 == strncmp(mime, "video/", 6)) {
- 
- bIsVideo = true;
- 
- } else if (0 == strncmp(mime, "audio/", 6)) {
- 
- bIsAudio = true;
- 
- CHECK_SUCCESS(MLMediaFormatGetKeyValueInt32(format, MLMediaFormat_Key_Sample_Rate, &sampleRate));
- 
- CHECK_SUCCESS(MLMediaFormatGetKeyValueInt32(format, MLMediaFormat_Key_Channel_Count, &channelCount));
- 
- ML_LOG_INFO("Audio sampling rate[%i] channel count[%i]", sampleRate, channelCount);
- 
- }
- 
- 
- 
- 
- if (bIsVideo || bIsAudio) {
- 
- MLHandle codec = ML_INVALID_HANDLE;
- 
- CHECK_SUCCESS(MLMediaExtractorSelectTrack(mExtractor, trackIndex));
- 
- result = MLMediaCodecCreateCodec(MLMediaCodecCreation_ByType,
- 
- MLMediaCodecType_Decoder, mime, &codec);
- 
- if (MLResult_Ok != result || codec == ML_INVALID_HANDLE) {
- 
- ML_LOG_ERROR("MLMediaCodecCreateCodec failed");
- 
- return result;
- 
- }
- 
- 
- 
- 
- // For Codec in sync mode use this function
- 
- // CHECK_SUCCESS(MLMediaCodecSetCallbacks(codec, &callbacksSync, nullptr));
- 
- // For Codec in async mode use this function
- 
- CHECK_SUCCESS(MLMediaCodecSetCallbacks(codec, &callbacksAsync, nullptr));
- 
- // TODO: NOTE that based on whether Extractor says if the content is encrypted, we need to set up the DRM/Crypto
- 
- CHECK_SUCCESS(MLMediaCodecConfigure(codec, format, mCrypto));
- 
- 
- 
- 
- mDurationUs  = durationUs;
- 
- mPosition     = 0;
- 
- mSawInputEOS  = false;
- 
- mSawOutputEOS = false;
- 
- if (bIsVideo) {
- 
- mVideoCodec = codec;
- 
- mVideoTrakIndex = trackIndex;
- 
- } else if (bIsAudio) {
- 
- mAudioCodec = codec;
- 
- mAudioTrakIndex = trackIndex;
- 
- }
- 
- }
- 
- }
- 
- 
- 
- 
- if (result != MLResult_Ok) {
- 
- // Failed to set up the playback - do the clean up before return
- 
- if (format) {
- 
- MLMediaFormatDestroy(format);
- 
- }
- 
- cleanUp();
- 
- }
- 
- 
- 
- 
- return result;
- 
- }
- 
- 
- 
- 
- MLResult MediaCodecPlayer::start() {
- 
- // TODO: Ideally trigger an async event that will call the following function in another thread
- 
- playbackLoop();
- 
- }
- 
- 
- 
- 
- void MediaCodecPlayer::cleanUp() {
- 
- // TODO: Stop the playback if its still happening
- 
- // TODO: Stop the thread that is spawned by construct()
- 
- if (mVideoCodec != ML_INVALID_HANDLE) {
- 
- MLMediaCodecDestroy(mVideoCodec);
- 
- mVideoCodec = ML_INVALID_HANDLE;
- 
- }
- 
- if (mAudioCodec != ML_INVALID_HANDLE) {
- 
- MLMediaCodecDestroy(mAudioCodec);
- 
- mAudioCodec = ML_INVALID_HANDLE;
- 
- }
- 
- if (mExtractor != ML_INVALID_HANDLE) {
- 
- MLMediaExtractorDestroy(mExtractor);
- 
- mExtractor = ML_INVALID_HANDLE;
- 
- }
- 
- if (mDrm != ML_INVALID_HANDLE) {
- 
- MLMediaDRMRelease(mDrm);
- 
- mDrm = ML_INVALID_HANDLE;
- 
- }
- 
- if (mCrypto != 0) {
- 
- MLMediaCryptoRelease(mCrypto);
- 
- mCrypto = 0;
- 
- }
- 
- mSawInputEOS  = true;
- 
- mSawOutputEOS = true;
- 
- }
-*/
-
 MagicLeap::TOutputThread::TOutputThread() :
 	SoyWorkerThread	("MagicLeapOutputThread", SoyWorkerWaitMode::Wake )
 {
@@ -1937,6 +619,14 @@ bool MagicLeap::TOutputThread::CanSleep()
 	return false;
 }
 
+
+bool MagicLeap::TInputThread::CanSleep()
+{
+	if ( mInputBuffers.IsEmpty() )
+		return true;
+	
+	return false;
+}
 
 
 void MagicLeap::TOutputThread::PopOutputBuffer(int64_t OutputBufferIndex)
@@ -2065,9 +755,58 @@ bool MagicLeap::TOutputThread::Iteration()
 	return true;
 }
 
+
+MagicLeap::TInputThread::TInputThread(std::function<void(ArrayBridge<uint8_t>&&)> PopPendingData,std::function<bool()> HasPendingData) :
+	mPopPendingData	( PopPendingData ),
+	mHasPendingData	( HasPendingData ),
+	SoyWorkerThread	("MagicLeapInputThread", SoyWorkerWaitMode::Wake )
+{
+	Start();
+}
+
+bool MagicLeap::TInputThread::Iteration()
+{
+	if ( mInputBuffers.IsEmpty() )
+		return true;
+	
+	if ( !HasPendingData() )
+		return true;
+	
+	//	read a buffer
+	int64_t BufferIndex = -1;
+	{
+		std::lock_guard<std::mutex> Lock(mInputBuffersLock);
+		BufferIndex = mInputBuffers.PopAt(0);
+	}
+	try
+	{
+		PushInputBuffer( BufferIndex );
+	}
+	catch(std::exception& e)
+	{
+		std::Debug << "Exception pushing input buffer " << BufferIndex << "; " << e.what() << GetDebugState() << std::endl;
+		std::lock_guard<std::mutex> Lock(mInputBuffersLock);
+		auto& ElementZero = *mInputBuffers.InsertBlock(0,1);
+		ElementZero = BufferIndex;
+		std::this_thread::sleep_for( std::chrono::seconds(1) );
+	}
+	
+	return true;
+}
+
+
+
 std::string MagicLeap::TDecoder::GetDebugState()
 {
-	std::lock_guard<std::mutex> Lock(mInputBufferLock);
+	std::stringstream Debug;
+	Debug << mInputThread.GetDebugState() << mOutputThread.GetDebugState();
+	return Debug.str();
+}
+
+
+std::string MagicLeap::TInputThread::GetDebugState()
+{
+	std::lock_guard<std::mutex> Lock(mInputBuffersLock);
 	
 	std::stringstream Debug;
 	Debug << " mInputBuffers[";

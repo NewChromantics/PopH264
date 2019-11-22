@@ -9,6 +9,7 @@
 namespace MagicLeap
 {
 	class TDecoder;
+	class TInputThread;
 	class TOutputThread;
 }
 
@@ -44,6 +45,37 @@ private:
 
 
 
+
+class MagicLeap::TInputThread : public SoyWorkerThread
+{
+public:
+	TInputThread(std::function<void(ArrayBridge<uint8_t>&&)> PopPendingData,std::function<bool()> HasPendingData);
+	
+	virtual bool	Iteration() override;
+	virtual bool	CanSleep() override;
+	
+	bool			HasPendingData()	{	return mHasPendingData();	}
+	void			OnInputBufferAvailible(MLHandle CodecHandle,int64_t BufferIndex);
+	std::string		GetDebugState();
+	void			OnInputSubmitted(int32_t PresentationTime)	{}
+	
+private:
+	void			PushInputBuffer(int64_t BufferIndex);
+	
+private:
+	MLHandle		mHandle = ML_INVALID_HANDLE;
+
+	std::function<void(ArrayBridge<uint8_t>&&)>	mPopPendingData;
+	std::function<bool()>						mHasPendingData;
+	uint64_t		mPacketCounter = 0;	//	we don't pass around frame/presentation time, so we just use a counter
+	
+	//	list of buffers we can write to
+	std::mutex		mInputBuffersLock;
+	Array<int64_t>	mInputBuffers;
+};
+
+
+
 class MagicLeap::TDecoder : public PopH264::TDecoder
 {
 public:
@@ -58,16 +90,11 @@ private:
 	void			OnOutputFormatChanged(MLHandle NewFormat);
 	
 	std::string		GetDebugState();
-
+	
 private:
 	MLHandle		mHandle = ML_INVALID_HANDLE;
 	
-	uint64_t		mPacketCounter = 0;	//	we don't pass around frame/presentation time, so we just use a counter
-
-	//	list of buffers we can write to
-	std::mutex		mInputBufferLock;
-	Array<int64_t>	mInputBuffers;
-	
+	TInputThread	mInputThread;
 	TOutputThread	mOutputThread;
 	SoyPixelsMeta	mOutputPixelMeta;
 };

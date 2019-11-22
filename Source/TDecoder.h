@@ -20,6 +20,8 @@ public:
 protected:
 	virtual bool	DecodeNextPacket(std::function<void(const SoyPixelsImpl&,SoyTime)> OnFrameDecoded)=0;	//	returns true if more data to proccess
 	
+	bool			HasPendingData()	{	return !mPendingData.IsEmpty();	}
+	void			PopPendingData(ArrayBridge<unsigned char>&& Buffer);
 	void			RemovePendingData(size_t Size);
 	
 protected:
