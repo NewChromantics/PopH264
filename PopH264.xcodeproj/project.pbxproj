@@ -981,6 +981,7 @@
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = NO;
 				SDKROOT = macosx;
+				UNITY_OUTPUT_PATH = "$(SOURCE_ROOT)/Unity/PopH264/Assets/PopH264/";
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Debug;
@@ -1025,6 +1026,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				ONLY_ACTIVE_ARCH = NO;
 				SDKROOT = macosx;
+				UNITY_OUTPUT_PATH = "$(SOURCE_ROOT)/Unity/PopH264/Assets/PopH264/";
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Release;
@@ -1060,6 +1062,7 @@
 			buildSettings = {
 				MABU_BUILD_TARGET = ml1;
 				MABU_FILENAME = PopH264.Lumin/PopH264.mabu;
+				UNITY_ASSET_PLUGIN_PATH = "$(UNITY_OUTPUT_PATH)/MagicLeap";
 			};
 			name = Debug;
 		};
@@ -1068,6 +1071,7 @@
 			buildSettings = {
 				MABU_BUILD_TARGET = release_ml1;
 				MABU_FILENAME = PopH264.Lumin/PopH264.mabu;
+				UNITY_ASSET_PLUGIN_PATH = "$(UNITY_OUTPUT_PATH)/MagicLeap";
 			};
 			name = Release;
 		};
@@ -1075,7 +1079,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ANDROID_ABI = x86_64;
-				UNITY_ASSET_PLUGIN_PATH = "$(SOURCE_ROOT)/Unity/PopH264/Assets/PopH264";
+				UNITY_ASSET_PLUGIN_PATH = "$(UNITY_OUTPUT_PATH)/Android";
 			};
 			name = Debug;
 		};
@@ -1083,7 +1087,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ANDROID_ABI = x86_64;
-				UNITY_ASSET_PLUGIN_PATH = "$(SOURCE_ROOT)/Unity/PopH264/Assets/PopH264";
+				UNITY_ASSET_PLUGIN_PATH = "$(UNITY_OUTPUT_PATH)/Android";
 			};
 			name = Release;
 		};

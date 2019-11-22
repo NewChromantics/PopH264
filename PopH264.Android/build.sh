@@ -46,32 +46,19 @@ if [ -z "$UNITY_ASSET_PLUGIN_PATH" ]; then
 	exit 1
 fi
 
+function BuildAbi()
+{
+	ANDROID_ABI=$1
+	$ANDROID_NDK/ndk-build -j$MAXCONCURRENTBUILDS NDK_DEBUG=0 NDK_PROJECT_PATH=$SOURCE_ROOT/PopH264.Android/
 
-#We never pass NDK_DEBUG=1 to vrlib as this generates a duplicate gdbserver
-#instead the app using vrlib can set it 
-if [ $ACTION == "release" ]; then
-	echo "Android/build.sh: $ACTION..."
-
-ANDROID_ABI=x86_64
-$ANDROID_NDK/ndk-build -j$MAXCONCURRENTBUILDS NDK_DEBUG=0 NDK_PROJECT_PATH=$SOURCE_ROOT/PopH264.Android/
-
-ANDROID_ABI=armeabi-v7a
-$ANDROID_NDK/ndk-build -j$MAXCONCURRENTBUILDS NDK_DEBUG=0 NDK_PROJECT_PATH=$SOURCE_ROOT/PopH264.Android/
-
-#ANDROID_ABI=x86
-#$ANDROID_NDK/ndk-build -j$MAXCONCURRENTBUILDS NDK_DEBUG=0 NDK_PROJECT_PATH=$SOURCE_ROOT/PopH264.Android/
-
-#ANDROID_ABI=arm64-v8a
-#$ANDROID_NDK/ndk-build -j$MAXCONCURRENTBUILDS NDK_DEBUG=0 NDK_PROJECT_PATH=$SOURCE_ROOT/PopH264.Android/
-
-RESULT=$?
+	RESULT=$?
 
 	if [[ $RESULT -ne 0 ]]; then
 		exit $RESULT
 	fi
 
-	SRC_PATH="PopH264.Android/libs/armeabi-v7a/libPopH264.so"
-	DEST_PATH="$UNITY_ASSET_PLUGIN_PATH"
+	SRC_PATH="PopH264.Android/libs/$ANDROID_ABI/libPopH264.so"
+	DEST_PATH="$UNITY_ASSET_PLUGIN_PATH/$ANDROID_ABI"
 	echo "Copying $SRC_PATH to $DEST_PATH"
 
 	mkdir -p $DEST_PATH && cp $SRC_PATH $DEST_PATH
@@ -80,7 +67,17 @@ RESULT=$?
 	if [[ $RESULT -ne 0 ]]; then
 		exit $RESULT
 	fi
+}
 
+#We never pass NDK_DEBUG=1 to vrlib as this generates a duplicate gdbserver
+#instead the app using vrlib can set it 
+if [ $ACTION == "release" ]; then
+	echo "Android/build.sh: $ACTION..."
+
+	BuildAbi armeabi-v7a
+	BuildAbi x86
+	BuildAbi x86_64
+	BuildAbi arm64-v8a
 	exit 0
 fi
 
