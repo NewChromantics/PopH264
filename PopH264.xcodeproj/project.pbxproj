@@ -558,12 +558,12 @@
 /* Begin PBXLegacyTarget section */
 		BF53E82722EC8C1D008253CD /* PopH264_Lumin */ = {
 			isa = PBXLegacyTarget;
-			buildArgumentsString = "-b $(MABU_FILENAME) -t $(MABU_BUILD_TARGET) --out PopH264.Lumin/$(MABU_BUILD_TARGET)/";
+			buildArgumentsString = "$(ACTION)";
 			buildConfigurationList = BF53E82822EC8C1D008253CD /* Build configuration list for PBXLegacyTarget "PopH264_Lumin" */;
 			buildPhases = (
 			);
-			buildToolPath = "$(MAGIC_LEAP_SDK_PATH)/mabu";
-			buildWorkingDirectory = "$(SRC_ROOT)";
+			buildToolPath = PopH264.Lumin/build.sh;
+			buildWorkingDirectory = "";
 			dependencies = (
 			);
 			name = PopH264_Lumin;
@@ -1062,7 +1062,7 @@
 			buildSettings = {
 				MABU_BUILD_TARGET = ml1;
 				MABU_FILENAME = PopH264.Lumin/PopH264.mabu;
-				UNITY_ASSET_PLUGIN_PATH = "$(UNITY_OUTPUT_PATH)/MagicLeap";
+				UNITY_ASSET_PLUGIN_PATH = "$(UNITY_OUTPUT_PATH)/Lumin";
 			};
 			name = Debug;
 		};
@@ -1071,7 +1071,7 @@
 			buildSettings = {
 				MABU_BUILD_TARGET = release_ml1;
 				MABU_FILENAME = PopH264.Lumin/PopH264.mabu;
-				UNITY_ASSET_PLUGIN_PATH = "$(UNITY_OUTPUT_PATH)/MagicLeap";
+				UNITY_ASSET_PLUGIN_PATH = "$(UNITY_OUTPUT_PATH)/Lumin";
 			};
 			name = Release;
 		};
