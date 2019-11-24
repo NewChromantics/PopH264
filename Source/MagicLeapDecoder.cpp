@@ -357,7 +357,7 @@ MagicLeap::TDecoder::TDecoder(int32_t Mode) :
 	{
 		auto& This = *static_cast<MagicLeap::TDecoder*>(pThis);
 		std::Debug << "OnOutputBufferAvailible( Codec=" << Codec << " BufferIndex=" << BufferIndex << ")" << std::endl;
-		This.OnOutputBufferAvailible(BufferIndex);
+		This.OnOutputBufferAvailible( BufferIndex, *BufferInfo );
 	};
 	
 	auto OnOutputFormatChanged = [](MLHandle Codec,MLHandle NewFormat,void* pThis)
@@ -536,9 +536,13 @@ void MagicLeap::TDecoder::OnInputBufferAvailible(int64_t BufferIndex)
 	mInputThread.OnInputBufferAvailible( mHandle, BufferIndex );
 }
 
-void MagicLeap::TDecoder::OnOutputBufferAvailible(int64_t BufferIndex)
+void MagicLeap::TDecoder::OnOutputBufferAvailible(int64_t BufferIndex,const MLMediaCodecBufferInfo& BufferMeta)
 {
-	mOutputThread.OnOutputBufferAvailible( mHandle, mOutputPixelMeta, BufferIndex );
+	TOutputBufferMeta Meta;
+	Meta.mPixelMeta = mOutputPixelMeta;
+	Meta.mBufferIndex = BufferIndex;
+	Meta.mMeta = BufferMeta;
+	mOutputThread.OnOutputBufferAvailible( mHandle, Meta );
 	std::Debug << "OnOutputBufferAvailible(" << BufferIndex << ") " << GetDebugState() << mOutputThread.GetDebugState() << std::endl;
 }
 
@@ -602,12 +606,11 @@ void MagicLeap::TOutputThread::PushOnOutputFrameFunc(std::function<void(const So
 	mPushFunctions.PushBack( PushFrameFunc );
 }
 
-void MagicLeap::TOutputThread::OnOutputBufferAvailible(MLHandle CodecHandle,SoyPixelsMeta PixelFormat,int64_t BufferIndex)
+void MagicLeap::TOutputThread::OnOutputBufferAvailible(MLHandle CodecHandle,const TOutputBufferMeta& BufferMeta)
 {
 	std::lock_guard<std::mutex> Lock(mOutputBuffersLock);
-	mOutputBuffers.PushBack( BufferIndex );
+	mOutputBuffers.PushBack( BufferMeta );
 	mCodecHandle = CodecHandle;
-	mPixelFormat = PixelFormat;
 	Wake();
 }
 
@@ -629,14 +632,14 @@ bool MagicLeap::TInputThread::CanSleep()
 }
 
 
-void MagicLeap::TOutputThread::PopOutputBuffer(int64_t OutputBufferIndex)
+void MagicLeap::TOutputThread::PopOutputBuffer(const TOutputBufferMeta& BufferMeta)
 {
 	{
 		std::lock_guard<std::mutex> Lock(mPushFunctionsLock);
 		if ( mPushFunctions.IsEmpty() )
 		{
 			std::stringstream Error;
-			Error << "PopOutputBuffer(" << OutputBufferIndex << ") but no push funcs yet (probably race condition)";
+			Error << "PopOutputBuffer(" << BufferMeta.mBufferIndex << ") but no push funcs yet (probably race condition)";
 			throw Soy::AssertException( Error );
 		}
 	}
@@ -644,7 +647,7 @@ void MagicLeap::TOutputThread::PopOutputBuffer(int64_t OutputBufferIndex)
 	//	gr: hold onto pointer and don't release buffer until it's been read,to avoid a copy
 	//		did this on android and it was a boost
 	Soy::TScopeTimerPrint Timer(__PRETTY_FUNCTION__,0);
-	auto BufferHandle = static_cast<MLHandle>( OutputBufferIndex );
+	auto BufferHandle = static_cast<MLHandle>( BufferMeta.mBufferIndex );
 	const uint8_t* Data = nullptr;
 	size_t DataSize = -1;
 	/*
@@ -666,40 +669,20 @@ void MagicLeap::TOutputThread::PopOutputBuffer(int64_t OutputBufferIndex)
 		IsOkay( Result, "MLMediaCodecReleaseOutputBuffer");
 	};
 	
+	//	if data is null, then output is a surface
 	if ( Data == nullptr || DataSize == 0 )
 	{
-		std::Debug << "Got Invalid OutputBuffer(" << OutputBufferIndex << ") DataSize=" << DataSize << " DataPtr=0x" << std::hex << (size_t)(Data) << std::dec << std::endl;
+		std::Debug << "Got Invalid OutputBuffer(" << BufferMeta.mBufferIndex << ") DataSize=" << DataSize << " DataPtr=0x" << std::hex << (size_t)(Data) << std::dec << std::endl;
 		ReleaseBuffer();
 		return;
 	}
 	
-	std::Debug << "Got OutputBuffer(" << OutputBufferIndex << ") DataSize=" << DataSize << " DataPtr=0x" << std::hex << (size_t)(Data) << std::dec << std::endl;
+	std::Debug << "Got OutputBuffer(" << BufferMeta.mBufferIndex << ") DataSize=" << DataSize << " DataPtr=0x" << std::hex << (size_t)(Data) << std::dec << std::endl;
 	try
 	{
-		static bool DumpData = false;
-		if ( DumpData )
-		{
-			std::stringstream DumpStr;
-			DumpStr << "const uint8_t PixelDump[" << DataSize << "] = \n{\n";
-			DumpStr << std::hex;
-			for ( auto i=0;	i<DataSize;	i++ )
-			{
-				if ( i == mPixelFormat.GetWidth() )
-				{
-					DumpStr << "\t";
-				}
-				auto px = Data[i];
-				DumpStr << "0x" << px << ", ";
-			}
-			DumpStr << "};\n";
-			std::Debug << DumpStr.str();
-		}
-		
-		//	if data is null, then output is a surface
-		
 		//	output pixels!
 		auto* DataMutable = const_cast<uint8_t*>( Data );
-		SoyPixelsRemote NewPixels( DataMutable, DataSize, mPixelFormat );
+		SoyPixelsRemote NewPixels( DataMutable, DataSize, BufferMeta.mPixelMeta );
 		PushFrame( NewPixels );
 		ReleaseBuffer();
 	}
@@ -734,21 +717,21 @@ bool MagicLeap::TOutputThread::Iteration()
 		return true;
 	
 	//	read a buffer
-	int64_t BufferIndex = -1;
+	TOutputBufferMeta BufferMeta;
 	{
 		std::lock_guard<std::mutex> Lock(mOutputBuffersLock);
-		BufferIndex = mOutputBuffers.PopAt(0);
+		BufferMeta = mOutputBuffers.PopAt(0);
 	}
 	try
 	{
-		PopOutputBuffer( BufferIndex );
+		PopOutputBuffer( BufferMeta );
 	}
 	catch(std::exception& e)
 	{
-		std::Debug << "Exception getting output buffer " << BufferIndex << "; " << e.what() << GetDebugState() << std::endl;
+		std::Debug << "Exception getting output buffer " << BufferMeta.mBufferIndex << "; " << e.what() << GetDebugState() << std::endl;
 		std::lock_guard<std::mutex> Lock(mOutputBuffersLock);
 		auto& ElementZero = *mOutputBuffers.InsertBlock(0,1);
-		ElementZero = BufferIndex;
+		ElementZero = BufferMeta;
 		std::this_thread::sleep_for( std::chrono::seconds(1) );
 	}
 		
@@ -823,7 +806,7 @@ std::string MagicLeap::TOutputThread::GetDebugState()
 	std::stringstream Debug;
 	Debug << " mOutputBuffers[";
 	for ( auto i=0;	i<mOutputBuffers.GetSize();	i++ )
-		Debug << mOutputBuffers[i] << ",";
+		Debug << mOutputBuffers[i].mBufferIndex << ",";
 	Debug << "] PushFuncs x" << mPushFunctions.GetSize() << " ";
 	return Debug.str();
 }

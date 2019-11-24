@@ -11,8 +11,17 @@ namespace MagicLeap
 	class TDecoder;
 	class TInputThread;
 	class TOutputThread;
+	class TOutputBufferMeta;
 }
 
+
+class MagicLeap::TOutputBufferMeta
+{
+public:
+	MLMediaCodecBufferInfo	mMeta;
+	int64_t					mBufferIndex = -1;
+	SoyPixelsMeta			mPixelMeta;			//	meta at time of availibility
+};
 
 class MagicLeap::TOutputThread : public SoyWorkerThread
 {
@@ -24,11 +33,11 @@ public:
 	
 	void			PushOnOutputFrameFunc(std::function<void(const SoyPixelsImpl&,SoyTime)>& PushFrameFunc);
 	void			OnInputSubmitted(int32_t PresentationTime);
-	void			OnOutputBufferAvailible(MLHandle CodecHandle,SoyPixelsMeta PixelFormat,int64_t BufferIndex);
+	void			OnOutputBufferAvailible(MLHandle CodecHandle,const TOutputBufferMeta& BufferMeta);
 	std::string		GetDebugState();
 	
 private:
-	void			PopOutputBuffer(int64_t OutputBuffer);
+	void			PopOutputBuffer(const TOutputBufferMeta& BufferMeta);
 	void			PushFrame(const SoyPixelsImpl& Pixels);
 
 private:
@@ -36,11 +45,10 @@ private:
 	Array<std::function<void(const SoyPixelsImpl&,SoyTime)>>	mPushFunctions;
 
 	//	list of buffers with some pending output data
-	std::mutex		mOutputBuffersLock;
-	Array<int64_t>	mOutputBuffers;
+	std::mutex					mOutputBuffersLock;
+	Array<TOutputBufferMeta>	mOutputBuffers;
 	
 	MLHandle		mCodecHandle = ML_INVALID_HANDLE;
-	SoyPixelsMeta	mPixelFormat;		//	this may need syncing with buffers
 };
 
 
@@ -86,7 +94,7 @@ private:
 	virtual bool	DecodeNextPacket(std::function<void(const SoyPixelsImpl&,SoyTime)> OnFrameDecoded) override;	//	returns true if more data to proccess
 	
 	void			OnInputBufferAvailible(int64_t BufferIndex);
-	void			OnOutputBufferAvailible(int64_t BufferIndex);
+	void			OnOutputBufferAvailible(int64_t BufferIndex,const MLMediaCodecBufferInfo& BufferMeta);
 	void			OnOutputFormatChanged(MLHandle NewFormat);
 	
 	std::string		GetDebugState();
