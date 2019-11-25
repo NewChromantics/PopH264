@@ -741,14 +741,14 @@ vec4x<uint8_t> GetDebugColour(int Index)
 {
 	vec4x<uint8_t> Colours[] =
 	{
-		vec4x<uint8_t>(0,0,0,255),
+		//vec4x<uint8_t>(0,0,0,255),
 		vec4x<uint8_t>(255,0,0,255),
 		vec4x<uint8_t>(255,255,0,255),
 		vec4x<uint8_t>(0,255,0,255),
 		vec4x<uint8_t>(0,255,255,255),
 		vec4x<uint8_t>(0,0,255,255),
 		vec4x<uint8_t>(255,0,255,255),
-		vec4x<uint8_t>(255,255,255,255)
+		//vec4x<uint8_t>(255,255,255,255)
 	};
 	Index = Index % std::size(Colours);
 	return Colours[Index];
