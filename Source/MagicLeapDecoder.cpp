@@ -162,7 +162,7 @@ SoyPixelsFormat::Type MagicLeap::GetPixelFormat(int32_t ColourFormat)
 	{
 		case COLOR_FormatYUV420Planar:				return SoyPixelsFormat::Yuv_8_8_8_Full;
 		case COLOR_FormatYUV420SemiPlanar:			return SoyPixelsFormat::Yuv_8_88_Full;
-		case COLOR_FORMAT_UNKNOWN_NVIDIA_SURFACE:	return SoyPixelsFormat::Yuv_8_8_8_Full;
+		case COLOR_FORMAT_UNKNOWN_NVIDIA_SURFACE:	return SoyPixelsFormat::Yuv_8_8_8_Ntsc;	//	not sure what this is yet, so for identification
 		default:break;
 	}
 	
@@ -398,14 +398,14 @@ MagicLeap::TDecoder::TDecoder(int32_t Mode) :
 	{
 		auto& This = *static_cast<MagicLeap::TDecoder*>(pThis);
 		std::Debug << "OnFrameRendered( pt=" << PresentationTimeMicroSecs << " systime=" << SystemTimeNano << ")" << std::endl;
-		This.OnOutputFrameWritten( PresentationTimeMicroSecs, SystemTimeNano );
+		//This.OnOutputTextureWritten( PresentationTimeMicroSecs );
 	};
 	
 	auto OnFrameAvailible = [](MLHandle Codec,void* pThis)
 	{
 		auto& This = *static_cast<MagicLeap::TDecoder*>(pThis);
 		std::Debug << "OnFrameAvailible" << std::endl;
-		This.OnOutputFrameAvailible();
+		This.OnOutputTextureAvailible();
 	};
 	
 
@@ -425,7 +425,6 @@ MagicLeap::TDecoder::TDecoder(int32_t Mode) :
 	MLHandle Format = ML_INVALID_HANDLE;
 	Result = MLMediaFormatCreateVideo( H264MimeType, 1920, 1080, &Format );
 	IsOkay( Result, "MLMediaFormatCreateVideo" );
-	std::Debug << "Got format: " << Format << std::endl;
 
 	//	configure with SPS & PPS
 	//int8_t CSD_Buffer[]= { 0, 0, 0, 1, 103, 100, 0, 40, -84, 52, -59, 1, -32, 17, 31, 120, 11, 80, 16, 16, 31, 0, 0, 3, 3, -23, 0, 0, -22, 96, -108, 0, 0, 0, 1, 104, -18, 60, -128 };
@@ -574,6 +573,16 @@ void MagicLeap::TDecoder::OnOutputBufferAvailible(int64_t BufferIndex,const MLMe
 	std::Debug << "OnOutputBufferAvailible(" << BufferIndex << ") " << GetDebugState() << mOutputThread.GetDebugState() << std::endl;
 }
 
+void MagicLeap::TDecoder::OnOutputTextureAvailible()
+{
+	mOutputThread.OnOutputTextureAvailible();
+}
+
+void MagicLeap::TDecoder::OnOutputTextureWritten(int64_t PresentationTime)
+{
+	mOutputThread.OnOutputTextureWritten(PresentationTime);
+}
+
 void MagicLeap::TDecoder::OnOutputFormatChanged(MLHandle NewFormat)
 {
 	//	gr: we should do this like a queue for the output thread
@@ -642,12 +651,57 @@ void MagicLeap::TOutputThread::OnOutputBufferAvailible(MLHandle CodecHandle,cons
 	Wake();
 }
 
+void MagicLeap::TOutputThread::OnOutputTextureAvailible()
+{
+	//	gr: from the forums, there's a suggestion that no calls should be done during a callback
+	//		so queue up a grab-a-texture request
+	mOutputTexturesAvailible++;
+	Wake();
+}
+
+void MagicLeap::TOutputThread::OnOutputTextureWritten(int64_t PresentationTime)
+{
+	//	mark texture ready to be output by giving it a time
+	//	this func/callback kinda suggests, there can only be one at a time?
+	//	because we don't know which texture handle this refers to
+	std::lock_guard<std::recursive_mutex> Lock(mOutputTexturesLock);
+	for ( auto t=0;	t<mOutputTextures.GetSize();	t++ )
+	{
+		auto& OutputTexture = mOutputTextures[t];
+		//	already used
+		if ( OutputTexture.mPresentationTime >= 0 )
+			continue;
+		//	shouldn't occur
+		if ( OutputTexture.mPushed )
+			continue;
+		
+		//	mark texture as ready and thread should process it
+		OutputTexture.mPresentationTime = PresentationTime;
+		std::Debug << "Marked texture " << t << " with time " << PresentationTime << " ready to be pushed" << std::endl;
+		Wake();
+		return;
+	}
+
+	std::stringstream Debug;
+	Debug << "OnOutputTextureWritten(" << PresentationTime << ") but 0/" << mOutputTextures.GetSize() << " textures availible to mark written";
+	throw Soy::AssertException(Debug);
+}
+
+
 bool MagicLeap::TOutputThread::CanSleep()
 {
-	if ( mOutputBuffers.IsEmpty() )
-		return true;
+	//	buffers to get
+	if ( !mOutputBuffers.IsEmpty() )
+		return false;
 	
-	return false;
+	//	textures to get
+	if ( mOutputTexturesAvailible > 0 )
+		return false;
+	
+	if ( IsAnyOutputTextureReady() )
+		return false;
+	
+	return true;
 }
 
 
@@ -659,6 +713,107 @@ bool MagicLeap::TInputThread::CanSleep()
 	return false;
 }
 
+void MagicLeap::TOutputThread::RequestOutputTexture()
+{
+	TOutputTexture OutputTexture;
+	{
+		//	gr: is this blocking?
+		Soy::TScopeTimerPrint Timer(__PRETTY_FUNCTION__,0);
+		auto Result = MLMediaCodecAcquireNextAvailableFrame( mCodecHandle, &OutputTexture.mTextureHandle );
+		IsOkay( Result, "MLMediaCodecAcquireNextAvailableFrame");
+		//	gr: we DONT get OnFrameRendered (maybe its after we release)
+		//		so we DONT know which frame/time this texture is for
+		//		but it's ready (i guess)
+		//	returns MLResult_UnspecifiedFailure when we request a THIRD texture (so maybe double buffered)
+		//	to make current system continue, give it a time
+		OutputTexture.mPresentationTime = mOutputTextureCounter++;
+	}
+	
+	{
+		std::lock_guard<std::recursive_mutex> Lock(mOutputTexturesLock);
+		mOutputTextures.PushBack( OutputTexture );
+		mOutputTexturesAvailible--;
+	}
+	std::Debug << "Got new texture 0x" << std::hex << OutputTexture.mTextureHandle << std::dec << "..." << GetDebugState() << std::endl;
+}
+
+vec4x<uint8_t> GetDebugColour(int Index)
+{
+	vec4x<uint8_t> Colours[] =
+	{
+		vec4x<uint8_t>(0,0,0,255),
+		vec4x<uint8_t>(255,0,0,255),
+		vec4x<uint8_t>(255,255,0,255),
+		vec4x<uint8_t>(0,255,0,255),
+		vec4x<uint8_t>(0,255,255,255),
+		vec4x<uint8_t>(0,0,255,255),
+		vec4x<uint8_t>(255,0,255,255),
+		vec4x<uint8_t>(255,255,255,255)
+	};
+	Index = Index % std::size(Colours);
+	return Colours[Index];
+}
+
+void MagicLeap::TOutputThread::PushOutputTexture(TOutputTexture& OutputTexture)
+{
+	//	for now, dummy texture, we need to push a handle (or make this readpixels on a gl thread)
+	SoyPixels DummyPixels( SoyPixelsMeta( 1, 1, SoyPixelsFormat::RGBA) );
+	DummyPixels.SetPixel( 0, 0, GetDebugColour(OutputTexture.mPresentationTime) );
+
+	std::Debug << "PushOutputTexture(0x" << std::hex << OutputTexture.mTextureHandle << std::dec << " time=" << OutputTexture.mPresentationTime << ")" << std::endl;
+	
+	PushFrame( DummyPixels );
+	
+	//	gr: temp, we've "delivered" this texture, so release it now
+	std::Debug << "ReleaseOutputTexture(0x" << std::hex << OutputTexture.mTextureHandle << std::dec << " time=" << OutputTexture.mPresentationTime << ")" << std::endl;
+	ReleaseOutputTexture( OutputTexture.mTextureHandle );
+}
+
+bool MagicLeap::TOutputThread::IsAnyOutputTextureReady()
+{
+	std::lock_guard<std::recursive_mutex> Lock(mOutputTexturesLock);
+	for ( auto t=0;	t<mOutputTextures.GetSize();	t++ )
+	{
+		auto& OutputTexture = mOutputTextures[t];
+		if ( OutputTexture.IsReadyToBePushed() )
+			return true;
+	}
+	return false;	
+}
+
+void MagicLeap::TOutputThread::PushOutputTextures()
+{
+	if ( mOutputTextures.GetSize() == 0 )
+		return;
+	
+	
+	std::lock_guard<std::recursive_mutex> Lock(mOutputTexturesLock);
+	for ( auto t=0;	t<mOutputTextures.GetSize();	t++ )
+	{
+		auto& OutputTexture = mOutputTextures[t];
+		if ( !OutputTexture.IsReadyToBePushed() )
+			continue;
+		
+		PushOutputTexture( OutputTexture );
+		OutputTexture.mPushed = true;
+	}
+	
+}
+
+void MagicLeap::TOutputThread::ReleaseOutputTexture(MLHandle TextureHandle)
+{
+	//	remove it from the list
+	std::lock_guard<std::recursive_mutex> Lock(mOutputTexturesLock);
+	if ( !mOutputTextures.Remove( TextureHandle ) )
+	{
+		std::Debug << "Warning: ReleaseOutputTexture(" << std::hex << "0x" << TextureHandle << std::dec << ") wasn't in our texture output list. MLMediaCodecReleaseFrame() NOT CALLED." << std::endl;
+		return;
+	}
+
+	//	release it
+	auto Result = MLMediaCodecReleaseFrame( mCodecHandle, TextureHandle );
+	IsOkay( Result, "MLMediaCodecReleaseFrame" );
+}
 
 void MagicLeap::TOutputThread::PopOutputBuffer(const TOutputBufferMeta& BufferMeta)
 {
@@ -755,28 +910,48 @@ void MagicLeap::TOutputThread::PushFrame(const SoyPixelsImpl& Pixels)
 
 bool MagicLeap::TOutputThread::Iteration()
 {
-	if ( mOutputBuffers.IsEmpty() )
-		return true;
+	//	flush any texture requests
+	if ( mOutputTexturesAvailible > 0 )
+	{
+		try
+		{
+			RequestOutputTexture();
+		}
+		catch(std::exception& e)
+		{
+			std::Debug << "Exception requesting output texture x" << mOutputTexturesAvailible << "availible; " << e.what() << GetDebugState() << std::endl;
+			std::this_thread::sleep_for( std::chrono::seconds(1) );
+		}
+	}
 	
-	//	read a buffer
-	TOutputBufferMeta BufferMeta;
+	//	push any textures that have been written
+	if ( mOutputTextures.GetSize() > 0 )
 	{
-		std::lock_guard<std::mutex> Lock(mOutputBuffersLock);
-		BufferMeta = mOutputBuffers.PopAt(0);
+		PushOutputTextures();
 	}
-	try
+	
+	if ( !mOutputBuffers.IsEmpty() )
 	{
-		PopOutputBuffer( BufferMeta );
+		//	read a buffer
+		TOutputBufferMeta BufferMeta;
+		{
+			std::lock_guard<std::mutex> Lock(mOutputBuffersLock);
+			BufferMeta = mOutputBuffers.PopAt(0);
+		}
+		try
+		{
+			PopOutputBuffer( BufferMeta );
+		}
+		catch(std::exception& e)
+		{
+			std::Debug << "Exception getting output buffer " << BufferMeta.mBufferIndex << "; " << e.what() << GetDebugState() << std::endl;
+			std::lock_guard<std::mutex> Lock(mOutputBuffersLock);
+			auto& ElementZero = *mOutputBuffers.InsertBlock(0,1);
+			ElementZero = BufferMeta;
+			std::this_thread::sleep_for( std::chrono::seconds(1) );
+		}
 	}
-	catch(std::exception& e)
-	{
-		std::Debug << "Exception getting output buffer " << BufferMeta.mBufferIndex << "; " << e.what() << GetDebugState() << std::endl;
-		std::lock_guard<std::mutex> Lock(mOutputBuffersLock);
-		auto& ElementZero = *mOutputBuffers.InsertBlock(0,1);
-		ElementZero = BufferMeta;
-		std::this_thread::sleep_for( std::chrono::seconds(1) );
-	}
-		
+	
 	return true;
 }
 
@@ -844,11 +1019,19 @@ std::string MagicLeap::TInputThread::GetDebugState()
 std::string MagicLeap::TOutputThread::GetDebugState()
 {
 	std::lock_guard<std::mutex> Lock(mOutputBuffersLock);
-	
+	std::lock_guard<std::recursive_mutex> Lock2(mOutputTexturesLock);
+
 	std::stringstream Debug;
 	Debug << " mOutputBuffers[";
 	for ( auto i=0;	i<mOutputBuffers.GetSize();	i++ )
 		Debug << mOutputBuffers[i].mBufferIndex << ",";
-	Debug << "] PushFuncs x" << mPushFunctions.GetSize() << " ";
+	Debug << "] ";
+	Debug << "PushFuncs x" << mPushFunctions.GetSize() << " ";
+	Debug << "mOutputTexturesAvailible=" << mOutputTexturesAvailible << " ";
+	Debug << "mOutputTextures[";
+	for ( auto i=0;	i<mOutputTextures.GetSize();	i++ )
+		Debug << std::hex << "0x" << mOutputTextures[i].mTextureHandle << std::dec << ",";
+	Debug << "] ";
+
 	return Debug.str();
 }

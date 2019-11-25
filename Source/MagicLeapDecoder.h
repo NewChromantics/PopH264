@@ -12,6 +12,7 @@ namespace MagicLeap
 	class TInputThread;
 	class TOutputThread;
 	class TOutputBufferMeta;
+	class TOutputTexture;
 }
 
 
@@ -21,6 +22,30 @@ public:
 	MLMediaCodecBufferInfo	mMeta;
 	int64_t					mBufferIndex = -1;
 	SoyPixelsMeta			mPixelMeta;			//	meta at time of availibility
+};
+
+class MagicLeap::TOutputTexture
+{
+public:
+	bool			IsReadyToBePushed()
+	{
+		if ( mPushed )
+			return false;
+		if ( mPresentationTime < 0 )
+			return false;
+		return true;
+	}
+	
+	inline bool		operator==(const MLHandle& Handle) const
+	{
+		return mTextureHandle == Handle;
+	}
+	
+	//	docs say this is a texture handle that can be used with OES_external
+	MLHandle		mTextureHandle = ML_INVALID_HANDLE;
+	int64_t			mPresentationTime = -1;	//	if -1, the texture hasn't been written to yet
+	bool			mPushed = false;			//	sent to caller
+	bool			mReleased = false;			//	released by caller
 };
 
 class MagicLeap::TOutputThread : public SoyWorkerThread
@@ -35,10 +60,17 @@ public:
 	void			OnInputSubmitted(int32_t PresentationTime);
 	void			OnOutputBufferAvailible(MLHandle CodecHandle,const TOutputBufferMeta& BufferMeta);
 	std::string		GetDebugState();
-	
+	void			OnOutputTextureWritten(int64_t PresentationTime);
+	void			OnOutputTextureAvailible();
+
 private:
 	void			PopOutputBuffer(const TOutputBufferMeta& BufferMeta);
+	void			RequestOutputTexture();
+	void			PushOutputTextures();
+	void			PushOutputTexture(TOutputTexture& OutputTexture);
+	void			ReleaseOutputTexture(MLHandle TextureHandle);
 	void			PushFrame(const SoyPixelsImpl& Pixels);
+	bool			IsAnyOutputTextureReady();
 
 private:
 	std::mutex		mPushFunctionsLock;
@@ -47,6 +79,13 @@ private:
 	//	list of buffers with some pending output data
 	std::mutex					mOutputBuffersLock;
 	Array<TOutputBufferMeta>	mOutputBuffers;
+	
+	//	texture's we've acquired
+	size_t						mOutputTexturesAvailible = 0;	//	shouldbe atomic
+	std::recursive_mutex		mOutputTexturesLock;
+	Array<TOutputTexture>		mOutputTextures;
+	
+	size_t						mOutputTextureCounter = 0;	//	for debug colour output
 	
 	MLHandle		mCodecHandle = ML_INVALID_HANDLE;
 };
@@ -96,7 +135,9 @@ private:
 	void			OnInputBufferAvailible(int64_t BufferIndex);
 	void			OnOutputBufferAvailible(int64_t BufferIndex,const MLMediaCodecBufferInfo& BufferMeta);
 	void			OnOutputFormatChanged(MLHandle NewFormat);
-	
+	void			OnOutputTextureWritten(int64_t PresentationTime);
+	void			OnOutputTextureAvailible();
+
 	std::string		GetDebugState();
 	
 private:
