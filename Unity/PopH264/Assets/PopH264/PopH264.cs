@@ -180,8 +180,10 @@ public static class PopH264
 	public enum DecoderMode
 	{
 		Software = 0,
-		MagicLeap_Nvidia = 1,
-		MagicLeap_Google = 2,
+		MagicLeap_NvidiaSoftware = 1,
+		MagicLeap_GoogleSoftware = 2,
+		MagicLeap_NvidiaHardware = 3,
+		MagicLeap_GoogleHardware = 4,
 	};
 
 	public class Decoder : IDisposable
@@ -237,7 +239,7 @@ public static class PopH264
 				case 1: return TextureFormat.R8;
 				case 2: return TextureFormat.RG16;
 				case 3: return TextureFormat.RGB24;
-				case 4: return TextureFormat.ARGB32;
+				case 4: return TextureFormat.RGBA32;
 				default:
 					throw new System.Exception("Don't know what format to use for component count " + ComponentCount);
 			}
