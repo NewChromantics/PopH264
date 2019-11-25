@@ -5,10 +5,13 @@
 #include <ml_media_format.h>
 #include <ml_media_error.h>
 
+
+
 namespace MagicLeap
 {
 	void			IsOkay(MLResult Result,const char* Context);
 	void			IsOkay(MLResult Result,std::stringstream& Context);
+	const char*		GetErrorString(MLResult Result);
 	void			EnumCodecs(std::function<void(const std::string&)> Enum);
 	
 	constexpr int32_t		Mode_NvidiaSoftware = 1;
@@ -44,19 +47,14 @@ void MagicLeap::IsOkay(MLResult Result,std::stringstream& Context)
 	IsOkay( Result, Str.c_str() );
 }
 
-void MagicLeap::IsOkay(MLResult Result,const char* Context)
+const char* MagicLeap::GetErrorString(MLResult Result)
 {
-	if ( Result == MLResult_Ok )
-		return;
-
 	//	specific media errors
 	auto HasPrefix = [&](MLResult Prefix)
 	{
 		auto And = Result & Prefix;
 		return And == Prefix;
 	};
-
-	const char* ResultString = nullptr;
 
 	if ( HasPrefix(MLResultAPIPrefix_MediaGeneric) ||
 		HasPrefix(MLResultAPIPrefix_Media) ||
@@ -66,18 +64,22 @@ void MagicLeap::IsOkay(MLResult Result,const char* Context)
 		HasPrefix(MLResultAPIPrefix_MediaOMXVendors) ||
 		HasPrefix(MLResultAPIPrefix_MediaPlayer) )
 	{
-		ResultString = MLMediaResultGetString( Result );
+		return MLMediaResultGetString( Result );
 	}
-	
-	if ( !ResultString )
-		ResultString = MLGetResultString(Result);
-	
-	auto Results16 = static_cast<int16_t>( static_cast<uint32_t>(Result) >> 16 );
-	auto Resultu16 = static_cast<uint16_t>( static_cast<uint32_t>(Result) >> 16 );
 
+	return MLGetResultString(Result);
+}
+
+void MagicLeap::IsOkay(MLResult Result,const char* Context)
+{
+	if ( Result == MLResult_Ok )
+		return;
+
+	auto ResultString = GetErrorString(Result);
+	
 	//	gr: sometimes we get unknown so, put error nmber in
 	std::stringstream Error;
-	Error << "Error in " << Context << ": " << ResultString << " (0x" << std::hex <<  static_cast<uint32_t>(Result) << std::dec << "/" << Results16 << "/" << Resultu16 << ")";
+	Error << "Error in " << Context << ": " << ResultString;
 	throw Soy::AssertException( Error );
 }
 
