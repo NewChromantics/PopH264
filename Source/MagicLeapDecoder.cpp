@@ -11,13 +11,14 @@ namespace MagicLeap
 	void			IsOkay(MLResult Result,std::stringstream& Context);
 	void			EnumCodecs(std::function<void(const std::string&)> Enum);
 	
-	constexpr int32_t		Mode_Nvidia = 1;
-	constexpr int32_t		Mode_Google = 2;
-	constexpr bool			ForceSoftwareOutput = true;
+	constexpr int32_t		Mode_NvidiaSoftware = 1;
+	constexpr int32_t		Mode_GoogleSoftware = 2;
+	constexpr int32_t		Mode_NvidiaHardware = 3;
+	constexpr int32_t		Mode_GoogleHardware = 4;
 
 	constexpr auto*			NvidiaH264Codec = "OMX.Nvidia.h264.decode";	//	hardware
 	constexpr auto*			GoogleH264Codec = "OMX.google.h264.decoder";	//	software according to https://forum.magicleap.com/hc/en-us/community/posts/360041748952-Follow-up-on-Multimedia-Decoder-API
-	std::string			GetCodec(int32_t Mode);
+	std::string				GetCodec(int32_t Mode,bool& HardwareSurface);
 
 	//	got this mime from googling;
 	//	http://hello-qd.blogspot.com/2013/05/choose-decoder-and-encoder-by-google.html
@@ -299,12 +300,29 @@ OMX.google.vp8.encoder
 	}
 }
 
-std::string MagicLeap::GetCodec(int32_t Mode)
+std::string MagicLeap::GetCodec(int32_t Mode,bool& HardwareSurface)
 {
 	switch ( Mode )
 	{
-		case Mode_Nvidia:	return NvidiaH264Codec;
-		case Mode_Google:	return GoogleH264Codec;
+		case Mode_NvidiaHardware:
+		case Mode_GoogleHardware:
+			HardwareSurface = true;
+			break;
+			
+		default:
+			HardwareSurface = false;
+			break;
+	}
+
+	switch ( Mode )
+	{
+		case Mode_NvidiaSoftware:
+		case Mode_NvidiaHardware:
+			return NvidiaH264Codec;
+			
+		case Mode_GoogleSoftware:
+		case Mode_GoogleHardware:
+			return GoogleH264Codec;
 
 		default:
 			break;
@@ -324,7 +342,8 @@ MagicLeap::TDecoder::TDecoder(int32_t Mode) :
 	};
 	EnumCodecs( EnumCodec );
 
-	auto CodecName = GetCodec( Mode );
+	bool HardwareSurface = false;
+	auto CodecName = GetCodec( Mode, HardwareSurface );
 	bool IsMime = Soy::StringBeginsWith(CodecName,"video/",false);
 	auto CreateByType = IsMime ? MLMediaCodecCreation_ByType : MLMediaCodecCreation_ByName;
 
@@ -377,12 +396,14 @@ MagicLeap::TDecoder::TDecoder(int32_t Mode) :
 	{
 		auto& This = *static_cast<MagicLeap::TDecoder*>(pThis);
 		std::Debug << "OnFrameRendered( pt=" << PresentationTimeMicroSecs << " systime=" << SystemTimeNano << ")" << std::endl;
+		This.OnOutputFrameWritten( PresentationTimeMicroSecs, SystemTimeNano );
 	};
 	
 	auto OnFrameAvailible = [](MLHandle Codec,void* pThis)
 	{
 		auto& This = *static_cast<MagicLeap::TDecoder*>(pThis);
 		std::Debug << "OnFrameAvailible" << std::endl;
+		This.OnOutputFrameAvailible();
 	};
 	
 
@@ -424,7 +445,12 @@ MagicLeap::TDecoder::TDecoder(int32_t Mode) :
 	
 	
 	//	force software mode
-	if ( ForceSoftwareOutput )
+	if ( HardwareSurface )
+	{
+		Result = MLMediaCodecSetSurfaceHint( mHandle, MLMediaCodecSurfaceHint_Hardware );
+		IsOkay( Result, "MLMediaCodecSetSurfaceHint(hardware)" );
+	}
+	else
 	{
 		Result = MLMediaCodecSetSurfaceHint( mHandle, MLMediaCodecSurfaceHint_Software );
 		IsOkay( Result, "MLMediaCodecSetSurfaceHint(software)" );
@@ -648,6 +674,14 @@ void MagicLeap::TOutputThread::PopOutputBuffer(const TOutputBufferMeta& BufferMe
 	//		did this on android and it was a boost
 	Soy::TScopeTimerPrint Timer(__PRETTY_FUNCTION__,0);
 	auto BufferHandle = static_cast<MLHandle>( BufferMeta.mBufferIndex );
+
+	auto ReleaseBuffer = [&](bool Render=true)
+	{
+		//	release back!
+		auto Result = MLMediaCodecReleaseOutputBuffer( mCodecHandle, BufferHandle, Render );
+		IsOkay( Result, "MLMediaCodecReleaseOutputBuffer");
+	};
+
 	const uint8_t* Data = nullptr;
 	size_t DataSize = -1;
 	/*
@@ -659,15 +693,21 @@ void MagicLeap::TOutputThread::PopOutputBuffer(const TOutputBufferMeta& BufferMe
 	std::Debug << "MLMediaCodecDequeueOutputBuffer returned buffer index " << NewBufferIndex << " compared to " << OutputBufferIndex << " time=" << BufferMeta.presentation_time_us << std::endl;
 	*/
 	auto Result = MLMediaCodecGetOutputBufferPointer( mCodecHandle, BufferHandle, &Data, &DataSize );
+	
+	//	gr: if we're in hardware mode, this DOES NOT return null/0 like docs say, but instead invalid operation
+	//		we release it
+	//	https://forum.magicleap.com/hc/en-us/community/posts/360055134771-Stagefright-assert-after-calling-MLMediaCodecDequeueInputBuffer?page=1#community_comment_360008514291
+	//	gr: we should probably store that we're in hardware mode...
+	if ( Result == MLMediaGenericResult_InvalidOperation )
+	{
+		std::Debug << "MLMediaCodecGetOutputBufferPointer returned MLMediaGenericResult_InvalidOperation, assuming hardware" << std::endl;
+		//	flush this frame (render=true) to get a frame-availible callback
+		ReleaseBuffer(true);
+		return;
+	}
+	
 	IsOkay( Result, "MLMediaCodecGetOutputBufferPointer");
 	
-	auto ReleaseBuffer = [&]()
-	{
-		//	release back!
-		bool Render = false;
-		auto Result = MLMediaCodecReleaseOutputBuffer( mCodecHandle, BufferHandle, Render );
-		IsOkay( Result, "MLMediaCodecReleaseOutputBuffer");
-	};
 	
 	//	if data is null, then output is a surface
 	if ( Data == nullptr || DataSize == 0 )
