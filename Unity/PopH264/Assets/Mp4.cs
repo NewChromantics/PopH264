@@ -74,6 +74,9 @@ public class Mp4 : MonoBehaviour {
 	public float DecodeToVideoTime = 0;
 	public int DecodeToVideoTimeMs { get { return (int)(DecodeToVideoTime * 1000.0f); } }
 
+	public PopH264.DecoderMode HardwareDecoding = PopH264.DecoderMode.Software;
+	public bool DecodeOnSeperateThread = true;
+
 	//	these values dictate how much processing time we give to each step
 	[Range(0, 20)]
 	public int DecodeImagesPerFrame = 1;
@@ -419,7 +422,7 @@ public class Mp4 : MonoBehaviour {
 
 		//	ideally only once we've verified we have an mp4, but before moov. Maybe just if an ftyp is found
 		if (Decoder == null)
-			Decoder = new PopH264.Decoder();
+			Decoder = new PopH264.Decoder( HardwareDecoding, DecodeOnSeperateThread );
 
 		long BytesRead;
 		var Mp4Bytes = PendingMp4Bytes.ToArray();
@@ -586,12 +589,22 @@ public class Mp4 : MonoBehaviour {
 			return false;
 
 		//	only pull out next frame, if we WANT the pending frame times
-		if (PendingOutputFrameTimes == null || PendingOutputFrameTimes.Count == 0 )
+		if (PendingOutputFrameTimes == null )
 			return false;
+
+		if (PendingOutputFrameTimes.Count == 0)
+		{
+			Debug.Log("Not expecting any more frames added extra PendingOutputFrameTimes " + (DecodeToVideoTimeMs + 1) );
+			//return false;
+			PendingOutputFrameTimes.Add(DecodeToVideoTimeMs + 1);
+		}
 
 		//	not reached next frame yet
 		if (DecodeToVideoTimeMs < PendingOutputFrameTimes[0])
+		{
+			Debug.Log("DecodeToVideoTimeMs " + DecodeToVideoTimeMs + " < PendingOutputFrameTimes[0] " + PendingOutputFrameTimes[0]);
 			return false;
+		}
 
 		var FrameTime = Decoder.GetNextFrame(ref PlaneTextures, ref PlaneFormats);
 
