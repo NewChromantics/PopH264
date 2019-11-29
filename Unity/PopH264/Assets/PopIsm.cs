@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.Networking;
 
 [System.Serializable]
-public class UnityEvent_String : UnityEngine.Events.UnityEvent<string> { }
+public class UnityEvent_IsmString : UnityEngine.Events.UnityEvent<string> { }
 
 [System.Serializable]
 public class UnityEvent_SmoothStream : UnityEngine.Events.UnityEvent<PopX.Ism.SmoothStream> { }
@@ -12,7 +12,7 @@ public class UnityEvent_SmoothStream : UnityEngine.Events.UnityEvent<PopX.Ism.Sm
 
 public class PopIsm : MonoBehaviour
 {
-	public UnityEvent_String OnError;
+	public UnityEvent_IsmString OnError;
 	public UnityEvent_SmoothStream OnParsedStream;
 	[Header("Example url: http://poph264test-euwe.streaming.media.azure.net/56909db0-0ba4-45bf-b2ae-0497e6e93049/cat_baseline.ism/")]
 	public string Url_Host = "poph264test-euwe";
@@ -79,7 +79,8 @@ public class PopIsm : MonoBehaviour
 		{
 			var TimeOffset = Track.ChunkStartTimes[ChunkIndex];
 			Mp4.Preconfigured_SPS_HexString = TrackSpsAndPps;
-			Mp4.LoadMp4(Bytes, TimeOffset);
+			//Mp4.LoadMp4(Bytes, TimeOffset);
+			Mp4.PushData(Bytes);
 			Mp4.enabled = true;
 		};
 

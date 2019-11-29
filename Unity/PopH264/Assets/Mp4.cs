@@ -424,6 +424,16 @@ public class Mp4 : MonoBehaviour {
 		if (Decoder == null)
 			Decoder = new PopH264.Decoder( HardwareDecoding, DecodeOnSeperateThread );
 
+		/*
+		System.Func<int, byte[]> PopData = (int DataSize)=>
+		{
+			var Data = new byte[DataSize];
+			PendingMp4Bytes.CopyTo(0, Data, 0, DataSize);
+			PendingMp4Bytes.RemoveRange(0, DataSize);
+			Mp4BytesRead += DataSize;
+			return Data;
+		};
+*/
 		long BytesRead;
 		var Mp4Bytes = PendingMp4Bytes.ToArray();
 		PopX.Mpeg4.ParseNextAtom(Mp4Bytes, out BytesRead, EnumTracks, EnumMdat);

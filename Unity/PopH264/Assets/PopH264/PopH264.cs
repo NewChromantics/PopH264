@@ -11,6 +11,7 @@ using System.Collections.Generic;
 ///	Low level interface
 /// </summary>
 public static class PopH264
+{
 #if UNITY_UWP
 	private const string PluginName = "PopH264.Uwp";
 #error building uwp

@@ -44,7 +44,7 @@ public class HololensRemote : MonoBehaviour {
 
 		System.Action<byte[]> HandleMp4Bytes = (Bytes) =>
 		{
-			Mp4.LoadMp4(Bytes, 0);
+			Mp4.PushData(Bytes);
 			Mp4.enabled = true;
 			
 		};
