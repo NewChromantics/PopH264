@@ -27,7 +27,7 @@ public class Mp4 : MonoBehaviour {
 	{
 		public PacketFormat Format;
 		public uint MdatIndex;
-		public long DataPosition;
+		public long DataFilePosition;
 		public long DataSize;
 		public int PresentationTime;
 	}
@@ -117,8 +117,8 @@ public class Mp4 : MonoBehaviour {
 	struct MdatBlock
 	{
 		public TAtom Atom;
-		public byte[] Bytes;
-		public long Mp4Offset;	//	where did this mdat start 
+		public byte[] Bytes	{ get { return Atom.AtomData; }}
+		public long FileOffset;	//	where did this mdat start (sample chunks are 
 	}
 	Dictionary<uint, MdatBlock> Mdats;
 	uint NextMdat = 0;
@@ -212,13 +212,13 @@ public class Mp4 : MonoBehaviour {
 		return Mdats.ContainsKey(MdatIndex);
 	}
 
-	byte[] GetDataBytes(uint MdatIndex, long Position, long Size)
+	byte[] GetDataBytes(uint MdatIndex, long FilePosition, long Size)
 	{
 		if (!HasMdat(MdatIndex))
 			throw new System.Exception("Not yet recieved mdat #" + MdatIndex);
 
 		var Meta = Mdats[MdatIndex];
-		Position -= Meta.Mp4Offset;
+		var Position = FilePosition - Meta.FileOffset;
 		return Meta.Bytes.SubArray(Position, Size);
 	}
 
@@ -345,7 +345,7 @@ public class Mp4 : MonoBehaviour {
 							PendingInputSamples = new List<TPendingSample>();
 
 						NewSample.MdatIndex = MdatIndex;
-						NewSample.DataPosition = Sample.DataPosition;
+						NewSample.DataFilePosition = Sample.DataFilePosition.Value;
 						NewSample.DataSize = Sample.DataSize;
 						var TimeOffsetMs = (int)(TimeOffset / 10000.0f);
 						NewSample.PresentationTime = Sample.PresentationTimeMs + TimeOffsetMs;
@@ -406,11 +406,7 @@ public class Mp4 : MonoBehaviour {
 
 			var Mdat = new MdatBlock();
 			Mdat.Atom = MdatAtom;
-
-			//	grab mdat bytes as we discard them when walking mp4
-			//	the filedata here is relative to what we put into the parser!
-			Mdat.Mp4Offset = Mp4BytesRead + MdatAtom.FileDataOffset;
-			Mdat.Bytes = GetMp4Bytes(Mdat.Mp4Offset, MdatAtom.DataSize);
+			Mdat.FileOffset = Mdat.Atom.AtomDataFilePosition;	//	need a better way to do this
 
 			if ( VerboseDebug )
 				Debug.Log("Got MDat " + MdatIndex + " x" + Mdat.Bytes.Length + " bytes");
@@ -424,22 +420,30 @@ public class Mp4 : MonoBehaviour {
 		if (Decoder == null)
 			Decoder = new PopH264.Decoder( HardwareDecoding, DecodeOnSeperateThread );
 
-		/*
-		System.Func<int, byte[]> PopData = (int DataSize)=>
+
+		System.Func<long, byte[]> PopData = (long DataSize)=>
 		{
+			if (PendingMp4Bytes.Count == 0)
+				return null;
 			var Data = new byte[DataSize];
-			PendingMp4Bytes.CopyTo(0, Data, 0, DataSize);
-			PendingMp4Bytes.RemoveRange(0, DataSize);
+			PendingMp4Bytes.CopyTo(0, Data, 0, (int)DataSize);
+			PendingMp4Bytes.RemoveRange(0, (int)DataSize);
 			Mp4BytesRead += DataSize;
 			return Data;
 		};
-*/
-		long BytesRead;
-		var Mp4Bytes = PendingMp4Bytes.ToArray();
-		PopX.Mpeg4.ParseNextAtom(Mp4Bytes, out BytesRead, EnumTracks, EnumMdat);
-		PendingMp4Bytes.RemoveRange(0, (int)BytesRead);
 
-		Mp4BytesRead += BytesRead;
+		//	read everything
+		if (PendingMp4Bytes.Count == 0)
+			return;
+
+		try
+		{
+			PopX.Mpeg4.ParseNextAtom(PopData, Mp4BytesRead, EnumTracks, EnumMdat);
+		}
+		catch(System.Exception e)
+		{
+			Debug.LogException(e);
+		}
 	}
 
 	void OnDisable()
@@ -547,10 +551,13 @@ public class Mp4 : MonoBehaviour {
 				return;
 
 		//	grab data
-		var SampleBytes = GetDataBytes( Sample.MdatIndex, Sample.DataPosition, Sample.DataSize);
+		//	position is in the FILE
+		var DataPosition = Sample.DataFilePosition;
+		//var DataPosition = 0;
+		var SampleBytes = GetDataBytes(Sample.MdatIndex, DataPosition, Sample.DataSize);
 
 		//	need to convert?
-		if ( Sample.Format == PacketFormat.Avcc )
+		if (Sample.Format == PacketFormat.Avcc)
 		{
 			System.Action<byte[]> OnAnnexB = (AnnexBBytes) =>
 			{
