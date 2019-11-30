@@ -80,7 +80,8 @@ public class PopIsm : MonoBehaviour
 			var TimeOffset = Track.ChunkStartTimes[ChunkIndex];
 			Mp4.Preconfigured_SPS_HexString = TrackSpsAndPps;
 			//Mp4.LoadMp4(Bytes, TimeOffset);
-			Mp4.PushData(Bytes);
+			throw new System.Exception("Need to switch to file reader");
+			//Mp4.PushData(Bytes);
 			Mp4.enabled = true;
 		};
 

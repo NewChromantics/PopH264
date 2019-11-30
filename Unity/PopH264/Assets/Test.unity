@@ -144,11 +144,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 49b4db9913f9e44d799c728e7d09e868, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Filename: Assets/HololensTest/hololens.mp4
   Preconfigured_SPS_HexString: 
-  PushAllData: 0
-  PopKbPerFrame: 30
-  PushPacketsPerFrameMin: 20
+  VerboseDebug: 0
+  AutoTrackTimeOnEnable: 1
+  OnFinished:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine.CoreModule, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+  DecodeToVideoTime: 0
+  HardwareDecoding: 0
+  DecodeOnSeperateThread: 1
+  DecodeImagesPerFrame: 1
+  DecodeSamplesPerFrame: 1
+  DecodePacketsPerFrame: 1
+  DecodeMp4AtomsPerFrame: 1
   MaterialUniform_LumaTexture: LumaTexture
   MaterialUniform_LumaFormat: LumaFormat
   MaterialUniform_ChromaUTexture: ChromaUTexture
@@ -156,6 +166,7 @@ MonoBehaviour:
   MaterialUniform_ChromaVTexture: ChromaVTexture
   MaterialUniform_ChromaVFormat: ChromaVFormat
   SetMaterialFormat: 1
+  RgbTextureBlits: []
   OnNewFrameTime:
     m_PersistentCalls:
       m_Calls:
@@ -170,6 +181,11 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+    m_TypeName: UnityEvent_String, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+  OnDebugUpdate:
+    m_PersistentCalls:
+      m_Calls: []
     m_TypeName: UnityEvent_String, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
       PublicKeyToken=null
 --- !u!23 &88594540
@@ -257,6 +273,7 @@ GameObject:
   - component: {fileID: 292209226}
   - component: {fileID: 292209225}
   - component: {fileID: 292209224}
+  - component: {fileID: 292209229}
   m_Layer: 0
   m_Name: cat_baseline.mov
   m_TagString: Untagged
@@ -276,11 +293,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 49b4db9913f9e44d799c728e7d09e868, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Filename: Assets/cat_baseline.mp4
   Preconfigured_SPS_HexString: 
-  PushAllData: 0
-  PopKbPerFrame: 30
-  PushPacketsPerFrameMin: 20
+  VerboseDebug: 0
+  AutoTrackTimeOnEnable: 1
+  OnFinished:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine.CoreModule, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+  DecodeToVideoTime: 0
+  HardwareDecoding: 0
+  DecodeOnSeperateThread: 1
+  DecodeImagesPerFrame: 1
+  DecodeSamplesPerFrame: 1
+  DecodePacketsPerFrame: 1
+  DecodeMp4AtomsPerFrame: 1
   MaterialUniform_LumaTexture: LumaTexture
   MaterialUniform_LumaFormat: LumaFormat
   MaterialUniform_ChromaUTexture: ChromaUTexture
@@ -288,6 +315,7 @@ MonoBehaviour:
   MaterialUniform_ChromaVTexture: ChromaVTexture
   MaterialUniform_ChromaVFormat: ChromaVFormat
   SetMaterialFormat: 1
+  RgbTextureBlits: []
   OnNewFrameTime:
     m_PersistentCalls:
       m_Calls:
@@ -302,6 +330,11 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+    m_TypeName: UnityEvent_String, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+  OnDebugUpdate:
+    m_PersistentCalls:
+      m_Calls: []
     m_TypeName: UnityEvent_String, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
       PublicKeyToken=null
 --- !u!23 &292209225
@@ -376,6 +409,19 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &292209229
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 292209223}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bc5be6511bbc64e559e6694d659d8044, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Filename: cat_baseline.mp4
 --- !u!1 &308914246
 GameObject:
   m_ObjectHideFlags: 0
@@ -408,11 +454,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 49b4db9913f9e44d799c728e7d09e868, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Filename: Assets/AzureTest/cat/525965.h264.bytes
   Preconfigured_SPS_HexString: 000000016742C01ED901E08EFFC0220021C400000FA40003A9803C58B9200000000168CB8CB2
-  PushAllData: 0
-  PopKbPerFrame: 30
-  PushPacketsPerFrameMin: 0
+  VerboseDebug: 0
+  AutoTrackTimeOnEnable: 1
+  OnFinished:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine.CoreModule, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+  DecodeToVideoTime: 0
+  HardwareDecoding: 0
+  DecodeOnSeperateThread: 1
+  DecodeImagesPerFrame: 1
+  DecodeSamplesPerFrame: 1
+  DecodePacketsPerFrame: 1
+  DecodeMp4AtomsPerFrame: 1
   MaterialUniform_LumaTexture: LumaTexture
   MaterialUniform_LumaFormat: LumaFormat
   MaterialUniform_ChromaUTexture: ChromaUTexture
@@ -420,6 +476,7 @@ MonoBehaviour:
   MaterialUniform_ChromaVTexture: ChromaVTexture
   MaterialUniform_ChromaVFormat: ChromaVFormat
   SetMaterialFormat: 1
+  RgbTextureBlits: []
   OnNewFrameTime:
     m_PersistentCalls:
       m_Calls:
@@ -434,6 +491,11 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+    m_TypeName: UnityEvent_String, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+  OnDebugUpdate:
+    m_PersistentCalls:
+      m_Calls: []
     m_TypeName: UnityEvent_String, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
       PublicKeyToken=null
 --- !u!23 &308914248
@@ -540,11 +602,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 49b4db9913f9e44d799c728e7d09e868, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Filename: Assets/cat_baseline_fragmented.mp4
   Preconfigured_SPS_HexString: 
-  PushAllData: 0
-  PopKbPerFrame: 30
-  PushPacketsPerFrameMin: 0
+  VerboseDebug: 0
+  AutoTrackTimeOnEnable: 1
+  OnFinished:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine.CoreModule, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+  DecodeToVideoTime: 0
+  HardwareDecoding: 0
+  DecodeOnSeperateThread: 1
+  DecodeImagesPerFrame: 1
+  DecodeSamplesPerFrame: 1
+  DecodePacketsPerFrame: 1
+  DecodeMp4AtomsPerFrame: 1
   MaterialUniform_LumaTexture: LumaTexture
   MaterialUniform_LumaFormat: LumaFormat
   MaterialUniform_ChromaUTexture: ChromaUTexture
@@ -552,6 +624,7 @@ MonoBehaviour:
   MaterialUniform_ChromaVTexture: ChromaVTexture
   MaterialUniform_ChromaVFormat: ChromaVFormat
   SetMaterialFormat: 1
+  RgbTextureBlits: []
   OnNewFrameTime:
     m_PersistentCalls:
       m_Calls:
@@ -566,6 +639,11 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+    m_TypeName: UnityEvent_String, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+  OnDebugUpdate:
+    m_PersistentCalls:
+      m_Calls: []
     m_TypeName: UnityEvent_String, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
       PublicKeyToken=null
 --- !u!23 &498001951
@@ -687,7 +765,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-    m_TypeName: UnityEvent_String, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+    m_TypeName: UnityEvent_IsmString, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
       PublicKeyToken=null
   OnParsedStream:
     m_PersistentCalls:
@@ -709,11 +787,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 49b4db9913f9e44d799c728e7d09e868, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Filename: 
   Preconfigured_SPS_HexString: 
-  PushAllData: 0
-  PopKbPerFrame: 30
-  PushPacketsPerFrameMin: 20
+  VerboseDebug: 0
+  AutoTrackTimeOnEnable: 1
+  OnFinished:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine.CoreModule, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+  DecodeToVideoTime: 0
+  HardwareDecoding: 0
+  DecodeOnSeperateThread: 1
+  DecodeImagesPerFrame: 1
+  DecodeSamplesPerFrame: 1
+  DecodePacketsPerFrame: 1
+  DecodeMp4AtomsPerFrame: 1
   MaterialUniform_LumaTexture: LumaTexture
   MaterialUniform_LumaFormat: LumaFormat
   MaterialUniform_ChromaUTexture: ChromaUTexture
@@ -721,6 +809,7 @@ MonoBehaviour:
   MaterialUniform_ChromaVTexture: ChromaVTexture
   MaterialUniform_ChromaVFormat: ChromaVFormat
   SetMaterialFormat: 1
+  RgbTextureBlits: []
   OnNewFrameTime:
     m_PersistentCalls:
       m_Calls:
@@ -735,6 +824,11 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+    m_TypeName: UnityEvent_String, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+  OnDebugUpdate:
+    m_PersistentCalls:
+      m_Calls: []
     m_TypeName: UnityEvent_String, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
       PublicKeyToken=null
 --- !u!23 &1299010233
@@ -954,11 +1048,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 49b4db9913f9e44d799c728e7d09e868, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Filename: 
   Preconfigured_SPS_HexString: 
-  PushAllData: 0
-  PopKbPerFrame: 30
-  PushPacketsPerFrameMin: 20
+  VerboseDebug: 0
+  AutoTrackTimeOnEnable: 1
+  OnFinished:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine.CoreModule, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+  DecodeToVideoTime: 0
+  HardwareDecoding: 0
+  DecodeOnSeperateThread: 1
+  DecodeImagesPerFrame: 1
+  DecodeSamplesPerFrame: 1
+  DecodePacketsPerFrame: 1
+  DecodeMp4AtomsPerFrame: 1
   MaterialUniform_LumaTexture: LumaTexture
   MaterialUniform_LumaFormat: LumaFormat
   MaterialUniform_ChromaUTexture: ChromaUTexture
@@ -966,6 +1070,7 @@ MonoBehaviour:
   MaterialUniform_ChromaVTexture: ChromaVTexture
   MaterialUniform_ChromaVFormat: ChromaVFormat
   SetMaterialFormat: 1
+  RgbTextureBlits: []
   OnNewFrameTime:
     m_PersistentCalls:
       m_Calls:
@@ -980,6 +1085,11 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+    m_TypeName: UnityEvent_String, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+  OnDebugUpdate:
+    m_PersistentCalls:
+      m_Calls: []
     m_TypeName: UnityEvent_String, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
       PublicKeyToken=null
 --- !u!23 &1484683420
@@ -1086,11 +1196,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 49b4db9913f9e44d799c728e7d09e868, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Filename: Assets/cat.mov
   Preconfigured_SPS_HexString: 
-  PushAllData: 0
-  PopKbPerFrame: 30
-  PushPacketsPerFrameMin: 0
+  VerboseDebug: 0
+  AutoTrackTimeOnEnable: 1
+  OnFinished:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine.CoreModule, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+  DecodeToVideoTime: 0
+  HardwareDecoding: 0
+  DecodeOnSeperateThread: 1
+  DecodeImagesPerFrame: 1
+  DecodeSamplesPerFrame: 1
+  DecodePacketsPerFrame: 1
+  DecodeMp4AtomsPerFrame: 1
   MaterialUniform_LumaTexture: LumaTexture
   MaterialUniform_LumaFormat: LumaFormat
   MaterialUniform_ChromaUTexture: ChromaUTexture
@@ -1098,6 +1218,7 @@ MonoBehaviour:
   MaterialUniform_ChromaVTexture: ChromaVTexture
   MaterialUniform_ChromaVFormat: ChromaVFormat
   SetMaterialFormat: 1
+  RgbTextureBlits: []
   OnNewFrameTime:
     m_PersistentCalls:
       m_Calls:
@@ -1112,6 +1233,11 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+    m_TypeName: UnityEvent_String, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+  OnDebugUpdate:
+    m_PersistentCalls:
+      m_Calls: []
     m_TypeName: UnityEvent_String, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
       PublicKeyToken=null
 --- !u!23 &1611006240
@@ -1465,11 +1591,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 49b4db9913f9e44d799c728e7d09e868, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Filename: Assets/AzureTest/5492715.h264.bytes
   Preconfigured_SPS_HexString: 0000000167640028AC2CA501E0089F97015202020280000003008000001E31300016E360000E4E1FF8C7076850A4580000000168E9093525
-  PushAllData: 0
-  PopKbPerFrame: 30
-  PushPacketsPerFrameMin: 0
+  VerboseDebug: 0
+  AutoTrackTimeOnEnable: 1
+  OnFinished:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine.CoreModule, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+  DecodeToVideoTime: 0
+  HardwareDecoding: 0
+  DecodeOnSeperateThread: 1
+  DecodeImagesPerFrame: 1
+  DecodeSamplesPerFrame: 1
+  DecodePacketsPerFrame: 1
+  DecodeMp4AtomsPerFrame: 1
   MaterialUniform_LumaTexture: LumaTexture
   MaterialUniform_LumaFormat: LumaFormat
   MaterialUniform_ChromaUTexture: ChromaUTexture
@@ -1477,6 +1613,7 @@ MonoBehaviour:
   MaterialUniform_ChromaVTexture: ChromaVTexture
   MaterialUniform_ChromaVFormat: ChromaVFormat
   SetMaterialFormat: 1
+  RgbTextureBlits: []
   OnNewFrameTime:
     m_PersistentCalls:
       m_Calls:
@@ -1491,6 +1628,11 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+    m_TypeName: UnityEvent_String, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+  OnDebugUpdate:
+    m_PersistentCalls:
+      m_Calls: []
     m_TypeName: UnityEvent_String, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
       PublicKeyToken=null
 --- !u!23 &1902604923
@@ -1608,7 +1750,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-    m_TypeName: UnityEvent_String, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+    m_TypeName: UnityEvent_IsmString, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
       PublicKeyToken=null
   OnParsedStream:
     m_PersistentCalls:

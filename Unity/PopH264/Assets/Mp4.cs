@@ -34,8 +34,6 @@ public class Mp4 : MonoBehaviour {
 		public int PresentationTime { get { return Sample.PresentationTimeMs; } }
 	}
 
-	public string Filename = "Assets/cat.mov";
-
 	byte HexCharToNibble(char HexChar)
 	{
 		if (HexChar >= 'A' && HexChar <= 'F') return (byte)((HexChar - 'A') + 10);
@@ -92,10 +90,12 @@ public class Mp4 : MonoBehaviour {
 
 	List<PopH264.FrameInput> PendingInputFrames;	//	h264 packets per-frame
 	List<TPendingSample> PendingInputSamples;		//	references to all samples that are scheduled, but we may not have data for yet (and may need conversion to a packet)
-	List<byte> PendingMp4Bytes;						//	encoded mp4 data we haven't processed
-	long Mp4BytesRead = 0;							//	amount of data we've processed from the start of the asset, so we know correct file offsets
 	List<int> PendingOutputFrameTimes;              //	frames we've submitted to the h264 decoder, that we're expecting to come out
-	int? LastFrameTime = null;						//	maybe a better way of storing this
+	int? LastFrameTime = null;                      //	maybe a better way of storing this
+
+
+	long Mp4BytesRead = 0;                          //	amount of data we've processed from the start of the asset, so we know correct file offsets
+	System.Func<long, long, byte[]> ReadFileFunction;   //	if set, we use this to read data (eg, from memory buffer). Other
 
 	//	assuming only one for now
 	int? H264TrackIndex = null;    
@@ -131,27 +131,22 @@ public class Mp4 : MonoBehaviour {
 
 	void OnEnable()
 	{
-		if (string.IsNullOrEmpty(Filename))
-			return;
-
-		//	hacky
-		if (!System.IO.File.Exists(Filename))
-		{
-			var StreamingAssetsFilename = Application.streamingAssetsPath + "/" + Filename;
-			if (System.IO.File.Exists(StreamingAssetsFilename))
-				Filename = StreamingAssetsFilename;
-		}
-
-		if (!System.IO.File.Exists(Filename))
-			throw new System.Exception("File missing: " + Filename);
-
-		var Mp4Bytes = System.IO.File.ReadAllBytes(Filename);
-		PushData(Mp4Bytes);
+		//	get the file reader
+		var FileReader = GetComponent<FileReaderBase>();
+		Mp4BytesRead = 0;
+		ReadFileFunction = FileReader.GetReadFileFunction();
 
 		if (AutoTrackTimeOnEnable)
 		{
 			StartTime = Time.time;
 		}
+	}
+
+	long GetKnownFileSize()
+	{
+		var FileReader = GetComponent<FileReaderBase>();
+		var Size = FileReader.GetKnownFileSize();
+		return Size;
 	}
 
 	static T[] CombineTwoArrays<T>(T[] a1, T[] a2)
@@ -186,15 +181,6 @@ public class Mp4 : MonoBehaviour {
 		Frame.Bytes = H264Packet;
 		Frame.FrameNumber = FrameNumber;
 		PendingInputFrames.Add(Frame);
-	}
-
-	public void PushData(byte[] Bytes)
-	{
-		if (PendingMp4Bytes==null)
-			PendingMp4Bytes = new List<byte>();
-
-		PendingMp4Bytes.AddRange(Bytes);
-		//	wake up threads etc that sort of thing
 	}
 
 	void CullMdatBlocks(int DiscardBlockIndex)
@@ -235,22 +221,13 @@ public class Mp4 : MonoBehaviour {
 		return Meta.Bytes.SubArray(Position, Sample.DataSize);
 	}
 
-	byte[] GetMp4Bytes(long Position,long Size)
-	{
-		//	gr: is this position mdat-relative? if so, need to record which mdat this sample is relative to, and same mdat positions
-		var PendingPosition = Position - Mp4BytesRead;
-		if (PendingPosition + Size > this.PendingMp4Bytes.Count)
-			throw new System.Exception("Looking for bytes we haven't yet recieved: " + Position + "/" + Mp4BytesRead + "+" + PendingMp4Bytes.Count);
-
-		var SampleBytes = this.PendingMp4Bytes.SubArray(PendingPosition, Size);
-		return SampleBytes;
-	}
-
 	void ParseNextMp4Header()
 	{
-		//	nothing to parse
-		if ( PendingMp4Bytes.Count==0)
+		//	check if there's more data to be read
+		var KnownFileSize = GetKnownFileSize();
+		if (Mp4BytesRead >= KnownFileSize)
 			return;
+
 
 		int TimeOffset = 0;
 
@@ -438,18 +415,10 @@ public class Mp4 : MonoBehaviour {
 
 		System.Func<long, byte[]> PopData = (long DataSize)=>
 		{
-			if (PendingMp4Bytes.Count == 0)
-				return null;
-			var Data = new byte[DataSize];
-			PendingMp4Bytes.CopyTo(0, Data, 0, (int)DataSize);
-			PendingMp4Bytes.RemoveRange(0, (int)DataSize);
+			var Data = ReadFileFunction(Mp4BytesRead, DataSize);
 			Mp4BytesRead += DataSize;
 			return Data;
 		};
-
-		//	read everything
-		if (PendingMp4Bytes.Count == 0)
-			return;
 
 		try
 		{
@@ -470,7 +439,7 @@ public class Mp4 : MonoBehaviour {
 
 		PendingInputFrames = null;
 		PendingInputSamples = null;
-		PendingMp4Bytes = null;
+		ReadFileFunction = null;
 		Mp4BytesRead = 0;
 
 		H264TrackIndex = null;
@@ -490,6 +459,10 @@ public class Mp4 : MonoBehaviour {
 			return -1;
 		return Array.Count / Div;
 	}
+	int GetCountString(long Count, int Div = 1)
+	{
+		return (int)(Count / Div);
+	}
 
 	void Update()
 	{
@@ -502,7 +475,7 @@ public class Mp4 : MonoBehaviour {
 		//	update debug output
 		{
 			string Debug = "";
-			Debug += "Kb: " + GetCountString(this.PendingMp4Bytes,1024);
+			Debug += "Kb: " + GetCountString(this.GetKnownFileSize(),1024);
 			Debug += "Samples: " + GetCountString(this.PendingInputSamples);
 			Debug += "Packets: " + GetCountString(this.PendingInputFrames);
 			this.OnDebugUpdate.Invoke(Debug);

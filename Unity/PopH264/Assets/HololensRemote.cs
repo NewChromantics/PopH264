@@ -4,8 +4,8 @@ using UnityEngine;
 using UnityEngine.Networking;
 
 
-public class HololensRemote : MonoBehaviour {
-
+public class HololensRemote : FileReaderBase
+{
 	public string HttpUsername = "admin";
 	public string HttpPassword = "password";
 	public string MonitorUrl = "https://192.168.0.36/api/holographic/stream/live_low.mp4?holo=true&pv=true&mic=false&loopback=false";
@@ -13,9 +13,42 @@ public class HololensRemote : MonoBehaviour {
 	public int LoadMp4AfterKb = 1024 * 2;
 	public int LoadMp4AfterBytes { get { return LoadMp4AfterKb * 1024; } }
 
+	List<byte> PendingBytes;
+	long BytesRead = 0;
+
 	void OnEnable()
 	{
 		LoadStream();
+	}
+
+	public override long GetKnownFileSize()
+	{
+		var Size = BytesRead;
+		if (PendingBytes != null)
+			Size += PendingBytes.Count;
+		return Size;
+	}
+
+
+	override public System.Func<long, long, byte[]> GetReadFileFunction()
+	{
+		return ReadFileBytes;
+	}
+
+	byte[] ReadFileBytes(long Position, long Size)
+	{
+		//	not yet read any data, use of GetKnownFileSize() should have caught this
+		if (PendingBytes == null)
+			return null;
+
+		var Data = new byte[Size];
+		PendingBytes.CopyTo(0, Data, 0, (int)Size);
+
+		//	delete data read so we don't run out of memory
+		PendingBytes.RemoveRange(0, (int)Size);
+		BytesRead -= Size;
+
+		return Data;
 	}
 
 	public void LoadStream()
@@ -44,9 +77,10 @@ public class HololensRemote : MonoBehaviour {
 
 		System.Action<byte[]> HandleMp4Bytes = (Bytes) =>
 		{
-			Mp4.PushData(Bytes);
+			if (PendingBytes == null)
+				PendingBytes = new List<byte>();
+			PendingBytes.AddRange(Bytes);
 			Mp4.enabled = true;
-			
 		};
 
 		string authorization = Authenticate(HttpUsername, HttpPassword);
