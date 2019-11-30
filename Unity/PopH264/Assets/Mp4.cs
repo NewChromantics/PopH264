@@ -25,11 +25,13 @@ public class Mp4 : MonoBehaviour {
 
 	struct TPendingSample
 	{
+		public PopX.Mpeg4.TSample Sample;
 		public PacketFormat Format;
 		public uint MdatIndex;
-		public long DataFilePosition;
-		public long DataSize;
-		public int PresentationTime;
+		public long? DataPosition { get { return Sample.DataPosition; } }
+		public long? DataFilePosition { get { return Sample.DataFilePosition; } }
+		public long DataSize { get { return Sample.DataSize; } }
+		public int PresentationTime { get { return Sample.PresentationTimeMs; } }
 	}
 
 	public string Filename = "Assets/cat.mov";
@@ -212,14 +214,25 @@ public class Mp4 : MonoBehaviour {
 		return Mdats.ContainsKey(MdatIndex);
 	}
 
-	byte[] GetDataBytes(uint MdatIndex, long FilePosition, long Size)
+	byte[] GetDataBytes(TPendingSample Sample)
 	{
+		var MdatIndex = Sample.MdatIndex;
+		//Sample.DataPosition, Sample.DataSizeuint MdatIndex, long Position, long Size)
 		if (!HasMdat(MdatIndex))
 			throw new System.Exception("Not yet recieved mdat #" + MdatIndex);
-
 		var Meta = Mdats[MdatIndex];
-		var Position = FilePosition - Meta.FileOffset;
-		return Meta.Bytes.SubArray(Position, Size);
+
+		long Position;
+		if (Sample.DataFilePosition.HasValue)
+		{
+			Position = Sample.DataFilePosition.Value - Meta.Atom.AtomDataFilePosition;
+		}
+		else
+		{
+			Position = Sample.DataPosition.Value;
+		}
+
+		return Meta.Bytes.SubArray(Position, Sample.DataSize);
 	}
 
 	byte[] GetMp4Bytes(long Position,long Size)
@@ -344,11 +357,13 @@ public class Mp4 : MonoBehaviour {
 						if (PendingInputSamples == null)
 							PendingInputSamples = new List<TPendingSample>();
 
+						NewSample.Sample = Sample;
 						NewSample.MdatIndex = MdatIndex;
-						NewSample.DataFilePosition = Sample.DataFilePosition.Value;
-						NewSample.DataSize = Sample.DataSize;
+						//NewSample.DataPosition = Sample.DataPosition;
+						//NewSample.DataFilePosition = Sample.DataFilePosition;
+						//NewSample.DataSize = Sample.DataSize;
 						var TimeOffsetMs = (int)(TimeOffset / 10000.0f);
-						NewSample.PresentationTime = Sample.PresentationTimeMs + TimeOffsetMs;
+						//NewSample.PresentationTime = Sample.PresentationTimeMs + TimeOffsetMs;
 						NewSample.Format = PacketFormat.Avcc;
 						PendingInputSamples.Add(NewSample);
 					}
@@ -551,10 +566,7 @@ public class Mp4 : MonoBehaviour {
 				return;
 
 		//	grab data
-		//	position is in the FILE
-		var DataPosition = Sample.DataFilePosition;
-		//var DataPosition = 0;
-		var SampleBytes = GetDataBytes(Sample.MdatIndex, DataPosition, Sample.DataSize);
+		var SampleBytes = GetDataBytes(Sample);
 
 		//	need to convert?
 		if (Sample.Format == PacketFormat.Avcc)
