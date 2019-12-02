@@ -197,6 +197,8 @@ public class Mp4 : MonoBehaviour {
 
 	bool HasMdat(uint MdatIndex)
 	{
+		if (Mdats == null)
+			return false;
 		return Mdats.ContainsKey(MdatIndex);
 	}
 
