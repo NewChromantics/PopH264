@@ -9,5 +9,15 @@ https://docs.microsoft.com/en-us/azure/media-services/previous/media-services-po
 
 
 Convert to baseline 
-
+=======
 `ffmpeg -i key.mp4 -c:v libx264 -profile:v baseline -level 3 key_baseline.mp4`
+
+
+Convert to fragmented mp4 for streaming
+==================
+
+- Fast start is moov atom at the front
+`ffmpeg -i cat_baseline.mp4 -c copy -movflags faststart cat_baseline_fragment.mp4`
+
+- Frag keyframe is fragmented mdats
+`ffmpeg -i cat_baseline.mp4 -c copy -movflags frag_keyframe+empty_moov cat_baseline_fragment.mp4`
