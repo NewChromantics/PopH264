@@ -1,6 +1,7 @@
-﻿//#if NET_4_6	//	gr: not working?
+//#if NET_4_6	//	gr: not working?
 #if true
-#define USE_MEMORY_MAPPED_FILE
+//#define USE_MEMORY_MAPPED_FILE
+#define USE_FILE_HANDLE
 #endif
 using System.Collections;
 using System.Collections.Generic;
@@ -28,6 +29,8 @@ public class FileReader : FileReaderBase
 	MemoryMappedFile File;
 	MemoryMappedViewAccessor FileView;
 	long FileSize;			//	the file view capcacity is bigger than the file size (page aligned) so we need to know the proper size
+#elif USE_FILE_HANDLE
+	System.IO.FileStream File;
 #else
 	byte[] FileBytes;
 #endif
@@ -37,6 +40,8 @@ public class FileReader : FileReaderBase
 #if USE_MEMORY_MAPPED_FILE
 		//return FileView.Capacity;
 		return FileSize;
+#elif USE_FILE_HANDLE
+		return File.Length;
 #else
 		return FileBytes != null ? FileBytes.Length : 0;
 #endif
@@ -58,10 +63,18 @@ public class FileReader : FileReaderBase
 		if (!System.IO.File.Exists(Filename))
 			throw new System.Exception("File missing: " + Filename);
 
+		Debug.Log("FileReader opening file " + Filename + " (length = " + Filename.Length + ")");
+
 #if USE_MEMORY_MAPPED_FILE
+		Debug.Log("Creating Memory mapped file");
 		File = MemoryMappedFile.CreateFromFile(Filename,System.IO.FileMode.Open);
+		Debug.Log("Memory mapped file = "+ File);
 		FileView = File.CreateViewAccessor();
+		Debug.Log("Memory mapped FileView = " + FileView);
 		FileSize = new System.IO.FileInfo(Filename).Length;
+		Debug.Log("Memory mapped FileSize = " + FileSize);
+#elif USE_FILE_HANDLE
+		File = System.IO.File.OpenRead(Filename);
 #else
 		FileBytes = System.IO.File.ReadAllBytes(Filename);
 #endif
@@ -78,6 +91,15 @@ public class FileReader : FileReaderBase
 		var BytesRead = FileView.ReadArray(Position, Data, 0, (int)Size);
 		if (BytesRead != Size)
 			throw new System.Exception("Memory mapped file only read " + BytesRead + "/" + Size + " bytes");
+		return Data;
+#elif USE_FILE_HANDLE
+		var Data = new byte[Size];
+		var NewPos = File.Seek(Position, System.IO.SeekOrigin.Begin);
+		if (NewPos != Position)
+			throw new System.Exception("Seeked to " + Position + " but stream is at " + NewPos);
+		var BytesRead = File.Read( Data, 0, (int)Size);
+		if (BytesRead != Size)
+			throw new System.Exception("FileStream only read " + BytesRead + "/" + Size + " bytes");
 		return Data;
 #else
 		return FileBytes.SubArray(Position, Size);
