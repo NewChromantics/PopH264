@@ -35,6 +35,19 @@ public class FileReader : FileReaderBase
 	byte[] FileBytes;
 #endif
 
+	public void Reset()
+	{
+#if USE_MEMORY_MAPPED_FILE
+		File = null;
+		FileView = null;
+		long FileSize = 0;
+#elif USE_FILE_HANDLE
+		File = null;
+#else
+		FileBytes = null;
+#endif
+	}
+
 	public override long GetKnownFileSize()
 	{
 #if USE_MEMORY_MAPPED_FILE
@@ -49,6 +62,7 @@ public class FileReader : FileReaderBase
 
 	override public System.Func<long, long, byte[]> GetReadFileFunction()
 	{
+		Reset();
 		var FullFilename = Filename;
 
 		if (!System.IO.File.Exists(FullFilename))
