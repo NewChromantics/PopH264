@@ -49,21 +49,23 @@ public class FileReader : FileReaderBase
 
 	override public System.Func<long, long, byte[]> GetReadFileFunction()
 	{
-		if (!System.IO.File.Exists(Filename))
-		{
-			var AssetFilename = "Assets/" + Filename;
-			if (System.IO.File.Exists(AssetFilename))
-				Filename = AssetFilename;
+		var FullFilename = Filename;
 
-			var StreamingAssetsFilename = Application.streamingAssetsPath + "/" + Filename;
+		if (!System.IO.File.Exists(FullFilename))
+		{
+			var AssetFilename = "Assets/" + FullFilename;
+			if (System.IO.File.Exists(AssetFilename))
+				FullFilename = AssetFilename;
+
+			var StreamingAssetsFilename = Application.streamingAssetsPath + "/" + FullFilename;
 			if (System.IO.File.Exists(StreamingAssetsFilename))
-				Filename = StreamingAssetsFilename;
+				FullFilename = StreamingAssetsFilename;
 		}
 
-		if (!System.IO.File.Exists(Filename))
-			throw new System.Exception("File missing: " + Filename);
+		if (!System.IO.File.Exists(FullFilename))
+			throw new System.Exception("File missing: " + FullFilename);
 
-		Debug.Log("FileReader opening file " + Filename + " (length = " + Filename.Length + ")");
+		Debug.Log("FileReader opening file " + FullFilename + " (length = " + FullFilename.Length + ")");
 
 #if USE_MEMORY_MAPPED_FILE
 		Debug.Log("Creating Memory mapped file");
@@ -71,12 +73,12 @@ public class FileReader : FileReaderBase
 		Debug.Log("Memory mapped file = "+ File);
 		FileView = File.CreateViewAccessor();
 		Debug.Log("Memory mapped FileView = " + FileView);
-		FileSize = new System.IO.FileInfo(Filename).Length;
+		FileSize = new System.IO.FileInfo(FullFilename).Length;
 		Debug.Log("Memory mapped FileSize = " + FileSize);
 #elif USE_FILE_HANDLE
-		File = System.IO.File.OpenRead(Filename);
+		File = System.IO.File.OpenRead(FullFilename);
 #else
-		FileBytes = System.IO.File.ReadAllBytes(Filename);
+		FileBytes = System.IO.File.ReadAllBytes(FullFilename);
 #endif
 
 		return ReadFileBytes;
