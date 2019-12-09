@@ -315,10 +315,10 @@ public class Mp4 : MonoBehaviour {
 				//	gr: is there a better mdat ident? don't think so, it's just the upcoming one in mpeg sequence
 				//	gr: sometimes, the mdat is before the tracks...
 				//	gr: the sample offset also needs correcting
-				var MdatIndex = MDatBeforeTrack ? NextMdat-1 : 0;
+				var MdatIndex = MDatBeforeTrack ? NextMdat-1 : NextMdat;
 
 				if (VerboseDebug)
-					Debug.Log("Found mp4 track " + Track.Samples.Count + " for next mdat: "+ MdatIndex);
+					Debug.Log("Found mp4 track " + Track.Samples.Count + "x samples for next mdat: "+ MdatIndex);
 
 				if ( Track.Samples.Count > 0 )
 				{
