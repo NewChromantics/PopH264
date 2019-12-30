@@ -19,6 +19,12 @@
 namespace PopH264
 {
 	class TDecoderInstance;
+	
+	enum Mode
+	{
+		Mode_Software = 0,
+		Mode_Hardware = 1,
+	};
 }
 #define EXPORTCLASS	PopH264::TDecoderInstance
 #else
