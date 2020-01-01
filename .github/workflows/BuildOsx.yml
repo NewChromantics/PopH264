@@ -18,11 +18,12 @@ jobs:
       ##[set-output name=version;]$(npm run package-version --silent)"
     - name: TestOutput
       id: TestOutput
-      run: "##[set-env name=Hello;]echo world;env;"
+ #     echo "##[set-output name=version;]$(
+      run: echo "##[set-env name=Hello;]$(echo world)";env
 
     - name: ShowTestOutput
       id: ShowTestOutput
-      run: "##[set-output name=env;]env"
+      run: env
 
     - name: GetTargetBuildDir
       id: GetTargetBuildDir
@@ -30,7 +31,7 @@ jobs:
         echo "Setting target build dir"
         ##[set-env name=Hello;]echo "world"
         env
-        ##[set-env name=TargetBuildDir;]xcodebuild -workspace $BuildProject/project.xcworkspace -scheme $BuildScheme -showBuildSettings | grep TARGET_BUILD_DIR
+        echo "##[set-env name=TargetBuildDir;]$(xcodebuild -workspace $BuildProject/project.xcworkspace -scheme $BuildScheme -showBuildSettings | grep TARGET_BUILD_DIR)"
         echo $TargetBuildDir
         env
 
