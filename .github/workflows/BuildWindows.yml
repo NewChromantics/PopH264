@@ -19,7 +19,7 @@ jobs:
     - name: compile
 # https://github.community/t5/GitHub-Actions/How-to-build-project-targeting-Net35-with-GitHub-Actions/td-p/36191
       run: |
-          "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\MSBuild\15.0\Bin\MSBuild.exe" $Env:BuildSolution /property:Configuration=$Env:BuildConfiguration /property:Platform=$Env:BuildPlatform
+          "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\MSBuild\15.0\Bin\MSBuild.exe" ${{Env:BuildSolution}} /property:Configuration=${{Env:BuildConfiguration}} /property:Platform=${{Env:BuildPlatform}}
     - name: List artifacts
       run: |
         ls .
