@@ -4,7 +4,10 @@ env:
   BuildProject: PopH264.xcodeproj
   BuildScheme: PopH264Framework
 
-on: [push]
+on: 
+  push:
+    branches:
+      - master
 
 jobs:
   buildosx:
