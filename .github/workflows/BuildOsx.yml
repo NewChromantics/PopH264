@@ -15,34 +15,19 @@ jobs:
       with:
         submodules: true
     # https://coderwall.com/p/rv2lgw/use-xcodebuild-to-build-workspace-vs-project
-      ##[set-output name=version;]$(npm run package-version --silent)"
-    - name: TestOutput
-      id: TestOutput
- #     echo "##[set-output name=version;]$(
-      run: echo "##[set-env name=Hello;]$(echo world)";env
-
-    - name: ShowTestOutput
-      id: ShowTestOutput
-      run: env
-
+    # https://github.community/t5/GitHub-Actions/steps-output/td-p/30947
     - name: GetTargetBuildDir
       id: GetTargetBuildDir
       run: |
         echo "Setting target build dir"
-        ##[set-env name=Hello;]echo "world"
-        env
-        echo "##[set-env name=TargetBuildDir;]$(xcodebuild -workspace $BuildProject/project.xcworkspace -scheme $BuildScheme -showBuildSettings | grep TARGET_BUILD_DIR)"
-        echo $TargetBuildDir
-        env
+        echo "##[set-output name=TargetBuildDir;]$(xcodebuild -workspace $BuildProject/project.xcworkspace -scheme $BuildScheme -showBuildSettings | grep TARGET_BUILD_DIR | sed -e 's/.*TARGET_BUILD_DIR = //')"
 
     - name: compile
-      #env: 
-      #    TargetBuildDir: ${{steps.GetTargetBuildDir.outputs.TargetBuildDir}}
+      env: 
+          TargetBuildDir: ${{steps.GetTargetBuildDir.outputs.TargetBuildDir}}
       run: |
-          env
-          xcodebuild -workspace $BuildProject/project.xcworkspace -list
           xcodebuild -workspace $BuildProject/project.xcworkspace -scheme $BuildScheme -showBuildSettings
-          xcodebuild -workspace $BuildProject/project.xcworkspace -scheme $BuildScheme -showBuildSettings | grep TARGET_BUILD_DIR
+          xcodebuild -workspace $BuildProject/project.xcworkspace -list
           xcodebuild -workspace $BuildProject/project.xcworkspace -scheme $BuildScheme
       
     - name: List artifacts
