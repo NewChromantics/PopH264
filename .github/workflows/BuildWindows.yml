@@ -20,7 +20,7 @@ jobs:
            cd "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\MSBuild\15.0\Bin\"
            .\MSBuild.exe $Env:GITHUB_WORKSPACE\PopH264.visualstudio\PopH264.sln /property:Configuration=$Env:BuildConfiguration /property:Platform=$Env:BuildPlatform
     - name: List artifacts
-      run: ls $Env:GITHUB_WORKSPACE\PopH264.visualstudio\Debug
+      run: ls $Env:GITHUB_WORKSPACE\PopH264.visualstudio\$Env:BuildConfiguration
     
     # do not use env here: ##[error]Path does not exist d:\a\PopH264\PopH264\$Env:GITHUB_WORKSPACE\PopH264.visualstudio\Debug
     - uses: actions/upload-artifact@v1
@@ -31,4 +31,9 @@ jobs:
       with:
         name: PopH264.lib
         path: PopH264.visualstudio\$Env:BuildConfiguration\PopH264.lib
+    - uses: actions/upload-artifact@v1
+      with:
+        name: PopH264.h
+        path: Source/PopH264.h
+        
 #PopH264.visualstudio\Debug\PopH264.dll
