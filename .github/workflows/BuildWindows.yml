@@ -1,0 +1,14 @@
+name: Build Windows
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: windows-2016
+    
+    steps:
+    - uses: actions/checkout@v1
+    - name: compile
+      run: '"C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\msbuild" PopH264.visualstudio/PopH264.sln'
+      
