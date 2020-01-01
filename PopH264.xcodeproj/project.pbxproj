@@ -27,20 +27,10 @@
 		BF151FF3238478B700A70EBF /* PopH264.h in Headers */ = {isa = PBXBuildFile; fileRef = BF8AB63721F20C41008E7E76 /* PopH264.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		BF151FFB23847C2B00A70EBF /* TDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = BF53E82C22EDC6A6008253CD /* TDecoder.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		BF151FFC23847C2C00A70EBF /* TDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = BF53E82C22EDC6A6008253CD /* TDecoder.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		BF1520662385899C00A70EBF /* MagicLeapDecoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF53E83022EDCC7E008253CD /* MagicLeapDecoder.cpp */; };
-		BF152069238589DB00A70EBF /* libml_mediacodec.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BF152068238589DB00A70EBF /* libml_mediacodec.dylib */; settings = {ATTRIBUTES = (Weak, ); }; };
-		BF15206B23858F2400A70EBF /* libml_mediacodeclist.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BF15206A23858F2400A70EBF /* libml_mediacodeclist.dylib */; settings = {ATTRIBUTES = (Weak, ); }; };
-		BF15206D23858F2C00A70EBF /* libml_mediaformat.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BF15206C23858F2C00A70EBF /* libml_mediaformat.dylib */; settings = {ATTRIBUTES = (Weak, ); }; };
-		BF15206F23858F2F00A70EBF /* libml_media_ccparser.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BF15206E23858F2F00A70EBF /* libml_media_ccparser.dylib */; settings = {ATTRIBUTES = (Weak, ); }; };
 		BF15207023858F8D00A70EBF /* libml_media_ccparser.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BF15206E23858F2F00A70EBF /* libml_media_ccparser.dylib */; settings = {ATTRIBUTES = (Weak, ); }; };
 		BF15207123858F8F00A70EBF /* libml_mediacodec.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BF152068238589DB00A70EBF /* libml_mediacodec.dylib */; settings = {ATTRIBUTES = (Weak, ); }; };
 		BF15207223858F9400A70EBF /* libml_mediaformat.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BF15206C23858F2C00A70EBF /* libml_mediaformat.dylib */; settings = {ATTRIBUTES = (Weak, ); }; };
 		BF15207323858F9700A70EBF /* libml_mediacodeclist.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BF15206A23858F2400A70EBF /* libml_mediacodeclist.dylib */; settings = {ATTRIBUTES = (Weak, ); }; };
-		BF15207423858FCF00A70EBF /* MagicLeapDecoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF53E83022EDCC7E008253CD /* MagicLeapDecoder.cpp */; };
-		BF152077238590F200A70EBF /* libml_mediacodec.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = BF152076238590F100A70EBF /* libml_mediacodec.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		BF152079238590FE00A70EBF /* libml_mediaformat.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = BF152078238590FE00A70EBF /* libml_mediaformat.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		BF15207B2385910800A70EBF /* libml_mediacodeclist.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = BF15207A2385910800A70EBF /* libml_mediacodeclist.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		BF15207D2385930B00A70EBF /* libml_media_ccparser.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = BF15207C2385930B00A70EBF /* libml_media_ccparser.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		BF152080238595CA00A70EBF /* SoyRuntimeLibrary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF15207F238595C700A70EBF /* SoyRuntimeLibrary.cpp */; };
 		BF152081238595CA00A70EBF /* SoyRuntimeLibrary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF15207F238595C700A70EBF /* SoyRuntimeLibrary.cpp */; };
 		BF152082238595CD00A70EBF /* SoyRuntimeLibrary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF15207F238595C700A70EBF /* SoyRuntimeLibrary.cpp */; };
@@ -96,11 +86,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				BF152077238590F200A70EBF /* libml_mediacodec.dylib in CopyFiles */,
-				BF15207D2385930B00A70EBF /* libml_media_ccparser.dylib in CopyFiles */,
-				BF152079238590FE00A70EBF /* libml_mediaformat.dylib in CopyFiles */,
-				BFBC07F523882FBA0070BCB4 /* libml_mediaerror.dylib in CopyFiles */,
-				BF15207B2385910800A70EBF /* libml_mediacodeclist.dylib in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -286,11 +271,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				BF459D1A21F7DB9900CED59D /* CoreMedia.framework in Frameworks */,
-				BF15206D23858F2C00A70EBF /* libml_mediaformat.dylib in Frameworks */,
-				BF15206B23858F2400A70EBF /* libml_mediacodeclist.dylib in Frameworks */,
-				BFBC07F623882FC30070BCB4 /* libml_mediaerror.dylib in Frameworks */,
-				BF15206F23858F2F00A70EBF /* libml_media_ccparser.dylib in Frameworks */,
-				BF152069238589DB00A70EBF /* libml_mediacodec.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -681,6 +661,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 			);
 			mainGroup = BF4A6A0B1EA16D7C00613A64;
@@ -750,7 +731,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BF1520662385899C00A70EBF /* MagicLeapDecoder.cpp in Sources */,
 				BFBC07F02386C0BC0070BCB4 /* SoyThread.cpp in Sources */,
 				BF459CF421F7DB1B00CED59D /* PopH264.cpp in Sources */,
 				BF459CF721F7DB3C00CED59D /* SoyTypes.cpp in Sources */,
@@ -790,7 +770,6 @@
 				BF8AB6B621F22818008E7E76 /* memheap.cpp in Sources */,
 				BF152080238595CA00A70EBF /* SoyRuntimeLibrary.cpp in Sources */,
 				BFBC07EF2386C0BB0070BCB4 /* SoyThread.cpp in Sources */,
-				BF15207423858FCF00A70EBF /* MagicLeapDecoder.cpp in Sources */,
 				BF8AB6BB21F228B8008E7E76 /* SoyTypes.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
