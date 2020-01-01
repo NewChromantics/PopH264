@@ -1,10 +1,11 @@
 name: Build Windows
 
 env:
-  BuildSolution: ${{ $Env:GITHUB_WORKSPACE\PopH264.visualstudio\PopH264.sln }}
-  BuildPlatform: ${{'x64'}}
-  BuildConfiguration: ${{'Master'}}
-  BuildDirectory: ${{ $Env:GITHUB_WORKSPACE\PopH264.visualstudio\$Env:BuildPlatform\$Env:BuildConfiguration }}
+  BuildSolution: PopH264.visualstudio\PopH264.sln
+  BuildPlatform: x64
+  BuildConfiguration: Master
+# would be nice to extract this from visual studio
+  BuildDirectory: PopH264.visualstudio\x64\Master
 
 on: [push]
 
