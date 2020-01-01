@@ -16,6 +16,14 @@ jobs:
         submodules: true
     # https://coderwall.com/p/rv2lgw/use-xcodebuild-to-build-workspace-vs-project
       ##[set-output name=version;]$(npm run package-version --silent)"
+    - name: TestOutput
+      id: TestOutput
+      run: "##[set-env name=Hello;]echo world;env;"
+
+    - name: ShowTestOutput
+      id: ShowTestOutput
+      run: "##[set-output name=env;]env"
+
     - name: GetTargetBuildDir
       id: GetTargetBuildDir
       run: |
