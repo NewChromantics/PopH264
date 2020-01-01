@@ -19,8 +19,13 @@ jobs:
     - name: List artifacts
       run: ls $Env:GITHUB_WORKSPACE\PopH264.visualstudio\Debug
     
+    # do not use env here: ##[error]Path does not exist d:\a\PopH264\PopH264\$Env:GITHUB_WORKSPACE\PopH264.visualstudio\Debug
     - uses: actions/upload-artifact@v1
       with:
-        name: my-artifact
-        path: $Env:GITHUB_WORKSPACE\PopH264.visualstudio\Debug
+        name: PopH264.dll
+        path: PopH264.visualstudio\Debug\PopH264.dll
+    - uses: actions/upload-artifact@v1
+      with:
+        name: PopH264.lib
+        path: PopH264.visualstudio\Debug\PopH264.lib
 #PopH264.visualstudio\Debug\PopH264.dll
