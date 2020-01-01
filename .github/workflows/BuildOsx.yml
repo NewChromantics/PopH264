@@ -20,7 +20,9 @@ jobs:
       id: GetTargetBuildDir
       run: |
         echo "Setting target build dir"
-        "##[set-env name=TargetBuildDir;]xcodebuild -workspace $BuildProject/project.xcworkspace -scheme $BuildScheme -showBuildSettings | grep TARGET_BUILD_DIR"
+        ##[set-env name=Hello;]echo "world"
+        env
+        ##[set-env name=TargetBuildDir;]xcodebuild -workspace $BuildProject/project.xcworkspace -scheme $BuildScheme -showBuildSettings | grep TARGET_BUILD_DIR
         echo $TargetBuildDir
         env
 
