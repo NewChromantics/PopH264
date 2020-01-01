@@ -1,0 +1,48 @@
+name: Build Windows
+
+env:
+  BuildSolution: PopH264.visualstudio\PopH264.sln
+  BuildPlatform: x64
+  BuildConfiguration: Master
+# would be nice to extract this from visual studio
+  BuildDirectory: PopH264.visualstudio\x64\Master
+
+on: [push]
+
+jobs:
+  buildwindows:
+    runs-on: windows-2016
+    
+    steps:
+    - uses: actions/checkout@v1
+      with:
+        submodules: true
+    - name: compile
+# https://github.community/t5/GitHub-Actions/How-to-build-project-targeting-Net35-with-GitHub-Actions/td-p/36191
+# set <--- list env vars
+      run: |
+          set
+          "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\MSBuild\15.0\Bin\MSBuild.exe" %BuildSolution% /property:Configuration=%BuildConfiguration% /property:Platform=%BuildPlatform%
+      shell: cmd
+      
+    - name: List artifacts
+      run: |
+        ls .
+        ls PopH264.visualstudio
+        ls $Env:BuildDirectory
+    
+    # do not use env here: ##[error]Path does not exist d:\a\PopH264\PopH264\$Env:GITHUB_WORKSPACE\PopH264.visualstudio\Debug
+    - uses: actions/upload-artifact@v1
+      with:
+        name: PopH264.dll
+        path: ${{env.BuildDirectory}}\PopH264.dll
+    - uses: actions/upload-artifact@v1
+      with:
+        name: PopH264.lib
+        path: ${{env.BuildDirectory}}\PopH264.lib
+    - uses: actions/upload-artifact@v1
+      with:
+        name: PopH264.h
+        path: Source/PopH264.h
+        
+#PopH264.visualstudio\Debug\PopH264.dll
