@@ -40,11 +40,9 @@ jobs:
     
     # do not use env here: ##[error]Path does not exist d:\a\PopH264\PopH264\$Env:GITHUB_WORKSPACE\PopH264.visualstudio\Debug
     - uses: actions/upload-artifact@v1
-      env: 
-          BuildDirectory: ${{steps.GetTargetBuildDir.outputs.TargetBuildDir}}
       with:
         name: PopH264_Osx.framework
-        path: ${{env.BuildDirectory}}\PopH264_Osx.framework
+        path: ${{steps.GetTargetBuildDir.outputs.TargetBuildDir}}/PopH264_Osx.framework
     - uses: actions/upload-artifact@v1
       with:
         name: PopH264.h
