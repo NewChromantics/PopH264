@@ -17,8 +17,8 @@ jobs:
     # https://coderwall.com/p/rv2lgw/use-xcodebuild-to-build-workspace-vs-project
       ##[set-output name=version;]$(npm run package-version --silent)"
     - name: GetTargetBuildDir
-      id: GetTargetBuildDir
       run: "##[set-output name=TargetBuildDir;]xcodebuild -workspace $BuildProject/project.xcworkspace -scheme $BuildScheme -showBuildSettings | grep TARGET_BUILD_DIR"
+      id: GetTargetBuildDir
 
     - name: compile
       env: 
@@ -35,6 +35,7 @@ jobs:
           TargetBuildDir: ${{steps.GetTargetBuildDir.outputs.TargetBuildDir}}
 
       run: |
+        env
         ls .
         ls $Env:TargetBuildDir
         ls $Env:BuildDirectory
