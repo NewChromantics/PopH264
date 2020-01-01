@@ -35,11 +35,11 @@ jobs:
     - uses: actions/upload-artifact@v1
       with:
         name: PopH264.dll
-        path: ${{Env:BuildDirectory}}\PopH264.dll
+        path: ${{env.BuildDirectory}}\PopH264.dll
     - uses: actions/upload-artifact@v1
       with:
         name: PopH264.lib
-        path: ${{Env:BuildDirectory}}\PopH264.lib
+        path: ${{env.BuildDirectory}}\PopH264.lib
     - uses: actions/upload-artifact@v1
       with:
         name: PopH264.h
