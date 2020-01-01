@@ -1,5 +1,10 @@
 name: Build Windows
 
+env:
+  BuildPlatform: ${{'x64'}}
+  BuildConfiguration: ${{'Release'}}
+
+
 on: [push]
 
 jobs:
@@ -15,7 +20,7 @@ jobs:
 # https://github.community/t5/GitHub-Actions/How-to-build-project-targeting-Net35-with-GitHub-Actions/td-p/36191
       run: |
            cd "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\MSBuild\15.0\Bin\"
-           .\MSBuild.exe $Env:GITHUB_WORKSPACE\PopH264.visualstudio\PopH264.sln
+           .\MSBuild.exe $Env:GITHUB_WORKSPACE\PopH264.visualstudio\PopH264.sln /property:Configuration=$Env:BuildConfiguration /property:Platform=$Env:BuildPlatform
     - name: List artifacts
       run: ls $Env:GITHUB_WORKSPACE\PopH264.visualstudio\Debug
     
@@ -23,9 +28,9 @@ jobs:
     - uses: actions/upload-artifact@v1
       with:
         name: PopH264.dll
-        path: PopH264.visualstudio\Debug\PopH264.dll
+        path: PopH264.visualstudio\$Env:BuildConfiguration\PopH264.dll
     - uses: actions/upload-artifact@v1
       with:
         name: PopH264.lib
-        path: PopH264.visualstudio\Debug\PopH264.lib
+        path: PopH264.visualstudio\$Env:BuildConfiguration\PopH264.lib
 #PopH264.visualstudio\Debug\PopH264.dll
