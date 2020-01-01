@@ -15,5 +15,12 @@ jobs:
 # https://github.community/t5/GitHub-Actions/How-to-build-project-targeting-Net35-with-GitHub-Actions/td-p/36191
       run: |
            cd "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\MSBuild\15.0\Bin\"
-           .\MSBuild.exe $Env:GITHUB_WORKSPACE\PopH264.visualstudio/PopH264.sln
-      
+           .\MSBuild.exe $Env:GITHUB_WORKSPACE\PopH264.visualstudio\PopH264.sln
+    - name: List artifacts
+      run: ls $Env:GITHUB_WORKSPACE\PopH264.visualstudio\Debug
+    
+    - uses: actions/upload-artifact@v1
+      with:
+        name: my-artifact
+        path: $Env:GITHUB_WORKSPACE\PopH264.visualstudio\Debug
+#PopH264.visualstudio\Debug\PopH264.dll
