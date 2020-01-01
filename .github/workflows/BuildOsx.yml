@@ -21,8 +21,12 @@ jobs:
       run: "##[set-output name=TargetBuildDir;]xcodebuild -workspace $BuildProject/project.xcworkspace -scheme $BuildScheme -showBuildSettings | grep TARGET_BUILD_DIR"
 
     - name: compile
+      env: 
+          TargetBuildDir: ${{steps.GetTargetBuildDir.outputs.TargetBuildDir}}
       run: |
           env
+          xcodebuild -workspace $BuildProject/project.xcworkspace -list
+          xcodebuild -workspace $BuildProject/project.xcworkspace -scheme $BuildScheme -showBuildSettings
           xcodebuild -workspace $BuildProject/project.xcworkspace -scheme $BuildScheme -showBuildSettings | grep TARGET_BUILD_DIR
           xcodebuild -workspace $BuildProject/project.xcworkspace -scheme $BuildScheme
       
