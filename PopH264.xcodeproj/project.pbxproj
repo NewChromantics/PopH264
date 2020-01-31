@@ -1059,7 +1059,6 @@
 		BFF1C6DF22E3769B00AFDFD5 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ANDROID_ABI = x86_64;
 				UNITY_ASSET_PLUGIN_PATH = "$(UNITY_OUTPUT_PATH)/Android";
 			};
 			name = Debug;
@@ -1067,7 +1066,6 @@
 		BFF1C6E022E3769B00AFDFD5 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ANDROID_ABI = x86_64;
 				UNITY_ASSET_PLUGIN_PATH = "$(UNITY_OUTPUT_PATH)/Android";
 			};
 			name = Release;
