@@ -967,10 +967,16 @@ MagicLeap::TInputThread::TInputThread(std::function<void(ArrayBridge<uint8_t>&&)
 bool MagicLeap::TInputThread::Iteration()
 {
 	if ( mInputBuffers.IsEmpty() )
+	{
+		std::Debug << __PRETTY_FUNCTION__ << " No input buffers" << std::endl;
 		return true;
-	
+	}
+
 	if ( !HasPendingData() )
+	{
+		std::Debug << __PRETTY_FUNCTION__ << " No pending data" << std::endl;
 		return true;
+	}
 	
 	//	read a buffer
 	int64_t BufferIndex = -1;
