@@ -499,6 +499,7 @@ bool MagicLeap::TDecoder::DecodeNextPacket(std::function<void(const SoyPixelsImp
 	//	gr: this doesn't ring true for PPS/SPS data though?
 	mOutputThread.PushOnOutputFrameFunc( OnFrameDecoded );
 	
+	//	wake the input thread, as when this is called, the super class has just put some pending data in
 	mInputThread.Wake();
 	return false;
 }
@@ -708,6 +709,9 @@ bool MagicLeap::TOutputThread::CanSleep()
 bool MagicLeap::TInputThread::CanSleep()
 {
 	if ( mInputBuffers.IsEmpty() )
+		return true;
+	
+	if ( !HasPendingData() )
 		return true;
 	
 	return false;
@@ -964,20 +968,28 @@ MagicLeap::TInputThread::TInputThread(std::function<void(ArrayBridge<uint8_t>&&)
 	Start();
 }
 
-bool MagicLeap::TInputThread::Iteration()
+auto InputThreadNotReadySleep = 12;
+auto InputThreadThrottle = 2;
+auto InputThreadErrorThrottle = 1000;
+
+bool MagicLeap::TInputThread::Iteration(std::function<void(std::chrono::milliseconds)> Sleep)
 {
 	if ( mInputBuffers.IsEmpty() )
 	{
 		std::Debug << __PRETTY_FUNCTION__ << " No input buffers" << std::endl;
+		Sleep( std::chrono::milliseconds(InputThreadNotReadySleep) );
 		return true;
 	}
 
 	if ( !HasPendingData() )
 	{
 		std::Debug << __PRETTY_FUNCTION__ << " No pending data" << std::endl;
+		Sleep( std::chrono::milliseconds(InputThreadNotReadySleep) );
 		return true;
 	}
 	
+	std::Debug << __PRETTY_FUNCTION__ << " Reading a buffer" << std::endl;
+
 	//	read a buffer
 	int64_t BufferIndex = -1;
 	{
@@ -990,12 +1002,15 @@ bool MagicLeap::TInputThread::Iteration()
 	}
 	catch(std::exception& e)
 	{
-		std::Debug << "Exception pushing input buffer " << BufferIndex << "; " << e.what() << GetDebugState() << std::endl;
+		std::Debug << __PRETTY_FUNCTION__ << " Exception pushing input buffer " << BufferIndex << "; " << e.what() << GetDebugState() << std::endl;
 		std::lock_guard<std::mutex> Lock(mInputBuffersLock);
 		auto& ElementZero = *mInputBuffers.InsertBlock(0,1);
 		ElementZero = BufferIndex;
-		std::this_thread::sleep_for( std::chrono::seconds(1) );
+		Sleep( std::chrono::milliseconds(InputThreadErrorThrottle) );
 	}
+	
+	//	throttle the thread
+	Sleep( std::chrono::milliseconds(InputThreadThrottle) );
 	
 	return true;
 }

@@ -98,7 +98,8 @@ class MagicLeap::TInputThread : public SoyWorkerThread
 public:
 	TInputThread(std::function<void(ArrayBridge<uint8_t>&&)> PopPendingData,std::function<bool()> HasPendingData);
 	
-	virtual bool	Iteration() override;
+	virtual bool	Iteration() override	{	return true;	}
+	virtual bool	Iteration(std::function<void(std::chrono::milliseconds)> Sleep) override;
 	virtual bool	CanSleep() override;
 	
 	bool			HasPendingData()	{	return mHasPendingData();	}
