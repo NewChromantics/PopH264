@@ -40,8 +40,9 @@ __export void				PopH264_DestroyInstance(int32_t Instance);
 //	todo: proper shared_ptr sharing, dllexport class etc. this is essentially unsafe, but caller can manage this between CreateInstance and DestroyInstance
 __export EXPORTCLASS*		PopH264_GetInstancePtr(int32_t Instance);
 
-//	todo: document values with a function that outputs labels!
-__export void				PopH264_GetMeta(int32_t Instance,int32_t* MetaValues,int32_t MetaValuesCount);
+//	deprecate meta values for json
+__export void				PopH264_GetMeta(int32_t Instance, int32_t* MetaValues, int32_t MetaValuesCount);
+__export void				PopH264_PeekFrame(int32_t Instance,char* JsonBuffer,int32_t JsonBufferSize);
 
 //	expecting one frame per packet, split up by highlevel code (mp4 demuxer etc)
 __export int32_t			PopH264_PushData(int32_t Instance,uint8_t* Data,int32_t DataSize,int32_t FrameNumber);

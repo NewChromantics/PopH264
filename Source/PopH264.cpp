@@ -1,6 +1,7 @@
 #include "PopH264.h"
 #include "PopH264DecoderInstance.h"
 #include "SoyLib/src/SoyPixels.h"
+#include "Json11/json11.hpp"
 
 //	gr: this works on osx, but currently, none of the functions are implemented :)
 //	gr: also needs SDK
@@ -20,7 +21,7 @@
 
 namespace PopH264
 {
-	const Soy::TVersion	Version(1,1,0);
+	const Soy::TVersion	Version(1,1,1);
 	const int32_t		MODE_BROADWAY = 0;
 	const int32_t		MODE_HARDWARE = 1;
 }
@@ -190,6 +191,59 @@ __export int32_t PopH264_PushData(int32_t Instance,uint8_t* Data,int32_t DataSiz
 		return 0;
 	};
 	return SafeCall(Function, __func__, -1 );
+}
+
+std::string GetMetaJson(const SoyPixelsMeta& Meta)
+{
+	using namespace json11;
+	Json::array PlaneArray;
+
+	auto AddPlaneJson = [&](SoyPixelsMeta& Plane)
+	{
+		auto Width = static_cast<int>(Plane.GetWidth());
+		auto Height = static_cast<int>(Plane.GetHeight());
+		auto Channels = static_cast<int>(Plane.GetChannels());
+		auto DataSize = static_cast<int>(Plane.GetDataSize());
+		auto FormatStr = SoyPixelsFormat::ToString(Plane.GetFormat());
+		Json PlaneMeta = Json::object{
+			{ "Width",Width },
+			{ "Height",Height },
+			{ "Channels",Channels },
+			{ "DataSize",DataSize },
+			{ "Format",FormatStr }
+		};
+		PlaneArray.push_back(PlaneMeta);
+	};
+
+	BufferArray<SoyPixelsMeta, 4> PlaneMetas;
+	Meta.GetPlanes(GetArrayBridge(PlaneMetas));
+	for (auto p = 0; p < PlaneMetas.GetSize(); p++)
+	{
+		auto& PlaneMeta = PlaneMetas[p];
+		AddPlaneJson(PlaneMeta);
+	}
+
+	//	make final object
+	//	todo: add frame numbers etc here
+	Json MetaJson = Json::object{
+		{ "Planes",PlaneArray }
+	};
+	auto MetaJsonString = MetaJson.dump();
+	return MetaJsonString;
+}
+
+__export void PopH264_PeekFrame(int32_t Instance, char* JsonBuffer, int32_t JsonBufferSize)
+{
+	auto Function = [&]()
+	{
+		auto& Device = InstanceManager::GetInstance(Instance);
+		auto& Meta = Device.GetMeta();
+
+		auto Json = GetMetaJson(Meta);
+		Soy::StringToBuffer(Json, JsonBuffer, JsonBufferSize);
+		return 0;
+	};
+	SafeCall(Function, __func__, 0);
 }
 
 

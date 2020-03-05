@@ -30,11 +30,33 @@ public static class PopH264
 	[DllImport(PluginName, CallingConvention = CallingConvention.Cdecl)]
 	private static extern int	PopH264_PushData(int Instance,byte[] Data,int DataSize,int FrameNumber);
 	
+	//	this is deprecated in favor of json
 	[DllImport(PluginName, CallingConvention = CallingConvention.Cdecl)]
 	private static extern void	PopH264_GetMeta(int Instance,int[] MetaValues,int MetaValuesCount);
-	
+
+	[DllImport(PluginName, CallingConvention = CallingConvention.Cdecl)]
+	private static extern void	PopH264_PeekFrame(int Instance, byte[] JsonBuffer, int JsonBufferSize);
+
 	[DllImport(PluginName, CallingConvention = CallingConvention.Cdecl)]
 	private static extern int	PopH264_PopFrame(int Instance,byte[] Plane0,int Plane0Size,byte[] Plane1,int Plane1Size,byte[] Plane2,int Plane2Size);
+
+	[System.Serializable]
+	public struct PlaneMeta
+	{
+		public SoyPixelsFormat	PixelFormat { get { return (SoyPixelsFormat)Enum.Parse(typeof(SoyPixelsFormat), Format); } }
+		public string			Format;
+		public int				Width;
+		public int				Height;
+		public int				DataSize;
+		public int				Channels;
+	};
+
+	[System.Serializable]
+	public struct FrameMeta
+	{
+		public List<PlaneMeta>	Planes;
+		public int				PlaneCount { get { return Planes ? Planes.Count : 0; } }
+	};
 
 	//	copied directly from https://github.com/SoylentGraham/SoyLib/blob/master/src/SoyPixels.h#L16
 	public enum SoyPixelsFormat
@@ -203,7 +225,7 @@ public static class PopH264
 		{
 			//	show version on first call
 			var Version = PopH264_GetVersion();
-			Debug.Log("PopH264 version " + Version);			
+			Debug.Log("PopH264 version " + Version);
 			
 			this.ThreadedDecoding = ThreadedDecoding;
 			int Mode = (int)DecoderMode;
@@ -336,9 +358,13 @@ public static class PopH264
 		//	returns frame time
 		public int? GetNextFrame(ref List<Texture2D> Planes, ref List<SoyPixelsFormat> PixelFormats)
 		{
-			var MetaValues = new int[100];
-			PopH264_GetMeta(Instance.Value, MetaValues, MetaValues.Length);
-			var PlaneCount = MetaValues[(int)MetaIndex.PlaneCount];
+			var JsonBuffer = new Byte[1000];
+			[DllImport(PluginName, CallingConvention = CallingConvention.Cdecl)]
+			private static extern void PopH264_PeekFrame(int Instance, byte[] JsonBuffer, int JsonBufferSize);
+			var Json = GetString(JsonBuffer);
+			var Meta = JsonUtility.FromJson<FrameMeta>(Json);
+			var PlaneCount = Meta.PlaneCount;
+
 			if (PlaneCount <= 0)
 			{
 				//Debug.Log("No planes (" + PlaneCount +")");
@@ -349,11 +375,10 @@ public static class PopH264
 			AllocListToSize(ref Planes, PlaneCount);
 			AllocListToSize(ref PixelFormats, PlaneCount);
 			AllocListToSize(ref PlaneCaches, PlaneCount);
-
-
-			if (PlaneCount >= 1) PixelFormats[0] = (SoyPixelsFormat)MetaValues[(int)MetaIndex.Plane0_SoyPixelsFormat];
-			if (PlaneCount >= 2) PixelFormats[1] = (SoyPixelsFormat)MetaValues[(int)MetaIndex.Plane1_SoyPixelsFormat];
-			if (PlaneCount >= 3) PixelFormats[2] = (SoyPixelsFormat)MetaValues[(int)MetaIndex.Plane2_SoyPixelsFormat];
+	
+			if (PlaneCount >= 1) PixelFormats[0] = Meta.Planes[0].PixelFormat;
+			if (PlaneCount >= 2) PixelFormats[1] = Meta.Planes[1].PixelFormat;
+			if (PlaneCount >= 3) PixelFormats[2] = Meta.Planes[2].PixelFormat;
 
 			//	alloc textures so we have data to write to
 			if (PlaneCount >= 1) Planes[0] = AllocTexture(Planes[0], MetaValues[(int)MetaIndex.Plane0_Width], MetaValues[(int)MetaIndex.Plane0_Height], MetaValues[(int)MetaIndex.Plane0_ComponentCount]);
