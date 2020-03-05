@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;		// required for DllImport
 using System;								// requred for IntPtr
 using System.Text;
 using System.Collections.Generic;
+using PopX;     //	for PopX.PixelFormat, replace this and provide your own pixelformat if you want to remove the dependency
 
 
 
@@ -39,7 +40,7 @@ public static class PopH264
 	[System.Serializable]
 	public struct PlaneMeta
 	{
-		public SoyPixelsFormat	PixelFormat { get { return (SoyPixelsFormat)Enum.Parse(typeof(SoyPixelsFormat), Format); } }
+		public PixelFormat		PixelFormat { get { return (PixelFormat)Enum.Parse(typeof(PixelFormat), Format); } }
 		public string			Format;
 		public int				Width;
 		public int				Height;
@@ -53,121 +54,7 @@ public static class PopH264
 		public List<PlaneMeta>	Planes;
 		public int				PlaneCount { get { return Planes!=null ? Planes.Count : 0; } }
 	};
-
-	//	copied directly from https://github.com/SoylentGraham/SoyLib/blob/master/src/SoyPixels.h#L16
-	public enum SoyPixelsFormat
-	{
-		Invalid = 0,
-		Greyscale,
-		GreyscaleAlpha,     //	png has this for 2 channel, so why not us!
-		RGB,
-		RGBA,
-		ARGB,
-		BGRA,
-		BGR,
-
-		//	non integer-based channel counts
-		KinectDepth,        //	16 bit, so "two channels". 13 bits of depth, 3 bits of user-index
-		FreenectDepth10bit, //	16 bit
-		FreenectDepth11bit, //	16 bit
-		FreenectDepthmm,    //	16 bit
-
-
-		//	http://stackoverflow.com/a/6315159/355753
-		//	bi planar is luma followed by chroma.
-		//	Full range is 0..255
-		//	video LUMA range 16-235 (chroma is still 0-255)	http://stackoverflow.com/a/10129300/355753
-		//	Y=luma	uv=ChromaUv
-
-		//	gr: I want to remove video/full/ntsc etc and have that explicit in a media format
-		//	http://www.chromapure.com/colorscience-decoding.asp
-		//	the range counts towards luma & chroma
-		//	video = NTSC
-		//	full = Rec. 709
-		//	SMPTE-C = SMPTE 170M 
-
-		//	gr: naming convention; planes seperated by underscore
-		Yuv_8_88_Full,      //	8 bit Luma, interleaved Chroma uv plane (uv is half size... reflect this somehow in the name!)
-		Yuv_8_88_Ntsc,      //	8 bit Luma, interleaved Chroma uv plane (uv is half size... reflect this somehow in the name!)
-		Yuv_8_88_Smptec,        //	8 bit Luma, interleaved Chroma uv plane (uv is half size... reflect this somehow in the name!)
-		Yuv_8_8_8_Full,     //	luma, u, v seperate planes (uv is half size... reflect this somehow in the name!)
-		Yuv_8_8_8_Ntsc, //	luma, u, v seperate planes (uv is half size... reflect this somehow in the name!)
-		Yuv_8_8_8_Smptec,   //	luma, u, v seperate planes (uv is half size... reflect this somehow in the name!)
-
-		//	gr: YUY2: LumaX,ChromaU,LumaX+1,ChromaV (4:2:2 ratio, 8 bit)
-		//		we still treat it like a 2 component format so dimensions match original
-		//		(maybe should be renamed YYuv_88 for this reason)
-		YYuv_8888_Full,
-		YYuv_8888_Ntsc,
-		YYuv_8888_Smptec,
-
-		//	https://stackoverflow.com/a/22793325/355753
-		//	4:2:2, apple call this yuvs
-		Yuv_844_Full,
-		Yuv_844_Ntsc,
-		Yuv_844_Smptec,
-
-		Pad0,	//	pixelformats getting out of sync, change this to a string
-
-		ChromaUV_8_8,       //	8 bit plane, 8 bit plane
-		ChromaUV_88,        //	16 bit interleaved plane
-		ChromaU_8,          //	single plane
-		ChromaV_8,          //	single plane
-		ChromaUV_44,        //	8 bit interleaved plane
-
-
-		//	https://github.com/ofTheo/ofxKinect/blob/ebb9075bcb5ab2543220b4dec598fd73cec40904/libs/libfreenect/src/cameras.c
-		//	kinect (16bit?) yuv. See if its the same as a standard one 
-		uyvy,
-		/*
-		 int u  = raw_buf[2*i];
-			int y1 = raw_buf[2*i+1];
-			int v  = raw_buf[2*i+2];
-			int y2 = raw_buf[2*i+3];
-			int r1 = (y1-16)*1164/1000 + (v-128)*1596/1000;
-			int g1 = (y1-16)*1164/1000 - (v-128)*813/1000 - (u-128)*391/1000;
-			int b1 = (y1-16)*1164/1000 + (u-128)*2018/1000;
-			int r2 = (y2-16)*1164/1000 + (v-128)*1596/1000;
-			int g2 = (y2-16)*1164/1000 - (v-128)*813/1000 - (u-128)*391/1000;
-			int b2 = (y2-16)*1164/1000 + (u-128)*2018/1000;
-			CLAMP(r1)
-			CLAMP(g1)
-			CLAMP(b1)
-			CLAMP(r2)
-			CLAMP(g2)
-			CLAMP(b2)
-			proc_buf[3*i]  =r1;
-			proc_buf[3*i+1]=g1;
-			proc_buf[3*i+2]=b1;
-			proc_buf[3*i+3]=r2;
-			proc_buf[3*i+4]=g2;
-			proc_buf[3*i+5]=b2;		 */
-
-		Luma_Ntsc,          //	ntsc-range luma plane
-		Luma_Smptec,        //	Smptec-range luma plane
-
-		//	2 planes, RGB (palette+length8) Greyscale (indexes)
-		//	warning, palette's first byte is the size of the palette! need to work out how to auto skip over this when extracting the plane...
-		Palettised_RGB_8,
-		Palettised_RGBA_8,
-
-		//	to distinguish from RGBA etc
-		Float1,
-		Float2,
-		Float3,
-		Float4,
-
-
-		//	shorthand names
-		//	http://www.fourcc.org/yuv.php
-		Luma_Full = Greyscale,  //	Luma plane of a YUV
-		Nv12 = Yuv_8_88_Full,
-		I420 = Yuv_8_8_8_Full,
-
-		Count = 99,
-	}
-
-
+	
 	static public string GetString(byte[] Ascii)
 	{
 		var String = System.Text.ASCIIEncoding.ASCII.GetString(Ascii);
@@ -339,7 +226,7 @@ public static class PopH264
 		}
 
 		//	returns frame time
-		public int? GetNextFrame(ref List<Texture2D> Planes, ref List<SoyPixelsFormat> PixelFormats)
+		public int? GetNextFrame(ref List<Texture2D> Planes, ref List<PixelFormat> PixelFormats)
 		{
 			var JsonBuffer = new Byte[1000];
 			PopH264_PeekFrame(Instance.Value, JsonBuffer, JsonBuffer.Length);

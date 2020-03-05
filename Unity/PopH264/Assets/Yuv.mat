@@ -5,9 +5,10 @@ Material:
   serializedVersion: 6
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
   m_Name: Yuv
-  m_Shader: {fileID: 4800000, guid: 19592822f1b4ffb4d8a12ee48c8b8404, type: 3}
+  m_Shader: {fileID: 4800000, guid: dac3e989ed185514da3d27e97dc58218, type: 3}
   m_ShaderKeywords: ENABLECHROMA_ON FLIP_ON
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -37,6 +38,7 @@ Material:
     - ChromaVFormat: 27
     - ChromaVGreen: -0.8129
     - ChromaVRed: 1.5958
+    - DepthMaxmm: 10000
     - EnableChroma: 1
     - Flip: 1
     - LumaFormat: 1
