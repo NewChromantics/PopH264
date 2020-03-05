@@ -69,6 +69,7 @@
 		#define Chroma_U	27
 		#define Chroma_V	28
 		#define ChromaVU_88	998
+#define RGB	3
 
 			float Flip;
 			float EnableChroma;
@@ -142,8 +143,15 @@
 			fixed4 frag (v2f i) : SV_Target
 			{
 				// sample the texture
-				float Luma = tex2D(LumaTexture, i.uv);
+				float4 Luma4 = tex2D(LumaTexture, i.uv);
+				float Luma = Luma4.x;
 				float2 ChromaUV = float2(0, 0);
+
+				if (LumaFormat == RGB)
+				{
+					return Luma4;
+				}
+
 				if ( LumaFormat == YYuv_8888_Full || LumaFormat == YYuv_8888_Ntsc )
 				{
 					GetLumaChromaUv_8888(i.uv, Luma, ChromaUV);
