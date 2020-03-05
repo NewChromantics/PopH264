@@ -29,10 +29,6 @@ public static class PopH264
 
 	[DllImport(PluginName, CallingConvention = CallingConvention.Cdecl)]
 	private static extern int	PopH264_PushData(int Instance,byte[] Data,int DataSize,int FrameNumber);
-	
-	//	this is deprecated in favor of json
-	[DllImport(PluginName, CallingConvention = CallingConvention.Cdecl)]
-	private static extern void	PopH264_GetMeta(int Instance,int[] MetaValues,int MetaValuesCount);
 
 	[DllImport(PluginName, CallingConvention = CallingConvention.Cdecl)]
 	private static extern void	PopH264_PeekFrame(int Instance, byte[] JsonBuffer, int JsonBufferSize);
@@ -55,7 +51,7 @@ public static class PopH264
 	public struct FrameMeta
 	{
 		public List<PlaneMeta>	Planes;
-		public int				PlaneCount { get { return Planes ? Planes.Count : 0; } }
+		public int				PlaneCount { get { return Planes!=null ? Planes.Count : 0; } }
 	};
 
 	//	copied directly from https://github.com/SoylentGraham/SoyLib/blob/master/src/SoyPixels.h#L16
@@ -171,28 +167,15 @@ public static class PopH264
 		Count = 99,
 	}
 
-	private enum MetaIndex
+
+	static public string GetString(byte[] Ascii)
 	{
-		PlaneCount = 0,
-
-		Plane0_Width,
-		Plane0_Height,
-		Plane0_ComponentCount,
-		Plane0_SoyPixelsFormat,
-		Plane0_PixelDataSize,
-
-		Plane1_Width,
-		Plane1_Height,
-		Plane1_ComponentCount,
-		Plane1_SoyPixelsFormat,
-		Plane1_PixelDataSize,
-
-		Plane2_Width,
-		Plane2_Height,
-		Plane2_ComponentCount,
-		Plane2_SoyPixelsFormat,
-		Plane2_PixelDataSize,
-	};
+		var String = System.Text.ASCIIEncoding.ASCII.GetString(Ascii);
+		var TerminatorPos = String.IndexOf('\0');
+		if (TerminatorPos >= 0)
+			String = String.Substring(0, TerminatorPos);
+		return String;
+	}
 
 	public struct FrameInput
 	{
@@ -268,14 +251,14 @@ public static class PopH264
 			}
 		}
 
-		Texture2D AllocTexture(Texture2D Plane, int Width, int Height, int ComponentCount)
+		Texture2D AllocTexture(Texture2D Plane,PlaneMeta Meta)
 		{
-			var Format = GetTextureFormat(ComponentCount);
+			var Format = GetTextureFormat(Meta.Channels);
 			if (Plane != null)
 			{
-				if (Plane.width != Width)
+				if (Plane.width != Meta.Width)
 					Plane = null;
-				else if (Plane.height != Height)
+				else if (Plane.height != Meta.Height)
 					Plane = null;
 				else if (Plane.format != Format)
 					Plane = null;
@@ -285,7 +268,7 @@ public static class PopH264
 			{
 				var MipMap = false;
 				var Linear = true;
-				Plane = new Texture2D(Width, Height, Format, MipMap,Linear);
+				Plane = new Texture2D(Meta.Width, Meta.Height, Format, MipMap,Linear);
 			}
 
 			return Plane;
@@ -359,8 +342,7 @@ public static class PopH264
 		public int? GetNextFrame(ref List<Texture2D> Planes, ref List<SoyPixelsFormat> PixelFormats)
 		{
 			var JsonBuffer = new Byte[1000];
-			[DllImport(PluginName, CallingConvention = CallingConvention.Cdecl)]
-			private static extern void PopH264_PeekFrame(int Instance, byte[] JsonBuffer, int JsonBufferSize);
+			PopH264_PeekFrame(Instance.Value, JsonBuffer, JsonBuffer.Length);
 			var Json = GetString(JsonBuffer);
 			var Meta = JsonUtility.FromJson<FrameMeta>(Json);
 			var PlaneCount = Meta.PlaneCount;
@@ -381,9 +363,9 @@ public static class PopH264
 			if (PlaneCount >= 3) PixelFormats[2] = Meta.Planes[2].PixelFormat;
 
 			//	alloc textures so we have data to write to
-			if (PlaneCount >= 1) Planes[0] = AllocTexture(Planes[0], MetaValues[(int)MetaIndex.Plane0_Width], MetaValues[(int)MetaIndex.Plane0_Height], MetaValues[(int)MetaIndex.Plane0_ComponentCount]);
-			if (PlaneCount >= 2) Planes[1] = AllocTexture(Planes[1], MetaValues[(int)MetaIndex.Plane1_Width], MetaValues[(int)MetaIndex.Plane1_Height], MetaValues[(int)MetaIndex.Plane1_ComponentCount]);
-			if (PlaneCount >= 3) Planes[2] = AllocTexture(Planes[2], MetaValues[(int)MetaIndex.Plane2_Width], MetaValues[(int)MetaIndex.Plane2_Height], MetaValues[(int)MetaIndex.Plane2_ComponentCount]);
+			if (PlaneCount >= 1) Planes[0] = AllocTexture(Planes[0], Meta.Planes[0]);
+			if (PlaneCount >= 2) Planes[1] = AllocTexture(Planes[1], Meta.Planes[1]);
+			if (PlaneCount >= 3) Planes[2] = AllocTexture(Planes[2], Meta.Planes[2]);
 
 			for (var p = 0; p < PlaneCount; p++)
 			{
