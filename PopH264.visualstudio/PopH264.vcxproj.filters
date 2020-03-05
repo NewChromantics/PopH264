@@ -13,6 +13,9 @@
     <Filter Include="Broadway">
       <UniqueIdentifier>{0c422dd0-e47c-4f51-a2d7-9ff412f56902}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Json11">
+      <UniqueIdentifier>{20bd4c59-d59a-47a1-a406-fd0c954511f1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Source\SoyLib\src\memheap.cpp">
@@ -176,6 +179,9 @@
     </ClCompile>
     <ClCompile Include="..\Source\TDecoder.cpp">
       <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Json11\json11.cpp">
+      <Filter>Source\Json11</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -343,6 +349,9 @@
     </ClInclude>
     <ClInclude Include="..\Source\TDecoder.h">
       <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Json11\json11.hpp">
+      <Filter>Source\Json11</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

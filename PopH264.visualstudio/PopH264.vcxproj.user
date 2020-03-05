@@ -1,22 +1,22 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LocalDebuggerCommand>E:\Unity2017.3.1f1\Editor\Unity.exe</LocalDebuggerCommand>
+    <LocalDebuggerCommand>C:\Program Files\Unity\Hub\Editor\2019.2.17f1\Editor\Unity.exe</LocalDebuggerCommand>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
     <LocalDebuggerCommandArguments>-projectPath $(ProjectDir)..\Unity\PopH264</LocalDebuggerCommandArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Master|x64'">
-    <LocalDebuggerCommand>E:\Unity2017.3.1f1\Editor\Unity.exe</LocalDebuggerCommand>
+    <LocalDebuggerCommand>C:\Program Files\Unity\Hub\Editor\2019.2.17f1\Editor\Unity.exe</LocalDebuggerCommand>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
     <LocalDebuggerCommandArguments>-projectPath $(ProjectDir)..\Unity\PopH264</LocalDebuggerCommandArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Master|Win32'">
-    <LocalDebuggerCommand>E:\Unity2017.3.1f1\Editor\Unity.exe</LocalDebuggerCommand>
+    <LocalDebuggerCommand>C:\Program Files\Unity\Hub\Editor\2019.2.17f1\Editor\Unity.exe</LocalDebuggerCommand>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
     <LocalDebuggerCommandArguments>-projectPath $(ProjectDir)..\Unity\PopH264</LocalDebuggerCommandArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <LocalDebuggerCommand>E:\Unity2017.3.1f1\Editor\Unity.exe</LocalDebuggerCommand>
+    <LocalDebuggerCommand>C:\Program Files\Unity\Hub\Editor\2019.2.17f1\Editor\Unity.exe</LocalDebuggerCommand>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
     <LocalDebuggerCommandArguments>-projectPath $(ProjectDir)..\Unity\PopH264</LocalDebuggerCommandArguments>
   </PropertyGroup>
