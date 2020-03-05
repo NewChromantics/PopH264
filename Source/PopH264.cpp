@@ -1,6 +1,7 @@
 #include "PopH264.h"
 #include "PopH264DecoderInstance.h"
 #include "SoyLib/src/SoyPixels.h"
+#include "SoyLib/src/SoyImage.h"
 #include "Json11/json11.hpp"
 
 //	gr: this works on osx, but currently, none of the functions are implemented :)
@@ -87,6 +88,28 @@ PopH264::TDecoderInstance::TDecoderInstance(int32_t Mode)
 void PopH264::TDecoderInstance::PushData(const uint8_t* Data,size_t DataSize,int32_t FrameNumber)
 {
 	auto DataArray = GetRemoteArray( Data, DataSize );
+
+	//	gr: temporary hack, if the data coming in is a different format, detect it, and switch decoders
+	//		maybe we can do something more elegant (eg. wait until first frame before allocating decoder)
+	//	gr: don't even need to interrupt decoder
+	try
+	{
+		//	calc duration
+		SoyTime DecodeDuration;
+		auto ImageMeta = Soy::IsImage(GetArrayBridge(DataArray));
+		if (ImageMeta.IsValid())
+		{
+			SoyPixels Pixels;
+			Soy::DecodeImage(Pixels, GetArrayBridge(DataArray));
+			this->PushFrame(Pixels, FrameNumber, DecodeDuration.GetMilliSeconds());
+			return;
+		}
+	}
+	catch (std::exception& e)
+	{
+		std::Debug << __PRETTY_FUNCTION__ << " trying to detect image caused exception; " << e.what() << std::endl;
+	}
+
 	auto PushFrame = [this,FrameNumber](const SoyPixelsImpl& Pixels,SoyTime DecodeDuration)
 	{
 		this->PushFrame( Pixels, FrameNumber, DecodeDuration.GetMilliSeconds() );

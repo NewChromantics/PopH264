@@ -95,12 +95,14 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Master|x64'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\Source\SoyLib\src\SoyFourcc.cpp" />
     <ClCompile Include="..\Source\SoyLib\src\SoyH264.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Master|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Master|x64'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\Source\SoyLib\src\SoyImage.cpp" />
     <ClCompile Include="..\Source\SoyLib\src\SoyJson.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Master|Win32'">true</ExcludedFromBuild>
@@ -132,12 +134,8 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Master|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\Source\SoyLib\src\SoyPixels.cpp" />
-    <ClCompile Include="..\Source\SoyLib\src\SoyPng.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Master|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Master|x64'">true</ExcludedFromBuild>
-    </ClCompile>
+    <ClCompile Include="..\Source\SoyLib\src\SoyPng.cpp" />
+    <ClCompile Include="..\Source\SoyLib\src\SoyStreamBuffer.cpp" />
     <ClCompile Include="..\Source\SoyLib\src\SoyString.cpp" />
     <ClCompile Include="..\Source\SoyLib\src\SoyThread.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
@@ -197,7 +195,9 @@
     <ClInclude Include="..\Source\SoyLib\src\SoyAssert.h" />
     <ClInclude Include="..\Source\SoyLib\src\SoyDebug.h" />
     <ClInclude Include="..\Source\SoyLib\src\SoyEvent.h" />
+    <ClInclude Include="..\Source\SoyLib\src\SoyFourcc.h" />
     <ClInclude Include="..\Source\SoyLib\src\SoyH264.h" />
+    <ClInclude Include="..\Source\SoyLib\src\SoyImage.h" />
     <ClInclude Include="..\Source\SoyLib\src\SoyJson.h" />
     <ClInclude Include="..\Source\SoyLib\src\SoyMath.h" />
     <ClInclude Include="..\Source\SoyLib\src\SoyMedia.h" />
@@ -205,6 +205,7 @@
     <ClInclude Include="..\Source\SoyLib\src\soymediafoundation.h" />
     <ClInclude Include="..\Source\SoyLib\src\SoyPixels.h" />
     <ClInclude Include="..\Source\SoyLib\src\SoyPng.h" />
+    <ClInclude Include="..\Source\SoyLib\src\SoyStreamBuffer.h" />
     <ClInclude Include="..\Source\SoyLib\src\SoyString.h" />
     <ClInclude Include="..\Source\SoyLib\src\SoyThread.h" />
     <ClInclude Include="..\Source\SoyLib\src\SoyTypes.h" />

@@ -183,6 +183,15 @@
     <ClCompile Include="..\Source\Json11\json11.cpp">
       <Filter>Source\Json11</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source\SoyLib\src\SoyImage.cpp">
+      <Filter>SoyLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\SoyLib\src\SoyFourcc.cpp">
+      <Filter>SoyLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\SoyLib\src\SoyStreamBuffer.cpp">
+      <Filter>SoyLib</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\SoyLib\src\Array.hpp">
@@ -352,6 +361,15 @@
     </ClInclude>
     <ClInclude Include="..\Source\Json11\json11.hpp">
       <Filter>Source\Json11</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\SoyLib\src\SoyImage.h">
+      <Filter>SoyLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\SoyLib\src\SoyFourcc.h">
+      <Filter>SoyLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\SoyLib\src\SoyStreamBuffer.h">
+      <Filter>SoyLib</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
