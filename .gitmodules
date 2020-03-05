@@ -10,3 +10,6 @@
 [submodule "Source/Json11"]
 	path = Source/Json11
 	url = https://github.com/dropbox/json11.git
+[submodule "Unity/PopH264/Assets/PopYuv"]
+	path = Unity/PopH264/Assets/PopYuv
+	url = https://github.com/NewChromantics/PopUnityYuvShader.git
