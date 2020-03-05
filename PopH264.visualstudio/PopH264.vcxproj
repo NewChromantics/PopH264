@@ -184,7 +184,7 @@
     <ClInclude Include="..\Source\Broadway\Decoder\src\h264bsd_vlc.h" />
     <ClInclude Include="..\Source\Broadway\Decoder\src\h264bsd_vui.h" />
     <ClInclude Include="..\Source\Json11\json11.hpp" />
-    <ClInclude Include="..\Source\PopH264.h" />
+    <CopyFileToFolders Include="..\Source\PopH264.h" />
     <ClInclude Include="..\Source\PopH264DecoderInstance.h" />
     <ClInclude Include="..\Source\PopH264Framework.h" />
     <ClInclude Include="..\Source\SoyLib\src\Array.hpp" />
@@ -222,7 +222,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Master|x64'">true</ExcludedFromBuild>
     </None>
     <None Include="..\Source\InstanceManager.inc" />
-    <None Include="..\Unity\PopH264\Assets\PopH264\PopH264.cs" />
+    <CopyFileToFolders Include="..\Unity\PopH264\Assets\PopH264\PopH264.cs" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{64811728-CD20-4F2C-899B-E3BF3D4B032E}</ProjectGuid>
