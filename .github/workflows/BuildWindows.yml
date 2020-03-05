@@ -5,7 +5,7 @@ env:
   BuildPlatform: x64
   BuildConfiguration: Master
 # would be nice to extract this from visual studio
-  BuildDirectory: PopH264.visualstudio\x64\Master
+  BuildDirectory: Build\Master_x64
 
 on: 
   push:
@@ -37,15 +37,5 @@ jobs:
     # do not use env here: ##[error]Path does not exist d:\a\PopH264\PopH264\$Env:GITHUB_WORKSPACE\PopH264.visualstudio\Debug
     - uses: actions/upload-artifact@v1
       with:
-        name: PopH264.dll
-        path: ${{env.BuildDirectory}}\PopH264.dll
-    - uses: actions/upload-artifact@v1
-      with:
-        name: PopH264.lib
-        path: ${{env.BuildDirectory}}\PopH264.lib
-    - uses: actions/upload-artifact@v1
-      with:
-        name: PopH264.h
-        path: Source/PopH264.h
-        
-#PopH264.visualstudio\Debug\PopH264.dll
+        name: PopH264
+        path: ${{env.BuildDirectory}}     
