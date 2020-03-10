@@ -4,38 +4,10 @@ using UnityEngine;
 using PopX;
 
 
-
-public class Pcap : MonoBehaviour {
-
-	byte HexCharToNibble(char HexChar)
-	{
-		if (HexChar >= 'A' && HexChar <= 'F') return (byte)((HexChar - 'A') + 10);
-		if (HexChar >= 'a' && HexChar <= 'f') return (byte)((HexChar - 'a') + 10);
-		if (HexChar >= '0' && HexChar <= '9') return (byte)((HexChar - '0'));
-		throw new System.Exception(HexChar + " not a hex char");
-	}
-
-	byte[] HexStringToBytes(string HexString)
-	{
-		if (string.IsNullOrEmpty(HexString))
-			return null;
-
-		var Bytes = new List<byte>();
-		for (int i = 0; i < HexString.Length;	i+=2)
-		{
-			var a = HexCharToNibble(HexString[i + 0]);
-			var b = HexCharToNibble(HexString[i + 1]);
-			var Byte = (byte)((a<<4) | b);
-			Bytes.Add(Byte);
-		}
-		return Bytes.ToArray();
-	}
-
-	//	now sps & pps
-	public string Preconfigured_SPS_HexString = "";
-	public byte[] Preconfigured_SPS_Bytes	{ get { return HexStringToBytes(Preconfigured_SPS_HexString); } }
-
+public class VideoPacketDecoder : MonoBehaviour
+{
 	public bool VerboseDebug = false;
+
 
 	[Header("Make this false to sync DecodeToVideoTime manually")]
 	public bool AutoTrackTimeOnEnable = true;
@@ -54,19 +26,13 @@ public class Pcap : MonoBehaviour {
 	[Range(0, 20)]
 	public int DecodeImagesPerFrame = 1;
 	[Range(0, 20)]
-	public int DecodeSamplesPerFrame = 1;
-	[Range(0, 20)]
 	public int DecodePacketsPerFrame = 1;
-	[Range(0, 20)]
-	public int DecodeMp4AtomsPerFrame = 1;
-
-	PopX.Pcap.GlobalHeader? Header = null;
-	List<PopH264.FrameInput> PendingInputFrames;        //	references to all samples that are scheduled, but we may not have data for yet (and may need conversion to a packet)
+	
+	List<PopH264.FrameInput> PendingInputFrames;	//	h264 packets per-frame
 	List<int> PendingOutputFrameTimes;              //	frames we've submitted to the h264 decoder, that we're expecting to come out
 	int? LastFrameTime = null;                      //	maybe a better way of storing this
 
-	long Mp4BytesRead = 0;                          //	amount of data we've processed from the start of the asset, so we know correct file offsets
-	System.Func<long, long, byte[]> ReadFileFunction;   //	if set, we use this to read data (eg, from memory buffer). Other
+
 
 	public string MaterialUniform_LumaTexture = "LumaTexture";
 	public string MaterialUniform_LumaFormat = "LumaFormat";
@@ -83,29 +49,26 @@ public class Pcap : MonoBehaviour {
 	[Header("Whenever there's a new frame, all these blits will be processed")]
 	public List<VideoBlitTexture> RgbTextureBlits;
 
-	List<byte[]> Packets;
-
 	public UnityEvent_String OnNewFrameTime;
 	public UnityEvent_String OnDebugUpdate;
 
 	void OnEnable()
 	{
-		//	get the file reader
-		var FileReader = GetComponent<FileReaderBase>();
-		Mp4BytesRead = 0;
-		ReadFileFunction = FileReader.GetReadFileFunction();
-
 		if (AutoTrackTimeOnEnable)
 		{
 			StartTime = Time.time;
 		}
 	}
 
-	long GetKnownFileSize()
+	public void PushPacket(byte[] Data, long TimeMs)
 	{
-		var FileReader = GetComponent<FileReaderBase>();
-		var Size = FileReader.GetKnownFileSize();
-		return Size;
+		if (PendingInputFrames == null)
+			PendingInputFrames = new List<PopH264.FrameInput>();
+
+		var NewPacket = new PopH264.FrameInput();
+		NewPacket.Bytes = Data;
+		NewPacket.FrameNumber = (int)TimeMs;
+		PendingInputFrames.Add(NewPacket);
 	}
 
 	static T[] CombineTwoArrays<T>(T[] a1, T[] a2)
@@ -116,48 +79,7 @@ public class Pcap : MonoBehaviour {
 		return arrayCombined;
 	}
 
-
-	void ParseNextMp4Header()
-	{
-		//	check if there's more data to be read
-		var KnownFileSize = GetKnownFileSize();
-		if (Mp4BytesRead >= KnownFileSize)
-			return;
-
-		System.Action<byte[],int> EnumPacket = (Packet,Time) =>
-		{
-			var Frame = new PopH264.FrameInput();
-			Frame.Bytes = Packet;
-			Frame.FrameNumber = Time;
-			if (PendingInputFrames == null)
-				PendingInputFrames = new List<PopH264.FrameInput>();
-			PendingInputFrames.Add(Frame);
-		};
-		
-		//	ideally only once we've verified we have an mp4, but before moov. Maybe just if an ftyp is found
-		if (Decoder == null)
-			Decoder = new PopH264.Decoder( HardwareDecoding, DecodeOnSeperateThread );
-
-
-		System.Func<long, byte[]> PopData = (long DataSize)=>
-		{
-			var Data = ReadFileFunction(Mp4BytesRead, DataSize);
-			Mp4BytesRead += DataSize;
-			return Data;
-		};
-
-		try
-		{
-			if (!Header.HasValue)
-				Header = PopX.Pcap.ParseHeader(PopData);
-
-			PopX.Pcap.ParseNextPacket(PopData,Header.Value,  EnumPacket);
-		}
-		catch(System.Exception e)
-		{
-			Debug.LogException(e);
-		}
-	}
+	
 
 	void OnDisable()
 	{
@@ -167,9 +89,7 @@ public class Pcap : MonoBehaviour {
 		Decoder = null;
 
 		PendingInputFrames = null;
-		ReadFileFunction = null;
-		Mp4BytesRead = 0;
-
+		
 		StartTime = null;
 	}
 
@@ -197,7 +117,6 @@ public class Pcap : MonoBehaviour {
 		//	update debug output
 		{
 			string Debug = "";
-			Debug += "Kb: " + GetCountString(this.GetKnownFileSize(),1024);
 			Debug += "Packets: " + GetCountString(this.PendingInputFrames);
 			this.OnDebugUpdate.Invoke(Debug);
 		}
@@ -217,19 +136,7 @@ public class Pcap : MonoBehaviour {
 		catch (System.Exception e)
 		{
 			Debug.LogException(e, this);
-		}
-
-
-		//	decode more of the mp4 (may need to do inital header, or a moof header, or next mdat, before we can do a frame again
-		try
-		{
-			for (var i = 0; i < DecodeMp4AtomsPerFrame; i++)
-				ParseNextMp4Header();
-		}
-		catch (System.Exception e)
-		{
-			Debug.LogException(e, this);
-		}
+		}	
 	}
 
 
@@ -237,6 +144,9 @@ public class Pcap : MonoBehaviour {
 	{
 		if (PendingInputFrames == null || PendingInputFrames.Count == 0)
 			return;
+
+		if (Decoder == null)
+			Decoder = new PopH264.Decoder(HardwareDecoding, DecodeOnSeperateThread);
 
 		var PendingInputFrame = PendingInputFrames[0];
 		if ( VerboseDebug )
