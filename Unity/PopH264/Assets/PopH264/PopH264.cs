@@ -192,8 +192,32 @@ public static class PopH264
 			}
 		}
 
+		void CheckH264Frame(FrameInput Frame)
+		{
+			try
+			{
+				var NaluHeaderLength = PopX.H264.GetNaluHeaderSize(Frame.Bytes);
+				var PacketType = PopX.H264.GetNaluType(Frame.Bytes[NaluHeaderLength]);
+				if ( PacketType == PopX.H264.NaluType.SPS )
+				{
+					var HeaderBytes = Frame.Bytes.SubArray(NaluHeaderLength, Frame.Bytes.Length - NaluHeaderLength);
+					var Header = PopX.H264.ParseAvccProfile(HeaderBytes);
+					if ( Header.Profile!=PopX.H264.Profile.Baseline || Header.Level > 3 )
+					{
+						Debug.LogWarning("H264 SPS version " + Header.Profile + " " + Header.Level + " higher than supported (Baseline 3.0)"); 
+					}
+				}
+			}
+			catch(System.Exception e)
+			{
+				Debug.LogException(e);
+			}
+		}
+
 		public int PushFrameData(FrameInput Frame)
 		{
+			CheckH264Frame(Frame);
+
 			if ( !ThreadedDecoding )
 			{
 				return PopH264_PushData(Instance.Value, Frame.Bytes, Frame.Bytes.Length, Frame.FrameNumber);
