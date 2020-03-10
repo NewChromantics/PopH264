@@ -185,6 +185,7 @@
     <ClInclude Include="..\Source\Broadway\Decoder\src\h264bsd_vui.h" />
     <ClInclude Include="..\Source\Json11\json11.hpp" />
     <CopyFileToFolders Include="..\Source\PopH264.h" />
+    <ClInclude Include="..\Source\MagicEnum\include\magic_enum.hpp" />
     <ClInclude Include="..\Source\PopH264DecoderInstance.h" />
     <ClInclude Include="..\Source\PopH264Framework.h" />
     <ClInclude Include="..\Source\SoyLib\src\Array.hpp" />

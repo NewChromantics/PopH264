@@ -16,6 +16,9 @@
     <Filter Include="Source\Json11">
       <UniqueIdentifier>{20bd4c59-d59a-47a1-a406-fd0c954511f1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\MagicEnum">
+      <UniqueIdentifier>{a5490091-84f5-492a-a94d-982b1bf6baeb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Source\SoyLib\src\memheap.cpp">
@@ -260,9 +263,6 @@
     <ClInclude Include="..\Source\SoyLib\src\SoyH264.h">
       <Filter>SoyLib</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\PopH264.h">
-      <Filter>Source</Filter>
-    </ClInclude>
     <ClInclude Include="..\Source\PopH264DecoderInstance.h">
       <Filter>Source</Filter>
     </ClInclude>
@@ -371,16 +371,20 @@
     <ClInclude Include="..\Source\SoyLib\src\SoyStreamBuffer.h">
       <Filter>SoyLib</Filter>
     </ClInclude>
+    <ClInclude Include="..\Source\MagicEnum\include\magic_enum.hpp">
+      <Filter>Source\MagicEnum</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\Unity\PopH264\Assets\PopH264\PopH264.cs">
-      <Filter>Unity Source</Filter>
-    </None>
     <None Include="..\Source\InstanceManager.inc">
       <Filter>Source</Filter>
     </None>
     <None Include="..\Source\Broadway\Decoder\src\EvaluationTestBench.x">
       <Filter>Broadway</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <CopyFileToFolders Include="..\Source\PopH264.h" />
+    <CopyFileToFolders Include="..\Unity\PopH264\Assets\PopH264\PopH264.cs" />
   </ItemGroup>
 </Project>
