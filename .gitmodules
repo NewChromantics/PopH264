@@ -13,3 +13,6 @@
 [submodule "Unity/PopH264/Assets/PopYuv"]
 	path = Unity/PopH264/Assets/PopYuv
 	url = https://github.com/NewChromantics/PopUnityYuvShader.git
+[submodule "Source/MagicEnum"]
+	path = Source/MagicEnum
+	url = https://github.com/Neargye/magic_enum.git
