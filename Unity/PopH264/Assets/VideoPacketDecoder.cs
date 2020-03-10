@@ -71,6 +71,13 @@ public class VideoPacketDecoder : MonoBehaviour
 		PendingInputFrames.Add(NewPacket);
 	}
 
+	public void PushPacketWithNoTimestamp(byte[] Data)
+	{
+		//	todo: guess next timestamp from last
+		PushPacket(Data, 0);
+	}
+
+
 	static T[] CombineTwoArrays<T>(T[] a1, T[] a2)
 	{
 		T[] arrayCombined = new T[a1.Length + a2.Length];
