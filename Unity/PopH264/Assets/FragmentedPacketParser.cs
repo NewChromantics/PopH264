@@ -7,12 +7,23 @@ using PopX;
 //public class UnityEvent_Packet : UnityEngine.Events.UnityEvent<byte[],long> { }
 
 
-//	gr: this isn't VAAPI, but I don't know what the transport is
-//		rename when we find out!
+//	gr: SOMETHING is fragmenting these packets. Seems to be from the transport, but not always the same
 namespace PopX
 {
-	public static class Vaapi
+	public static class FragmentedPacket
 	{
+		[System.Serializable]
+		public struct FragmentedOptions
+		{
+			//	sets of packets
+			//		Frame8_Checksum24_Part8_Length24
+			//		Part8
+			public bool HasFrameNumberAndChecksumAndSize;
+			public bool HasPartNumber;
+			public bool HasPartSize { get { return HasFrameNumberAndChecksumAndSize; } }
+			public bool HasFrameNumber { get { return HasFrameNumberAndChecksumAndSize; } }
+		}
+
 		public struct PendingPacket
 		{
 			public int FrameNumber;
@@ -20,25 +31,49 @@ namespace PopX
 			public List<int> PartNumbers;	//	keep a list of parts we've processed, should just increment
 		}
 
-		static public PendingPacket? ParseNextPacket(System.Func<long,byte[]> ReadData, PendingPacket? PendingPacket,System.Action<byte[],long> EnumPacket)
+		
+		static public PendingPacket? ParseNextPacket(System.Func<long,byte[]> ReadData, int PacketSize,FragmentedOptions Options, PendingPacket? PendingPacket,System.Action<byte[],long> EnumPacket)
 		{
-			//	first byte is incrementing
-			var FrameNumber = ReadData(1)[0];
+			var FrameNumber = 0;
+			int? PartLength = null;
+			var PartNumber = 0;
+			long BytesRead = 0;
+			System.Func<long,byte[]> PopData = (Length)=>
+			{
+				var Data = ReadData(Length);
+				BytesRead += Length;
+				return Data;
+			};
 
-			//	this isn't a length, but it's consistent per frame number
-			var FrameLength = PopX.Mpeg4.Get24(ReadData(3));
-			
+			if (Options.HasFrameNumberAndChecksumAndSize )
+			{
+				//	first byte is incrementing
+				FrameNumber = PopData(1)[0];
+
+				//	this isn't a length, but it's consistent per frame number (checksum?)
+				var Checksum = PopX.Mpeg4.Get24(ReadData(3));
+			}
+
 			//	next seems to be a byte that increments (Part X/N?)
-			var PartNumber = ReadData(1)[0];
+			if ( Options.HasPartNumber )
+				PartNumber = PopData(1)[0];
 
-			//	next 3 (or X and 2) is the length of this part
-			var PartLength3 = ReadData(3);
-			var PartLength = PopX.Mpeg4.Get24(PartLength3[0], PartLength3[2], PartLength3[1]);
+			if (Options.HasPartSize)
+			{
+				//	next 3 (or X and 2) is the length of this part
+				var PartLength3 = PopData(3);
+				PartLength = PopX.Mpeg4.Get24(PartLength3[0], PartLength3[2], PartLength3[1]);
+			}
+			
+			if ( !PartLength.HasValue )
+			{
+				PartLength = PacketSize - (int)BytesRead;
+			}
 
-			Debug.Log("Frame " + FrameNumber + "x" + FrameLength + " Part " + PartNumber + "x" + PartLength);
+			Debug.Log("Frame " + FrameNumber + "x" + PartLength.Value + " Part " + PartNumber + "x" + PartLength);
 			
 			//	grab the rest of the data (this should match what's left?)
-			var PacketData = ReadData(PartLength);
+			var PacketData = ReadData(PartLength.Value);
 
 			//	gr: how do we detect last part?
 			bool EndOfFrame = false;
@@ -77,8 +112,10 @@ namespace PopX
 					LastPartNumber = PartNumbers[PartNumbers.Count - 1];
 				if (LastPartNumber != PartNumber - 1)
 				{
-					throw new System.Exception("Packet part numbers are out of order");
-					return null;
+					FlushFrame = true;
+					//	gr: only throw if we have a frame, otherwise its how we know we're on a new fragment
+					if ( Options.HasFrameNumber)
+						throw new System.Exception("Packet part numbers are out of order");
 				}
 			}
 
@@ -104,15 +141,18 @@ namespace PopX
 
 
 
-public class VaapiParser : MonoBehaviour {
+public class FragmentedPacketParser : MonoBehaviour {
 
 	public UnityEvent_Packet OnPacket;
 	
 	[Range(0, 20)]
 	public int DecodePacketsPerFrame = 1;
 
+	[Header("Some fragments have lengths, but no flags in PCAP to indicate it came from there")]
+	public PopX.FragmentedPacket.FragmentedOptions FragmentedOptions;
+
 	List<PopH264.FrameInput> PendingPackets;
-	PopX.Vaapi.PendingPacket? PendingPacket = null;
+	PopX.FragmentedPacket.PendingPacket? CurrentPacket = null;
 	
 
 	void OnEnable()
@@ -150,7 +190,7 @@ public class VaapiParser : MonoBehaviour {
 			OnPacket.Invoke(Bytes, Time);
 		};
 
-		PendingPacket = PopX.Vaapi.ParseNextPacket(PopData, PendingPacket, EnumPacket);
+		CurrentPacket = PopX.FragmentedPacket.ParseNextPacket(PopData, NextPacket.Bytes.Length, FragmentedOptions, CurrentPacket, EnumPacket);
 	}
 
 	void OnDisable()
