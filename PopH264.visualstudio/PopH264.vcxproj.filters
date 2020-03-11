@@ -19,6 +19,9 @@
     <Filter Include="Source\MagicEnum">
       <UniqueIdentifier>{a5490091-84f5-492a-a94d-982b1bf6baeb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="IntelMedia">
+      <UniqueIdentifier>{9236602d-c355-491e-8513-eac9ad797579}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Source\SoyLib\src\memheap.cpp">
@@ -194,6 +197,9 @@
     </ClCompile>
     <ClCompile Include="..\Source\SoyLib\src\SoyStreamBuffer.cpp">
       <Filter>SoyLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\IntelMediaDecoder.cpp">
+      <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -374,6 +380,72 @@
     <ClInclude Include="..\Source\MagicEnum\include\magic_enum.hpp">
       <Filter>Source\MagicEnum</Filter>
     </ClInclude>
+    <ClInclude Include="..\Source\IntelMediaDecoder.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Program Files (x86)\IntelSWTools\Intel(R) Media SDK 2019 R1\Software Development Kit\include\mfxastructures.h">
+      <Filter>IntelMedia</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Program Files (x86)\IntelSWTools\Intel(R) Media SDK 2019 R1\Software Development Kit\include\mfxaudio.h">
+      <Filter>IntelMedia</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Program Files (x86)\IntelSWTools\Intel(R) Media SDK 2019 R1\Software Development Kit\include\mfxaudio++.h">
+      <Filter>IntelMedia</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Program Files (x86)\IntelSWTools\Intel(R) Media SDK 2019 R1\Software Development Kit\include\mfxbrc.h">
+      <Filter>IntelMedia</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Program Files (x86)\IntelSWTools\Intel(R) Media SDK 2019 R1\Software Development Kit\include\mfxcamera.h">
+      <Filter>IntelMedia</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Program Files (x86)\IntelSWTools\Intel(R) Media SDK 2019 R1\Software Development Kit\include\mfxcommon.h">
+      <Filter>IntelMedia</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Program Files (x86)\IntelSWTools\Intel(R) Media SDK 2019 R1\Software Development Kit\include\mfxdefs.h">
+      <Filter>IntelMedia</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Program Files (x86)\IntelSWTools\Intel(R) Media SDK 2019 R1\Software Development Kit\include\mfxenc.h">
+      <Filter>IntelMedia</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Program Files (x86)\IntelSWTools\Intel(R) Media SDK 2019 R1\Software Development Kit\include\mfxjpeg.h">
+      <Filter>IntelMedia</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Program Files (x86)\IntelSWTools\Intel(R) Media SDK 2019 R1\Software Development Kit\include\mfxla.h">
+      <Filter>IntelMedia</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Program Files (x86)\IntelSWTools\Intel(R) Media SDK 2019 R1\Software Development Kit\include\mfxmvc.h">
+      <Filter>IntelMedia</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Program Files (x86)\IntelSWTools\Intel(R) Media SDK 2019 R1\Software Development Kit\include\mfxpak.h">
+      <Filter>IntelMedia</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Program Files (x86)\IntelSWTools\Intel(R) Media SDK 2019 R1\Software Development Kit\include\mfxplugin.h">
+      <Filter>IntelMedia</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Program Files (x86)\IntelSWTools\Intel(R) Media SDK 2019 R1\Software Development Kit\include\mfxplugin++.h">
+      <Filter>IntelMedia</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Program Files (x86)\IntelSWTools\Intel(R) Media SDK 2019 R1\Software Development Kit\include\mfxsession.h">
+      <Filter>IntelMedia</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Program Files (x86)\IntelSWTools\Intel(R) Media SDK 2019 R1\Software Development Kit\include\mfxstructures.h">
+      <Filter>IntelMedia</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Program Files (x86)\IntelSWTools\Intel(R) Media SDK 2019 R1\Software Development Kit\include\mfxvideo.h">
+      <Filter>IntelMedia</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Program Files (x86)\IntelSWTools\Intel(R) Media SDK 2019 R1\Software Development Kit\include\mfxvideo++.h">
+      <Filter>IntelMedia</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Program Files (x86)\IntelSWTools\Intel(R) Media SDK 2019 R1\Software Development Kit\include\mfxvp8.h">
+      <Filter>IntelMedia</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Program Files (x86)\IntelSWTools\Intel(R) Media SDK 2019 R1\Software Development Kit\include\mfxvp9.h">
+      <Filter>IntelMedia</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Program Files (x86)\IntelSWTools\Intel(R) Media SDK 2019 R1\Software Development Kit\include\mfxvstructures.h">
+      <Filter>IntelMedia</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Source\InstanceManager.inc">
@@ -386,5 +458,13 @@
   <ItemGroup>
     <CopyFileToFolders Include="..\Source\PopH264.h" />
     <CopyFileToFolders Include="..\Unity\PopH264\Assets\PopH264\PopH264.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="C:\Program Files (x86)\IntelSWTools\Intel(R) Media SDK 2019 R1\Software Development Kit\lib\x64\libmfx.lib">
+      <Filter>IntelMedia</Filter>
+    </Library>
+    <Library Include="C:\Program Files (x86)\IntelSWTools\Intel(R) Media SDK 2019 R1\Software Development Kit\lib\x64\libmfx_vs2015.lib">
+      <Filter>IntelMedia</Filter>
+    </Library>
   </ItemGroup>
 </Project>

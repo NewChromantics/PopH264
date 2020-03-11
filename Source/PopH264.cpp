@@ -11,6 +11,7 @@
 #endif
 
 #define ENABLE_BROADWAY
+#define ENABLE_INTELMEDIA
 
 #if defined(ENABLE_MAGICLEAP_DECODER)
 #include "MagicLeapDecoder.h"
@@ -18,6 +19,10 @@
 
 #if defined(ENABLE_BROADWAY)
 #include "BroadwayDecoder.h"
+#endif
+
+#if defined(ENABLE_INTELMEDIA)
+#include "IntelMediaDecoder.h"
 #endif
 
 namespace PopH264
@@ -67,12 +72,34 @@ BOOL APIENTRY DllMain(HMODULE /* hModule */, DWORD ul_reason_for_call, LPVOID /*
 PopH264::TDecoderInstance::TDecoderInstance(int32_t Mode)
 {
 #if defined(ENABLE_MAGICLEAP_DECODER)
-	if ( Mode != MODE_BROADWAY )
+	if (Mode != MODE_BROADWAY)
 	{
-		mDecoder.reset( new MagicLeap::TDecoder( Mode ) );
-		return;
+		try
+		{
+			mDecoder.reset(new MagicLeap::TDecoder(Mode));
+			return;
+		}
+		catch (std::exception& e)
+		{
+			std::Debug << "Failed to create MagicLeap decoder: " << e.what() << std::endl;
+		}
 	}
 #endif
+
+#if defined(ENABLE_INTELMEDIA)
+	{
+		try
+		{
+			mDecoder.reset(new IntelMedia::TDecoder());
+			return;
+		}
+		catch (std::exception& e)
+		{
+			std::Debug << "Failed to create IntelMedia decoder: " << e.what() << std::endl;
+		}
+	}
+#endif
+
 	
 #if defined(ENABLE_BROADWAY)
 	mDecoder.reset( new Broadway::TDecoder );

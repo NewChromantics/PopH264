@@ -10,14 +10,4 @@
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
     <LocalDebuggerCommandArguments>-projectPath $(ProjectDir)..\Unity\PopH264</LocalDebuggerCommandArguments>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Master|Win32'">
-    <LocalDebuggerCommand>C:\Program Files\Unity\Hub\Editor\2019.2.17f1\Editor\Unity.exe</LocalDebuggerCommand>
-    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerCommandArguments>-projectPath $(ProjectDir)..\Unity\PopH264</LocalDebuggerCommandArguments>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <LocalDebuggerCommand>C:\Program Files\Unity\Hub\Editor\2019.2.17f1\Editor\Unity.exe</LocalDebuggerCommand>
-    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerCommandArguments>-projectPath $(ProjectDir)..\Unity\PopH264</LocalDebuggerCommandArguments>
-  </PropertyGroup>
 </Project>
