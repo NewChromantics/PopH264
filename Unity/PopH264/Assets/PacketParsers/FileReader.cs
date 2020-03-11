@@ -18,12 +18,30 @@ public abstract class FileReaderBase : MonoBehaviour
 {
 	public abstract long GetKnownFileSize();    //	gr: this isn't actually file SIZE for streaming, but total known, so we know if there's no pending data
 	public abstract System.Func<long, long, byte[]> GetReadFileFunction();
+
+	public UnityEvent_Packet OnPacketRecieved;
+
+	protected void OnDataChanged()
+	{
+		//	currently sends everything, need to change this to fit streaming formats
+		var ReadFunc = GetReadFileFunction();
+		var FileSize = GetKnownFileSize();
+		if (FileSize > 0)
+		{
+			var FrameNumber = 0;
+			var Data = ReadFunc(0, FileSize);
+			OnPacketRecieved.Invoke(Data, FrameNumber);
+		}
+	}
 }
 
 
 public class FileReader : FileReaderBase
 {
 	public string Filename = "Cat.mp4";
+
+	[Header("On first update, send all bytes. Best disabled on very large files")]
+	public bool EnableOnPacket = true;
 
 #if USE_MEMORY_MAPPED_FILE
 	MemoryMappedFile File;
@@ -34,6 +52,13 @@ public class FileReader : FileReaderBase
 #else
 	byte[] FileBytes;
 #endif
+
+	//	gr: move this to Base and trigger when we get more data in
+	void Start()
+	{
+		if (EnableOnPacket)
+			OnDataChanged();
+	}
 
 	public override long GetKnownFileSize()
 	{

@@ -129,18 +129,14 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 24380342}
-  - component: {fileID: 24380341}
-  - component: {fileID: 24380340}
-  - component: {fileID: 24380339}
   - component: {fileID: 24380337}
-  - component: {fileID: 24380338}
   m_Layer: 0
   m_Name: Chang.jpeg
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &24380337
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -153,45 +149,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bc5be6511bbc64e559e6694d659d8044, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Filename: ChangAndDepth.jpg
---- !u!114 &24380338
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 24380336}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5bbf7a4a24bbe94428b6f80fcb7b9d33, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Preconfigured_SPS_HexString: 
-  VerboseDebug: 1
-  AutoTrackTimeOnEnable: 1
-  OnFinished:
-    m_PersistentCalls:
-      m_Calls: []
-  DecodeToVideoTime: 0
-  HardwareDecoding: 0
-  DecodeOnSeperateThread: 1
-  DecodeImagesPerFrame: 1
-  DecodeSamplesPerFrame: 1
-  DecodePacketsPerFrame: 1
-  DecodeMp4AtomsPerFrame: 1
-  MaterialUniform_LumaTexture: LumaTexture
-  MaterialUniform_LumaFormat: LumaFormat
-  MaterialUniform_ChromaUTexture: ChromaUTexture
-  MaterialUniform_ChromaUFormat: ChromaUFormat
-  MaterialUniform_ChromaVTexture: ChromaVTexture
-  MaterialUniform_ChromaVFormat: ChromaVFormat
-  SetMaterialFormat: 1
-  RgbTextureBlits: []
-  OnNewFrameTime:
+  OnPacketRecieved:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1809756288}
-        m_MethodName: set_text
+      - m_Target: {fileID: 1678362409}
+        m_MethodName: PushPacket
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -201,68 +163,8 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-  OnDebugUpdate:
-    m_PersistentCalls:
-      m_Calls: []
---- !u!23 &24380339
-MeshRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 24380336}
-  m_Enabled: 1
-  m_CastShadows: 1
-  m_ReceiveShadows: 1
-  m_DynamicOccludee: 1
-  m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
-  m_RenderingLayerMask: 4294967295
-  m_RendererPriority: 0
-  m_Materials:
-  - {fileID: 2100000, guid: 89d84989a3ee5ef449fbc4de4c94fc64, type: 2}
-  m_StaticBatchInfo:
-    firstSubMesh: 0
-    subMeshCount: 0
-  m_StaticBatchRoot: {fileID: 0}
-  m_ProbeAnchor: {fileID: 0}
-  m_LightProbeVolumeOverride: {fileID: 0}
-  m_ScaleInLightmap: 1
-  m_ReceiveGI: 1
-  m_PreserveUVs: 1
-  m_IgnoreNormalsForChartDetection: 0
-  m_ImportantGI: 0
-  m_StitchLightmapSeams: 0
-  m_SelectedEditorRenderState: 3
-  m_MinimumChartSize: 4
-  m_AutoUVMaxDistance: 0.5
-  m_AutoUVMaxAngle: 89
-  m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
-  m_SortingOrder: 0
---- !u!65 &24380340
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 24380336}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
---- !u!33 &24380341
-MeshFilter:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 24380336}
-  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+  Filename: ChangAndDepth.jpg
+  EnableOnPacket: 1
 --- !u!4 &24380342
 Transform:
   m_ObjectHideFlags: 0
@@ -576,7 +478,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bc5be6511bbc64e559e6694d659d8044, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  OnPacketRecieved:
+    m_PersistentCalls:
+      m_Calls: []
   Filename: cat_baseline.mp4
+  EnableOnPacket: 1
 --- !u!1 &308914246
 GameObject:
   m_ObjectHideFlags: 0
@@ -788,7 +694,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bc5be6511bbc64e559e6694d659d8044, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  OnPacketRecieved:
+    m_PersistentCalls:
+      m_Calls: []
   Filename: packets3.pcap
+  EnableOnPacket: 1
 --- !u!4 &496615617
 Transform:
   m_ObjectHideFlags: 0
@@ -945,6 +855,93 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 6
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &521706624
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 521706627}
+  - component: {fileID: 521706626}
+  - component: {fileID: 521706625}
+  m_Layer: 0
+  m_Name: Wireshark PacketDump (1)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &521706625
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 521706624}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8134f8a747fba644d8d1d65698ea7f4a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  OnPacket:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1285034034}
+        m_MethodName: PushPacket
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 2080490542}
+        m_MethodName: PushPacket
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  DecodePacketsPerFrame: 1
+--- !u!114 &521706626
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 521706624}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bc5be6511bbc64e559e6694d659d8044, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  OnPacketRecieved:
+    m_PersistentCalls:
+      m_Calls: []
+  Filename: nhve2.pcap
+  EnableOnPacket: 1
+--- !u!4 &521706627
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 521706624}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 1.033, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 18
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1230580379
 GameObject:
@@ -1383,6 +1380,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c48eea80943d94c47a6872a5e7e13bd3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  OnPacketRecieved:
+    m_PersistentCalls:
+      m_Calls: []
   HttpUsername: admin
   HttpPassword: password
   MonitorUrl: https://192.168.0.36/api/holographic/stream/live_low.mp4?holo=true&pv=true&mic=false&loopback=false
