@@ -11,26 +11,46 @@ using UnityEditor.IMGUI.Controls;
 [ExecuteInEditMode]
 public class Mp4Inspector : MonoBehaviour
 {
-	public List<string> Parts;
+	public List<TreeViewItem> Parts;
 	public bool Changed = false;
 
+	int GetId()
+	{
+		return 1 + Parts.Count;
+	}
 
 	void EnumTracks(List<PopX.Mpeg4.TTrack> Tracks)
 	{
 		foreach (var Track in Tracks)
 		{
-			Parts.Add("Track");
+			var Depth = 0;
+			Parts.Add( new TreeViewItem(GetId(), Depth,"Track") );
+			foreach( var Sample in Track.Samples )
+			{
+				var Debug = "Time: " + Sample.DecodeTimeMs;
+				if (Sample.DataFilePosition.HasValue)
+					Debug += " FilePos: " + Sample.DataFilePosition.Value;
+				if (Sample.DataPosition.HasValue)
+					Debug += " DataPos: " + Sample.DataPosition.Value;
+				Debug += " bytes: " + Sample.DataSize;
+
+				Parts.Add(new TreeViewItem(GetId(), Depth + 1, Debug));
+			}
 		}
 	}
 
 	void EnumMdat(PopX.TAtom MdatAtom)
 	{
-		Parts.Add("Mdat");
+		var Depth = 0;
+		var Debug = "MDat: ";
+		Debug += " FilePos: " + MdatAtom.AtomDataFilePosition;
+		Debug += " Bytes: " + MdatAtom.DataSize;
+		Parts.Add(new TreeViewItem(GetId(), Depth, Debug));
 	}
 
 	void LoadMp4()
 	{
-		Parts = new List<string>();
+		Parts = new List<TreeViewItem>();
 		var FileReader = GetComponent<FileReaderBase>();
 		long Mp4BytesRead = 0;
 		var ReadFileFunction = FileReader.GetReadFileFunction();
@@ -51,7 +71,7 @@ public class Mp4Inspector : MonoBehaviour
 			}
 			catch (System.Exception e)
 			{
-				Parts.Add("Exception: " + e.Message);
+				//Parts.Add("Exception: " + e.Message);
 				break;
 			}
 		}
@@ -80,18 +100,11 @@ class Mp4TreeView : TreeView
 	protected override TreeViewItem BuildRoot()
 	{
 		var root = new TreeViewItem { id = 0, depth = -1, displayName = "Mp4" };
-		var allItems = new List<TreeViewItem>();
+		var Items = new List<TreeViewItem>();
+		Items.Add(root);
+		Items.AddRange(Mp4.Parts);
 
-		foreach (var Part in Mp4.Parts)
-		{
-			var Item = new TreeViewItem { id = 1, depth = 0, displayName = Part };
-			allItems.Add(Item);
-		}
-
-		// Utility method that initializes the TreeViewItem.children and .parent for all items.
-		SetupParentsAndChildrenFromDepths(root, allItems);
-
-		// Return root of the tree
+		SetupParentsAndChildrenFromDepths(root, Items);
 		return root;
 	}
 }
