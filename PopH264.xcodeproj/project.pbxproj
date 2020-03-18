@@ -75,6 +75,7 @@
 		BF8AB6C021F228D0008E7E76 /* SoyTime.mm in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB6BD21F228D0008E7E76 /* SoyTime.mm */; };
 		BF8AB6C921F24E22008E7E76 /* PopH264.h in Resources */ = {isa = PBXBuildFile; fileRef = BF8AB63721F20C41008E7E76 /* PopH264.h */; };
 		BF8AB6CB21F24F9D008E7E76 /* InstanceManager.inc in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB6CA21F24F9D008E7E76 /* InstanceManager.inc */; };
+		BF93AD57239939E8003A36C4 /* SoyProtocol.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF93AD56239939E8003A36C4 /* SoyProtocol.cpp */; };
 		BFBC07EF2386C0BB0070BCB4 /* SoyThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFBC07ED2386C0B50070BCB4 /* SoyThread.cpp */; };
 		BFBC07F02386C0BC0070BCB4 /* SoyThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFBC07ED2386C0B50070BCB4 /* SoyThread.cpp */; };
 		BFBC07F12386C0BC0070BCB4 /* SoyThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFBC07ED2386C0B50070BCB4 /* SoyThread.cpp */; };
@@ -253,6 +254,8 @@
 		BF8AB6BE21F228D0008E7E76 /* SoyTime.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SoyTime.h; path = Source/SoyLib/src/SoyTime.h; sourceTree = "<group>"; };
 		BF8AB6C721F23712008E7E76 /* PopH264.cs */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = PopH264.cs; path = Unity/PopH264/Assets/PopH264/PopH264.cs; sourceTree = "<group>"; };
 		BF8AB6CA21F24F9D008E7E76 /* InstanceManager.inc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.pascal; name = InstanceManager.inc; path = Source/InstanceManager.inc; sourceTree = "<group>"; };
+		BF93AD55239939E8003A36C4 /* SoyProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SoyProtocol.h; path = Source/SoyLib/src/SoyProtocol.h; sourceTree = "<group>"; };
+		BF93AD56239939E8003A36C4 /* SoyProtocol.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SoyProtocol.cpp; path = Source/SoyLib/src/SoyProtocol.cpp; sourceTree = "<group>"; };
 		BFBC07ED2386C0B50070BCB4 /* SoyThread.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SoyThread.cpp; path = Source/SoyLib/src/SoyThread.cpp; sourceTree = "<group>"; };
 		BFBC07EE2386C0B50070BCB4 /* SoyThread.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SoyThread.h; path = Source/SoyLib/src/SoyThread.h; sourceTree = "<group>"; };
 		BFBC07F223882F9D0070BCB4 /* libml_mediaerror.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libml_mediaerror.dylib; path = ../MagicLeap/mlsdk/v0.22.0/lib/osx/libml_mediaerror.dylib; sourceTree = "<group>"; };
@@ -455,6 +458,8 @@
 				BF8AB6B521F22818008E7E76 /* MemHeap.hpp */,
 				BFF1C70F22E3CF8B00AFDFD5 /* SoyArray.cpp */,
 				BFF1C70E22E3CF8A00AFDFD5 /* SoyArray.h */,
+				BF93AD56239939E8003A36C4 /* SoyProtocol.cpp */,
+				BF93AD55239939E8003A36C4 /* SoyProtocol.h */,
 				BF8AB6AF21F227EF008E7E76 /* SoyAssert.cpp */,
 				BF8AB6AE21F227EF008E7E76 /* SoyAssert.h */,
 				BF8AB6A421F22602008E7E76 /* SoyDebug.cpp */,
@@ -777,6 +782,7 @@
 				BFF1C6E922E3C65800AFDFD5 /* BroadwayAll.c in Sources */,
 				BFF1C71122E3CF8B00AFDFD5 /* SoyArray.cpp in Sources */,
 				BF8AB6C021F228D0008E7E76 /* SoyTime.mm in Sources */,
+				BF93AD57239939E8003A36C4 /* SoyProtocol.cpp in Sources */,
 				BF53E82E22EDC989008253CD /* TDecoder.cpp in Sources */,
 				BF8AB6B321F22801008E7E76 /* SoyString.cpp in Sources */,
 				BF8AB6AA21F22602008E7E76 /* SoyPixels.cpp in Sources */,
