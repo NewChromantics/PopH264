@@ -21,10 +21,6 @@ if [ -z "$ANDROID_API" ]; then
 	ANDROID_API="23"
 fi
 
-if [ "$ANDROID_ABI" == "" ]; then
-	echo "ANDROID_ABI (eg. armeabi-v7a) not specified"
-	exit 1;
-fi
 
 MAXCONCURRENTBUILDS=8
 
