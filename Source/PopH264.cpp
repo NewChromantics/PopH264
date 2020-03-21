@@ -11,7 +11,9 @@
 #endif
 
 #define ENABLE_BROADWAY
+#if defined(TARGET_WINDOWS)
 #define ENABLE_INTELMEDIA
+#endif
 
 #if defined(ENABLE_MAGICLEAP_DECODER)
 #include "MagicLeapDecoder.h"
