@@ -16,6 +16,10 @@ public static class PopH264
 #if UNITY_UWP
 	private const string PluginName = "PopH264.Uwp";
 #error building uwp
+#elif UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
+	private const string PluginName = "Assets/PopH264/PopH264_Osx.framework/Versions/A/PopH264_Osx";
+#elif UNITY_IPHONE
+	[DllImport("__Internal")]
 #else
 	private const string PluginName = "PopH264";
 #endif
