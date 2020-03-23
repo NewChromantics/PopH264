@@ -145,7 +145,7 @@ public class FragmentedPacketParser : MonoBehaviour {
 
 	public UnityEvent_Packet OnPacket;
 	
-	[Range(0, 20)]
+	[Range(0, 100)]
 	public int DecodePacketsPerFrame = 1;
 
 	[Header("Some fragments have lengths, but no flags in PCAP to indicate it came from there")]
