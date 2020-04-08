@@ -682,7 +682,7 @@
 				TargetAttributes = {
 					BF151FD82384786600A70EBF = {
 						CreatedOnToolsVersion = 10.1;
-						DevelopmentTeam = X52DR36JY2;
+						DevelopmentTeam = 2HGDT7H2KX;
 						ProvisioningStyle = Automatic;
 					};
 					BF459CD421F7D5C700CED59D = {
@@ -856,7 +856,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = X52DR36JY2;
+				DEVELOPMENT_TEAM = 2HGDT7H2KX;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				INFOPLIST_FILE = PopH264_Ios/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 12.1;
@@ -867,6 +867,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
+				VALID_ARCHS = "$(ARCHS_STANDARD)";
 			};
 			name = Debug;
 		};
@@ -889,7 +890,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = X52DR36JY2;
+				DEVELOPMENT_TEAM = 2HGDT7H2KX;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				INFOPLIST_FILE = PopH264_Ios/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 12.1;
@@ -900,6 +901,7 @@
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
+				VALID_ARCHS = "$(ARCHS_STANDARD)";
 			};
 			name = Release;
 		};
