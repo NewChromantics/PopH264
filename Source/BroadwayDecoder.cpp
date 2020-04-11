@@ -126,28 +126,44 @@ void Broadway::IsOkay(H264SwDecRet Result,const char* Context)
 	throw Soy::AssertException(Error.str());
 }
 
+bool IsNal(const uint8_t* pData)
+{
+	if ( pData[0] != 0 )	return false;
+	if ( pData[1] != 0 )	return false;
+	if ( pData[2] != 0 )	return false;
+	if ( pData[3] != 1 )	return false;
+	return true;
+}
+
 //	returns true if more data to proccess
 bool Broadway::TDecoder::DecodeNextPacket(std::function<void(const SoyPixelsImpl&,SoyTime)> OnFrameDecoded)
 {
-	if ( mPendingData.IsEmpty() )
+	if ( mPendingData.GetDataSize() < 4 )
 		return false;
+	
+	auto StartsWithNal = IsNal(mPendingData.GetArray());
 	
 	const unsigned IntraGrayConcealment = 0;
 	const unsigned IntraReferenceConcealment = 1;
+	
+	//	if we're getting small packets in, we may not have enough for a frame, but we could wait...
+	//	todo: this should be false if our current packet is end of stream
+	static bool WaitForNextNal = true;
 	
 	auto GetNextNalOffset = [this]
 	{
 		for ( int i=3;	i<mPendingData.GetDataSize();	i++ )
 		{
-			if ( mPendingData[i+0] != 0 )	continue;
-			if ( mPendingData[i+1] != 0 )	continue;
-			if ( mPendingData[i+2] != 0 )	continue;
-			if ( mPendingData[i+3] != 1 )	continue;
+			if ( !IsNal( &mPendingData[i] ) )
+				continue;
 			return i;
 		}
+		
+		if ( WaitForNextNal )
+			return 0;
+
 		//	assume is complete...
 		return (int)mPendingData.GetDataSize();
-		//return 0;
 	};
 	
 	H264SwDecInput Input;
@@ -157,6 +173,10 @@ bool Broadway::TDecoder::DecodeNextPacket(std::function<void(const SoyPixelsImpl
 		Input.dataLen = GetNextNalOffset();
 		//Input.dataLen = mPendingData.GetDataSize();
 	}
+	
+	if ( Input.dataLen == 0 )
+		return false;
+
 	Input.picId = 0;
 	Input.intraConcealmentMethod = IntraGrayConcealment;
 	
