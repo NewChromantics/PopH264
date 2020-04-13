@@ -1,6 +1,7 @@
 #include "PopH264.h"
 #include "PopH264DecoderInstance.h"
 #include "SoyLib/src/SoyPixels.h"
+#include "SoyLib/src/SoyPng.h"
 #include "SoyLib/src/SoyImage.h"
 #include "Json11/json11.hpp"
 
@@ -123,15 +124,19 @@ void PopH264::TDecoderInstance::PushData(const uint8_t* Data,size_t DataSize,int
 	//	gr: don't even need to interrupt decoder
 	try
 	{
-		//	calc duration
-		SoyTime DecodeDuration;
-		auto ImageMeta = Soy::IsImage(GetArrayBridge(DataArray));
-		if (ImageMeta.IsValid())
+		//	do fast PNG check, STB is sometimes matching TGA
+		if (TPng::IsPngHeader(GetArrayBridge(DataArray)))
 		{
-			SoyPixels Pixels;
-			Soy::DecodeImage(Pixels, GetArrayBridge(DataArray));
-			this->PushFrame(Pixels, FrameNumber, DecodeDuration.GetMilliSeconds());
-			return;
+			//	calc duration
+			SoyTime DecodeDuration;
+			auto ImageMeta = Soy::IsImage(GetArrayBridge(DataArray));
+			if (ImageMeta.IsValid())
+			{
+				SoyPixels Pixels;
+				Soy::DecodeImage(Pixels, GetArrayBridge(DataArray));
+				this->PushFrame(Pixels, FrameNumber, DecodeDuration.GetMilliSeconds());
+				return;
+			}
 		}
 	}
 	catch (std::exception& e)
