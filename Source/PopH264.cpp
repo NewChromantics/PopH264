@@ -30,9 +30,8 @@
 
 namespace PopH264
 {
-	const Soy::TVersion	Version(1,1,1);
-	const int32_t		MODE_BROADWAY = 0;
-	const int32_t		MODE_HARDWARE = 1;
+	//	1.2.0	removed access to c++ decoder object
+	const Soy::TVersion	Version(1,2,0);
 }
 
 

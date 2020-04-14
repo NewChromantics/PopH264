@@ -14,39 +14,26 @@
 #endif
 
 
-//	forward declare this c++ class. May need to export the class...
-#if defined(__cplusplus)
-namespace PopH264
-{
-	class TDecoderInstance;
-	
-	enum Mode
-	{
-		Mode_Software = 0,
-		Mode_Hardware = 1,
-	};
-}
-#define EXPORTCLASS	PopH264::TDecoderInstance
-#else
-#define EXPORTCLASS	void
-#endif
+//	ditch these for strings, magic leap already has 4
+#define POPH264_DECODERMODE_SOFTWARE	0
+#define POPH264_DECODERMODE_HARDWARE	1
+
 
 __export int32_t			PopH264_GetVersion();
 
+//	todo: rename these to CreateDecoder and DestroyDecoder
 __export int32_t			PopH264_CreateInstance(int32_t Mode);
 __export void				PopH264_DestroyInstance(int32_t Instance);
-
-//	for C++ interfaces, to give access to known types and callbacks
-//	todo: proper shared_ptr sharing, dllexport class etc. this is essentially unsafe, but caller can manage this between CreateInstance and DestroyInstance
-__export EXPORTCLASS*		PopH264_GetInstancePtr(int32_t Instance);
 
 //	deprecate meta values for json
 __export void				PopH264_GetMeta(int32_t Instance, int32_t* MetaValues, int32_t MetaValuesCount);
 __export void				PopH264_PeekFrame(int32_t Instance,char* JsonBuffer,int32_t JsonBufferSize);
 
-//	expecting one frame per packet, split up by highlevel code (mp4 demuxer etc)
+//	push NALU packets (even fragmented)
+//	todo; fix framenumber to mix with fragmented data; for now, if framenumber is important, defragment nalu packets at high level
 __export int32_t			PopH264_PushData(int32_t Instance,uint8_t* Data,int32_t DataSize,int32_t FrameNumber);
 
-//	returns frame number
+//	returns frame number. -1 on error
 __export int32_t			PopH264_PopFrame(int32_t Instance,uint8_t* Plane0,int32_t Plane0Size,uint8_t* Plane1,int32_t Plane1Size,uint8_t* Plane2,int32_t Plane2Size);
+
 
