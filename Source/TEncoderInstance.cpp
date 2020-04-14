@@ -124,7 +124,16 @@ size_t PopH264::TEncoderInstance::PeekNextFrameSize()
 
 void PopH264::TEncoderInstance::PopPacket(ArrayBridge<uint8_t>&& Data)
 {
-	Soy_AssertTodo();
+	std::shared_ptr<Array<uint8_t>>	PacketData;
+	{
+		std::lock_guard<std::mutex> Lock(mPacketsLock);
+		if ( !this->mPackets.GetSize() )
+			throw Soy::AssertException("PopH264::TEncoderInstance::PopPacket no packets queued");
+		
+		auto Packet = mPackets.PopAt(0);
+		PacketData = Packet.mData;
+	}
+	Data.Copy(*PacketData);
 }
 
 void PopH264::TEncoderInstance::OnNewPacket(TPacket& Packet)
