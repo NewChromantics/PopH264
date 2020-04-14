@@ -30,6 +30,8 @@ __export void				PopH264_GetMeta(int32_t Instance, int32_t* MetaValues, int32_t 
 __export void				PopH264_PeekFrame(int32_t Instance,char* JsonBuffer,int32_t JsonBufferSize);
 
 //	push NALU packets (even fragmented)
+//	This decodes the packet, but may not have an immediate output, and may have more than one frame output.
+//	This is synchronous, any scheduling should be on the caller.
 //	todo; fix framenumber to mix with fragmented data; for now, if framenumber is important, defragment nalu packets at high level
 __export int32_t			PopH264_PushData(int32_t Instance,uint8_t* Data,int32_t DataSize,int32_t FrameNumber);
 
@@ -45,6 +47,8 @@ __export int32_t			PopH264_PopFrame(int32_t Instance,uint8_t* Plane0,int32_t Pla
 __export int32_t			PopH264_CreateEncoder(const char* Encoder);
 __export void				PopH264_DestroyEncoder(int32_t Instance);
 
+//	This encodes the frame, but may not have an immediate output, and may have more than one packet output.
+//	This is synchronous, any scheduling should be on the caller.
 //	meta should contain
 //		.Width
 //		.Height
@@ -68,7 +72,6 @@ __export int32_t			PopH264_EncoderPopData(int32_t Instance,uint8_t* DataBuffer,i
 //		.EncodeDurationMs	time it took to encode
 //		.DelayDurationMs	time spent in queue before encoding (lag)
 //	members regardless of pending data
-//		.InputQueueCount	number of frames still to be encoded
 //		.OutputQueueCount	number of packets waiting to be popped
 __export void				PopH264_EncoderPeekData(int32_t Instance,char* MetaJsonBuffer,int32_t MetaJsonBufferSize);
 

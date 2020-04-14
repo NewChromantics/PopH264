@@ -45,6 +45,12 @@
 		BF32256B2445EC9F00C74D4D /* TEncoderInstance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF3225692445EC9F00C74D4D /* TEncoderInstance.cpp */; };
 		BF32256D2445ECD800C74D4D /* TDecoderInstance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF32256C2445ECD800C74D4D /* TDecoderInstance.cpp */; };
 		BF32256E2445ECD800C74D4D /* TDecoderInstance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF32256C2445ECD800C74D4D /* TDecoderInstance.cpp */; };
+		BF3225732445F0D200C74D4D /* X264Encoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF3225712445F0D100C74D4D /* X264Encoder.cpp */; };
+		BF3225742445F0D200C74D4D /* X264Encoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF3225712445F0D100C74D4D /* X264Encoder.cpp */; };
+		BF3225782445F8DD00C74D4D /* TEncoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF3225772445F8DD00C74D4D /* TEncoder.cpp */; };
+		BF3225792445F8DD00C74D4D /* TEncoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF3225772445F8DD00C74D4D /* TEncoder.cpp */; };
+		BF32257B244609C700C74D4D /* libx264.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BF32257A244609C700C74D4D /* libx264.a */; };
+		BF32257D244609D100C74D4D /* libx264.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BF32257C244609D100C74D4D /* libx264.a */; };
 		BF459CE221F7D60500CED59D /* PopH264Framework.h in Headers */ = {isa = PBXBuildFile; fileRef = BF459CDE21F7D60500CED59D /* PopH264Framework.h */; };
 		BF459CE921F7D70000CED59D /* PopH264.h in Headers */ = {isa = PBXBuildFile; fileRef = BF8AB63721F20C41008E7E76 /* PopH264.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		BF459CEA21F7D70000CED59D /* TDecoderInstance.h in Headers */ = {isa = PBXBuildFile; fileRef = BF459C7F21F7C97400CED59D /* TDecoderInstance.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -123,6 +129,12 @@
 		BF3225622445E57100C74D4D /* TEncoderInstance.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TEncoderInstance.h; path = Source/TEncoderInstance.h; sourceTree = "<group>"; };
 		BF3225692445EC9F00C74D4D /* TEncoderInstance.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TEncoderInstance.cpp; path = Source/TEncoderInstance.cpp; sourceTree = "<group>"; };
 		BF32256C2445ECD800C74D4D /* TDecoderInstance.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TDecoderInstance.cpp; path = Source/TDecoderInstance.cpp; sourceTree = "<group>"; };
+		BF3225702445F0A400C74D4D /* X264 */ = {isa = PBXFileReference; lastKnownFileType = folder; name = X264; path = Source/X264; sourceTree = "<group>"; };
+		BF3225712445F0D100C74D4D /* X264Encoder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = X264Encoder.cpp; path = Source/X264Encoder.cpp; sourceTree = "<group>"; };
+		BF3225722445F0D200C74D4D /* X264Encoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = X264Encoder.h; path = Source/X264Encoder.h; sourceTree = "<group>"; };
+		BF3225772445F8DD00C74D4D /* TEncoder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TEncoder.cpp; path = Source/TEncoder.cpp; sourceTree = "<group>"; };
+		BF32257A244609C700C74D4D /* libx264.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libx264.a; path = Source/X264/osx/libx264.a; sourceTree = "<group>"; };
+		BF32257C244609D100C74D4D /* libx264.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libx264.a; path = Source/X264/Ios/lib/libx264.a; sourceTree = "<group>"; };
 		BF459C7F21F7C97400CED59D /* TDecoderInstance.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TDecoderInstance.h; path = Source/TDecoderInstance.h; sourceTree = "<group>"; };
 		BF459CD521F7D5C700CED59D /* PopH264_Osx.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = PopH264_Osx.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		BF459CDD21F7D60500CED59D /* FrameworkInfo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = FrameworkInfo.plist; path = Source/FrameworkInfo.plist; sourceTree = "<group>"; };
@@ -246,6 +258,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				BF151FF02384789700A70EBF /* CoreMedia.framework in Frameworks */,
+				BF32257D244609D100C74D4D /* libx264.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -254,6 +267,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				BF459D1A21F7DB9900CED59D /* CoreMedia.framework in Frameworks */,
+				BF32257B244609C700C74D4D /* libx264.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -281,6 +295,8 @@
 			isa = PBXGroup;
 			children = (
 				BF151FEF2384789700A70EBF /* CoreMedia.framework */,
+				BF32257C244609D100C74D4D /* libx264.a */,
+				BF32257A244609C700C74D4D /* libx264.a */,
 				BF152068238589DB00A70EBF /* libml_mediacodec.dylib */,
 				BF15206C23858F2C00A70EBF /* libml_mediaformat.dylib */,
 				BFBC07F223882F9D0070BCB4 /* libml_mediaerror.dylib */,
@@ -478,12 +494,16 @@
 				BF53E82C22EDC6A6008253CD /* TDecoder.h */,
 				BF32256C2445ECD800C74D4D /* TDecoderInstance.cpp */,
 				BF459C7F21F7C97400CED59D /* TDecoderInstance.h */,
+				BF3225772445F8DD00C74D4D /* TEncoder.cpp */,
 				BF3225612445E57100C74D4D /* TEncoder.h */,
 				BF3225692445EC9F00C74D4D /* TEncoderInstance.cpp */,
 				BF3225622445E57100C74D4D /* TEncoderInstance.h */,
 				BF3225602445E57100C74D4D /* TInstanceManager.h */,
 				BFD607731EA16EFC0035C814 /* Unity */,
 				BF8AB6C621F236F8008E7E76 /* Unity C# */,
+				BF3225702445F0A400C74D4D /* X264 */,
+				BF3225712445F0D100C74D4D /* X264Encoder.cpp */,
+				BF3225722445F0D200C74D4D /* X264Encoder.h */,
 			);
 			name = Source;
 			sourceTree = SOURCE_ROOT;
@@ -672,6 +692,7 @@
 				BF151FE12384787200A70EBF /* BroadwayAll.c in Sources */,
 				BF18269A24226502006FEB93 /* SoyImage.cpp in Sources */,
 				BFBC07F12386C0BC0070BCB4 /* SoyThread.cpp in Sources */,
+				BF3225792445F8DD00C74D4D /* TEncoder.cpp in Sources */,
 				BF1826AB24228C43006FEB93 /* SoyPng.cpp in Sources */,
 				BF151FE72384788600A70EBF /* SoyAssert.cpp in Sources */,
 				BF152082238595CD00A70EBF /* SoyRuntimeLibrary.cpp in Sources */,
@@ -681,6 +702,7 @@
 				BF151FE22384787800A70EBF /* BroadwayDecoder.cpp in Sources */,
 				BF151FED2384788600A70EBF /* SoyTime.mm in Sources */,
 				BF151FEB2384788600A70EBF /* SoyString.cpp in Sources */,
+				BF3225742445F0D200C74D4D /* X264Encoder.cpp in Sources */,
 				BF151FE32384787800A70EBF /* PopH264.cpp in Sources */,
 				BF151FEC2384788600A70EBF /* SoyTime.cpp in Sources */,
 				BF1826B224228D31006FEB93 /* SoyFourcc.cpp in Sources */,
@@ -702,6 +724,7 @@
 				BFBC07F02386C0BC0070BCB4 /* SoyThread.cpp in Sources */,
 				BF18269924226502006FEB93 /* SoyImage.cpp in Sources */,
 				BF459CF421F7DB1B00CED59D /* PopH264.cpp in Sources */,
+				BF3225782445F8DD00C74D4D /* TEncoder.cpp in Sources */,
 				BF1826AA24228C43006FEB93 /* SoyPng.cpp in Sources */,
 				BF459CF721F7DB3C00CED59D /* SoyTypes.cpp in Sources */,
 				BFF1C6EA22E3C65800AFDFD5 /* BroadwayAll.c in Sources */,
@@ -711,6 +734,7 @@
 				BF459CFB21F7DB4400CED59D /* SoyAssert.cpp in Sources */,
 				BF459CFD21F7DB4400CED59D /* SoyString.cpp in Sources */,
 				BF459CF521F7DB1E00CED59D /* BroadwayDecoder.cpp in Sources */,
+				BF3225732445F0D200C74D4D /* X264Encoder.cpp in Sources */,
 				BF459CFE21F7DB4400CED59D /* SoyPixels.cpp in Sources */,
 				BF152081238595CA00A70EBF /* SoyRuntimeLibrary.cpp in Sources */,
 				BF1826B124228D31006FEB93 /* SoyFourcc.cpp in Sources */,
@@ -752,6 +776,10 @@
 				INFOPLIST_FILE = PopH264_Ios/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 12.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Source/X264/Ios/lib",
+				);
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.NewChromantics.PopH264-Ios";
@@ -786,6 +814,10 @@
 				INFOPLIST_FILE = PopH264_Ios/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 12.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Source/X264/Ios/lib",
+				);
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.NewChromantics.PopH264-Ios";
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
@@ -822,6 +854,10 @@
 				FRAMEWORK_VERSION = A;
 				INFOPLIST_FILE = "$(SRCROOT)/Source/FrameworkInfo.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Source/X264/osx",
+				);
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.NewChromantics.PopH264Framework;
@@ -855,6 +891,10 @@
 				FRAMEWORK_VERSION = A;
 				INFOPLIST_FILE = "$(SRCROOT)/Source/FrameworkInfo.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Source/X264/osx",
+				);
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.NewChromantics.PopH264Framework;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";

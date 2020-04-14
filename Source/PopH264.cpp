@@ -283,7 +283,6 @@ __export void PopH264_EncoderPeekData(int32_t Instance,char* MetaJsonBuffer,int3
 			auto& Encoder = PopH264::EncoderInstanceManager.GetInstance(Instance);
 
 			//	add generic meta
-			MetaJson["InputQueueCount"] = static_cast<int32_t>(Encoder.GetFrameQueueCount());
 			MetaJson["OutputQueueCount"] = static_cast<int32_t>(Encoder.GetPacketQueueCount());
 			
 			Encoder.PeekPacket(MetaJson);

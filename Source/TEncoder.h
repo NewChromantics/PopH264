@@ -7,24 +7,32 @@
 
 class SoyPixelsImpl;
 
+
 namespace PopH264
 {
-	class TDecoder;
+	class TEncoder;
+	class TPacket;
 }
 
-class PopH264::TDecoder
+class PopH264::TPacket
 {
 public:
-	void			Decode(ArrayBridge<uint8_t>&& PacketData,std::function<void(const SoyPixelsImpl&,SoyTime)> OnFrameDecoded);
+	std::shared_ptr<Array<uint8_t>>	mData;
+	std::string						mInputMeta;	//	original input meta json
+};
+
+
+class PopH264::TEncoder
+{
+public:
+	TEncoder(std::function<void(TPacket&)> OnOutputPacket);
+	
+	virtual void	Encode(const SoyPixelsImpl& Pixels,const std::string& Meta)=0;
+	virtual void	FinishEncoding()=0;
 	
 protected:
-	virtual bool	DecodeNextPacket(std::function<void(const SoyPixelsImpl&,SoyTime)> OnFrameDecoded)=0;	//	returns true if more data to proccess
-	
-	bool			HasPendingData()	{	return !mPendingData.IsEmpty();	}
-	void			PopPendingData(ArrayBridge<unsigned char>&& Buffer);
-	void			RemovePendingData(size_t Size);
-	
-protected:
-	std::mutex		mPendingDataLock;
-	Array<uint8_t>	mPendingData;
+	void			OnOutputPacket(TPacket& Packet);
+
+private:
+	std::function<void(TPacket&)>	mOnOutputPacket;
 };
