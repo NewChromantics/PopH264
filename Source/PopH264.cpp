@@ -1,33 +1,10 @@
 #include "PopH264.h"
-#include "PopH264DecoderInstance.h"
-#include "PopH264EncoderInstance.h"
+#include "TDecoderInstance.h"
+#include "TEncoderInstance.h"
 #include "SoyLib/src/SoyPixels.h"
-#include "SoyLib/src/SoyPng.h"
-#include "SoyLib/src/SoyImage.h"
 #include "Json11/json11.hpp"
+#include "TInstanceManager.h"
 
-//	gr: this works on osx, but currently, none of the functions are implemented :)
-//	gr: also needs SDK
-#if defined(TARGET_LUMIN) //|| defined(TARGET_OSX)
-#define ENABLE_MAGICLEAP_DECODER
-#endif
-
-#define ENABLE_BROADWAY
-#if defined(TARGET_WINDOWS)
-#define ENABLE_INTELMEDIA
-#endif
-
-#if defined(ENABLE_MAGICLEAP_DECODER)
-#include "MagicLeapDecoder.h"
-#endif
-
-#if defined(ENABLE_BROADWAY)
-#include "BroadwayDecoder.h"
-#endif
-
-#if defined(ENABLE_INTELMEDIA)
-#include "IntelMediaDecoder.h"
-#endif
 
 namespace PopH264
 {
@@ -36,40 +13,14 @@ namespace PopH264
 }
 
 
-template<typename INSTANCETYPE,typename INSTANCEPARAMS>
-class TInstanceManager
-{
-public:
-	INSTANCETYPE&	GetInstance(uint32_t Instance);
-	uint32_t		AssignInstance(std::shared_ptr<INSTANCETYPE> Object);
-	void			FreeInstance(uint32_t Instance);
-	uint32_t		CreateInstance(const INSTANCEPARAMS& Params);
-	
-	std::mutex			mInstancesLock;
-	Array<INSTANCETYPE>	mInstances;
-	uint32_t			mInstancesCounter = 1;
-};
 
 namespace PopH264
 {
 	TInstanceManager<TEncoderInstance,std::string>	EncoderInstanceManager;
+	TInstanceManager<TDecoderInstance,uint32_t>		DecoderInstanceManager;
 }
 
 
-
-class TInstanceParams
-{
-public:
-	TInstanceParams(int32_t Mode) :
-		Mode	( Mode )
-	{
-	}
-	int32_t Mode = -1;
-};
-
-//	gr: get rid of this
-#define TInstanceObject	PopH264::TDecoderInstance
-#include "InstanceManager.inc"
 
 #if defined(TARGET_LUMIN) || defined(TARGET_ANDROID)
 const char* Platform::LogIdentifer = "PopH264";
@@ -111,164 +62,13 @@ RETURN SafeCall(FUNC Function,const char* FunctionName,RETURN ErrorReturn)
 	}
 }
 
-
-
-PopH264::TDecoderInstance::TDecoderInstance(int32_t Mode)
-{
-#if defined(ENABLE_MAGICLEAP_DECODER)
-	if (Mode != MODE_BROADWAY)
-	{
-		try
-		{
-			mDecoder.reset(new MagicLeap::TDecoder(Mode));
-			return;
-		}
-		catch (std::exception& e)
-		{
-			std::Debug << "Failed to create MagicLeap decoder: " << e.what() << std::endl;
-		}
-	}
-#endif
-
-#if defined(ENABLE_INTELMEDIA)
-	{
-		try
-		{
-			mDecoder.reset(new IntelMedia::TDecoder());
-			return;
-		}
-		catch (std::exception& e)
-		{
-			std::Debug << "Failed to create IntelMedia decoder: " << e.what() << std::endl;
-		}
-	}
-#endif
-
-	
-#if defined(ENABLE_BROADWAY)
-	mDecoder.reset( new Broadway::TDecoder );
-	return;
-#endif
-	
-	std::stringstream Error;
-	Error << "No decoder supported (mode=" << Mode << ")";
-	throw Soy::AssertException(Error);
-}
-
-
-void PopH264::TDecoderInstance::PushData(const uint8_t* Data,size_t DataSize,int32_t FrameNumber)
-{
-	auto DataArray = GetRemoteArray( Data, DataSize );
-
-	//	gr: temporary hack, if the data coming in is a different format, detect it, and switch decoders
-	//		maybe we can do something more elegant (eg. wait until first frame before allocating decoder)
-	//	gr: don't even need to interrupt decoder
-	try
-	{
-		//	do fast PNG check, STB is sometimes matching TGA
-		if (TPng::IsPngHeader(GetArrayBridge(DataArray)))
-		{
-			//	calc duration
-			SoyTime DecodeDuration;
-			auto ImageMeta = Soy::IsImage(GetArrayBridge(DataArray));
-			if (ImageMeta.IsValid())
-			{
-				SoyPixels Pixels;
-				Soy::DecodeImage(Pixels, GetArrayBridge(DataArray));
-				this->PushFrame(Pixels, FrameNumber, DecodeDuration.GetMilliSeconds());
-				return;
-			}
-		}
-	}
-	catch (std::exception& e)
-	{
-		std::Debug << __PRETTY_FUNCTION__ << " trying to detect image caused exception; " << e.what() << std::endl;
-	}
-
-	auto PushFrame = [this,FrameNumber](const SoyPixelsImpl& Pixels,SoyTime DecodeDuration)
-	{
-		this->PushFrame( Pixels, FrameNumber, DecodeDuration.GetMilliSeconds() );
-	};
-	mDecoder->Decode( GetArrayBridge(DataArray), PushFrame );
-}
-
-
-void PopH264::TDecoderInstance::PopFrame(int32_t& FrameNumber,ArrayBridge<uint8_t>&& Plane0,ArrayBridge<uint8_t>&& Plane1,ArrayBridge<uint8_t>&& Plane2)
-{
-	TFrame Frame;
-	if ( !PopFrame( Frame ) )
-	{
-		FrameNumber = -1;
-		return;
-	}
-	
-	//	if we don't set the correct time the c# thinks we have a bad frame!
-	FrameNumber = Frame.mFrameNumber;
-	
-	//	emulating TPixelBuffer interface
-	BufferArray<SoyPixelsImpl*, 10> Textures;
-	Textures.PushBack( Frame.mPixels.get() );
-
-	BufferArray<std::shared_ptr<SoyPixelsImpl>, 10> Planes;
-	
-	//	get all the planes
-	for ( auto t = 0; t < Textures.GetSize(); t++ )
-	{
-		auto& Texture = *Textures[t];
-		Texture.SplitPlanes(GetArrayBridge(Planes));
-	}
-	
-	ArrayBridge<uint8_t>* PlanePixels[] = { &Plane0, &Plane1, &Plane2 };
-	for ( auto p = 0; p < Planes.GetSize() && p<3; p++ )
-	{
-		auto& Plane = *Planes[p];
-		auto& PlaneDstPixels = *PlanePixels[p];
-		auto& PlaneSrcPixels = Plane.GetPixelsArray();
-		
-		auto MaxSize = std::min(PlaneDstPixels.GetDataSize(), PlaneSrcPixels.GetDataSize());
-		//	copy as much as possible
-		auto PlaneSrcPixelsMin = GetRemoteArray(PlaneSrcPixels.GetArray(), MaxSize);
-		PlaneDstPixels.Copy(PlaneSrcPixelsMin);
-	}
-
-	std::Debug << "PoppedFrame(" << FrameNumber << ") Frames Ready x" << mFrames.GetSize() << std::endl;
-}
-
-bool PopH264::TDecoderInstance::PopFrame(TFrame& Frame)
-{
-	std::lock_guard<std::mutex> Lock(mFramesLock);
-	if ( mFrames.IsEmpty() )
-		return false;
-	
-	Frame = mFrames[0];
-	mFrames.RemoveBlock(0,1);
-	return true;
-}
-
-void PopH264::TDecoderInstance::PushFrame(const SoyPixelsImpl& Frame,int32_t FrameNumber,std::chrono::milliseconds DecodeDuration)
-{
-	TFrame NewFrame;
-	NewFrame.mFrameNumber = FrameNumber;
-	NewFrame.mPixels.reset( new SoyPixels( Frame ) );
-	NewFrame.mDecodeDuration = DecodeDuration;
-
-	{
-		std::lock_guard<std::mutex> Lock(mFramesLock);
-		mFrames.PushBack(NewFrame);
-		mMeta = Frame.GetMeta();
-		std::Debug << mFrames.GetSize() << " frames pending" << std::endl;
-	}
-	if ( mOnNewFrame )
-		mOnNewFrame();
-}
-
 	
 
 __export int32_t PopH264_PopFrame(int32_t Instance,uint8_t* Plane0,int32_t Plane0Size,uint8_t* Plane1,int32_t Plane1Size,uint8_t* Plane2,int32_t Plane2Size)
 {
 	auto Function = [&]()
 	{
-		auto& Decoder = InstanceManager::GetInstance(Instance);
+		auto& Decoder = PopH264::DecoderInstanceManager.GetInstance(Instance);
 		//	Decoder.PopFrame
 		auto Plane0Array = GetRemoteArray(Plane0, Plane0Size);
 		auto Plane1Array = GetRemoteArray(Plane1, Plane1Size);
@@ -284,7 +84,7 @@ __export int32_t PopH264_PushData(int32_t Instance,uint8_t* Data,int32_t DataSiz
 {
 	auto Function = [&]()
 	{
-		auto& Decoder = InstanceManager::GetInstance(Instance);
+		auto& Decoder = PopH264::DecoderInstanceManager.GetInstance(Instance);
 		Decoder.PushData( Data, DataSize, FrameNumber );
 		return 0;
 	};
@@ -334,7 +134,7 @@ __export void PopH264_PeekFrame(int32_t Instance, char* JsonBuffer, int32_t Json
 {
 	auto Function = [&]()
 	{
-		auto& Device = InstanceManager::GetInstance(Instance);
+		auto& Device = PopH264::DecoderInstanceManager.GetInstance(Instance);
 		auto& Meta = Device.GetMeta();
 
 		auto Json = GetMetaJson(Meta);
@@ -349,7 +149,7 @@ __export void PopH264_GetMeta(int32_t Instance, int32_t* pMetaValues, int32_t Me
 {
 	auto Function = [&]()
 	{
-		auto& Device = InstanceManager::GetInstance(Instance);
+		auto& Device = PopH264::DecoderInstanceManager.GetInstance(Instance);
 		
 		auto& Meta = Device.GetMeta();
 		
@@ -388,6 +188,29 @@ __export int32_t PopH264_GetVersion()
 
 
 
+__export int32_t PopH264_CreateInstance(int32_t Mode)
+{
+	auto Function = [&]()
+	{
+		auto InstanceId = PopH264::DecoderInstanceManager.CreateInstance( Mode );
+		return InstanceId;
+	};
+	return SafeCall( Function, __func__, -1 );
+}
+
+__export void PopH264_DestroyInstance(int32_t Instance)
+{
+	auto Function = [&]()
+	{
+		PopH264::DecoderInstanceManager.FreeInstance(Instance);
+		return 0;
+	};
+	SafeCall(Function, __func__, 0 );
+}
+
+
+
+
 
 __export int32_t PopH264_CreateEncoder(const char* Encoder)
 {
@@ -417,7 +240,8 @@ __export void PopH264_EncoderPushFrame(int32_t Instance,const char* MetaJson,con
 	{
 		auto& Encoder = PopH264::EncoderInstanceManager.GetInstance(Instance);
 		std::string Meta( MetaJson ? MetaJson : "" );
-		Encoder.PushFrame( LumaData, ChromaUData, ChromaVData );
+		Soy_AssertTodo();
+		//Encoder.PushFrame( LumaData, ChromaUData, ChromaVData );
 	}
 	catch(std::exception& e)
 	{
@@ -443,7 +267,7 @@ __export int32_t PopH264_EncoderPopData(int32_t Instance,uint8_t* DataBuffer,int
 		Encoder.PopPacket( GetArrayBridge(DataArray) );
 		return DataBufferUsed;
 	};
-	SafeCall(Function, __func__, -1 );
+	return SafeCall(Function, __func__, -1 );
 }
 
 __export void PopH264_EncoderPeekData(int32_t Instance,char* MetaJsonBuffer,int32_t MetaJsonBufferSize)
@@ -456,7 +280,7 @@ __export void PopH264_EncoderPeekData(int32_t Instance,char* MetaJsonBuffer,int3
 		try
 		{
 			//	get next frame's meta
-			auto Encoder = PopH264::EncoderInstanceManager.GetInstance(Instance);
+			auto& Encoder = PopH264::EncoderInstanceManager.GetInstance(Instance);
 
 			//	add generic meta
 			MetaJson["InputQueueCount"] = Encoder.GetFrameQueueCount();
@@ -472,8 +296,11 @@ __export void PopH264_EncoderPeekData(int32_t Instance,char* MetaJsonBuffer,int3
 		{
 			MetaJson["Error"] = "Unknown exception";
 		}
-		auto MetaJsonString = MetaJson.dump();
+		Json FinalJson(MetaJson);
+		auto MetaJsonString = FinalJson.dump();
 		Soy::StringToBuffer( MetaJsonString, MetaJsonBuffer, MetaJsonBufferSize );
+
+		return 0;
 	};
 	SafeCall(Function, __func__, 0 );
 }

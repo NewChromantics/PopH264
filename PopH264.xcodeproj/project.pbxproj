@@ -41,6 +41,10 @@
 		BF1826AB24228C43006FEB93 /* SoyPng.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF1826A624228C43006FEB93 /* SoyPng.cpp */; };
 		BF1826B124228D31006FEB93 /* SoyFourcc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF1826AD24228D31006FEB93 /* SoyFourcc.cpp */; };
 		BF1826B224228D31006FEB93 /* SoyFourcc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF1826AD24228D31006FEB93 /* SoyFourcc.cpp */; };
+		BF32256A2445EC9F00C74D4D /* TEncoderInstance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF3225692445EC9F00C74D4D /* TEncoderInstance.cpp */; };
+		BF32256B2445EC9F00C74D4D /* TEncoderInstance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF3225692445EC9F00C74D4D /* TEncoderInstance.cpp */; };
+		BF32256D2445ECD800C74D4D /* TDecoderInstance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF32256C2445ECD800C74D4D /* TDecoderInstance.cpp */; };
+		BF32256E2445ECD800C74D4D /* TDecoderInstance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF32256C2445ECD800C74D4D /* TDecoderInstance.cpp */; };
 		BF459CE221F7D60500CED59D /* PopH264Framework.h in Headers */ = {isa = PBXBuildFile; fileRef = BF459CDE21F7D60500CED59D /* PopH264Framework.h */; };
 		BF459CE921F7D70000CED59D /* PopH264.h in Headers */ = {isa = PBXBuildFile; fileRef = BF8AB63721F20C41008E7E76 /* PopH264.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		BF459CEA21F7D70000CED59D /* TDecoderInstance.h in Headers */ = {isa = PBXBuildFile; fileRef = BF459C7F21F7C97400CED59D /* TDecoderInstance.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -114,6 +118,11 @@
 		BF1826A624228C43006FEB93 /* SoyPng.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SoyPng.cpp; path = Source/SoyLib/src/SoyPng.cpp; sourceTree = "<group>"; };
 		BF1826AC24228D31006FEB93 /* SoyFourcc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SoyFourcc.h; path = Source/SoyLib/src/SoyFourcc.h; sourceTree = "<group>"; };
 		BF1826AD24228D31006FEB93 /* SoyFourcc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SoyFourcc.cpp; path = Source/SoyLib/src/SoyFourcc.cpp; sourceTree = "<group>"; };
+		BF3225602445E57100C74D4D /* TInstanceManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TInstanceManager.h; path = Source/TInstanceManager.h; sourceTree = "<group>"; };
+		BF3225612445E57100C74D4D /* TEncoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TEncoder.h; path = Source/TEncoder.h; sourceTree = "<group>"; };
+		BF3225622445E57100C74D4D /* TEncoderInstance.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TEncoderInstance.h; path = Source/TEncoderInstance.h; sourceTree = "<group>"; };
+		BF3225692445EC9F00C74D4D /* TEncoderInstance.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TEncoderInstance.cpp; path = Source/TEncoderInstance.cpp; sourceTree = "<group>"; };
+		BF32256C2445ECD800C74D4D /* TDecoderInstance.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TDecoderInstance.cpp; path = Source/TDecoderInstance.cpp; sourceTree = "<group>"; };
 		BF459C7F21F7C97400CED59D /* TDecoderInstance.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TDecoderInstance.h; path = Source/TDecoderInstance.h; sourceTree = "<group>"; };
 		BF459CD521F7D5C700CED59D /* PopH264_Osx.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = PopH264_Osx.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		BF459CDD21F7D60500CED59D /* FrameworkInfo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = FrameworkInfo.plist; path = Source/FrameworkInfo.plist; sourceTree = "<group>"; };
@@ -212,7 +221,6 @@
 		BF8AB6BD21F228D0008E7E76 /* SoyTime.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = SoyTime.mm; path = Source/SoyLib/src/SoyTime.mm; sourceTree = "<group>"; };
 		BF8AB6BE21F228D0008E7E76 /* SoyTime.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SoyTime.h; path = Source/SoyLib/src/SoyTime.h; sourceTree = "<group>"; };
 		BF8AB6C721F23712008E7E76 /* PopH264.cs */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = PopH264.cs; path = Unity/PopH264/Assets/PopH264/PopH264.cs; sourceTree = "<group>"; };
-		BF8AB6CA21F24F9D008E7E76 /* InstanceManager.inc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.pascal; name = InstanceManager.inc; path = Source/InstanceManager.inc; sourceTree = "<group>"; };
 		BFBC07ED2386C0B50070BCB4 /* SoyThread.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SoyThread.cpp; path = Source/SoyLib/src/SoyThread.cpp; sourceTree = "<group>"; };
 		BFBC07EE2386C0B50070BCB4 /* SoyThread.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SoyThread.h; path = Source/SoyLib/src/SoyThread.h; sourceTree = "<group>"; };
 		BFBC07F223882F9D0070BCB4 /* libml_mediaerror.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libml_mediaerror.dylib; path = ../MagicLeap/mlsdk/v0.22.0/lib/osx/libml_mediaerror.dylib; sourceTree = "<group>"; };
@@ -450,7 +458,6 @@
 		BFD6076D1EA16ED20035C814 /* Source */ = {
 			isa = PBXGroup;
 			children = (
-				BF18268E24226111006FEB93 /* Json11 */,
 				BF8AB63A21F20CD9008E7E76 /* Broadway */,
 				BF8AB63B21F20D4C008E7E76 /* Broadway */,
 				BFF1C6E822E3C65800AFDFD5 /* BroadwayAll.c */,
@@ -458,18 +465,23 @@
 				BF8AB6A021F21F07008E7E76 /* BroadwayDecoder.h */,
 				BF459CDF21F7D60500CED59D /* BundleInfo.plist */,
 				BF459CDD21F7D60500CED59D /* FrameworkInfo.plist */,
-				BF8AB6CA21F24F9D008E7E76 /* InstanceManager.inc */,
+				BF18268E24226111006FEB93 /* Json11 */,
 				BF53E83022EDCC7E008253CD /* MagicLeapDecoder.cpp */,
 				BF53E83122EDCC7F008253CD /* MagicLeapDecoder.h */,
-				BF8AB63821F20C41008E7E76 /* PopH264.cpp */,
-				BF8AB63721F20C41008E7E76 /* PopH264.h */,
 				BF151FF52384795600A70EBF /* PopH264_Ios.xcconfig */,
 				BF151FF42384795600A70EBF /* PopH264_Osx.xcconfig */,
-				BF459C7F21F7C97400CED59D /* TDecoderInstance.h */,
+				BF8AB63821F20C41008E7E76 /* PopH264.cpp */,
+				BF8AB63721F20C41008E7E76 /* PopH264.h */,
 				BF459CDE21F7D60500CED59D /* PopH264Framework.h */,
 				BF8AB6A221F225C5008E7E76 /* SoyLib */,
 				BF53E82D22EDC989008253CD /* TDecoder.cpp */,
 				BF53E82C22EDC6A6008253CD /* TDecoder.h */,
+				BF32256C2445ECD800C74D4D /* TDecoderInstance.cpp */,
+				BF459C7F21F7C97400CED59D /* TDecoderInstance.h */,
+				BF3225612445E57100C74D4D /* TEncoder.h */,
+				BF3225692445EC9F00C74D4D /* TEncoderInstance.cpp */,
+				BF3225622445E57100C74D4D /* TEncoderInstance.h */,
+				BF3225602445E57100C74D4D /* TInstanceManager.h */,
 				BFD607731EA16EFC0035C814 /* Unity */,
 				BF8AB6C621F236F8008E7E76 /* Unity C# */,
 			);
@@ -673,8 +685,10 @@
 				BF151FEC2384788600A70EBF /* SoyTime.cpp in Sources */,
 				BF1826B224228D31006FEB93 /* SoyFourcc.cpp in Sources */,
 				BF151FE42384787800A70EBF /* TDecoder.cpp in Sources */,
+				BF32256E2445ECD800C74D4D /* TDecoderInstance.cpp in Sources */,
 				BF151FEA2384788600A70EBF /* SoyPixels.cpp in Sources */,
 				BF151FE62384788600A70EBF /* SoyArray.cpp in Sources */,
+				BF32256B2445EC9F00C74D4D /* TEncoderInstance.cpp in Sources */,
 				BF151FE82384788600A70EBF /* SoyDebug.cpp in Sources */,
 				BF1826A12422656E006FEB93 /* SoyStreamBuffer.cpp in Sources */,
 				BF151FE92384788600A70EBF /* SoyDebug.mm in Sources */,
@@ -701,8 +715,10 @@
 				BF152081238595CA00A70EBF /* SoyRuntimeLibrary.cpp in Sources */,
 				BF1826B124228D31006FEB93 /* SoyFourcc.cpp in Sources */,
 				BF459CFC21F7DB4400CED59D /* SoyDebug.cpp in Sources */,
+				BF32256D2445ECD800C74D4D /* TDecoderInstance.cpp in Sources */,
 				BF459CF821F7DB4400CED59D /* SoyTime.cpp in Sources */,
 				BF459CFA21F7DB4400CED59D /* SoyDebug.mm in Sources */,
+				BF32256A2445EC9F00C74D4D /* TEncoderInstance.cpp in Sources */,
 				BF459CF621F7DB3A00CED59D /* memheap.cpp in Sources */,
 				BF1826A02422656E006FEB93 /* SoyStreamBuffer.cpp in Sources */,
 				BFF1C71222E3CF8B00AFDFD5 /* SoyArray.cpp in Sources */,
