@@ -48,8 +48,8 @@ public:
 	TEncoderInstance(const std::string& Encoder);
 	
 	//	meta
-	int32_t			GetFrameQueueCount()	{	return mFrames.GetSize();	}
-	int32_t			GetPacketQueueCount()	{	return mPackets.GetSize();	}
+	size_t			GetFrameQueueCount()	{	return mFrames.GetSize();	}
+	size_t			GetPacketQueueCount()	{	return mPackets.GetSize();	}
 
 	//	input
 	void			PushFrame(const SoyPixelsImpl& Frame,const std::string& Meta);
