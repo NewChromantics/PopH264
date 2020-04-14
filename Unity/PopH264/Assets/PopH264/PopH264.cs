@@ -159,7 +159,15 @@ public static class PopH264
 			{
 				var MipMap = false;
 				var Linear = true;
-				Plane = new Texture2D(Meta.Width, Meta.Height, Format, MipMap,Linear);
+				try
+				{
+					Plane = new Texture2D(Meta.Width, Meta.Height, Format, MipMap, Linear);
+				}
+				catch(System.Exception e)
+				{
+					Debug.LogError("Create texture2d(" + Meta.Width + "," + Meta.Height + " " + Format + ")");
+					throw e;
+				}
 			}
 
 			return Plane;
@@ -268,7 +276,7 @@ public static class PopH264
 			var Json = GetString(JsonBuffer);
 			var Meta = JsonUtility.FromJson<FrameMeta>(Json);
 			var PlaneCount = Meta.PlaneCount;
-
+			//Debug.Log("Meta " + Json);
 			if (PlaneCount <= 0)
 			{
 				//Debug.Log("No planes (" + PlaneCount +")");

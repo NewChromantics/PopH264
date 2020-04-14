@@ -25,7 +25,7 @@ public class VideoPacketDecoder : MonoBehaviour
 	//	these values dictate how much processing time we give to each step
 	[Range(0, 20)]
 	public int DecodeImagesPerFrame = 1;
-	[Range(0, 20)]
+	[Range(0, 1000)]
 	public int DecodePacketsPerFrame = 1;
 	
 	List<PopH264.FrameInput> PendingInputFrames;	//	h264 packets per-frame
