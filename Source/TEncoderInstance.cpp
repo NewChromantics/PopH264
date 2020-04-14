@@ -32,6 +32,10 @@ PopH264::TEncoderInstance::TEncoderInstance(const std::string& Encoder_)
 	}
 #endif
 	
+	//	success!
+	if ( mEncoder )
+		return;
+	
 	std::stringstream Error;
 	Error << "No encoder supported (requested " << Encoder << ")";
 	throw Soy::AssertException(Error);
@@ -76,5 +80,11 @@ void PopH264::TEncoderInstance::OnNewPacket(TPacket& Packet)
 	
 	if ( mOnNewPacket )
 		mOnNewPacket();
+}
+
+void PopH264::TEncoderInstance::AddOnNewFrameCallback(std::function<void()> Callback)
+{
+	//	does this need to be threadsafe?
+	mOnNewPacket = Callback;
 }
 

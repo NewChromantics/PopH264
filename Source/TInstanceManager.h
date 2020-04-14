@@ -36,6 +36,8 @@ uint32_t TInstanceManager<INSTANCETYPE,INSTANCEPARAMS>::CreateInstance(const INS
 	//	alloc device
 	try
 	{
+		//	if the debugger won't step into this from outside, use this in lldb
+		//	breakpoint set --name PopH264::TEncoderInstance::TEncoderInstance
 		auto Object = std::make_shared<INSTANCETYPE>( Params );
 		if ( Object )
 			return AssignInstance(Object);
