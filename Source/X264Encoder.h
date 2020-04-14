@@ -34,6 +34,10 @@ public:
 class X264::TEncoder : public PopH264::TEncoder
 {
 public:
+	static inline const char*	NamePrefix = "x264";
+	static const size_t			DefaultPreset = 2;
+	
+public:
 	TEncoder(size_t PresetValue,std::function<void(PopH264::TPacket&)> OnOutputPacket);
 	~TEncoder();
 

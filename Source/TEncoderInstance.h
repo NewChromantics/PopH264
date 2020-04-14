@@ -57,6 +57,9 @@ public:
 	std::function<void()>	mOnNewPacket;	//	called when a new packet is decoded and ready to be popped
 	
 private:
+	void			OnNewPacket(TPacket& Packet);
+	
+private:
 	std::shared_ptr<PopH264::TEncoder>		mEncoder;
 
 	//	packets ready for output

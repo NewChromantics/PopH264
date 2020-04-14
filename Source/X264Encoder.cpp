@@ -100,6 +100,7 @@ int X264::GetColourSpace(SoyPixelsFormat::Type Format)
 			//case SoyPixelsFormat::BGR:		return X264_CSP_BGR;
 			//case SoyPixelsFormat::BGRA:		return X264_CSP_BGRA;
 			//case SoyPixelsFormat::RGB:		return X264_CSP_BGR;
+		default:break;
 	}
 	
 	std::stringstream Error;
