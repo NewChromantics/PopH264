@@ -45,7 +45,7 @@ public:
 	void			AddOnNewFrameCallback(std::function<void()> Callback);
 	
 	//	input
-	void			PushFrame(const SoyPixelsImpl& Frame,const std::string& Meta);
+	void 			PushFrame(const std::string& Meta,const uint8_t* LumaData,const uint8_t* ChromaUData,const uint8_t* ChromaVData);
 	
 	//	output
 	size_t			GetPacketQueueCount()	{	return mPackets.GetSize();	}

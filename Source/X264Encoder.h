@@ -41,7 +41,7 @@ public:
 	TEncoder(size_t PresetValue,std::function<void(PopH264::TPacket&)> OnOutputPacket);
 	~TEncoder();
 
-	virtual void		Encode(const SoyPixelsImpl& Pixels,const std::string& Meta) override;
+	virtual void		Encode(const SoyPixelsImpl& Luma,const SoyPixelsImpl& ChromaU,const SoyPixelsImpl& ChromaV,const std::string& Meta) override;
 	virtual void		FinishEncoding() override;
 
 	static std::string	GetVersion();

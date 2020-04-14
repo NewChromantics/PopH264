@@ -151,25 +151,26 @@ void X264::TEncoder::AllocEncoder(const SoyPixelsMeta& Meta)
 	mPixelMeta = Meta;
 }
 
-void X264::TEncoder::Encode(const SoyPixelsImpl& Pixels,const std::string& Meta)
+void X264::TEncoder::Encode(const SoyPixelsImpl& Luma,const SoyPixelsImpl& ChromaU,const SoyPixelsImpl& ChromaV,const std::string& Meta)
 {
 	Soy::TScopeTimerPrint Timer(__PRETTY_FUNCTION__, 2);
-	AllocEncoder(Pixels.GetMeta());
+	{
+		auto YuvFormat = SoyPixelsFormat::GetMergedFormat( Luma.GetFormat(), ChromaU.GetFormat(), ChromaV.GetFormat() );
+		auto YuvWidth = Luma.GetWidth();
+		auto YuvHeight = Luma.GetHeight();
+		SoyPixelsMeta YuvMeta( YuvWidth, YuvHeight, YuvFormat );
+		AllocEncoder(YuvMeta);
+	}
 	
-	//	need planes
-	auto& YuvPixels = Pixels;
-	//YuvPixels.SetFormat(SoyPixelsFormat::Yuv_8_8_8_Ntsc);
-	BufferArray<std::shared_ptr<SoyPixelsImpl>, 3> Planes;
-	YuvPixels.SplitPlanes(GetArrayBridge(Planes));
-	
-	//auto& LumaPlane = *Planes[0];
-	//auto& ChromaUPlane = *Planes[1];
-	//auto& ChromaVPlane = *Planes[2];
-	
+	BufferArray<const SoyPixelsImpl*, 3> Planes;
+	Planes.PushBack(&Luma);
+	Planes.PushBack(&ChromaU);
+	Planes.PushBack(&ChromaV);
+
 	//	checks from example code https://github.com/jesselegg/x264/blob/master/example.c
 	//	gr: look for proper validation funcs
-	auto Width = Pixels.GetWidth();
-	auto Height = Pixels.GetHeight();
+	auto Width = Luma.GetWidth();
+	auto Height = Luma.GetHeight();
 	int LumaSize = Width * Height;
 	int ChromaSize = LumaSize / 4;
 	int ExpectedBufferSizes[] = { LumaSize, ChromaSize, ChromaSize };

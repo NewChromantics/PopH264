@@ -27,7 +27,7 @@ class PopH264::TEncoder
 public:
 	TEncoder(std::function<void(TPacket&)> OnOutputPacket);
 	
-	virtual void	Encode(const SoyPixelsImpl& Pixels,const std::string& Meta)=0;
+	virtual void	Encode(const SoyPixelsImpl& Luma,const SoyPixelsImpl& ChromaU,const SoyPixelsImpl& ChromaV,const std::string& Meta)=0;
 	virtual void	FinishEncoding()=0;
 	
 protected:

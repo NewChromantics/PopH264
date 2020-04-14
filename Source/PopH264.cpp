@@ -250,8 +250,7 @@ __export void PopH264_EncoderPushFrame(int32_t Instance,const char* MetaJson,con
 	{
 		auto& Encoder = PopH264::EncoderInstanceManager.GetInstance(Instance);
 		std::string Meta( MetaJson ? MetaJson : "" );
-		Soy_AssertTodo();
-		//Encoder.PushFrame( LumaData, ChromaUData, ChromaVData );
+		Encoder.PushFrame( Meta, LumaData, ChromaUData, ChromaVData );
 	}
 	catch(std::exception& e)
 	{
