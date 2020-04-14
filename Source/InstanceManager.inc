@@ -104,25 +104,6 @@ void InstanceManager::FreeInstance(uint32_t Instance)
 
 
 
-template<typename RETURN,typename FUNC>
-RETURN SafeCall(FUNC Function,const char* FunctionName,RETURN ErrorReturn)
-{
-	try
-	{
-		return Function();
-	}
-	catch(std::exception& e)
-	{
-		std::Debug << FunctionName << " exception: " << e.what() << std::endl;
-		return ErrorReturn;
-	}
-	catch(...)
-	{
-		std::Debug << FunctionName << " unknown exception." << std::endl;
-		return ErrorReturn;
-	}
-}
-
 
 
 __export int32_t PopH264_CreateInstance(int32_t Mode)
@@ -147,22 +128,3 @@ __export void PopH264_DestroyInstance(int32_t Instance)
 }
 
 
-__export TInstanceObject* PopH264_GetInstancePtr(int32_t Instance)
-{
-	auto Function = [&]()
-	{
-		auto& Object = InstanceManager::GetInstance(Instance);
-		return &Object;
-	};
-	return SafeCall<TInstanceObject*>( Function, __func__, nullptr );
-}
-
-
-__export int32_t PopH264_GetVersion()
-{
-	auto Function = [&]()
-	{
-		return PopH264::Version.GetMillion();
-	};
-	return SafeCall( Function, __func__, -1 );
-}

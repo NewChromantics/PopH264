@@ -1,5 +1,6 @@
 #include "PopH264.h"
 #include "PopH264DecoderInstance.h"
+#include "PopH264EncoderInstance.h"
 #include "SoyLib/src/SoyPixels.h"
 #include "SoyLib/src/SoyPng.h"
 #include "SoyLib/src/SoyImage.h"
@@ -35,6 +36,25 @@ namespace PopH264
 }
 
 
+template<typename INSTANCETYPE,typename INSTANCEPARAMS>
+class TInstanceManager
+{
+public:
+	INSTANCETYPE&	GetInstance(uint32_t Instance);
+	uint32_t		AssignInstance(std::shared_ptr<INSTANCETYPE> Object);
+	void			FreeInstance(uint32_t Instance);
+	uint32_t		CreateInstance(const INSTANCEPARAMS& Params);
+	
+	std::mutex			mInstancesLock;
+	Array<INSTANCETYPE>	mInstances;
+	uint32_t			mInstancesCounter = 1;
+};
+
+namespace PopH264
+{
+	TInstanceManager<TEncoderInstance,std::string>	EncoderInstanceManager;
+}
+
 
 
 class TInstanceParams
@@ -47,8 +67,8 @@ public:
 	int32_t Mode = -1;
 };
 
+//	gr: get rid of this
 #define TInstanceObject	PopH264::TDecoderInstance
-
 #include "InstanceManager.inc"
 
 #if defined(TARGET_LUMIN) || defined(TARGET_ANDROID)
@@ -70,6 +90,28 @@ BOOL APIENTRY DllMain(HMODULE /* hModule */, DWORD ul_reason_for_call, LPVOID /*
 	return TRUE;
 }
 #endif
+
+
+template<typename RETURN,typename FUNC>
+RETURN SafeCall(FUNC Function,const char* FunctionName,RETURN ErrorReturn)
+{
+	try
+	{
+		return Function();
+	}
+	catch(std::exception& e)
+	{
+		std::Debug << FunctionName << " exception: " << e.what() << std::endl;
+		return ErrorReturn;
+	}
+	catch(...)
+	{
+		std::Debug << FunctionName << " unknown exception." << std::endl;
+		return ErrorReturn;
+	}
+}
+
+
 
 PopH264::TDecoderInstance::TDecoderInstance(int32_t Mode)
 {
@@ -333,4 +375,107 @@ __export void PopH264_GetMeta(int32_t Instance, int32_t* pMetaValues, int32_t Me
 	};
 	SafeCall(Function, __func__, 0 );
 }
+
+
+__export int32_t PopH264_GetVersion()
+{
+	auto Function = [&]()
+	{
+		return PopH264::Version.GetMillion();
+	};
+	return SafeCall( Function, __func__, -1 );
+}
+
+
+
+
+__export int32_t PopH264_CreateEncoder(const char* Encoder)
+{
+	auto Function = [&]()
+	{
+		std::string Params(Encoder ? Encoder : std::string());
+		auto InstanceId = PopH264::EncoderInstanceManager.CreateInstance( Params );
+		return InstanceId;
+	};
+	return SafeCall( Function, __func__, -1 );
+}
+
+__export void PopH264_DestroyEncoder(int32_t Instance)
+{
+	auto Function = [&]()
+	{
+		PopH264::EncoderInstanceManager.FreeInstance(Instance);
+		return 0;
+	};
+	SafeCall(Function, __func__, 0 );
+}
+
+
+__export void PopH264_EncoderPushFrame(int32_t Instance,const char* MetaJson,const uint8_t* LumaData,const uint8_t* ChromaUData,const uint8_t* ChromaVData,char* ErrorBuffer,int32_t ErrorBufferSize)
+{
+	try
+	{
+		auto& Encoder = PopH264::EncoderInstanceManager.GetInstance(Instance);
+		std::string Meta( MetaJson ? MetaJson : "" );
+		Encoder.PushFrame( LumaData, ChromaUData, ChromaVData );
+	}
+	catch(std::exception& e)
+	{
+		Soy::StringToBuffer( e.what(), ErrorBuffer, ErrorBufferSize );
+	}
+	catch(...)
+	{
+		Soy::StringToBuffer("Unknown exception", ErrorBuffer, ErrorBufferSize );
+	}
+}
+
+__export int32_t PopH264_EncoderPopData(int32_t Instance,uint8_t* DataBuffer,int32_t DataBufferSize)
+{
+	auto Function = [&]()
+	{
+		auto& Encoder = PopH264::EncoderInstanceManager.GetInstance(Instance);
+		//	no data buffer, just peeking size
+		if ( !DataBuffer || DataBufferSize <= 0 )
+			return Encoder.PeekNextFrameSize();
+		
+		size_t DataBufferUsed = 0;
+		auto DataArray = GetRemoteArray( DataBuffer, DataBufferUsed, DataBufferSize);
+		Encoder.PopPacket( GetArrayBridge(DataArray) );
+		return DataBufferUsed;
+	};
+	SafeCall(Function, __func__, -1 );
+}
+
+__export void PopH264_EncoderPeekData(int32_t Instance,char* MetaJsonBuffer,int32_t MetaJsonBufferSize)
+{
+	//	wrapped in a safe call in case the json generation fails in some way
+	auto Function = [&]()
+	{
+		using namespace json11;
+		Json::object MetaJson;
+		try
+		{
+			//	get next frame's meta
+			auto Encoder = PopH264::EncoderInstanceManager.GetInstance(Instance);
+
+			//	add generic meta
+			MetaJson["InputQueueCount"] = Encoder.GetFrameQueueCount();
+			MetaJson["OutputQueueCount"] = Encoder.GetPacketQueueCount();
+			
+			Encoder.PeekPacket(MetaJson);
+		}
+		catch(std::exception& e)
+		{
+			MetaJson["Error"] = e.what();
+		}
+		catch(...)
+		{
+			MetaJson["Error"] = "Unknown exception";
+		}
+		auto MetaJsonString = MetaJson.dump();
+		Soy::StringToBuffer( MetaJsonString, MetaJsonBuffer, MetaJsonBufferSize );
+	};
+	SafeCall(Function, __func__, 0 );
+}
+
 

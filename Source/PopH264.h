@@ -41,6 +41,7 @@ __export int32_t			PopH264_PopFrame(int32_t Instance,uint8_t* Plane0,int32_t Pla
 
 
 //	Encoder param is optional
+//	gr: add error buffer here?
 __export int32_t			PopH264_CreateEncoder(const char* Encoder);
 __export void				PopH264_DestroyEncoder(int32_t Instance);
 
@@ -57,6 +58,7 @@ __export void				PopH264_EncoderPushFrame(int32_t Instance,const char* MetaJson,
 //	copies & removes next packet and returns buffer size written (may be greater than input buffer size, in which case data will be lost)
 //	if DataBuffer is null, the size is returned, but data NOT discarded. This can be used to Peek for buffer size. (Use Peek function to also get meta)
 //	returns 0 if there is no Data to pop.
+//	returns -1 on error
 __export int32_t			PopH264_EncoderPopData(int32_t Instance,uint8_t* DataBuffer,int32_t DataBufferSize);
 
 //	get meta for next packet as json. If MetaJsonSize isn't big enough, it writes as much as possible.
@@ -66,9 +68,9 @@ __export int32_t			PopH264_EncoderPopData(int32_t Instance,uint8_t* DataBuffer,i
 //		.EncodeDurationMs	time it took to encode
 //		.DelayDurationMs	time spent in queue before encoding (lag)
 //	members regardless of pending data
-//		.EncoderQueueSize	number of frames still to be encoded
-//		.OutputQueueSize	number of packets waiting to be popped
-__export void				PopH264_EncoderPeekData(int32_t Instance,char* MetaJson,int32_t MetaJsonSize);
+//		.InputQueueCount	number of frames still to be encoded
+//		.OutputQueueCount	number of packets waiting to be popped
+__export void				PopH264_EncoderPeekData(int32_t Instance,char* MetaJsonBuffer,int32_t MetaJsonBufferSize);
 
 
 

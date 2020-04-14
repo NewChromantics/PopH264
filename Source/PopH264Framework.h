@@ -1,12 +1,6 @@
-//
-//  PopH264Framework.h
-//  PopH264Framework
-//
-//  Created by graham on 22/01/2019.
-//  Copyright © 2019 NewChromantics. All rights reserved.
-//
-
 #import <Cocoa/Cocoa.h>
+
+//	gr; todo; get these versions from the CAPI!
 
 //! Project version number for PopH264Framework.
 FOUNDATION_EXPORT double PopH264FrameworkVersionNumber;
