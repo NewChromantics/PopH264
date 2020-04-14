@@ -272,7 +272,7 @@ __export int32_t PopH264_EncoderPopData(int32_t Instance,uint8_t* DataBuffer,int
 			return Encoder.PeekNextFrameSize();
 		
 		size_t DataBufferUsed = 0;
-		auto DataArray = GetRemoteArray( DataBuffer, DataBufferUsed, DataBufferSize);
+		auto DataArray = GetRemoteArray( DataBuffer, DataBufferSize, DataBufferUsed );
 		Encoder.PopPacket( GetArrayBridge(DataArray) );
 		return DataBufferUsed;
 	};
