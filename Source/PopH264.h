@@ -18,6 +18,10 @@
 #define POPH264_DECODERMODE_SOFTWARE	0
 #define POPH264_DECODERMODE_HARDWARE	1
 
+//	function pointer type for new frame callback
+typedef void PopH264_EncoderOnNewPacket(void* Meta);
+
+
 
 __export int32_t			PopH264_GetVersion();
 
@@ -44,7 +48,7 @@ __export int32_t			PopH264_PopFrame(int32_t Instance,uint8_t* Plane0,int32_t Pla
 
 //	Encoder param is optional
 //	gr: add error buffer here?
-__export int32_t			PopH264_CreateEncoder(const char* Encoder);
+__export int32_t			PopH264_CreateEncoder(const char* Encoder,char* ErrorBuffer,int32_t ErrorBufferSize);
 __export void				PopH264_DestroyEncoder(int32_t Instance);
 
 //	This encodes the frame, but may not have an immediate output, and may have more than one packet output.
@@ -74,6 +78,9 @@ __export int32_t			PopH264_EncoderPopData(int32_t Instance,uint8_t* DataBuffer,i
 //	members regardless of pending data
 //		.OutputQueueCount	number of packets waiting to be popped
 __export void				PopH264_EncoderPeekData(int32_t Instance,char* MetaJsonBuffer,int32_t MetaJsonBufferSize);
+
+//	register a callback function when a new packet is ready. This is expected to exist until released
+__export void				PopH264_EncoderAddOnNewPacketCallback(int32_t Instance,PopH264_EncoderOnNewPacket* Callback, void* Meta);
 
 
 

@@ -42,6 +42,8 @@ class PopH264::TEncoderInstance
 public:
 	TEncoderInstance(const std::string& Encoder);
 	
+	void			AddOnNewFrameCallback(std::function<void()> Callback);
+	
 	//	input
 	void			PushFrame(const SoyPixelsImpl& Frame,const std::string& Meta);
 	
