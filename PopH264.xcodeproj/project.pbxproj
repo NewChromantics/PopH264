@@ -23,10 +23,7 @@
 		BF151FEE2384788600A70EBF /* SoyTypes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB6BA21F228B8008E7E76 /* SoyTypes.cpp */; };
 		BF151FF02384789700A70EBF /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BF151FEF2384789700A70EBF /* CoreMedia.framework */; };
 		BF151FF1238478B000A70EBF /* PopH264Framework.h in Headers */ = {isa = PBXBuildFile; fileRef = BF459CDE21F7D60500CED59D /* PopH264Framework.h */; };
-		BF151FF2238478B300A70EBF /* TDecoderInstance.h in Headers */ = {isa = PBXBuildFile; fileRef = BF459C7F21F7C97400CED59D /* TDecoderInstance.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		BF151FF3238478B700A70EBF /* PopH264.h in Headers */ = {isa = PBXBuildFile; fileRef = BF8AB63721F20C41008E7E76 /* PopH264.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		BF151FFB23847C2B00A70EBF /* TDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = BF53E82C22EDC6A6008253CD /* TDecoder.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		BF151FFC23847C2C00A70EBF /* TDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = BF53E82C22EDC6A6008253CD /* TDecoder.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		BF152081238595CA00A70EBF /* SoyRuntimeLibrary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF15207F238595C700A70EBF /* SoyRuntimeLibrary.cpp */; };
 		BF152082238595CD00A70EBF /* SoyRuntimeLibrary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF15207F238595C700A70EBF /* SoyRuntimeLibrary.cpp */; };
 		BF18269424226126006FEB93 /* json11.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF18269024226126006FEB93 /* json11.cpp */; };
@@ -53,7 +50,6 @@
 		BF32257D244609D100C74D4D /* libx264.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BF32257C244609D100C74D4D /* libx264.a */; };
 		BF459CE221F7D60500CED59D /* PopH264Framework.h in Headers */ = {isa = PBXBuildFile; fileRef = BF459CDE21F7D60500CED59D /* PopH264Framework.h */; };
 		BF459CE921F7D70000CED59D /* PopH264.h in Headers */ = {isa = PBXBuildFile; fileRef = BF8AB63721F20C41008E7E76 /* PopH264.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		BF459CEA21F7D70000CED59D /* TDecoderInstance.h in Headers */ = {isa = PBXBuildFile; fileRef = BF459C7F21F7C97400CED59D /* TDecoderInstance.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		BF459CF421F7DB1B00CED59D /* PopH264.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB63821F20C41008E7E76 /* PopH264.cpp */; };
 		BF459CF521F7DB1E00CED59D /* BroadwayDecoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB69F21F21F07008E7E76 /* BroadwayDecoder.cpp */; };
 		BF459CF621F7DB3A00CED59D /* memheap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB6B421F22817008E7E76 /* memheap.cpp */; };
@@ -528,10 +524,8 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BF151FF2238478B300A70EBF /* TDecoderInstance.h in Headers */,
 				BF1826A32422656E006FEB93 /* SoyStreamBuffer.h in Headers */,
 				BF151FF3238478B700A70EBF /* PopH264.h in Headers */,
-				BF151FFC23847C2C00A70EBF /* TDecoder.h in Headers */,
 				BF151FF1238478B000A70EBF /* PopH264Framework.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -540,10 +534,8 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BF459CEA21F7D70000CED59D /* TDecoderInstance.h in Headers */,
 				BF1826A22422656E006FEB93 /* SoyStreamBuffer.h in Headers */,
 				BF459CE921F7D70000CED59D /* PopH264.h in Headers */,
-				BF151FFB23847C2B00A70EBF /* TDecoder.h in Headers */,
 				BF459CE221F7D60500CED59D /* PopH264Framework.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
