@@ -198,6 +198,12 @@ public static class PopH264
 
 		void CheckH264Frame(FrameInput Frame)
 		{
+			//	if we're getting raw fragmented packets (eg. from udp)
+			//	then the packets may not be real frames. 
+			//	maybe don't need to waste time checking any more, but certainly skip ultra small ones
+			if (Frame.Bytes.Length < 4)
+				return;
+
 			try
 			{
 				var NaluHeaderLength = PopX.H264.GetNaluHeaderSize(Frame.Bytes);
