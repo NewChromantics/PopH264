@@ -37,3 +37,38 @@ __export int32_t			PopH264_PushData(int32_t Instance,uint8_t* Data,int32_t DataS
 __export int32_t			PopH264_PopFrame(int32_t Instance,uint8_t* Plane0,int32_t Plane0Size,uint8_t* Plane1,int32_t Plane1Size,uint8_t* Plane2,int32_t Plane2Size);
 
 
+
+
+
+//	Encoder param is optional
+__export int32_t			PopH264_CreateEncoder(const char* Encoder);
+__export void				PopH264_DestroyEncoder(int32_t Instance);
+
+//	meta should contain
+//		.Width
+//		.Height
+//		.LumaSize (bytes)
+//		.ChromaUSize (bytes if not null)
+//		.ChromaVSize (bytes if not null)
+//	any other fields (eg. frame number) will be copied to output meta
+//	error will be a string mentioning any missing fields (if provided)
+__export void				PopH264_EncoderPushFrame(int32_t Instance,const char* MetaJson,const uint8_t* LumaData,const uint8_t* ChromaUData,const uint8_t* ChromaVData,char* ErrorBuffer,int32_t ErrorBufferSize);
+
+//	copies & removes next packet and returns buffer size written (may be greater than input buffer size, in which case data will be lost)
+//	if DataBuffer is null, the size is returned, but data NOT discarded. This can be used to Peek for buffer size. (Use Peek function to also get meta)
+//	returns 0 if there is no Data to pop.
+__export int32_t			PopH264_EncoderPopData(int32_t Instance,uint8_t* DataBuffer,int32_t DataBufferSize);
+
+//	get meta for next packet as json. If MetaJsonSize isn't big enough, it writes as much as possible.
+//	members if pending data
+//		.DataSize			byte-size of packet
+//		.Meta				all meta passed in to PopH264_EncoderPushFrame
+//		.EncodeDurationMs	time it took to encode
+//		.DelayDurationMs	time spent in queue before encoding (lag)
+//	members regardless of pending data
+//		.EncoderQueueSize	number of frames still to be encoded
+//		.OutputQueueSize	number of packets waiting to be popped
+__export void				PopH264_EncoderPeekData(int32_t Instance,char* MetaJson,int32_t MetaJsonSize);
+
+
+
