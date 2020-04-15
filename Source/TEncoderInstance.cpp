@@ -4,8 +4,16 @@
 
 #define ENABLE_X264
 
+#if defined(TARGET_IOS) || defined(TARGET_OSX)
+#define ENABLE_AVF
+#endif
+
 #if defined(ENABLE_X264)
 #include "X264Encoder.h"
+#endif
+
+#if defined(ENABLE_AVF)
+#include "AvfEncoder.h"
 #endif
 
 
@@ -18,6 +26,25 @@ PopH264::TEncoderInstance::TEncoderInstance(const std::string& Encoder_)
 	
 	std::string Encoder = Encoder_;
 
+#if defined(ENABLE_AVF)
+	if ( Encoder.empty() )
+		Encoder = std::string(Avf::TEncoder::NamePrefix);
+	
+	if ( Soy::StringTrimLeft( Encoder, Avf::TEncoder::NamePrefix, false ) )
+	{
+		/*
+		//	extract preset
+		size_t Preset = X264::TEncoder::DefaultPreset;
+		auto PresetString = Encoder;
+		if ( !PresetString.empty() )
+			Soy::StringToType(Preset,PresetString);
+		*/
+		mEncoder.reset( new Avf::TEncoder(OnOutputPacket) );
+		return;
+	}
+#endif
+	
+	
 #if defined(ENABLE_X264)
 	if ( Encoder.empty() )
 		Encoder = std::string(X264::TEncoder::NamePrefix);
@@ -31,6 +58,7 @@ PopH264::TEncoderInstance::TEncoderInstance(const std::string& Encoder_)
 			Soy::StringToType(Preset,PresetString);
 		
 		mEncoder.reset( new X264::TEncoder(Preset,OnOutputPacket) );
+		return;
 	}
 #endif
 	

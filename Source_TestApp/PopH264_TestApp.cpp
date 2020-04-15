@@ -33,6 +33,22 @@ int main()
 	Debug << "PopH264_CreateEncoder handle=" << Handle << " error=" << ErrorBuffer;
 	DebugPrint(Debug.str());
 	
+	//	encode a test image
+	const uint8_t TestImage[128*128]={128};
+	const char* TestMetaJson =
+	R"V0G0N(
+	{
+		"Width":128,
+		"Height":128,
+		"LumaSize":16384
+	}
+	)V0G0N";
+	PopH264_EncoderPushFrame( Handle, TestMetaJson, TestImage, nullptr, nullptr, ErrorBuffer, std::size(ErrorBuffer) );
+	Debug << "PopH264_EncoderPushFrame error=" << ErrorBuffer;
+	DebugPrint(Debug.str());
+
+	PopH264_DestroyEncoder(Handle);
+	
 	return 0;
 }
 

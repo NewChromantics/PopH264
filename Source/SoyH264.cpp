@@ -29,3 +29,25 @@ H264NaluContent::Type H264::GetPacketType(const ArrayBridge<uint8_t>&& Data)
 }
 
 
+void ReformatDeliminator(ArrayBridge<uint8>& Data,
+						 std::function<size_t(ArrayBridge<uint8>& Data,size_t Position)> ExtractChunk,
+						 std::function<void(size_t ChunkLength,ArrayBridge<uint8>& Data,size_t& Position)> InsertChunk)
+{
+	size_t Position = 0;
+	while ( true )
+	{
+		auto ChunkLength = ExtractChunk( Data, Position );
+		if ( ChunkLength == 0 )
+			break;
+		{
+			std::stringstream Error;
+			Error << "Extracted NALU length of " << ChunkLength << "/" << Data.GetDataSize();
+			Soy::Assert( ChunkLength <= Data.GetDataSize(), Error.str() );
+		}
+		
+		InsertChunk( ChunkLength, Data, Position );
+		Position += ChunkLength;
+	}
+}
+
+

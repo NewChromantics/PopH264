@@ -71,8 +71,8 @@
 		BFBC07FC238834EC0070BCB4 /* PopH264_Osx.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = BF459CD521F7D5C700CED59D /* PopH264_Osx.framework */; };
 		BFC4717B2447509600A2DA70 /* PopH264_TestApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFC471792447509600A2DA70 /* PopH264_TestApp.cpp */; };
 		BFC4717F244751BF00A2DA70 /* PopH264_Osx.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BF459CD521F7D5C700CED59D /* PopH264_Osx.framework */; };
-		BFC471842447523100A2DA70 /* AppleEncoder.mm in Sources */ = {isa = PBXBuildFile; fileRef = BFC471812447523000A2DA70 /* AppleEncoder.mm */; };
-		BFC471852447523100A2DA70 /* AppleEncoder.mm in Sources */ = {isa = PBXBuildFile; fileRef = BFC471812447523000A2DA70 /* AppleEncoder.mm */; };
+		BFC471842447523100A2DA70 /* AvfEncoder.mm in Sources */ = {isa = PBXBuildFile; fileRef = BFC471812447523000A2DA70 /* AvfEncoder.mm */; };
+		BFC471852447523100A2DA70 /* AvfEncoder.mm in Sources */ = {isa = PBXBuildFile; fileRef = BFC471812447523000A2DA70 /* AvfEncoder.mm */; };
 		BFC4718A2447625000A2DA70 /* AvfPixelBuffer.h in Headers */ = {isa = PBXBuildFile; fileRef = BFC471862447624F00A2DA70 /* AvfPixelBuffer.h */; };
 		BFC4718B2447625000A2DA70 /* AvfPixelBuffer.h in Headers */ = {isa = PBXBuildFile; fileRef = BFC471862447624F00A2DA70 /* AvfPixelBuffer.h */; };
 		BFC471902447625000A2DA70 /* AvfPixelBuffer.mm in Sources */ = {isa = PBXBuildFile; fileRef = BFC471892447625000A2DA70 /* AvfPixelBuffer.mm */; };
@@ -277,8 +277,8 @@
 		BFBC0800238AE8A70070BCB4 /* SoyLib_Ios.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = SoyLib_Ios.xcconfig; path = Source/SoyLib/SoyLib_Ios.xcconfig; sourceTree = "<group>"; };
 		BFC4717124474FFA00A2DA70 /* PopH264_TestApp */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = PopH264_TestApp; sourceTree = BUILT_PRODUCTS_DIR; };
 		BFC471792447509600A2DA70 /* PopH264_TestApp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PopH264_TestApp.cpp; sourceTree = "<group>"; };
-		BFC471802447523000A2DA70 /* AppleEncoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppleEncoder.h; path = Source/AppleEncoder.h; sourceTree = "<group>"; };
-		BFC471812447523000A2DA70 /* AppleEncoder.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = AppleEncoder.mm; path = Source/AppleEncoder.mm; sourceTree = "<group>"; };
+		BFC471802447523000A2DA70 /* AvfEncoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AvfEncoder.h; path = Source/AvfEncoder.h; sourceTree = "<group>"; };
+		BFC471812447523000A2DA70 /* AvfEncoder.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = AvfEncoder.mm; path = Source/AvfEncoder.mm; sourceTree = "<group>"; };
 		BFC471862447624F00A2DA70 /* AvfPixelBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AvfPixelBuffer.h; path = Source/SoyLib/src/AvfPixelBuffer.h; sourceTree = "<group>"; };
 		BFC471892447625000A2DA70 /* AvfPixelBuffer.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = AvfPixelBuffer.mm; path = Source/SoyLib/src/AvfPixelBuffer.mm; sourceTree = "<group>"; };
 		BFC4719224477DDE00A2DA70 /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = System/Library/Frameworks/CoreVideo.framework; sourceTree = SDKROOT; };
@@ -543,10 +543,8 @@
 		BFD6076D1EA16ED20035C814 /* Source */ = {
 			isa = PBXGroup;
 			children = (
-				BFC4719924477E4F00A2DA70 /* SoyAvf.h */,
-				BFC4719824477E4F00A2DA70 /* SoyAvf.mm */,
-				BFC471812447523000A2DA70 /* AppleEncoder.mm */,
-				BFC471802447523000A2DA70 /* AppleEncoder.h */,
+				BFC471802447523000A2DA70 /* AvfEncoder.h */,
+				BFC471812447523000A2DA70 /* AvfEncoder.mm */,
 				BF8AB63A21F20CD9008E7E76 /* Broadway */,
 				BF8AB63B21F20D4C008E7E76 /* Broadway */,
 				BFF1C6E822E3C65800AFDFD5 /* BroadwayAll.c */,
@@ -562,6 +560,8 @@
 				BF8AB63821F20C41008E7E76 /* PopH264.cpp */,
 				BF8AB63721F20C41008E7E76 /* PopH264.h */,
 				BF459CDE21F7D60500CED59D /* PopH264Framework.h */,
+				BFC4719924477E4F00A2DA70 /* SoyAvf.h */,
+				BFC4719824477E4F00A2DA70 /* SoyAvf.mm */,
 				BF322582244708BB00C74D4D /* SoyH264.cpp */,
 				BF322581244708BB00C74D4D /* SoyH264.h */,
 				BF8AB6A221F225C5008E7E76 /* SoyLib */,
@@ -797,7 +797,7 @@
 				BF18269524226126006FEB93 /* json11.cpp in Sources */,
 				BF151FE52384788600A70EBF /* memheap.cpp in Sources */,
 				BF151FEE2384788600A70EBF /* SoyTypes.cpp in Sources */,
-				BFC471852447523100A2DA70 /* AppleEncoder.mm in Sources */,
+				BFC471852447523100A2DA70 /* AvfEncoder.mm in Sources */,
 				BF151FE22384787800A70EBF /* BroadwayDecoder.cpp in Sources */,
 				BF151FED2384788600A70EBF /* SoyTime.mm in Sources */,
 				BF151FEB2384788600A70EBF /* SoyString.cpp in Sources */,
@@ -834,7 +834,7 @@
 				BF18269424226126006FEB93 /* json11.cpp in Sources */,
 				BF53E82F22EDCABB008253CD /* TDecoder.cpp in Sources */,
 				BF459CF921F7DB4400CED59D /* SoyTime.mm in Sources */,
-				BFC471842447523100A2DA70 /* AppleEncoder.mm in Sources */,
+				BFC471842447523100A2DA70 /* AvfEncoder.mm in Sources */,
 				BF459CFB21F7DB4400CED59D /* SoyAssert.cpp in Sources */,
 				BF459CFD21F7DB4400CED59D /* SoyString.cpp in Sources */,
 				BF459CF521F7DB1E00CED59D /* BroadwayDecoder.cpp in Sources */,

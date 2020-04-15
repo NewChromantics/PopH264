@@ -1,4 +1,4 @@
-#include "AppleEncoder.h"
+#include "AvfEncoder.h"
 #include "SoyPixels.h"
 #include "SoyAvf.h"
 #include "SoyFourcc.h"
@@ -15,6 +15,7 @@
 #include <VideoToolbox/VTCompressionSession.h>
 #include <VideoToolbox/VTDecompressionSession.h>
 #include <VideoToolbox/VTErrors.h>
+#include "SoyH264.h"
 
 
 class Avf::TCompressor
@@ -29,7 +30,7 @@ public:
 	void	Encode(CVPixelBufferRef PixelBuffer,size_t FrameNumber);
 	
 private:
-	void	OnPacket(const ArrayBridge<uint8_t>&& Data,SoyTime PresentationTime);
+	void	OnPacket(const ArrayBridge<uint8_t>& Data,SoyTime PresentationTime);
 	
 private:
 	std::function<void(const ArrayBridge<uint8_t>&,SoyTime)>	mOnPacket;
@@ -122,6 +123,8 @@ Avf::TCompressor::~TCompressor()
 	// End the session
 	VTCompressionSessionInvalidate( EncodingSession );
 	CFRelease( EncodingSession );
+	
+	//	wait for the queue to end
 }
 
 void Avf::TCompressor::Flush()
@@ -129,12 +132,82 @@ void Avf::TCompressor::Flush()
 	VTCompressionSessionCompleteFrames( EncodingSession, kCMTimeInvalid );
 }
 
-void AnnexBToAnnexB(ArrayBridge<uint8_t>&& Data)
+uint8 H264::EncodeNaluByte(H264NaluContent::Type Content,H264NaluPriority::Type Priority)
 {
-	//	do nothing!
+	//	uint8 Idc_Important = 0x3 << 5;	//	0x60
+	//	uint8 Idc = Idc_Important;	//	011 XXXXX
+	uint8 Idc = Priority;
+	Idc <<= 5;
+	uint8 Type = Content;
+	
+	uint8 Byte = Idc|Type;
+	return Byte;
 }
 
-std::function<void(ArrayBridge<uint8_t>&&)> GetNaluConversionFunc(CMFormatDescriptionRef FormatDescription)
+void AnnexBToAnnexB(ArrayBridge<uint8_t>&& Data,std::function<void(const ArrayBridge<uint8_t>&)> EnumPacket)
+{
+	EnumPacket( Data );
+}
+
+void NaluToAnnexB(ArrayBridge<uint8_t>& Data,size_t LengthSize,std::function<void(const ArrayBridge<uint8_t>&)>& EnumPacket)
+{
+	//	need to insert special cases like SPS
+	BufferArray<uint8,10> NaluHeader;
+	NaluHeader.PushBack(0);
+	NaluHeader.PushBack(0);
+	NaluHeader.PushBack(0);
+	NaluHeader.PushBack(1);
+	NaluHeader.PushBack( H264::EncodeNaluByte( H264NaluContent::AccessUnitDelimiter, H264NaluPriority::Zero ) );
+	NaluHeader.PushBack(0xF0);// Slice types = ANY
+	
+	auto EnumPacketData = [&](const ArrayBridge<uint8_t>&& PacketContent)
+	{
+		Array<uint8_t> CompletePacket;
+		CompletePacket.PushBackArray(NaluHeader);
+		CompletePacket.PushBackArray(PacketContent);
+		auto Bridge = GetArrayBridge(CompletePacket);
+		EnumPacket(Bridge);
+	};
+	
+	//	walk through data
+	int i=0;
+	while ( i <Data.GetSize() )
+	{
+		size_t ChunkLength = 0;
+		auto* pData = &Data[i+0];
+		
+		if ( LengthSize == 1 )
+		{
+			ChunkLength |= Data[i+0];
+		}
+		else if ( LengthSize == 2 )
+		{
+			ChunkLength |= Data[i+0] << 8;
+			ChunkLength |= Data[i+1] << 0;
+		}
+		else if ( LengthSize == 4 )
+		{
+			ChunkLength |= Data[i+0] << 24;
+			ChunkLength |= Data[i+1] << 16;
+			ChunkLength |= Data[i+2] << 8;
+			ChunkLength |= Data[i+3] << 0;
+		}
+	
+		auto* DataStart = &Data[i+LengthSize];
+		auto PacketContent = GetRemoteArray( DataStart, ChunkLength );
+
+		EnumPacketData( GetArrayBridge(PacketContent) );
+		
+		i += LengthSize + ChunkLength;
+	}
+}
+
+void Nalu32ToAnnexB(ArrayBridge<uint8_t>&& Data,std::function<void(const ArrayBridge<uint8_t>&)> EnumPacket)
+{
+	NaluToAnnexB( Data, 4, EnumPacket );
+}
+
+std::function<void(ArrayBridge<uint8_t>&&,std::function<void(const ArrayBridge<uint8_t>&)>)> GetNaluConversionFunc(CMFormatDescriptionRef FormatDescription)
 {
 	int nal_size_field_bytes = 0;
 	auto Result = CMVideoFormatDescriptionGetH264ParameterSetAtIndex( FormatDescription, 0, nullptr, nullptr, nullptr, &nal_size_field_bytes );
@@ -147,6 +220,7 @@ std::function<void(ArrayBridge<uint8_t>&&)> GetNaluConversionFunc(CMFormatDescri
 	switch ( nal_size_field_bytes )
 	{
 		case 0:	return AnnexBToAnnexB;
+		case 4:	return Nalu32ToAnnexB;
 	}
 	
 	std::stringstream Debug;
@@ -186,6 +260,10 @@ void Avf::TCompressor::OnCompressed(OSStatus status, VTEncodeInfoFlags infoFlags
 		throw Soy::AssertException("Data sample not ready");
 	}
 
+	auto PushPacket = [&](const ArrayBridge<uint8_t>& Data)
+	{
+		OnPacket( Data, PresentationTime );
+	};
 	
 	if ( IsKeyframe )
 	{
@@ -193,8 +271,8 @@ void Avf::TCompressor::OnCompressed(OSStatus status, VTEncodeInfoFlags infoFlags
 		{
 			Array<uint8_t> SpsData;
 			Avf::GetFormatDescriptionData( GetArrayBridge(SpsData), FormatDescription, 0 );
-			FixNaluData( GetArrayBridge(SpsData) );
-			OnPacket( GetArrayBridge(SpsData), PresentationTime );
+			//FixNaluData( GetArrayBridge(SpsData), PushPacket );
+			PushPacket( GetArrayBridge(SpsData) );
 		}
 		catch(std::exception& e)
 		{
@@ -205,8 +283,8 @@ void Avf::TCompressor::OnCompressed(OSStatus status, VTEncodeInfoFlags infoFlags
 		{
 			Array<uint8_t> PpsData;
 			Avf::GetFormatDescriptionData( GetArrayBridge(PpsData), FormatDescription, 1 );
-			FixNaluData( GetArrayBridge(PpsData) );
-			OnPacket( GetArrayBridge(PpsData), PresentationTime );
+			//FixNaluData( GetArrayBridge(PpsData), PushPacket );
+			PushPacket( GetArrayBridge(PpsData) );
 		}
 		catch(std::exception& e)
 		{
@@ -233,8 +311,7 @@ void Avf::TCompressor::OnCompressed(OSStatus status, VTEncodeInfoFlags infoFlags
 			
 			//	note: this packet could have multiple NAL's
 			//	we should adapt FixNaluData to spit out multiple packets
-			FixNaluData( GetArrayBridge(PacketData) );
-			OnPacket( GetArrayBridge(PacketData), PresentationTime );
+			FixNaluData( GetArrayBridge(PacketData), PushPacket );
 		}
 		else
 		{
@@ -270,7 +347,7 @@ void Avf::TCompressor::OnCompressed(OSStatus status, VTEncodeInfoFlags infoFlags
 	*/
 }
 
-void Avf::TCompressor::OnPacket(const ArrayBridge<uint8_t>&& Data,SoyTime PresentationTime)
+void Avf::TCompressor::OnPacket(const ArrayBridge<uint8_t>& Data,SoyTime PresentationTime)
 {
 	mOnPacket( Data, PresentationTime );
 }
