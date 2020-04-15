@@ -238,11 +238,16 @@ void X264::TEncoder::Encode(x264_picture_t* InputPicture)
 	//	gr: currently, decoder NEEDS to have nal packets split
 	auto OnNalPacket = [&](FixedRemoteArray<uint8_t>& Data)
 	{
+		Soy::TScopeTimerPrint Timer("OnNalPacket",2);
+		auto DecodeOrderNumber = mPicture.i_dts;
 		auto FrameNumber = mPicture.i_pts;
-		auto FrameMeta = PopFrameMeta(FrameNumber);
+		//std::Debug << "OnNalPacket( pts=" << FrameNumber << ", dts=" << DecodeOrderNumber << ")" << std::endl;
+		auto FrameMeta = GetFrameMeta(FrameNumber);
 		
 		//	todo: either store these to make sure decode order (dts) is kept correct
 		//		or send DTS order to TPacket for host to order
+		//	todo: insert DTS into meta anyway!
+		//	gr: DTS is 0 all of the time, I think there's a setting to allow out of order
 		PopH264::TPacket OutputPacket;
 		OutputPacket.mData.reset(new Array<uint8_t>());
 		OutputPacket.mInputMeta = FrameMeta;
@@ -273,6 +278,7 @@ void X264::TEncoder::Encode(x264_picture_t* InputPicture)
 		auto& Nal = Nals[n];
 		auto NalSize = Nal.i_payload;
 		auto PacketArray = GetRemoteArray(Nal.p_payload, NalSize);
+		//	if this throws we lose a packet!
 		OnNalPacket(PacketArray);
 		TotalNalSize += NalSize;
 	}
@@ -291,15 +297,17 @@ size_t X264::TEncoder::PushFrameMeta(const std::string& Meta)
 	return FrameMeta.mFrameNumber;
 }
 
-std::string X264::TEncoder::PopFrameMeta(size_t FrameNumber)
+std::string X264::TEncoder::GetFrameMeta(size_t FrameNumber)
 {
 	for ( auto i=0;	i<mFrameMetas.GetSize();	i++ )
 	{
 		auto& FrameMeta = mFrameMetas[i];
 		if ( FrameMeta.mFrameNumber != FrameNumber )
 			continue;
-		
-		auto Meta = mFrameMetas.PopAt(i);
+
+		//	gr: for now, sometimes we get multiple packets for one frame, so we can't discard them all
+		//auto Meta = mFrameMetas.PopAt(i);
+		auto Meta = mFrameMetas[i];
 		return Meta.mMeta;
 	}
 	

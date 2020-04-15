@@ -59,7 +59,9 @@ private:
 	
 	//	returns frame number used as PTS and stores meta
 	size_t			PushFrameMeta(const std::string& Meta);
-	std::string		PopFrameMeta(size_t FrameNumber);
+	//	gr: SOME frames will yield multiple packets (eg SPS & PPS) so some we need to keep around...
+	//		gotta work out a way to figure out what we can discard
+	std::string		GetFrameMeta(size_t FrameNumber);
 	
 protected:
 	SoyPixelsMeta	mPixelMeta;	//	invalid until we've pushed first frame
