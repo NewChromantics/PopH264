@@ -2,44 +2,8 @@
 #include <sstream>
 #include "SoyLib/src/SoyDebug.h"
 #include "SoyLib/src/SoyPixels.h"
-#include "SoyLib/src/SoyH264.h"
+#include "SoyH264.h"
 #include "MagicEnum/include/magic_enum.hpp"
-
-namespace H264
-{
-	size_t					GetNaluLength(const ArrayBridge<uint8_t>& Data);
-	size_t					GetNaluLength(const ArrayBridge<uint8_t>&& Data) { return GetNaluLength(Data); }
-	H264NaluContent::Type	GetPacketType(const ArrayBridge<uint8_t>&& Data);
-}
-
-size_t H264::GetNaluLength(const ArrayBridge<uint8_t>& Data)
-{
-	auto Data0 = Data[0];
-	auto Data1 = Data[1];
-	auto Data2 = Data[2];
-	auto Data3 = Data[3];
-	if (Data0 != 0 || Data1 != 0)
-		throw Soy::AssertException("Data is not bytestream NALU header (leading zeroes)");
-	if (Data2 == 1)
-		return 3;
-	if (Data2 == 0 && Data3 == 1)
-		return 4;
-
-	throw Soy::AssertException("Data is not bytestream NALU header (suffix)");
-}
-
-H264NaluContent::Type H264::GetPacketType(const ArrayBridge<uint8_t>&& Data)
-{
-	auto HeaderLength = GetNaluLength(Data);
-	auto TypeAndPriority = Data[HeaderLength];
-	auto Type = TypeAndPriority & 0x1f;
-	auto Priority = TypeAndPriority >> 5;
-
-	auto TypeEnum = static_cast<H264NaluContent::Type>(Type);
-	return TypeEnum;
-}
-
-
 
 
 namespace Broadway

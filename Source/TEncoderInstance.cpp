@@ -1,4 +1,6 @@
 #include "TEncoderInstance.h"
+#include "SoyH264.h"
+#include "MagicEnum/include/magic_enum.hpp"
 
 #define ENABLE_X264
 
@@ -138,6 +140,16 @@ void PopH264::TEncoderInstance::PopPacket(ArrayBridge<uint8_t>&& Data)
 
 void PopH264::TEncoderInstance::OnNewPacket(TPacket& Packet)
 {
+	try
+	{
+		auto H264PacketType = H264::GetPacketType(GetArrayBridge(*Packet.mData));
+		std::Debug << __PRETTY_FUNCTION__ << "(" << magic_enum::enum_name(H264PacketType) << ")" << std::endl;
+	}
+	catch (std::exception& e)
+	{
+		std::Debug << __PRETTY_FUNCTION__ << " Error getting Nalu packet type; " << e.what() << std::endl;
+	}
+
 	{
 		std::lock_guard<std::mutex> Lock(mPacketsLock);
 		mPackets.PushBack(Packet);
