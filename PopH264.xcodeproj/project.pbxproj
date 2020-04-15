@@ -69,9 +69,21 @@
 		BFBC07F02386C0BC0070BCB4 /* SoyThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFBC07ED2386C0B50070BCB4 /* SoyThread.cpp */; };
 		BFBC07F12386C0BC0070BCB4 /* SoyThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFBC07ED2386C0B50070BCB4 /* SoyThread.cpp */; };
 		BFBC07FC238834EC0070BCB4 /* PopH264_Osx.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = BF459CD521F7D5C700CED59D /* PopH264_Osx.framework */; };
+		BFC4717B2447509600A2DA70 /* PopH264_TestApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFC471792447509600A2DA70 /* PopH264_TestApp.cpp */; };
+		BFC4717F244751BF00A2DA70 /* PopH264_Osx.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BF459CD521F7D5C700CED59D /* PopH264_Osx.framework */; };
 		BFF1C6EA22E3C65800AFDFD5 /* BroadwayAll.c in Sources */ = {isa = PBXBuildFile; fileRef = BFF1C6E822E3C65800AFDFD5 /* BroadwayAll.c */; };
 		BFF1C71222E3CF8B00AFDFD5 /* SoyArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFF1C70F22E3CF8B00AFDFD5 /* SoyArray.cpp */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		BFC4717D244750E200A2DA70 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BF4A6A0C1EA16D7C00613A64 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = BF459CD421F7D5C700CED59D;
+			remoteInfo = PopH264_Osx;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
 		BFBC07FB238834E40070BCB4 /* CopyFiles */ = {
@@ -91,6 +103,15 @@
 			dstSubfolderSpec = 0;
 			files = (
 				BF322580244610DD00C74D4D /* PopH264_Ios.framework in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+		BFC4716F24474FFA00A2DA70 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 1;
 		};
@@ -241,6 +262,8 @@
 		BFBC07F423882FB90070BCB4 /* libml_mediaerror.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libml_mediaerror.dylib; path = ../MagicLeap/mlsdk/v0.22.0/lib/osx/libml_mediaerror.dylib; sourceTree = "<group>"; };
 		BFBC07FF238AE8A70070BCB4 /* SoyLib_Osx.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = SoyLib_Osx.xcconfig; path = Source/SoyLib/SoyLib_Osx.xcconfig; sourceTree = "<group>"; };
 		BFBC0800238AE8A70070BCB4 /* SoyLib_Ios.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = SoyLib_Ios.xcconfig; path = Source/SoyLib/SoyLib_Ios.xcconfig; sourceTree = "<group>"; };
+		BFC4717124474FFA00A2DA70 /* PopH264_TestApp */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = PopH264_TestApp; sourceTree = BUILT_PRODUCTS_DIR; };
+		BFC471792447509600A2DA70 /* PopH264_TestApp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PopH264_TestApp.cpp; sourceTree = "<group>"; };
 		BFD607741EA16F0A0035C814 /* IUnityGraphics.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IUnityGraphics.h; path = Source/Unity/IUnityGraphics.h; sourceTree = "<group>"; };
 		BFD607751EA16F0A0035C814 /* IUnityGraphicsD3D9.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IUnityGraphicsD3D9.h; path = Source/Unity/IUnityGraphicsD3D9.h; sourceTree = "<group>"; };
 		BFD607761EA16F0A0035C814 /* IUnityGraphicsD3D11.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IUnityGraphicsD3D11.h; path = Source/Unity/IUnityGraphicsD3D11.h; sourceTree = "<group>"; };
@@ -270,6 +293,14 @@
 			files = (
 				BF459D1A21F7DB9900CED59D /* CoreMedia.framework in Frameworks */,
 				BF32257B244609C700C74D4D /* libx264.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BFC4716E24474FFA00A2DA70 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BFC4717F244751BF00A2DA70 /* PopH264_Osx.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -323,7 +354,7 @@
 				BFF1C6E322E377D100AFDFD5 /* PopH264.Android */,
 				BF0A19C21EA428F4007EBC95 /* Unity */,
 				BFD6076D1EA16ED20035C814 /* Source */,
-				BF4A6A161EA16D7D00613A64 /* Osx */,
+				BFC471782447506B00A2DA70 /* Source_TestApp */,
 				BF151FDA2384786600A70EBF /* PopH264_Ios */,
 				BF4A6A151EA16D7D00613A64 /* Products */,
 				BF459CEC21F7D73B00CED59D /* Frameworks */,
@@ -335,16 +366,10 @@
 			children = (
 				BF459CD521F7D5C700CED59D /* PopH264_Osx.framework */,
 				BF151FD92384786600A70EBF /* PopH264_Ios.framework */,
+				BFC4717124474FFA00A2DA70 /* PopH264_TestApp */,
 			);
 			name = Products;
 			sourceTree = "<group>";
-		};
-		BF4A6A161EA16D7D00613A64 /* Osx */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = Osx;
-			sourceTree = SOURCE_ROOT;
 		};
 		BF8AB63A21F20CD9008E7E76 /* Broadway */ = {
 			isa = PBXGroup;
@@ -471,6 +496,14 @@
 				BF8AB6C721F23712008E7E76 /* PopH264.cs */,
 			);
 			name = "Unity C#";
+			sourceTree = "<group>";
+		};
+		BFC471782447506B00A2DA70 /* Source_TestApp */ = {
+			isa = PBXGroup;
+			children = (
+				BFC471792447509600A2DA70 /* PopH264_TestApp.cpp */,
+			);
+			path = Source_TestApp;
 			sourceTree = "<group>";
 		};
 		BFD6076D1EA16ED20035C814 /* Source */ = {
@@ -620,6 +653,24 @@
 			productReference = BF459CD521F7D5C700CED59D /* PopH264_Osx.framework */;
 			productType = "com.apple.product-type.framework";
 		};
+		BFC4717024474FFA00A2DA70 /* PopH264_TestApp */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BFC4717724474FFA00A2DA70 /* Build configuration list for PBXNativeTarget "PopH264_TestApp" */;
+			buildPhases = (
+				BFC4716D24474FFA00A2DA70 /* Sources */,
+				BFC4716E24474FFA00A2DA70 /* Frameworks */,
+				BFC4716F24474FFA00A2DA70 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				BFC4717E244750E200A2DA70 /* PBXTargetDependency */,
+			);
+			name = PopH264_TestApp;
+			productName = PopH264_TestApp;
+			productReference = BFC4717124474FFA00A2DA70 /* PopH264_TestApp */;
+			productType = "com.apple.product-type.tool";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -640,6 +691,11 @@
 					};
 					BF53E82722EC8C1D008253CD = {
 						CreatedOnToolsVersion = 10.1;
+					};
+					BFC4717024474FFA00A2DA70 = {
+						CreatedOnToolsVersion = 10.1;
+						DevelopmentTeam = 2HGDT7H2KX;
+						ProvisioningStyle = Automatic;
 					};
 					BFF1C6DE22E3769B00AFDFD5 = {
 						CreatedOnToolsVersion = 10.1;
@@ -663,6 +719,7 @@
 				BFF1C6DE22E3769B00AFDFD5 /* PopH264_Android */,
 				BF53E82722EC8C1D008253CD /* PopH264_Lumin */,
 				BF151FD82384786600A70EBF /* PopH264_Ios */,
+				BFC4717024474FFA00A2DA70 /* PopH264_TestApp */,
 			);
 		};
 /* End PBXProject section */
@@ -751,7 +808,23 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		BFC4716D24474FFA00A2DA70 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BFC4717B2447509600A2DA70 /* PopH264_TestApp.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		BFC4717E244750E200A2DA70 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = BF459CD421F7D5C700CED59D /* PopH264_Osx */;
+			targetProxy = BFC4717D244750E200A2DA70 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		BF151FDF2384786600A70EBF /* Debug */ = {
@@ -1019,6 +1092,41 @@
 			};
 			name = Release;
 		};
+		BFC4717524474FFA00A2DA70 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 2HGDT7H2KX;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = PopH264_TestApp;
+			};
+			name = Debug;
+		};
+		BFC4717624474FFA00A2DA70 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 2HGDT7H2KX;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				PRODUCT_NAME = PopH264_TestApp;
+			};
+			name = Release;
+		};
 		BFF1C6DF22E3769B00AFDFD5 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1068,6 +1176,15 @@
 			buildConfigurations = (
 				BF53E82922EC8C1D008253CD /* Debug */,
 				BF53E82A22EC8C1D008253CD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		BFC4717724474FFA00A2DA70 /* Build configuration list for PBXNativeTarget "PopH264_TestApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BFC4717524474FFA00A2DA70 /* Debug */,
+				BFC4717624474FFA00A2DA70 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
