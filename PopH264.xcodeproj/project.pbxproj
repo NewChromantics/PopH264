@@ -71,6 +71,16 @@
 		BFBC07FC238834EC0070BCB4 /* PopH264_Osx.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = BF459CD521F7D5C700CED59D /* PopH264_Osx.framework */; };
 		BFC4717B2447509600A2DA70 /* PopH264_TestApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFC471792447509600A2DA70 /* PopH264_TestApp.cpp */; };
 		BFC4717F244751BF00A2DA70 /* PopH264_Osx.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BF459CD521F7D5C700CED59D /* PopH264_Osx.framework */; };
+		BFC471842447523100A2DA70 /* AppleEncoder.mm in Sources */ = {isa = PBXBuildFile; fileRef = BFC471812447523000A2DA70 /* AppleEncoder.mm */; };
+		BFC471852447523100A2DA70 /* AppleEncoder.mm in Sources */ = {isa = PBXBuildFile; fileRef = BFC471812447523000A2DA70 /* AppleEncoder.mm */; };
+		BFC4718A2447625000A2DA70 /* AvfPixelBuffer.h in Headers */ = {isa = PBXBuildFile; fileRef = BFC471862447624F00A2DA70 /* AvfPixelBuffer.h */; };
+		BFC4718B2447625000A2DA70 /* AvfPixelBuffer.h in Headers */ = {isa = PBXBuildFile; fileRef = BFC471862447624F00A2DA70 /* AvfPixelBuffer.h */; };
+		BFC4718C2447625000A2DA70 /* SoyAvf.h in Headers */ = {isa = PBXBuildFile; fileRef = BFC471872447624F00A2DA70 /* SoyAvf.h */; };
+		BFC4718D2447625000A2DA70 /* SoyAvf.h in Headers */ = {isa = PBXBuildFile; fileRef = BFC471872447624F00A2DA70 /* SoyAvf.h */; };
+		BFC4718E2447625000A2DA70 /* SoyAvf.mm in Sources */ = {isa = PBXBuildFile; fileRef = BFC471882447624F00A2DA70 /* SoyAvf.mm */; };
+		BFC4718F2447625000A2DA70 /* SoyAvf.mm in Sources */ = {isa = PBXBuildFile; fileRef = BFC471882447624F00A2DA70 /* SoyAvf.mm */; };
+		BFC471902447625000A2DA70 /* AvfPixelBuffer.mm in Sources */ = {isa = PBXBuildFile; fileRef = BFC471892447625000A2DA70 /* AvfPixelBuffer.mm */; };
+		BFC471912447625000A2DA70 /* AvfPixelBuffer.mm in Sources */ = {isa = PBXBuildFile; fileRef = BFC471892447625000A2DA70 /* AvfPixelBuffer.mm */; };
 		BFF1C6EA22E3C65800AFDFD5 /* BroadwayAll.c in Sources */ = {isa = PBXBuildFile; fileRef = BFF1C6E822E3C65800AFDFD5 /* BroadwayAll.c */; };
 		BFF1C71222E3CF8B00AFDFD5 /* SoyArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFF1C70F22E3CF8B00AFDFD5 /* SoyArray.cpp */; };
 /* End PBXBuildFile section */
@@ -264,6 +274,12 @@
 		BFBC0800238AE8A70070BCB4 /* SoyLib_Ios.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = SoyLib_Ios.xcconfig; path = Source/SoyLib/SoyLib_Ios.xcconfig; sourceTree = "<group>"; };
 		BFC4717124474FFA00A2DA70 /* PopH264_TestApp */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = PopH264_TestApp; sourceTree = BUILT_PRODUCTS_DIR; };
 		BFC471792447509600A2DA70 /* PopH264_TestApp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PopH264_TestApp.cpp; sourceTree = "<group>"; };
+		BFC471802447523000A2DA70 /* AppleEncoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppleEncoder.h; path = Source/AppleEncoder.h; sourceTree = "<group>"; };
+		BFC471812447523000A2DA70 /* AppleEncoder.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = AppleEncoder.mm; path = Source/AppleEncoder.mm; sourceTree = "<group>"; };
+		BFC471862447624F00A2DA70 /* AvfPixelBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AvfPixelBuffer.h; path = Source/SoyLib/src/AvfPixelBuffer.h; sourceTree = "<group>"; };
+		BFC471872447624F00A2DA70 /* SoyAvf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SoyAvf.h; path = Source/SoyLib/src/SoyAvf.h; sourceTree = "<group>"; };
+		BFC471882447624F00A2DA70 /* SoyAvf.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = SoyAvf.mm; path = Source/SoyLib/src/SoyAvf.mm; sourceTree = "<group>"; };
+		BFC471892447625000A2DA70 /* AvfPixelBuffer.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = AvfPixelBuffer.mm; path = Source/SoyLib/src/AvfPixelBuffer.mm; sourceTree = "<group>"; };
 		BFD607741EA16F0A0035C814 /* IUnityGraphics.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IUnityGraphics.h; path = Source/Unity/IUnityGraphics.h; sourceTree = "<group>"; };
 		BFD607751EA16F0A0035C814 /* IUnityGraphicsD3D9.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IUnityGraphicsD3D9.h; path = Source/Unity/IUnityGraphicsD3D9.h; sourceTree = "<group>"; };
 		BFD607761EA16F0A0035C814 /* IUnityGraphicsD3D11.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IUnityGraphicsD3D11.h; path = Source/Unity/IUnityGraphicsD3D11.h; sourceTree = "<group>"; };
@@ -451,6 +467,8 @@
 			isa = PBXGroup;
 			children = (
 				BF8AB6A521F22602008E7E76 /* Array.hpp */,
+				BFC471862447624F00A2DA70 /* AvfPixelBuffer.h */,
+				BFC471892447625000A2DA70 /* AvfPixelBuffer.mm */,
 				BF8AB6A321F22602008E7E76 /* HeapArray.hpp */,
 				BF8AB6B421F22817008E7E76 /* memheap.cpp */,
 				BF8AB6B521F22818008E7E76 /* MemHeap.hpp */,
@@ -458,18 +476,20 @@
 				BFF1C70E22E3CF8A00AFDFD5 /* SoyArray.h */,
 				BF8AB6AF21F227EF008E7E76 /* SoyAssert.cpp */,
 				BF8AB6AE21F227EF008E7E76 /* SoyAssert.h */,
+				BFC471872447624F00A2DA70 /* SoyAvf.h */,
+				BFC471882447624F00A2DA70 /* SoyAvf.mm */,
 				BF8AB6A421F22602008E7E76 /* SoyDebug.cpp */,
 				BF8AB6A821F22602008E7E76 /* SoyDebug.h */,
 				BF8AB6B721F22895008E7E76 /* SoyDebug.mm */,
 				BFF1C6E622E3A1D600AFDFD5 /* SoyFilesystem.h */,
+				BF1826AD24228D31006FEB93 /* SoyFourcc.cpp */,
+				BF1826AC24228D31006FEB93 /* SoyFourcc.h */,
 				BF18269624226502006FEB93 /* SoyImage.cpp */,
 				BF18269724226502006FEB93 /* SoyImage.h */,
 				BFBC0800238AE8A70070BCB4 /* SoyLib_Ios.xcconfig */,
 				BFBC07FF238AE8A70070BCB4 /* SoyLib_Osx.xcconfig */,
 				BF8AB6A621F22602008E7E76 /* SoyPixels.cpp */,
 				BF8AB6A721F22602008E7E76 /* SoyPixels.h */,
-				BF1826AD24228D31006FEB93 /* SoyFourcc.cpp */,
-				BF1826AC24228D31006FEB93 /* SoyFourcc.h */,
 				BF1826A624228C43006FEB93 /* SoyPng.cpp */,
 				BF1826A524228C43006FEB93 /* SoyPng.h */,
 				BF15207F238595C700A70EBF /* SoyRuntimeLibrary.cpp */,
@@ -509,6 +529,8 @@
 		BFD6076D1EA16ED20035C814 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				BFC471812447523000A2DA70 /* AppleEncoder.mm */,
+				BFC471802447523000A2DA70 /* AppleEncoder.h */,
 				BF8AB63A21F20CD9008E7E76 /* Broadway */,
 				BF8AB63B21F20D4C008E7E76 /* Broadway */,
 				BFF1C6E822E3C65800AFDFD5 /* BroadwayAll.c */,
@@ -524,12 +546,12 @@
 				BF8AB63821F20C41008E7E76 /* PopH264.cpp */,
 				BF8AB63721F20C41008E7E76 /* PopH264.h */,
 				BF459CDE21F7D60500CED59D /* PopH264Framework.h */,
+				BF322582244708BB00C74D4D /* SoyH264.cpp */,
+				BF322581244708BB00C74D4D /* SoyH264.h */,
 				BF8AB6A221F225C5008E7E76 /* SoyLib */,
 				BF53E82D22EDC989008253CD /* TDecoder.cpp */,
 				BF53E82C22EDC6A6008253CD /* TDecoder.h */,
 				BF32256C2445ECD800C74D4D /* TDecoderInstance.cpp */,
-				BF322582244708BB00C74D4D /* SoyH264.cpp */,
-				BF322581244708BB00C74D4D /* SoyH264.h */,
 				BF459C7F21F7C97400CED59D /* TDecoderInstance.h */,
 				BF3225772445F8DD00C74D4D /* TEncoder.cpp */,
 				BF3225612445E57100C74D4D /* TEncoder.h */,
@@ -565,9 +587,11 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BFC4718D2447625000A2DA70 /* SoyAvf.h in Headers */,
 				BF1826A32422656E006FEB93 /* SoyStreamBuffer.h in Headers */,
 				BF151FF3238478B700A70EBF /* PopH264.h in Headers */,
 				BF151FF1238478B000A70EBF /* PopH264Framework.h in Headers */,
+				BFC4718B2447625000A2DA70 /* AvfPixelBuffer.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -575,9 +599,11 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BFC4718C2447625000A2DA70 /* SoyAvf.h in Headers */,
 				BF1826A22422656E006FEB93 /* SoyStreamBuffer.h in Headers */,
 				BF459CE921F7D70000CED59D /* PopH264.h in Headers */,
 				BF459CE221F7D60500CED59D /* PopH264Framework.h in Headers */,
+				BFC4718A2447625000A2DA70 /* AvfPixelBuffer.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -756,6 +782,7 @@
 				BF18269524226126006FEB93 /* json11.cpp in Sources */,
 				BF151FE52384788600A70EBF /* memheap.cpp in Sources */,
 				BF151FEE2384788600A70EBF /* SoyTypes.cpp in Sources */,
+				BFC471852447523100A2DA70 /* AppleEncoder.mm in Sources */,
 				BF151FE22384787800A70EBF /* BroadwayDecoder.cpp in Sources */,
 				BF151FED2384788600A70EBF /* SoyTime.mm in Sources */,
 				BF151FEB2384788600A70EBF /* SoyString.cpp in Sources */,
@@ -770,8 +797,10 @@
 				BF151FE62384788600A70EBF /* SoyArray.cpp in Sources */,
 				BF32256B2445EC9F00C74D4D /* TEncoderInstance.cpp in Sources */,
 				BF151FE82384788600A70EBF /* SoyDebug.cpp in Sources */,
+				BFC4718F2447625000A2DA70 /* SoyAvf.mm in Sources */,
 				BF1826A12422656E006FEB93 /* SoyStreamBuffer.cpp in Sources */,
 				BF151FE92384788600A70EBF /* SoyDebug.mm in Sources */,
+				BFC471912447625000A2DA70 /* AvfPixelBuffer.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -789,6 +818,7 @@
 				BF18269424226126006FEB93 /* json11.cpp in Sources */,
 				BF53E82F22EDCABB008253CD /* TDecoder.cpp in Sources */,
 				BF459CF921F7DB4400CED59D /* SoyTime.mm in Sources */,
+				BFC471842447523100A2DA70 /* AppleEncoder.mm in Sources */,
 				BF459CFB21F7DB4400CED59D /* SoyAssert.cpp in Sources */,
 				BF459CFD21F7DB4400CED59D /* SoyString.cpp in Sources */,
 				BF459CF521F7DB1E00CED59D /* BroadwayDecoder.cpp in Sources */,
@@ -803,8 +833,10 @@
 				BF459CFA21F7DB4400CED59D /* SoyDebug.mm in Sources */,
 				BF32256A2445EC9F00C74D4D /* TEncoderInstance.cpp in Sources */,
 				BF459CF621F7DB3A00CED59D /* memheap.cpp in Sources */,
+				BFC4718E2447625000A2DA70 /* SoyAvf.mm in Sources */,
 				BF1826A02422656E006FEB93 /* SoyStreamBuffer.cpp in Sources */,
 				BFF1C71222E3CF8B00AFDFD5 /* SoyArray.cpp in Sources */,
+				BFC471902447625000A2DA70 /* AvfPixelBuffer.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
