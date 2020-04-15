@@ -131,9 +131,10 @@ void X264::TEncoder::AllocEncoder(const SoyPixelsMeta& Meta)
 	mParam.i_log_level = X264_LOG_DEBUG;
 	
 	//	reduce mem usage by reducing threads
-	mParam.i_threads = 1;
-	mParam.i_lookahead_threads = 0;
-	mParam.b_sliced_threads = false;
+	//	gr: this heavily slows encoding (20ms -> 50/60) on desktop
+	mParam.i_threads = 2;
+	mParam.i_lookahead_threads = 2;
+	mParam.b_sliced_threads = true;
 	
 	//	h264 profile level
 	mParam.i_level_idc = 30;//	3.0
@@ -259,7 +260,9 @@ void X264::TEncoder::Encode(x264_picture_t* InputPicture)
 	x264_nal_t* Nals = nullptr;
 	int NalCount = 0;
 	
+	Soy::TScopeTimerPrint EncodeTimer("x264_encoder_encode",10);
 	auto FrameSize = x264_encoder_encode(mHandle, &Nals, &NalCount, InputPicture, &OutputPicture);
+	EncodeTimer.Stop();
 	if (FrameSize < 0)
 		throw Soy::AssertException("x264_encoder_encode error");
 	
