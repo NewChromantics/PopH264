@@ -26,7 +26,7 @@ public:
 	void	OnCompressed(OSStatus status, VTEncodeInfoFlags infoFlags,CMSampleBufferRef sampleBuffer);
 	void	Flush();
 
-	void	Encode();
+	void	Encode(CVPixelBufferRef PixelBuffer,size_t FrameNumber);
 	
 private:
 	void	OnPacket(const ArrayBridge<uint8_t>&& Data,SoyTime PresentationTime);
@@ -160,9 +160,6 @@ void Avf::TCompressor::OnCompressed(OSStatus status, VTEncodeInfoFlags infoFlags
 	std::Debug << __PRETTY_FUNCTION__ << "( status=" << status << " infoFlags=" << infoFlags << ")" << std::endl;
 	Avf::IsOkay( status, "OnCompressed status");
 	
-	//H264HwEncoderImpl* encoder = (__bridge H264HwEncoderImpl*)outputCallbackRefCon;
-	auto* encoder = this;
-	
 	CMFormatDescriptionRef FormatDescription = CMSampleBufferGetFormatDescription(SampleBuffer);
 
 	auto DescFourcc = CFSwapInt32HostToBig( CMFormatDescriptionGetMediaSubType(FormatDescription) );
@@ -278,48 +275,33 @@ void Avf::TCompressor::OnPacket(const ArrayBridge<uint8_t>&& Data,SoyTime Presen
 	mOnPacket( Data, PresentationTime );
 }
 
-void Avf::TCompressor::Encode()
+
+void Avf::TCompressor::Encode(CVPixelBufferRef PixelBuffer,size_t FrameNumber)
 {
-	CVPixelBufferRef PixelsToPixelBuffer(const SoyPixelsImpl& Pixels);
+	auto Lambda = ^
+	{
+		CMTime presentationTimeStamp = CMTimeMake(FrameNumber, 1);
+		//CMTime duration = CMTimeMake(1, DURATION);
+		VTEncodeInfoFlags OutputFlags = 0;
+		auto Duration = kCMTimeInvalid;
+		CFDictionaryRef frameProperties = nullptr;
+		void* FrameMeta = nullptr;
+		
+		// Pass it to the encoder
+		auto Status = VTCompressionSessionEncodeFrame(EncodingSession,
+													  PixelBuffer,
+													  presentationTimeStamp,
+													  Duration,
+													  frameProperties, FrameMeta, &OutputFlags);
+		Avf::IsOkay(Status,"VTCompressionSessionEncodeFrame");
 
-	CMSampleBufferRef
-	encode:(CMSampleBufferRef )sampleBuffer // 频繁调用
-		{
-			dispatch_sync(aQueue, ^{
-				
-				frameCount++;
-				// Get the CV Image buffer
-				CVImageBufferRef imageBuffer = (CVImageBufferRef)CMSampleBufferGetImageBuffer(sampleBuffer);
-				//            CVPixelBufferRef pixelBuffer = (CVPixelBufferRef)CMSampleBufferGetImageBuffer(sampleBuffer);
-				
-				// Create properties
-				CMTime presentationTimeStamp = CMTimeMake(frameCount, 1); // 这个值越大画面越模糊
-				//            CMTime duration = CMTimeMake(1, DURATION);
-				VTEncodeInfoFlags flags;
-				
-				// Pass it to the encoder
-				OSStatus statusCode = VTCompressionSessionEncodeFrame(EncodingSession,
-																	  imageBuffer,
-																	  presentationTimeStamp,
-																	  kCMTimeInvalid,
-																	  NULL, NULL, &flags);
-				// Check for error
-				if (statusCode != noErr) {
-					NSLog(@"H264: VTCompressionSessionEncodeFrame failed with %d", (int)statusCode);
-					error = @"H264: VTCompressionSessionEncodeFrame failed ";
-					
-					// End the session
-					VTCompressionSessionInvalidate(EncodingSession);
-					CFRelease(EncodingSession);
-					EncodingSession = NULL;
-					error = NULL;
-					return;
-				}
-				NSLog(@"H264: VTCompressionSessionEncodeFrame Success");
-			});
-			
-	}
-
+		auto FrameDropped = ( OutputFlags & kVTEncodeInfo_FrameDropped) != 0;
+		auto EncodingAsync = ( OutputFlags & kVTEncodeInfo_Asynchronous) != 0;
+		
+		std::Debug << "VTCompressionSessionEncodeFrame returned FrameDropped=" << FrameDropped << " EncodingAsync=" << EncodingAsync << std::endl;
+	};
+	dispatch_sync(aQueue,Lambda);
+}
 	
 
 	
@@ -346,13 +328,21 @@ void Avf::TEncoder::AllocEncoder(const SoyPixelsMeta& Meta)
 		throw Soy_AssertException(Error);
 	}
 	
-	mCompressor.reset( new TCompressor(Meta) );
+	auto OnPacket = [this](const ArrayBridge<uint8_t>& PacketData,SoyTime Timestamp)
+	{
+		this->OnPacketCompressed( PacketData, Timestamp );
+	};
+
+	mCompressor.reset( new TCompressor( Meta, OnPacket ) );
 	mPixelMeta = Meta;
 }
 
 void Avf::TEncoder::Encode(const SoyPixelsImpl& Luma,const SoyPixelsImpl& ChromaU,const SoyPixelsImpl& ChromaV,const std::string& Meta)
 {
 	Soy::TScopeTimerPrint Timer(__PRETTY_FUNCTION__, 2);
+	
+	//	todo: make a complete CVPixelBuffer
+	/*
 	{
 		auto YuvFormat = SoyPixelsFormat::GetMergedFormat( Luma.GetFormat(), ChromaU.GetFormat(), ChromaV.GetFormat() );
 		auto YuvWidth = Luma.GetWidth();
@@ -360,135 +350,26 @@ void Avf::TEncoder::Encode(const SoyPixelsImpl& Luma,const SoyPixelsImpl& Chroma
 		SoyPixelsMeta YuvMeta( YuvWidth, YuvHeight, YuvFormat );
 		AllocEncoder(YuvMeta);
 	}
-	
-	BufferArray<const SoyPixelsImpl*, 3> Planes;
-	Planes.PushBack(&Luma);
-	Planes.PushBack(&ChromaU);
-	Planes.PushBack(&ChromaV);
+	*/
+	auto& EncodePixels = Luma;
+	AllocEncoder( EncodePixels.GetMeta() );
 
-	//	checks from example code https://github.com/jesselegg/x264/blob/master/example.c
-	//	gr: look for proper validation funcs
-	auto Width = Luma.GetWidth();
-	auto Height = Luma.GetHeight();
-	int LumaSize = Width * Height;
-	int ChromaSize = LumaSize / 4;
-	int ExpectedBufferSizes[] = { LumaSize, ChromaSize, ChromaSize };
-	
-	for (auto i = 0; i < Planes.GetSize(); i++)
-	{
-		auto* OutPlane = mPicture.img.plane[i];
-		auto& InPlane = *Planes[i];
-		auto& InPlaneArray = InPlane.GetPixelsArray();
-		auto OutSize = ExpectedBufferSizes[i];
-		auto InSize = InPlaneArray.GetDataSize();
-		if (OutSize != InSize)
-		{
-			std::stringstream Error;
-			Error << "Copying plane " << i << " for x264, but plane size mismatch " << InSize << " != " << OutSize;
-			throw Soy_AssertException(Error);
-		}
-		memcpy(OutPlane, InPlaneArray.GetArray(), InSize );
-	}
-	
-	mPicture.i_pts = PushFrameMeta(Meta);
-	
-	Encode(&mPicture);
-	
-	//	flush any other frames
-	//	gr: this is supposed to only be called at the end of the stream...
-	//		if DelayedFrameCount non zero, we may haveto call multiple times before nal size is >0
-	//		so just keep calling until we get 0
-	//	maybe add a safety iteration check
-	//	gr: need this on OSX (latest x264) but on windows (old build) every subsequent frame fails
-	//	gr: this was backwards? brew (old 2917) DID need to flush?
-	if (X264_REV < 2969)
-	{
-		//	gr: flushing on OSX (X264_REV 2917) causing
-		//	log: x264 [error]: lookahead thread is already stopped
-#if !defined(TARGET_OSX)
-		{
-			//FlushFrames();
-		}
-#endif
-	}
+	auto PixelBuffer = Avf::PixelsToPixelBuffer(EncodePixels);
+	auto FrameNumber = PushFrameMeta(Meta);
+		
+	mCompressor->Encode( PixelBuffer, FrameNumber );
 }
 
 
 
 void Avf::TEncoder::FinishEncoding()
 {
-	//	when we're done with frames, we need to make the encoder flush out any more packets
-	int Safety = 1000;
-	while (--Safety > 0)
-	{
-		auto DelayedFrameCount = x264_encoder_delayed_frames(mHandle);
-		if (DelayedFrameCount == 0)
-			break;
-		
-		Encode(nullptr);
-	}
+	mCompressor.reset();
 }
 
 
-void Avf::TEncoder::Encode(x264_picture_t* InputPicture)
-{
-	//	we're assuming here mPicture has been setup, or we're flushing
-	
-	//	gr: currently, decoder NEEDS to have nal packets split
-	auto OnNalPacket = [&](FixedRemoteArray<uint8_t>& Data)
-	{
-		Soy::TScopeTimerPrint Timer("OnNalPacket",2);
-		auto DecodeOrderNumber = mPicture.i_dts;
-		auto FrameNumber = mPicture.i_pts;
-		//std::Debug << "OnNalPacket( pts=" << FrameNumber << ", dts=" << DecodeOrderNumber << ")" << std::endl;
-		auto FrameMeta = GetFrameMeta(FrameNumber);
-		
-		//	todo: either store these to make sure decode order (dts) is kept correct
-		//		or send DTS order to TPacket for host to order
-		//	todo: insert DTS into meta anyway!
-		//	gr: DTS is 0 all of the time, I think there's a setting to allow out of order
-		PopH264::TPacket OutputPacket;
-		OutputPacket.mData.reset(new Array<uint8_t>());
-		OutputPacket.mInputMeta = FrameMeta;
-		OutputPacket.mData->PushBackArray(Data);
-		OnOutputPacket(OutputPacket);
-	};
-	
-	x264_picture_t OutputPicture;
-	x264_nal_t* Nals = nullptr;
-	int NalCount = 0;
-	
-	Soy::TScopeTimerPrint EncodeTimer("x264_encoder_encode",10);
-	auto FrameSize = x264_encoder_encode(mHandle, &Nals, &NalCount, InputPicture, &OutputPicture);
-	EncodeTimer.Stop();
-	if (FrameSize < 0)
-		throw Soy::AssertException("x264_encoder_encode error");
-	
-	//	processed, but no data output
-	if (FrameSize == 0)
-	{
-		auto DelayedFrameCount = x264_encoder_delayed_frames(mHandle);
-		std::Debug << "x264::Encode processed, but no output; DelayedFrameCount=" << DelayedFrameCount << std::endl;
-		return;
-	}
-	
-	//	process each nal
-	auto TotalNalSize = 0;
-	for (auto n = 0; n < NalCount; n++)
-	{
-		auto& Nal = Nals[n];
-		auto NalSize = Nal.i_payload;
-		auto PacketArray = GetRemoteArray(Nal.p_payload, NalSize);
-		//	if this throws we lose a packet!
-		OnNalPacket(PacketArray);
-		TotalNalSize += NalSize;
-	}
-	if (TotalNalSize != FrameSize)
-		throw Soy::AssertException("NALs output size doesn't match frame size");
-}
 
-
-size_t X264::TEncoder::PushFrameMeta(const std::string& Meta)
+size_t Avf::TEncoder::PushFrameMeta(const std::string& Meta)
 {
 	TFrameMeta FrameMeta;
 	FrameMeta.mFrameNumber = mFrameCount;
@@ -498,7 +379,7 @@ size_t X264::TEncoder::PushFrameMeta(const std::string& Meta)
 	return FrameMeta.mFrameNumber;
 }
 
-std::string X264::TEncoder::GetFrameMeta(size_t FrameNumber)
+std::string Avf::TEncoder::GetFrameMeta(size_t FrameNumber)
 {
 	for ( auto i=0;	i<mFrameMetas.GetSize();	i++ )
 	{

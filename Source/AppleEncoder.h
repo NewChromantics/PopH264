@@ -48,7 +48,7 @@ private:
 	
 protected:
 	std::shared_ptr<TCompressor>	mCompressor;
-	SoyPixelsMeta		mPixelsMeta;
+	SoyPixelsMeta		mPixelMeta;	//	format the compressor is currently setup for
 	
 	size_t				mFrameCount = 0;
 	Array<TFrameMeta>	mFrameMetas;
