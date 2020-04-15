@@ -35,8 +35,8 @@ X264::TEncoder::TEncoder(size_t PresetValue,std::function<void(PopH264::TPacket&
 	Soy::TRuntimeLibrary Dll("x264.dll");
 #endif
 	
-	//	todo: tune options. takes , seperated values
-	const char* Tune = nullptr;
+	//	todo: allow user to set tune options. takes , seperated values
+	const char* Tune = "zerolatency";
 	auto* PresetName = x264_preset_names[PresetValue];
 	auto Result = x264_param_default_preset(&mParam, PresetName, Tune);
 	IsOkay(Result,"x264_param_default_preset");
