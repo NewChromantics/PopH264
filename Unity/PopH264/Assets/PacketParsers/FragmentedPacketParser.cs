@@ -216,4 +216,10 @@ public class FragmentedPacketParser : MonoBehaviour {
 		PendingPackets.Add(NewPacket);
 	}
 
+
+	public void PushPacketWithNoTimestamp(byte[] Data)
+	{
+		PushPacket(Data, 0);
+	}
+
 }
