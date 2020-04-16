@@ -38,7 +38,7 @@ public:
 	
 private:
 	void			AllocEncoder(const SoyPixelsMeta& Meta);
-	void			OnPacketCompressed(const ArrayBridge<uint8_t>& Data,SoyTime PresentationTime);
+	void			OnPacketCompressed(const ArrayBridge<uint8_t>& Data,size_t FrameNumber);
 
 	//	returns frame number used as PTS and stores meta
 	size_t			PushFrameMeta(const std::string& Meta);

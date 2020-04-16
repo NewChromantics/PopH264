@@ -21,7 +21,7 @@
 class Avf::TCompressor
 {
 public:
-	TCompressor(const SoyPixelsMeta& Meta,std::function<void(const ArrayBridge<uint8_t>&,SoyTime)> OnPacket);
+	TCompressor(const SoyPixelsMeta& Meta,std::function<void(const ArrayBridge<uint8_t>&&,size_t)> OnPacket);
 	~TCompressor();
 	
 	void	OnCompressed(OSStatus status, VTEncodeInfoFlags infoFlags,CMSampleBufferRef sampleBuffer);
@@ -30,10 +30,10 @@ public:
 	void	Encode(CVPixelBufferRef PixelBuffer,size_t FrameNumber);
 	
 private:
-	void	OnPacket(const ArrayBridge<uint8_t>& Data,SoyTime PresentationTime);
+	void	OnPacket(const ArrayBridge<uint8_t>&& Data,SoyTime PresentationTime,H264NaluContent::Type Content,H264NaluPriority::Type Priority);
 	
 private:
-	std::function<void(const ArrayBridge<uint8_t>&,SoyTime)>	mOnPacket;
+	std::function<void(const ArrayBridge<uint8_t>&&,size_t)>	mOnPacket;
 
 	
 	VTCompressionSessionRef EncodingSession = nil;
@@ -61,7 +61,7 @@ void OnCompressedCallback(void *outputCallbackRefCon,void *sourceFrameRefCon, OS
 
 
 
-Avf::TCompressor::TCompressor(const SoyPixelsMeta& Meta,std::function<void(const ArrayBridge<uint8_t>&,SoyTime)> OnPacket) :
+Avf::TCompressor::TCompressor(const SoyPixelsMeta& Meta,std::function<void(const ArrayBridge<uint8_t>&&,size_t)> OnPacket) :
 	mOnPacket	( OnPacket )
 {
 	if ( !mOnPacket )
@@ -144,13 +144,16 @@ uint8 H264::EncodeNaluByte(H264NaluContent::Type Content,H264NaluPriority::Type 
 	return Byte;
 }
 
-void AnnexBToAnnexB(ArrayBridge<uint8_t>&& Data,std::function<void(const ArrayBridge<uint8_t>&)> EnumPacket)
+void AnnexBToAnnexB(const ArrayBridge<uint8_t>& Data,std::function<void(const ArrayBridge<uint8_t>&&)> EnumPacket)
 {
-	EnumPacket( Data );
+	//	gr: does this start with 0001 etc? if so, cut
+	Soy_AssertTodo();
+	EnumPacket( GetArrayBridge(Data) );
 }
 
-void NaluToAnnexB(ArrayBridge<uint8_t>& Data,size_t LengthSize,std::function<void(const ArrayBridge<uint8_t>&)>& EnumPacket)
+void NaluToAnnexB(const ArrayBridge<uint8_t>& Data,size_t LengthSize,std::function<void(const ArrayBridge<uint8_t>&&)>& EnumPacket)
 {
+	/*
 	//	need to insert special cases like SPS
 	BufferArray<uint8,10> NaluHeader;
 	NaluHeader.PushBack(0);
@@ -168,7 +171,7 @@ void NaluToAnnexB(ArrayBridge<uint8_t>& Data,size_t LengthSize,std::function<voi
 		auto Bridge = GetArrayBridge(CompletePacket);
 		EnumPacket(Bridge);
 	};
-	
+	*/
 	//	walk through data
 	int i=0;
 	while ( i <Data.GetSize() )
@@ -196,18 +199,15 @@ void NaluToAnnexB(ArrayBridge<uint8_t>& Data,size_t LengthSize,std::function<voi
 		auto* DataStart = &Data[i+LengthSize];
 		auto PacketContent = GetRemoteArray( DataStart, ChunkLength );
 
-		EnumPacketData( GetArrayBridge(PacketContent) );
+		EnumPacket( GetArrayBridge(PacketContent) );
 		
 		i += LengthSize + ChunkLength;
 	}
 }
 
-void Nalu32ToAnnexB(ArrayBridge<uint8_t>&& Data,std::function<void(const ArrayBridge<uint8_t>&)> EnumPacket)
-{
-	NaluToAnnexB( Data, 4, EnumPacket );
-}
 
-std::function<void(ArrayBridge<uint8_t>&&,std::function<void(const ArrayBridge<uint8_t>&)>)> GetNaluConversionFunc(CMFormatDescriptionRef FormatDescription)
+//	this could be multiple nals, and we need to cut the prefix, so enum
+void ExtractPackets(const ArrayBridge<uint8_t>&& Packets,CMFormatDescriptionRef FormatDescription,std::function<void(const ArrayBridge<uint8_t>&&)> EnumPacket)
 {
 	int nal_size_field_bytes = 0;
 	auto Result = CMVideoFormatDescriptionGetH264ParameterSetAtIndex( FormatDescription, 0, nullptr, nullptr, nullptr, &nal_size_field_bytes );
@@ -219,8 +219,15 @@ std::function<void(ArrayBridge<uint8_t>&&,std::function<void(const ArrayBridge<u
 	
 	switch ( nal_size_field_bytes )
 	{
-		case 0:	return AnnexBToAnnexB;
-		case 4:	return Nalu32ToAnnexB;
+		case 0:
+			AnnexBToAnnexB( Packets, EnumPacket );
+			return;
+			
+		//case 1:
+		//case 2:
+		case 4:
+			NaluToAnnexB( Packets, nal_size_field_bytes, EnumPacket );
+			return;
 	}
 	
 	std::stringstream Debug;
@@ -238,9 +245,6 @@ void Avf::TCompressor::OnCompressed(OSStatus status, VTEncodeInfoFlags infoFlags
 
 	auto DescFourcc = CFSwapInt32HostToBig( CMFormatDescriptionGetMediaSubType(FormatDescription) );
 	Soy::TFourcc Fourcc( DescFourcc );
-	
-	//	get a function to convert nalu to what we want
-	auto FixNaluData = GetNaluConversionFunc(FormatDescription);
 
 	//	get meta
 	CMTime PresentationTimestamp = CMSampleBufferGetPresentationTimeStamp(SampleBuffer);
@@ -260,19 +264,14 @@ void Avf::TCompressor::OnCompressed(OSStatus status, VTEncodeInfoFlags infoFlags
 		throw Soy::AssertException("Data sample not ready");
 	}
 
-	auto PushPacket = [&](const ArrayBridge<uint8_t>& Data)
-	{
-		OnPacket( Data, PresentationTime );
-	};
-	
 	if ( IsKeyframe )
 	{
 		try
 		{
+			//	need to insert nalu!
 			Array<uint8_t> SpsData;
 			Avf::GetFormatDescriptionData( GetArrayBridge(SpsData), FormatDescription, 0 );
-			//FixNaluData( GetArrayBridge(SpsData), PushPacket );
-			PushPacket( GetArrayBridge(SpsData) );
+			OnPacket( GetArrayBridge(SpsData), PresentationTime, H264NaluContent::SequenceParameterSet, H264NaluPriority::Important );
 		}
 		catch(std::exception& e)
 		{
@@ -283,8 +282,7 @@ void Avf::TCompressor::OnCompressed(OSStatus status, VTEncodeInfoFlags infoFlags
 		{
 			Array<uint8_t> PpsData;
 			Avf::GetFormatDescriptionData( GetArrayBridge(PpsData), FormatDescription, 1 );
-			//FixNaluData( GetArrayBridge(PpsData), PushPacket );
-			PushPacket( GetArrayBridge(PpsData) );
+			OnPacket( GetArrayBridge(PpsData), PresentationTime, H264NaluContent::PictureParameterSet, H264NaluPriority::Important );
 		}
 		catch(std::exception& e)
 		{
@@ -309,9 +307,13 @@ void Avf::TCompressor::OnCompressed(OSStatus status, VTEncodeInfoFlags infoFlags
 			auto Result = CMBlockBufferCopyDataBytes( BlockBuffer, 0, PacketData.GetDataSize(), PacketData.GetArray() );
 			Avf::IsOkay( Result, "CMBlockBufferCopyDataBytes" );
 			
-			//	note: this packet could have multiple NAL's
-			//	we should adapt FixNaluData to spit out multiple packets
-			FixNaluData( GetArrayBridge(PacketData), PushPacket );
+			auto EnumPacket = [&](const ArrayBridge<uint8_t>&& PacketData)
+			{
+				//	check keyframe, does description have the proper type?
+				OnPacket( GetArrayBridge(PacketData), PresentationTime, H264NaluContent::AccessUnitDelimiter, H264NaluPriority::Important );
+			};
+			//	this could be multiple nals, and we need to cut the prefix, so enum
+			ExtractPackets( GetArrayBridge(PacketData), FormatDescription, EnumPacket );
 		}
 		else
 		{
@@ -347,9 +349,26 @@ void Avf::TCompressor::OnCompressed(OSStatus status, VTEncodeInfoFlags infoFlags
 	*/
 }
 
-void Avf::TCompressor::OnPacket(const ArrayBridge<uint8_t>& Data,SoyTime PresentationTime)
+void Avf::TCompressor::OnPacket(const ArrayBridge<uint8_t>&& Data,SoyTime PresentationTime,H264NaluContent::Type Content,H264NaluPriority::Type Priority)
 {
-	mOnPacket( Data, PresentationTime );
+	//	fill output with nalu header
+	Array<uint8_t> NaluPacket;
+	NaluPacket.PushBack(0);
+	NaluPacket.PushBack(0);
+	NaluPacket.PushBack(0);
+	NaluPacket.PushBack(1);
+
+	auto NaluByte = H264::EncodeNaluByte(Content,Priority);
+	NaluPacket.PushBack(NaluByte);
+
+	if ( Content == H264NaluContent::AccessUnitDelimiter )
+		NaluPacket.PushBack(0xF0);// Slice types = ANY
+
+	NaluPacket.PushBackArray(Data);
+	
+	auto FrameNumber = PresentationTime.mTime / 1000;
+	
+	mOnPacket( GetArrayBridge(NaluPacket), FrameNumber );
 }
 
 
@@ -405,9 +424,9 @@ void Avf::TEncoder::AllocEncoder(const SoyPixelsMeta& Meta)
 		throw Soy_AssertException(Error);
 	}
 	
-	auto OnPacket = [this](const ArrayBridge<uint8_t>& PacketData,SoyTime Timestamp)
+	auto OnPacket = [this](const ArrayBridge<uint8_t>&& PacketData,size_t FrameNumber)
 	{
-		this->OnPacketCompressed( PacketData, Timestamp );
+		this->OnPacketCompressed( PacketData, FrameNumber );
 	};
 
 	mCompressor.reset( new TCompressor( Meta, OnPacket ) );
@@ -475,11 +494,10 @@ std::string Avf::TEncoder::GetFrameMeta(size_t FrameNumber)
 	throw Soy::AssertException(Error);
 }
 	
-void Avf::TEncoder::OnPacketCompressed(const ArrayBridge<uint8_t>& Data,SoyTime PresentationTime)
+void Avf::TEncoder::OnPacketCompressed(const ArrayBridge<uint8_t>& Data,size_t FrameNumber)
 {
 	Soy::TScopeTimerPrint Timer("OnNalPacket",2);
 	//auto DecodeOrderNumber = mPicture.i_dts;
-	auto FrameNumber = PresentationTime.GetTime();
 	
 	//std::Debug << "OnNalPacket( pts=" << FrameNumber << ", dts=" << DecodeOrderNumber << ")" << std::endl;
 	auto FrameMeta = GetFrameMeta(FrameNumber);
