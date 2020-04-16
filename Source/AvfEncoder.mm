@@ -30,7 +30,7 @@ public:
 	void	Encode(CVPixelBufferRef PixelBuffer,size_t FrameNumber);
 	
 private:
-	void	OnPacket(const ArrayBridge<uint8_t>&& Data,SoyTime PresentationTime,H264NaluContent::Type Content,H264NaluPriority::Type Priority);
+	void	OnPacket(const ArrayBridge<uint8_t>&& Data,SoyTime PresentationTime);
 	
 private:
 	std::function<void(const ArrayBridge<uint8_t>&&,size_t)>	mOnPacket;
@@ -48,6 +48,7 @@ private:
 
 void OnCompressedCallback(void *outputCallbackRefCon,void *sourceFrameRefCon, OSStatus status, VTEncodeInfoFlags infoFlags,CMSampleBufferRef sampleBuffer)
 {
+	//	https://chromium.googlesource.com/external/webrtc/+/6c78307a21252c2dbd704f6d5e92a220fb722ed4/webrtc/modules/video_coding/codecs/h264/h264_video_toolbox_encoder.mm#588
 	try
 	{
 		auto* This = static_cast<Avf::TCompressor*>(outputCallbackRefCon);
@@ -157,25 +158,6 @@ void AnnexBToAnnexB(const ArrayBridge<uint8_t>& Data,std::function<void(const Ar
 
 void NaluToAnnexB(const ArrayBridge<uint8_t>& Data,size_t LengthSize,std::function<void(const ArrayBridge<uint8_t>&&)>& EnumPacket)
 {
-	/*
-	//	need to insert special cases like SPS
-	BufferArray<uint8,10> NaluHeader;
-	NaluHeader.PushBack(0);
-	NaluHeader.PushBack(0);
-	NaluHeader.PushBack(0);
-	NaluHeader.PushBack(1);
-	NaluHeader.PushBack( H264::EncodeNaluByte( H264NaluContent::AccessUnitDelimiter, H264NaluPriority::Zero ) );
-	NaluHeader.PushBack(0xF0);// Slice types = ANY
-	
-	auto EnumPacketData = [&](const ArrayBridge<uint8_t>&& PacketContent)
-	{
-		Array<uint8_t> CompletePacket;
-		CompletePacket.PushBackArray(NaluHeader);
-		CompletePacket.PushBackArray(PacketContent);
-		auto Bridge = GetArrayBridge(CompletePacket);
-		EnumPacket(Bridge);
-	};
-	*/
 	//	walk through data
 	int i=0;
 	while ( i <Data.GetSize() )
@@ -194,6 +176,7 @@ void NaluToAnnexB(const ArrayBridge<uint8_t>& Data,size_t LengthSize,std::functi
 		}
 		else if ( LengthSize == 4 )
 		{
+			//	gr: we should be using CFSwapInt32BigToHost
 			ChunkLength |= Data[i+0] << 24;
 			ChunkLength |= Data[i+1] << 16;
 			ChunkLength |= Data[i+2] << 8;
@@ -214,8 +197,29 @@ void NaluToAnnexB(const ArrayBridge<uint8_t>& Data,size_t LengthSize,std::functi
 void ExtractPackets(const ArrayBridge<uint8_t>&& Packets,CMFormatDescriptionRef FormatDescription,std::function<void(const ArrayBridge<uint8_t>&&)> EnumPacket)
 {
 	int nal_size_field_bytes = 0;
-	auto Result = CMVideoFormatDescriptionGetH264ParameterSetAtIndex( FormatDescription, 0, nullptr, nullptr, nullptr, &nal_size_field_bytes );
+	//	SPS & PPS (&sei?) set count, maybe we should integrate that into this func
+	size_t ParamSetCount = 0;
+	auto Result = CMVideoFormatDescriptionGetH264ParameterSetAtIndex( FormatDescription, 0, nullptr, nullptr, &ParamSetCount, &nal_size_field_bytes );
 	Avf::IsOkay( Result, "Get H264 param NAL size");
+	
+	//	extract header packets
+	//	SPS, then PPS
+	H264NaluContent::Type NaluContentTypes[] = { H264NaluContent::SequenceParameterSet, H264NaluContent::PictureParameterSet };
+	for ( auto i=0;	i<ParamSetCount;	i++ )
+	{
+		if ( i > 1 )
+			throw Soy::AssertException("Got Packet header > SPS & PPS");
+		Array<uint8_t> SpsData;
+		Avf::GetFormatDescriptionData( GetArrayBridge(SpsData), FormatDescription, 0 );
+
+		//	insert nalu header
+		auto Content = NaluContentTypes[i];
+		auto Priority = H264NaluPriority::Important;
+		auto NaluByte = H264::EncodeNaluByte(Content,Priority);
+		GetArrayBridge(SpsData).InsertAt(0,NaluByte);
+		EnumPacket( GetArrayBridge(SpsData) );
+	}
+	
 	
 	//	-1 is annexB
 	if ( nal_size_field_bytes < 0 )
@@ -268,32 +272,6 @@ void Avf::TCompressor::OnCompressed(OSStatus status, VTEncodeInfoFlags infoFlags
 		throw Soy::AssertException("Data sample not ready");
 	}
 
-	if ( IsKeyframe )
-	{
-		try
-		{
-			//	need to insert nalu!
-			Array<uint8_t> SpsData;
-			Avf::GetFormatDescriptionData( GetArrayBridge(SpsData), FormatDescription, 0 );
-			OnPacket( GetArrayBridge(SpsData), PresentationTime, H264NaluContent::SequenceParameterSet, H264NaluPriority::Important );
-		}
-		catch(std::exception& e)
-		{
-			std::Debug << "Error getting SPS: " << e.what() << std::endl;
-		}
-		
-		try
-		{
-			Array<uint8_t> PpsData;
-			Avf::GetFormatDescriptionData( GetArrayBridge(PpsData), FormatDescription, 1 );
-			OnPacket( GetArrayBridge(PpsData), PresentationTime, H264NaluContent::PictureParameterSet, H264NaluPriority::Important );
-		}
-		catch(std::exception& e)
-		{
-			std::Debug << "Error getting PPS: " << e.what() << std::endl;
-		}
-	}
-
 	//	extract data
 	{
 		//	this data could be an image buffer or a block buffer (for h264, expecting block)
@@ -303,7 +281,9 @@ void Avf::TCompressor::OnCompressed(OSStatus status, VTEncodeInfoFlags infoFlags
 		if ( BlockBuffer )
 		{
 			//	copy bytes into our array
-			//	CMBlockBufferGetDataPointer is also an option
+			//	CMBlockBufferGetDataPointer is also an option...
+			//	...but we copy in case buffer isn't contiguous
+			//if (!CMBlockBufferIsRangeContiguous(block_buffer, 0, 0)) {
 			Array<uint8_t> PacketData;
 			
 			auto DataSize = CMBlockBufferGetDataLength( BlockBuffer );
@@ -313,8 +293,7 @@ void Avf::TCompressor::OnCompressed(OSStatus status, VTEncodeInfoFlags infoFlags
 			
 			auto EnumPacket = [&](const ArrayBridge<uint8_t>&& PacketData)
 			{
-				//	check keyframe, does description have the proper type?
-				OnPacket( GetArrayBridge(PacketData), PresentationTime, H264NaluContent::AccessUnitDelimiter, H264NaluPriority::Important );
+				OnPacket( GetArrayBridge(PacketData), PresentationTime );
 			};
 			//	this could be multiple nals, and we need to cut the prefix, so enum
 			ExtractPackets( GetArrayBridge(PacketData), FormatDescription, EnumPacket );
@@ -353,7 +332,7 @@ void Avf::TCompressor::OnCompressed(OSStatus status, VTEncodeInfoFlags infoFlags
 	*/
 }
 
-void Avf::TCompressor::OnPacket(const ArrayBridge<uint8_t>&& Data,SoyTime PresentationTime,H264NaluContent::Type Content,H264NaluPriority::Type Priority)
+void Avf::TCompressor::OnPacket(const ArrayBridge<uint8_t>&& Data,SoyTime PresentationTime)
 {
 	//	fill output with nalu header
 	Array<uint8_t> NaluPacket;
@@ -362,12 +341,7 @@ void Avf::TCompressor::OnPacket(const ArrayBridge<uint8_t>&& Data,SoyTime Presen
 	NaluPacket.PushBack(0);
 	NaluPacket.PushBack(1);
 
-	auto NaluByte = H264::EncodeNaluByte(Content,Priority);
-	NaluPacket.PushBack(NaluByte);
-
-	if ( Content == H264NaluContent::AccessUnitDelimiter )
-		NaluPacket.PushBack(0xF0);// Slice types = ANY
-
+	//	content type should already be here	
 	NaluPacket.PushBackArray(Data);
 	
 	auto FrameNumber = PresentationTime.mTime / 1000;
