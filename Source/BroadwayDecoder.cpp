@@ -183,16 +183,20 @@ bool Broadway::TDecoder::DecodeNextPacket(std::function<void(const SoyPixelsImpl
 	H264SwDecOutput Output;
 	Output.pStrmCurrPos = nullptr;
 	
-	try
+	static bool Debug = false;
+	if ( Debug )
 	{
-		auto H264PacketType = H264::GetPacketType(GetArrayBridge(mPendingData));
-		std::Debug << "H264SwDecDecode(" << magic_enum::enum_name(H264PacketType) << ")" << std::endl;
+		try
+		{
+			auto H264PacketType = H264::GetPacketType(GetArrayBridge(mPendingData));
+			std::Debug << "H264SwDecDecode(" << magic_enum::enum_name(H264PacketType) << ")" << std::endl;
+		}
+		catch (std::exception& e)
+		{
+			std::Debug << "Error getting Nalu packet type; " << e.what() << std::endl;
+		}
 	}
-	catch (std::exception& e)
-	{
-		std::Debug << "Error getting Nalu packet type; " << e.what() << std::endl;
-	}
-
+	
 	Soy::TScopeTimerPrint Timer("H264 Decode",15);
 	auto Result = H264SwDecDecode( mDecoderInstance, &Input, &Output );
 	auto DecodeDuration = Timer.Stop();
@@ -264,6 +268,10 @@ bool Broadway::TDecoder::DecodeNextPacket(std::function<void(const SoyPixelsImpl
 			}
 			return true;
 		}
+			
+			//	data eaten, no output
+		case H264SWDEC_STRM_PROCESSED:
+			return true;
 		
 		default:
 		{

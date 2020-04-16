@@ -99,7 +99,7 @@ Avf::TCompressor::TCompressor(const SoyPixelsMeta& Meta,std::function<void(const
 		auto Width = Meta.GetWidth();
 		auto Height = Meta.GetHeight();
 		OSStatus status = VTCompressionSessionCreate( NULL, Width, Height, kCMVideoCodecType_H264, sessionAttributes, NULL, NULL, OnCompressedCallback, CallbackParam, &EncodingSession );
-		std::Debug << "H264: VTCompressionSessionCreate " << status << std::endl;
+		//std::Debug << "H264: VTCompressionSessionCreate " << status << std::endl;
 		Avf::IsOkay(status,"VTCompressionSessionCreate");
 
 		//	gr: kVTProfileLevel_H264_Baseline_3_0 always fails in compression callback with -12348
@@ -236,8 +236,13 @@ extern "C" void ExtractPackets(const ArrayBridge<uint8_t>&& Packets,CMFormatDesc
 
 void Avf::TCompressor::OnCompressed(OSStatus status, VTEncodeInfoFlags infoFlags,CMSampleBufferRef SampleBuffer)
 {
-	std::Debug << __PRETTY_FUNCTION__ << "( status=" << status << " infoFlags=" << infoFlags << ")" << std::endl;
 	Avf::IsOkay( status, "OnCompressed status");
+	
+	//	if flags & dropped, report
+	if ( status != 0 || infoFlags != 0 )
+	{
+		std::Debug << __PRETTY_FUNCTION__ << "( status=" << status << " infoFlags=" << infoFlags << ")" << std::endl;
+	}
 	
 	CMFormatDescriptionRef FormatDescription = CMSampleBufferGetFormatDescription(SampleBuffer);
 
@@ -331,14 +336,17 @@ void Avf::TCompressor::OnPacket(const ArrayBridge<uint8_t>&& Data,SoyTime Presen
 	NaluPacket.PushBack(0);
 	NaluPacket.PushBack(1);
 
-	//	content type should already be here
-	H264NaluContent::Type Content;
-	H264NaluPriority::Type Priority;
-	auto NaluByte = Data[0];
-	H264::DecodeNaluByte( NaluByte, Content, Priority );
+	static bool Debug = false;
+	if ( Debug )
+	{
+		//	content type should already be here
+		H264NaluContent::Type Content;
+		H264NaluPriority::Type Priority;
+		auto NaluByte = Data[0];
+		H264::DecodeNaluByte( NaluByte, Content, Priority );
+		std::Debug << __PRETTY_FUNCTION__ << " x" << Data.GetDataSize() << "bytes (pre-0001) " << magic_enum::enum_name(Content) << " " << magic_enum::enum_name(Priority) << std::endl;
+	}
 	
-	std::Debug << __PRETTY_FUNCTION__ << " x" << Data.GetDataSize() << "bytes (pre-0001) " << magic_enum::enum_name(Content) << " " << magic_enum::enum_name(Priority) << std::endl;
-
 	NaluPacket.PushBackArray(Data);
 	
 	auto FrameNumber = PresentationTime.mTime / 1000;
@@ -366,10 +374,14 @@ void Avf::TCompressor::Encode(CVPixelBufferRef PixelBuffer,size_t FrameNumber)
 													  frameProperties, FrameMeta, &OutputFlags);
 		Avf::IsOkay(Status,"VTCompressionSessionEncodeFrame");
 
-		auto FrameDropped = ( OutputFlags & kVTEncodeInfo_FrameDropped) != 0;
-		auto EncodingAsync = ( OutputFlags & kVTEncodeInfo_Asynchronous) != 0;
-		
-		std::Debug << "VTCompressionSessionEncodeFrame returned FrameDropped=" << FrameDropped << " EncodingAsync=" << EncodingAsync << std::endl;
+		//	expecting this output to be async
+		static bool Debug = false;
+		if ( Debug )
+		{
+			auto FrameDropped = ( OutputFlags & kVTEncodeInfo_FrameDropped) != 0;
+			auto EncodingAsync = ( OutputFlags & kVTEncodeInfo_Asynchronous) != 0;
+			std::Debug << "VTCompressionSessionEncodeFrame returned FrameDropped=" << FrameDropped << " EncodingAsync=" << EncodingAsync << std::endl;
+		}
 	};
 	dispatch_sync(aQueue,Lambda);
 }
@@ -410,6 +422,7 @@ void Avf::TEncoder::AllocEncoder(const SoyPixelsMeta& Meta)
 
 void Avf::TEncoder::Encode(const SoyPixelsImpl& Luma,const SoyPixelsImpl& ChromaU,const SoyPixelsImpl& ChromaV,const std::string& Meta)
 {
+	//	this should be fast as it sends to encoder, but synchronous
 	Soy::TScopeTimerPrint Timer(__PRETTY_FUNCTION__, 2);
 	
 	//	todo: make a complete CVPixelBuffer
