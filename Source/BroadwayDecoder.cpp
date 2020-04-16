@@ -6,10 +6,46 @@
 #include "MagicEnum/include/magic_enum.hpp"
 
 
+
 namespace Broadway
 {
-	void	IsOkay(H264SwDecRet Result,const char* Context);
+	void		IsOkay(H264SwDecRet Result,const char* Context);
+	prmem::Heap	Heap(false,false,"Broadway");
 }
+
+
+
+//	gr: commented these out from H264SwDecApi.c so I can debug
+//		(and monitor mem usage)
+
+void H264SwDecTrace(char *string)
+{
+	std::Debug << "Broadway: " << string << std::endl;
+}
+
+void* H264SwDecMalloc(u32 size)
+{
+	return malloc(size);
+	//return Broadway::Heap.Alloc(size);
+}
+
+void H264SwDecFree(void *ptr)
+{
+	free(ptr);
+	//	need a free that doesn't know size
+	//return Broadway::Heap.Free(ptr);
+}
+
+void H264SwDecMemcpy(void *dest, void *src, u32 count)
+{
+	memcpy(dest, src, count);
+}
+
+void H264SwDecMemset(void *ptr, i32 value, u32 count)
+{
+	memset(ptr, value, count);
+}
+
 
 Broadway::TDecoder::TDecoder()
 {
