@@ -2,6 +2,7 @@
 #include "SoyPixels.h"
 #include "SoyAvf.h"
 #include "SoyFourcc.h"
+#include "MagicEnum/include/magic_enum.hpp"
 
 #include <CoreMedia/CMBase.h>
 #include <VideoToolbox/VTBase.h>
@@ -137,17 +138,6 @@ void Avf::TCompressor::Flush()
 	VTCompressionSessionCompleteFrames( EncodingSession, kCMTimeInvalid );
 }
 
-uint8 H264::EncodeNaluByte(H264NaluContent::Type Content,H264NaluPriority::Type Priority)
-{
-	//	uint8 Idc_Important = 0x3 << 5;	//	0x60
-	//	uint8 Idc = Idc_Important;	//	011 XXXXX
-	uint8 Idc = Priority;
-	Idc <<= 5;
-	uint8 Type = Content;
-	
-	uint8 Byte = Idc|Type;
-	return Byte;
-}
 
 void AnnexBToAnnexB(const ArrayBridge<uint8_t>& Data,std::function<void(const ArrayBridge<uint8_t>&&)> EnumPacket)
 {
@@ -194,7 +184,7 @@ void NaluToAnnexB(const ArrayBridge<uint8_t>& Data,size_t LengthSize,std::functi
 
 
 //	this could be multiple nals, and we need to cut the prefix, so enum
-void ExtractPackets(const ArrayBridge<uint8_t>&& Packets,CMFormatDescriptionRef FormatDescription,std::function<void(const ArrayBridge<uint8_t>&&)> EnumPacket)
+extern "C" void ExtractPackets(const ArrayBridge<uint8_t>&& Packets,CMFormatDescriptionRef FormatDescription,std::function<void(const ArrayBridge<uint8_t>&&)> EnumPacket)
 {
 	int nal_size_field_bytes = 0;
 	//	SPS & PPS (&sei?) set count, maybe we should integrate that into this func
@@ -210,13 +200,13 @@ void ExtractPackets(const ArrayBridge<uint8_t>&& Packets,CMFormatDescriptionRef 
 		if ( i > 1 )
 			throw Soy::AssertException("Got Packet header > SPS & PPS");
 		Array<uint8_t> SpsData;
-		Avf::GetFormatDescriptionData( GetArrayBridge(SpsData), FormatDescription, 0 );
+		Avf::GetFormatDescriptionData( GetArrayBridge(SpsData), FormatDescription, i );
 
+		//	gr: this header is already here. lets debug it in EnumPacket though
 		//	insert nalu header
-		auto Content = NaluContentTypes[i];
-		auto Priority = H264NaluPriority::Important;
-		auto NaluByte = H264::EncodeNaluByte(Content,Priority);
-		GetArrayBridge(SpsData).InsertAt(0,NaluByte);
+		//auto Content = NaluContentTypes[i];
+		//auto Priority = H264NaluPriority::Important;
+		//auto NaluByte = H264::EncodeNaluByte(Content,Priority);
 		EnumPacket( GetArrayBridge(SpsData) );
 	}
 	
@@ -341,7 +331,14 @@ void Avf::TCompressor::OnPacket(const ArrayBridge<uint8_t>&& Data,SoyTime Presen
 	NaluPacket.PushBack(0);
 	NaluPacket.PushBack(1);
 
-	//	content type should already be here	
+	//	content type should already be here
+	H264NaluContent::Type Content;
+	H264NaluPriority::Type Priority;
+	auto NaluByte = Data[0];
+	H264::DecodeNaluByte( NaluByte, Content, Priority );
+	
+	std::Debug << __PRETTY_FUNCTION__ << " x" << Data.GetDataSize() << "bytes (pre-0001) " << magic_enum::enum_name(Content) << " " << magic_enum::enum_name(Priority) << std::endl;
+
 	NaluPacket.PushBackArray(Data);
 	
 	auto FrameNumber = PresentationTime.mTime / 1000;

@@ -294,6 +294,8 @@
 		BFD607771EA16F0A0035C814 /* IUnityGraphicsD3D12.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IUnityGraphicsD3D12.h; path = Source/Unity/IUnityGraphicsD3D12.h; sourceTree = "<group>"; };
 		BFD607781EA16F0A0035C814 /* IUnityGraphicsMetal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IUnityGraphicsMetal.h; path = Source/Unity/IUnityGraphicsMetal.h; sourceTree = "<group>"; };
 		BFD607791EA16F0A0035C814 /* IUnityInterface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IUnityInterface.h; path = Source/Unity/IUnityInterface.h; sourceTree = "<group>"; };
+		BFDB2BAB2448B4CE009EC370 /* SoyH264.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SoyH264.cpp; path = Source/SoyLib/src/SoyH264.cpp; sourceTree = "<group>"; };
+		BFDB2BAC2448B4CF009EC370 /* SoyH264.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SoyH264.h; path = Source/SoyLib/src/SoyH264.h; sourceTree = "<group>"; };
 		BFF1C6E322E377D100AFDFD5 /* PopH264.Android */ = {isa = PBXFileReference; lastKnownFileType = folder; path = PopH264.Android; sourceTree = "<group>"; };
 		BFF1C6E622E3A1D600AFDFD5 /* SoyFilesystem.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SoyFilesystem.h; path = Source/SoyLib/src/SoyFilesystem.h; sourceTree = "<group>"; };
 		BFF1C6E822E3C65800AFDFD5 /* BroadwayAll.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = BroadwayAll.c; path = Source/BroadwayAll.c; sourceTree = "<group>"; };
@@ -494,6 +496,8 @@
 				BF8AB6A421F22602008E7E76 /* SoyDebug.cpp */,
 				BF8AB6A821F22602008E7E76 /* SoyDebug.h */,
 				BF8AB6B721F22895008E7E76 /* SoyDebug.mm */,
+				BFDB2BAB2448B4CE009EC370 /* SoyH264.cpp */,
+				BFDB2BAC2448B4CF009EC370 /* SoyH264.h */,
 				BFF1C6E622E3A1D600AFDFD5 /* SoyFilesystem.h */,
 				BF1826AD24228D31006FEB93 /* SoyFourcc.cpp */,
 				BF1826AC24228D31006FEB93 /* SoyFourcc.h */,
