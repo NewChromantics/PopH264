@@ -99,19 +99,23 @@ Avf::TCompressor::TCompressor(const SoyPixelsMeta& Meta,std::function<void(const
 		OSStatus status = VTCompressionSessionCreate( NULL, Width, Height, kCMVideoCodecType_H264, sessionAttributes, NULL, NULL, OnCompressedCallback, CallbackParam, &EncodingSession );
 		std::Debug << "H264: VTCompressionSessionCreate " << status << std::endl;
 		Avf::IsOkay(status,"VTCompressionSessionCreate");
-		
-		//设置properties（这些参数设置了也没用）
-		auto Profile = kVTProfileLevel_H264_Baseline_5_2;
+
+		//	gr: kVTProfileLevel_H264_Baseline_3_0 always fails in compression callback with -12348
+		auto Profile = kVTProfileLevel_H264_Baseline_3_1;
 		//kVTProfileLevel_H264_High_5_2
 		auto Realtime = kCFBooleanTrue;
 		auto AllowFramesOutOfOrder = false;
 		auto AutoOrderFrames = AllowFramesOutOfOrder ? kCFBooleanTrue : kCFBooleanFalse;
-		VTSessionSetProperty(EncodingSession, kVTCompressionPropertyKey_RealTime, Realtime);
-		VTSessionSetProperty(EncodingSession, kVTCompressionPropertyKey_ProfileLevel, Profile);
-		VTSessionSetProperty(EncodingSession, kVTCompressionPropertyKey_AllowFrameReordering, AutoOrderFrames);
-		
+		status = VTSessionSetProperty(EncodingSession, kVTCompressionPropertyKey_RealTime, Realtime);
+		Avf::IsOkay(status,"kVTCompressionPropertyKey_RealTime");
+		status = VTSessionSetProperty(EncodingSession, kVTCompressionPropertyKey_ProfileLevel, Profile);
+		Avf::IsOkay(status,"kVTCompressionPropertyKey_ProfileLevel");
+		status = VTSessionSetProperty(EncodingSession, kVTCompressionPropertyKey_AllowFrameReordering, AutoOrderFrames);
+		Avf::IsOkay(status,"kVTCompressionPropertyKey_AllowFrameReordering");
+
 		// 启动编码
-		VTCompressionSessionPrepareToEncodeFrames(EncodingSession);
+		status = VTCompressionSessionPrepareToEncodeFrames(EncodingSession);
+		Avf::IsOkay(status,"VTCompressionSessionPrepareToEncodeFrames");
 	};
 	dispatch_sync(aQueue, Lambda);
 }
