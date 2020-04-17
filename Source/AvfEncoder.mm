@@ -102,19 +102,22 @@ Avf::TCompressor::TCompressor(const SoyPixelsMeta& Meta,std::function<void(const
 		//std::Debug << "H264: VTCompressionSessionCreate " << status << std::endl;
 		Avf::IsOkay(status,"VTCompressionSessionCreate");
 
+#if defined(TARGET_OSX)
 		//	gr: kVTProfileLevel_H264_Baseline_3_0 always fails in compression callback with -12348
 		auto Profile = kVTProfileLevel_H264_Baseline_3_1;
-		//kVTProfileLevel_H264_High_5_2
+#else
+		auto Profile = kVTProfileLevel_H264_Baseline_AutoLevel;
+#endif
 		status = VTSessionSetProperty(EncodingSession, kVTCompressionPropertyKey_ProfileLevel, Profile);
 		Avf::IsOkay(status,"kVTCompressionPropertyKey_ProfileLevel");
 		
-		auto Realtime = kCFBooleanTrue;
+		static auto Realtime = kCFBooleanTrue;
 		status = VTSessionSetProperty(EncodingSession, kVTCompressionPropertyKey_RealTime, Realtime);
 		Avf::IsOkay(status,"kVTCompressionPropertyKey_RealTime");
 		
 		//	gr: this is the correct logic! (name sounds backwards to me)
 		//		does this also enough more non-keyframes?
-		auto OutputFramesInOrder = true;
+		static auto OutputFramesInOrder = true;
 		auto FrameReorder = OutputFramesInOrder ? kCFBooleanTrue : kCFBooleanFalse;
 		status = VTSessionSetProperty(EncodingSession, kVTCompressionPropertyKey_AllowFrameReordering, FrameReorder );
 		Avf::IsOkay(status,"kVTCompressionPropertyKey_AllowFrameReordering");
@@ -123,7 +126,7 @@ Avf::TCompressor::TCompressor(const SoyPixelsMeta& Meta,std::function<void(const
 		//	kVTCompressionPropertyKey_AllowTemporalCompression
 		
 		//	control quality
-		auto AverageKbRate = 512;//1024 * 1;
+		static auto AverageKbRate = 512;//1024 * 1;
 		auto AverageBitRate = AverageKbRate * 8;
 		CFNumberRef AverageBitRateNumber = CFNumberCreate(NULL, kCFNumberSInt32Type, &AverageBitRate);
 		status = VTSessionSetProperty(EncodingSession, kVTCompressionPropertyKey_AverageBitRate, AverageBitRateNumber);
