@@ -17,38 +17,60 @@ void PopH264::TDecoder::Decode(ArrayBridge<uint8_t>&& PacketData,std::function<v
 	}
 }
 
-
-void PopH264::TDecoder::PopPendingData(ArrayBridge<unsigned char>&& Buffer)
+bool PopH264::TDecoder::PopNalu(ArrayBridge<uint8_t>&& Buffer)
 {
 	std::lock_guard<std::mutex> Lock( mPendingDataLock );
-	auto GetNextNalOffset = [this]
+	auto* PendingData = &mPendingData[mPendingOffset];
+	auto PendingDataSize = mPendingData.GetDataSize()-mPendingOffset;
+	
+	auto GetNextNalOffset = [&]
 	{
-		for ( int i=3;	i<mPendingData.GetDataSize();	i++ )
+		//	todo: handle 001 as well as 0001
+		for ( int i=3;	i<PendingDataSize;	i++ )
 		{
-			if ( mPendingData[i+0] != 0 )	continue;
-			if ( mPendingData[i+1] != 0 )	continue;
-			if ( mPendingData[i+2] != 0 )	continue;
-			if ( mPendingData[i+3] != 1 )	continue;
+			if ( PendingData[i+0] != 0 )	continue;
+			if ( PendingData[i+1] != 0 )	continue;
+			if ( PendingData[i+2] != 0 )	continue;
+			if ( PendingData[i+3] != 1 )	continue;
 			return i;
 		}
+		
+		//	gr: to deal with fragmented data (eg. udp) we now wait
+		//		for the next complete NAL
+		//	we should look for EOF packets to handle this though
 		//	assume is complete...
-		return (int)mPendingData.GetDataSize();
-		//return 0;
+		//return (int)mPendingData.GetDataSize();
+		return 0;
 	};
 	
 	auto DataSize = GetNextNalOffset();
-	auto* Data = mPendingData.GetArray();
-	auto PendingData = GetRemoteArray( Data, DataSize );
+	//	no next nal yet
+	if ( DataSize == 0 )
+		return false;
 	
-	Buffer.Copy( PendingData );
+	auto* Data = PendingData;
+	auto PendingDataArray = GetRemoteArray( Data, DataSize );
 	
-	mPendingData.RemoveBlock(0, DataSize);
+	Buffer.Copy( PendingDataArray );
+	RemovePendingData( DataSize );
+	return true;
 }
 
 void PopH264::TDecoder::RemovePendingData(size_t Size)
 {
-	std::lock_guard<std::mutex> Lock(mPendingDataLock);
-	mPendingData.RemoveBlock(0, Size);
+	//	this function is expensive because of giant memmoves when we cut a small amount of data
+	//	we should use a RingArray, but for now, have a start offset, and remove when the offset
+	//	gets over a certain size
+
+	//	only called from this class, so should be locked
+	///std::lock_guard<std::mutex> Lock(mPendingDataLock);
+	mPendingOffset += Size;
+	static int KbThreshold = 1024 * 5;
+	if ( mPendingOffset > KbThreshold * 1024 )
+	{
+		mPendingData.RemoveBlock(0, mPendingOffset);
+		mPendingOffset = 0;
+	}
 }
 
 

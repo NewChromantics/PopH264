@@ -21,10 +21,13 @@ protected:
 	virtual bool	DecodeNextPacket(std::function<void(const SoyPixelsImpl&,SoyTime)> OnFrameDecoded)=0;	//	returns true if more data to proccess
 	
 	bool			HasPendingData()	{	return !mPendingData.IsEmpty();	}
-	void			PopPendingData(ArrayBridge<unsigned char>&& Buffer);
+	bool			PopNalu(ArrayBridge<uint8_t>&& Buffer);
+
+private:
 	void			RemovePendingData(size_t Size);
 	
-protected:
+private:
 	std::mutex		mPendingDataLock;
+	size_t			mPendingOffset = 0;		//	to reduce reallocations, we keep an offset where we've read
 	Array<uint8_t>	mPendingData;
 };

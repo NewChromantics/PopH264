@@ -138,41 +138,16 @@ bool IsNal(const uint8_t* pData)
 //	returns true if more data to proccess
 bool Broadway::TDecoder::DecodeNextPacket(std::function<void(const SoyPixelsImpl&,SoyTime)> OnFrameDecoded)
 {
-	if ( mPendingData.GetDataSize() < 4 )
+	Array<uint8_t> Nalu;
+	if ( !PopNalu( GetArrayBridge(Nalu) ) )
 		return false;
-	
-	auto StartsWithNal = IsNal(mPendingData.GetArray());
 	
 	const unsigned IntraGrayConcealment = 0;
 	const unsigned IntraReferenceConcealment = 1;
 	
-	//	if we're getting small packets in, we may not have enough for a frame, but we could wait...
-	//	todo: this should be false if our current packet is end of stream
-	static bool WaitForNextNal = true;
-	
-	auto GetNextNalOffset = [this]
-	{
-		for ( int i=3;	i<mPendingData.GetDataSize();	i++ )
-		{
-			if ( !IsNal( &mPendingData[i] ) )
-				continue;
-			return i;
-		}
-		
-		if ( WaitForNextNal )
-			return 0;
-
-		//	assume is complete...
-		return (int)mPendingData.GetDataSize();
-	};
-	
 	H264SwDecInput Input;
-	{
-		std::lock_guard<std::mutex> Lock(mPendingDataLock);
-		Input.pStream = mPendingData.GetArray();
-		Input.dataLen = GetNextNalOffset();
-		//Input.dataLen = mPendingData.GetDataSize();
-	}
+	Input.pStream = Nalu.GetArray();
+	Input.dataLen = Nalu.GetDataSize();
 	
 	if ( Input.dataLen == 0 )
 		return false;
@@ -188,7 +163,7 @@ bool Broadway::TDecoder::DecodeNextPacket(std::function<void(const SoyPixelsImpl
 	{
 		try
 		{
-			auto H264PacketType = H264::GetPacketType(GetArrayBridge(mPendingData));
+			auto H264PacketType = H264::GetPacketType(GetArrayBridge(Nalu));
 			std::Debug << "H264SwDecDecode(" << magic_enum::enum_name(H264PacketType) << ")" << std::endl;
 		}
 		catch (std::exception& e)
@@ -206,10 +181,6 @@ bool Broadway::TDecoder::DecodeNextPacket(std::function<void(const SoyPixelsImpl
 	auto BytesProcessed = static_cast<ssize_t>(Output.pStrmCurrPos - Input.pStream);
 	//	todo: keep this meta for external debugging
 	//std::Debug << "H264SwDecDecode result: " << GetDecodeResultString(Result) << ". Bytes processed: "  << BytesProcessed << "/" << Input.dataLen << std::endl;
-	
-	//	gr: can we delete data here? or do calls below use this data...
-	//	gr: still not super clear from API, need to dive into code
-	RemovePendingData( BytesProcessed );
 	
 	auto GetMeta = [&]()
 	{
@@ -269,7 +240,7 @@ bool Broadway::TDecoder::DecodeNextPacket(std::function<void(const SoyPixelsImpl
 			return true;
 		}
 			
-			//	data eaten, no output
+			//	data eaten, no ouput
 		case H264SWDEC_STRM_PROCESSED:
 			return true;
 		
