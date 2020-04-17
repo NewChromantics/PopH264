@@ -170,7 +170,7 @@ void PopH264::TDecoderInstance::PushFrame(const SoyPixelsImpl& Frame,int32_t Fra
 		std::lock_guard<std::mutex> Lock(mFramesLock);
 		mFrames.PushBack(NewFrame);
 		mMeta = Frame.GetMeta();
-		std::Debug << mFrames.GetSize() << " frames pending" << std::endl;
+		//std::Debug << __PRETTY_FUNCTION__ << mFrames.GetSize() << " frames pending" << std::endl;
 	}
 	if ( mOnNewFrame )
 		mOnNewFrame();
