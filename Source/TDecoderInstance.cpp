@@ -175,3 +175,10 @@ void PopH264::TDecoderInstance::PushFrame(const SoyPixelsImpl& Frame,int32_t Fra
 	if ( mOnNewFrame )
 		mOnNewFrame();
 }
+
+void PopH264::TDecoderInstance::AddOnNewFrameCallback(std::function<void()> Callback)
+{
+	//	does this need to be threadsafe?
+	mOnNewFrame = Callback;
+}
+

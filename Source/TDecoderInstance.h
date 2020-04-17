@@ -37,6 +37,8 @@ class PopH264::TDecoderInstance
 public:
 	TDecoderInstance(int32_t Mode);
 	
+	void									AddOnNewFrameCallback(std::function<void()> Callback);
+
 	//	input
 	void									PushData(const uint8_t* Data,size_t DataSize,int32_t FrameNumber);
 	

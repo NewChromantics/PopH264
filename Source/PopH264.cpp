@@ -10,7 +10,8 @@ namespace PopH264
 {
 	//	1.2.0	removed access to c++ decoder object
 	//	1.2.1	added encoding
-	const Soy::TVersion	Version(1,2,1);
+	//	1.2.2	Added PopH264_DecoderAddOnNewFrameCallback
+	const Soy::TVersion	Version(1,2,2);
 }
 
 
@@ -314,7 +315,7 @@ __export void PopH264_EncoderPeekData(int32_t Instance,char* MetaJsonBuffer,int3
 }
 
 
-__export void PopH264_EncoderAddOnNewPacketCallback(int32_t Instance,PopH264_EncoderOnNewPacket* Callback, void* Meta)
+__export void PopH264_EncoderAddOnNewPacketCallback(int32_t Instance,PopH264_Callback* Callback, void* Meta)
 {
 	auto Function = [&]()
 	{
@@ -327,6 +328,25 @@ __export void PopH264_EncoderAddOnNewPacketCallback(int32_t Instance,PopH264_Enc
 		};
 		auto& Encoder = PopH264::EncoderInstanceManager.GetInstance(Instance);
 		Encoder.AddOnNewFrameCallback(Lambda);
+		return 0;
+	};
+	SafeCall(Function, __func__, 0);
+}
+
+
+__export void PopH264_DecoderAddOnNewFrameCallback(int32_t Instance,PopH264_Callback* Callback, void* Meta)
+{
+	auto Function = [&]()
+	{
+		if (!Callback)
+			throw Soy::AssertException("PopH264_DecoderAddOnNewFrameCallback callback is null");
+		
+		auto Lambda = [Callback, Meta]()
+		{
+			Callback(Meta);
+		};
+		auto& Decoder = PopH264::DecoderInstanceManager.GetInstance(Instance);
+		Decoder.AddOnNewFrameCallback(Lambda);
 		return 0;
 	};
 	SafeCall(Function, __func__, 0);
