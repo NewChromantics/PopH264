@@ -116,6 +116,13 @@ Avf::TCompressor::TCompressor(const SoyPixelsMeta& Meta,std::function<void(const
 		Avf::IsOkay(status,"kVTCompressionPropertyKey_AllowFrameReordering");
 
 		// 启动编码
+		//	control quality
+		auto AverageKbRate = 512;//1024 * 1;
+		auto AverageBitRate = AverageKbRate * 8;
+		CFNumberRef AverageBitRateNumber = CFNumberCreate(NULL, kCFNumberSInt32Type, &AverageBitRate);
+		status = VTSessionSetProperty(EncodingSession, kVTCompressionPropertyKey_AverageBitRate, AverageBitRateNumber);
+		Avf::IsOkay(status,"kVTCompressionPropertyKey_AverageBitRate");
+	
 		status = VTCompressionSessionPrepareToEncodeFrames(EncodingSession);
 		Avf::IsOkay(status,"VTCompressionSessionPrepareToEncodeFrames");
 	};
