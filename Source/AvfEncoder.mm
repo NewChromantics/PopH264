@@ -383,7 +383,6 @@ void Avf::TCompressor::Encode(CVPixelBufferRef PixelBuffer,size_t FrameNumber)
 		
 		//	kVTEncodeFrameOptionKey_ForceKeyFrame
 		CFDictionaryRef frameProperties = nullptr;
-		void* FrameMeta = nullptr;
 		
 		// Pass it to the encoder
 		auto Status = VTCompressionSessionEncodeFrame(EncodingSession,
@@ -393,6 +392,8 @@ void Avf::TCompressor::Encode(CVPixelBufferRef PixelBuffer,size_t FrameNumber)
 													  frameProperties, FrameMeta, &OutputFlags);
 		Avf::IsOkay(Status,"VTCompressionSessionEncodeFrame");
 
+		CFRelease(PixelBuffer);
+		
 		//	expecting this output to be async
 		static bool Debug = false;
 		if ( Debug )
