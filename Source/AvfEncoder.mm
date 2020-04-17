@@ -359,10 +359,16 @@ void Avf::TCompressor::Encode(CVPixelBufferRef PixelBuffer,size_t FrameNumber)
 {
 	auto Lambda = ^
 	{
+		//	we're using this to pass a frame number, but really we should be giving a real time to aid the encoder
 		CMTime presentationTimeStamp = CMTimeMake(FrameNumber, 1);
-		//CMTime duration = CMTimeMake(1, DURATION);
 		VTEncodeInfoFlags OutputFlags = 0;
-		auto Duration = kCMTimeInvalid;
+		
+		//	specifying duration helps with bitrates and keyframing
+		//kCMTimeInvalid
+		auto Duration = Soy::Platform::GetTime( SoyTime(std::chrono::milliseconds(33)) );
+		void* FrameMeta = nullptr;
+		
+		//	kVTEncodeFrameOptionKey_ForceKeyFrame
 		CFDictionaryRef frameProperties = nullptr;
 		void* FrameMeta = nullptr;
 		
