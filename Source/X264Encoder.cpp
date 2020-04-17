@@ -1,6 +1,6 @@
 #include "X264Encoder.h"
 #include "SoyPixels.h"
-
+#include "SoyRuntimeLibrary.h"
 
 namespace X264
 {

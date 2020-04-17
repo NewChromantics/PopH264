@@ -17,7 +17,7 @@ namespace Broadway
 
 //	gr: commented these out from H264SwDecApi.c so I can debug
 //		(and monitor mem usage)
-
+/*
 void H264SwDecTrace(char *string)
 {
 	std::Debug << "Broadway: " << string << std::endl;
@@ -45,7 +45,7 @@ void H264SwDecMemset(void *ptr, i32 value, u32 count)
 {
 	memset(ptr, value, count);
 }
-
+*/
 
 Broadway::TDecoder::TDecoder()
 {
