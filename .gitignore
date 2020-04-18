@@ -34,3 +34,5 @@ Unity/PopH264/Assets/PopH264/Android/arm64-v8a/libPopH264.so
 Unity/PopH264/Assets/PopH264/Android/armeabi-v7a/libPopH264.so
 Unity/PopH264/Assets/PopH264/Android/x86/libPopH264.so
 Unity/PopH264/Assets/PopH264/Android/x86_64/libPopH264.so
+
+build-iphoneos/
