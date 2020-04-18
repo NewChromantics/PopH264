@@ -995,6 +995,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/Source/X264/osx",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.NewChromantics.PopH264Framework;
@@ -1032,6 +1033,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/Source/X264/osx",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.NewChromantics.PopH264Framework;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
