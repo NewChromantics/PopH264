@@ -48,6 +48,7 @@ Avf::TEncoderParams::TEncoderParams(json11::Json& Options)
 	};
 	SetBool( POPH264_ENCODER_KEY_REALTIME, mRealtime );
 	SetInt( POPH264_ENCODER_KEY_AVERAGEKBPS, mAverageKbps );
+	SetInt( POPH264_ENCODER_KEY_MAXKBPS, mMaxKbps );
 	SetInt( POPH264_ENCODER_KEY_MAXFRAMEBUFFERS, mMaxFrameBuffers );
 	SetInt( POPH264_ENCODER_KEY_MAXSLICEBYTES, mMaxSliceBytes );
 	SetBool( POPH264_ENCODER_KEY_MAXIMISEPOWEREFFICIENCY, mMaximisePowerEfficiency );
@@ -74,7 +75,6 @@ private:
 	
 	VTCompressionSessionRef	mSession = nil;
 	dispatch_queue_t		mQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-	TEncoderParams			mParams;
 };
 
 void OnCompressedCallback(void *outputCallbackRefCon,void *sourceFrameRefCon, OSStatus status, VTEncodeInfoFlags infoFlags,CMSampleBufferRef sampleBuffer)
@@ -144,7 +144,7 @@ Avf::TCompressor::TCompressor(TEncoderParams& Params,const SoyPixelsMeta& Meta,s
 		}
 		
 		{
-			auto Realtime = mParams.mRealtime ? kCFBooleanTrue : kCFBooleanFalse;
+			auto Realtime = Params.mRealtime ? kCFBooleanTrue : kCFBooleanFalse;
 			auto status = VTSessionSetProperty(mSession, kVTCompressionPropertyKey_RealTime, Realtime);
 			Avf::IsOkay(status,"kVTCompressionPropertyKey_RealTime");
 		}
@@ -162,32 +162,64 @@ Avf::TCompressor::TCompressor(TEncoderParams& Params,const SoyPixelsMeta& Meta,s
 		//	kVTCompressionPropertyKey_AllowTemporalCompression
 		
 		//	control quality
-		if ( mParams.mAverageKbps > 0 )
+		if ( Params.mAverageKbps > 0 )
 		{
-			int32_t AverageBitRate = mParams.mAverageKbps * 1024 * 8;
+			//	this was giving about 25x too much, maybe im giving it the wrong values, but I dont think so
+			int32_t AverageBitRate = Params.mAverageKbps * 1024 * 8;
+			//int32_t AverageBitRate = Params.mAverageKbps * (1000 * 8);
+			//AverageBitRate /= 25;
 			CFNumberRef Number = CFNumberCreate(NULL, kCFNumberSInt32Type, &AverageBitRate );
 			auto status = VTSessionSetProperty(mSession, kVTCompressionPropertyKey_AverageBitRate, Number);
 			Avf::IsOkay(status,"kVTCompressionPropertyKey_AverageBitRate");
 		}
 		
-		if ( mParams.mMaxSliceBytes > 0 )
+		//	gr: setting this on my iphone 5s (ios 12) makes every frame drop
+		//	gr: setting on iphone SE (ios 13) has little effect
+		if ( Params.mMaxKbps > 0 )
 		{
-			int32_t MaxSliceBytes = mParams.mMaxSliceBytes;
+			int32_t Bytes = Params.mMaxKbps * 1024;
+			int32_t Secs = 1;
+			CFNumberRef n1 = CFNumberCreate( kCFAllocatorDefault, kCFNumberSInt32Type, &Bytes );
+			CFNumberRef n2 = CFNumberCreate( kCFAllocatorDefault, kCFNumberSInt32Type, &Secs );
+			const void *values[] = {n1, n2};
+			auto ValueCount = std::size(values);
+			CFArrayRef dataRateLimits = CFArrayCreate(kCFAllocatorDefault,
+													  (const void**)&values,
+													  ValueCount,
+													  nullptr);
+			auto Status = VTSessionSetProperty(mSession, kVTCompressionPropertyKey_DataRateLimits, dataRateLimits);
+			Avf::IsOkay(Status,"kVTCompressionPropertyKey_DataRateLimits");
+		}
+		
+		if ( Params.mMaxSliceBytes > 0 )
+		{
+			int32_t MaxSliceBytes = Params.mMaxSliceBytes;
 			CFNumberRef Number = CFNumberCreate(NULL, kCFNumberSInt32Type, &MaxSliceBytes );
 			auto status = VTSessionSetProperty(mSession, kVTCompressionPropertyKey_MaxH264SliceBytes, Number);
 			Avf::IsOkay(status,"kVTCompressionPropertyKey_MaxH264SliceBytes");
 		}
-		
+
+#if defined(TARGET_IOS)
+		auto MaxPowerSupported = true;
+#else
+		auto OsVersion = Platform::GetOsVersion();
+		auto MaxPowerSupported = OsVersion.mMinor >= 14;
+#endif
+		if ( MaxPowerSupported )
 		{
-			auto MaximisePE = mParams.mMaximisePowerEfficiency ? kCFBooleanTrue : kCFBooleanFalse;
+			auto MaximisePE = Params.mMaximisePowerEfficiency ? kCFBooleanTrue : kCFBooleanFalse;
 			auto status = VTSessionSetProperty(mSession, kVTCompressionPropertyKey_MaximizePowerEfficiency, MaximisePE);
 			Avf::IsOkay(status,"kVTCompressionPropertyKey_MaximizePowerEfficiency");
 		}
+		else
+		{
+			std::Debug << "kVTCompressionPropertyKey_MaximizePowerEfficiency not supported on this OS version " << OsVersion << std::endl;
+		}
 		
 		//	-1 is unlimited, and is the default
-		if ( mParams.mMaxFrameBuffers > 0 )
+		if ( Params.mMaxFrameBuffers > 0 )
 		{
-			int32_t MaxFrameBuffers = mParams.mMaxFrameBuffers;
+			int32_t MaxFrameBuffers = Params.mMaxFrameBuffers;
 			CFNumberRef Number = CFNumberCreate(NULL, kCFNumberSInt32Type, &MaxFrameBuffers );
 			auto status = VTSessionSetProperty(mSession, kVTCompressionPropertyKey_MaxFrameDelayCount, Number);
 			Avf::IsOkay(status,"kVTCompressionPropertyKey_MaxFrameDelayCount");

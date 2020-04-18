@@ -49,6 +49,7 @@ __export void				PopH264_DecoderAddOnNewFrameCallback(int32_t Instance,PopH264_C
 #define POPH264_ENCODER_KEY_ENCODERNAME		"Encoder"
 #define POPH264_ENCODER_KEY_QUALITY			"Quality"
 #define POPH264_ENCODER_KEY_AVERAGEKBPS		"AverageKbps"
+#define POPH264_ENCODER_KEY_MAXKBPS			"MaxKbps"
 #define POPH264_ENCODER_KEY_REALTIME		"Realtime"
 #define POPH264_ENCODER_KEY_MAXFRAMEBUFFERS	"MaxFrameBuffers"
 #define POPH264_ENCODER_KEY_MAXSLICEBYTES	"MaxSliceBytes"
@@ -57,7 +58,8 @@ __export void				PopH264_DecoderAddOnNewFrameCallback(int32_t Instance,PopH264_C
 //	All options are optional
 //	.Encoder = "avf"|"x264"
 //	.Quality = [0..9]				x264
-//	.AverageKbps = float			avf
+//	.AverageKbps = int				avf kiloBYTES
+//	.MaxKbps = int					avf kiloBYTES
 //	.Realtime = true				avf: kVTCompressionPropertyKey_RealTime
 //	.MaxFrameBuffers = undefined	avf: kVTCompressionPropertyKey_MaxFrameDelayCount
 //	.MaxSliceBytes = number			avf: kVTCompressionPropertyKey_MaxH264SliceBytes

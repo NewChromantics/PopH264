@@ -28,10 +28,13 @@ public:
 	TEncoderParams(json11::Json& Options);
 	
 	bool	mRealtime = true;
-	size_t	mAverageKbps = 0;	//	0 = not set
+	bool	mMaximisePowerEfficiency = true;
+
+	//	zero means don't apply
+	size_t	mAverageKbps = 0;
+	size_t	mMaxKbps = 0;
 	size_t	mMaxFrameBuffers = 0;
 	size_t	mMaxSliceBytes = 0;
-	bool	mMaximisePowerEfficiency = true;
 };
 
 //	same as X264

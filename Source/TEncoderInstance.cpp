@@ -2,6 +2,7 @@
 #include "SoyH264.h"
 #include "MagicEnum/include/magic_enum.hpp"
 #include "json11.hpp"
+#include "PopH264.h"
 
 #define ENABLE_X264
 
@@ -34,7 +35,7 @@ PopH264::TEncoderInstance::TEncoderInstance(const std::string& OptionsJsonString
 		this->OnNewPacket(Packet);
 	};
 	
-	auto EncoderName = Options["Encoder"].string_value();
+	auto EncoderName = Options[POPH264_ENCODER_KEY_ENCODERNAME].string_value();
 
 #if defined(ENABLE_AVF)
 	if ( EncoderName.empty() || EncoderName == Avf::TEncoder::Name )
