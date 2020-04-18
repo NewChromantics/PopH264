@@ -36,3 +36,5 @@ Unity/PopH264/Assets/PopH264/Android/x86/libPopH264.so
 Unity/PopH264/Assets/PopH264/Android/x86_64/libPopH264.so
 
 build-iphoneos/
+
+build-iphonesimulator/
