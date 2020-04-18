@@ -22,6 +22,15 @@
     <Filter Include="IntelMedia">
       <UniqueIdentifier>{9236602d-c355-491e-8513-eac9ad797579}</UniqueIdentifier>
     </Filter>
+    <Filter Include="x264">
+      <UniqueIdentifier>{9c3124d0-7c4f-4498-acdc-43e97cf109f6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="x264\x86">
+      <UniqueIdentifier>{fb8dffc9-7c16-4b30-a9cb-bc800a013126}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="x264\x64">
+      <UniqueIdentifier>{8f411c2b-1aee-4761-ac99-a378b4222ec9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Source\SoyLib\src\memheap.cpp">
@@ -200,6 +209,30 @@
     </ClCompile>
     <ClCompile Include="..\Source\IntelMediaDecoder.cpp">
       <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\SoyH264.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\TDecoderInstance.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\TEncoder.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\TEncoderInstance.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Test.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\X264Encoder.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\SoyLib\src\SoyRuntimeLibrary.cpp">
+      <Filter>SoyLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\SoyLib\src\SoyFilesystem.cpp">
+      <Filter>SoyLib</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -446,6 +479,42 @@
     <ClInclude Include="C:\Program Files (x86)\IntelSWTools\Intel(R) Media SDK 2019 R1\Software Development Kit\include\mfxvstructures.h">
       <Filter>IntelMedia</Filter>
     </ClInclude>
+    <ClInclude Include="..\Source\AvfEncoder.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\SoyAvf.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\SoyH264.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\TDecoderInstance.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\TEncoder.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\TEncoderInstance.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\TInstanceManager.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\X264Encoder.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\SoyLib\src\SoyRuntimeLibrary.h">
+      <Filter>SoyLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\SoyLib\src\SoyFilesystem.h">
+      <Filter>SoyLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\X264\include\x264.h">
+      <Filter>x264</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\X264\include\x264_config.h">
+      <Filter>x264</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Source\InstanceManager.inc">
@@ -454,10 +523,25 @@
     <None Include="..\Source\Broadway\Decoder\src\EvaluationTestBench.x">
       <Filter>Broadway</Filter>
     </None>
+    <None Include="..\Source\AvfEncoder.mm">
+      <Filter>Source</Filter>
+    </None>
+    <None Include="..\Source\SoyAvf.mm">
+      <Filter>Source</Filter>
+    </None>
+    <None Include="..\Source\X264\lib\x86\x264.pdb">
+      <Filter>x264\x86</Filter>
+    </None>
+    <None Include="..\Source\X264\bin\x86\x264.dll">
+      <Filter>x264\x86</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <CopyFileToFolders Include="..\Source\PopH264.h" />
     <CopyFileToFolders Include="..\Unity\PopH264\Assets\PopH264\PopH264.cs" />
+    <CopyFileToFolders Include="..\Source\X264\bin\x64\x264.dll">
+      <Filter>x264\x64</Filter>
+    </CopyFileToFolders>
   </ItemGroup>
   <ItemGroup>
     <Library Include="C:\Program Files (x86)\IntelSWTools\Intel(R) Media SDK 2019 R1\Software Development Kit\lib\x64\libmfx.lib">
@@ -465,6 +549,15 @@
     </Library>
     <Library Include="C:\Program Files (x86)\IntelSWTools\Intel(R) Media SDK 2019 R1\Software Development Kit\lib\x64\libmfx_vs2015.lib">
       <Filter>IntelMedia</Filter>
+    </Library>
+    <Library Include="..\Source\X264\lib\x86\x264.lib">
+      <Filter>x264\x86</Filter>
+    </Library>
+    <Library Include="..\Source\X264\lib\x64\libx264.lib">
+      <Filter>x264\x64</Filter>
+    </Library>
+    <Library Include="..\Source\X264\lib\x64\x264.lib">
+      <Filter>x264\x64</Filter>
     </Library>
   </ItemGroup>
 </Project>

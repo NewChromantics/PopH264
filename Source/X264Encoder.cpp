@@ -2,7 +2,7 @@
 #include "SoyPixels.h"
 #include "PopH264.h"	//	param keys
 #include "json11.hpp"
-
+#include "SoyRuntimeLibrary.h"
 
 namespace X264
 {
