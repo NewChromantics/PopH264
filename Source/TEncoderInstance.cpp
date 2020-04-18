@@ -1,6 +1,7 @@
 #include "TEncoderInstance.h"
 #include "SoyH264.h"
 #include "MagicEnum/include/magic_enum.hpp"
+#include "json11.hpp"
 
 #define ENABLE_X264
 
@@ -17,47 +18,39 @@
 #endif
 
 
-PopH264::TEncoderInstance::TEncoderInstance(const std::string& Encoder_)
+PopH264::TEncoderInstance::TEncoderInstance(const std::string& OptionsJsonString)
 {
+	//	get options
+	std::string ParseError;
+	auto Options = json11::Json::parse(OptionsJsonString,ParseError);
+	if ( ParseError.length() )
+	{
+		ParseError = "Error parsing encoder options json: " + ParseError;
+		throw Soy::AssertException(ParseError);
+	}
+	
 	auto OnOutputPacket = [this](TPacket& Packet)
 	{
 		this->OnNewPacket(Packet);
 	};
 	
-	std::string Encoder = Encoder_;
+	auto EncoderName = Options["Encoder"].string_value();
 
 #if defined(ENABLE_AVF)
-	if ( Encoder.empty() )
-		Encoder = std::string(Avf::TEncoder::NamePrefix);
-	
-	if ( Soy::StringTrimLeft( Encoder, Avf::TEncoder::NamePrefix, false ) )
+	if ( EncoderName.empty() || EncoderName == Avf::TEncoder::Name )
 	{
-		/*
-		//	extract preset
-		size_t Preset = X264::TEncoder::DefaultPreset;
-		auto PresetString = Encoder;
-		if ( !PresetString.empty() )
-			Soy::StringToType(Preset,PresetString);
-		*/
-		mEncoder.reset( new Avf::TEncoder(OnOutputPacket) );
+		Avf::TEncoderParams Params(Options);
+		mEncoder.reset( new Avf::TEncoder(Params,OnOutputPacket) );
 		return;
 	}
 #endif
 	
 	
 #if defined(ENABLE_X264)
-	if ( Encoder.empty() )
-		Encoder = std::string(X264::TEncoder::NamePrefix);
-	
-	if ( Soy::StringTrimLeft( Encoder, X264::TEncoder::NamePrefix, false ) )
+	if ( EncoderName.empty() || EncoderName == X264::TEncoder::Name )
 	{
-		//	extract preset
-		size_t Preset = X264::TEncoder::DefaultPreset;
-		auto PresetString = Encoder;
-		if ( !PresetString.empty() )
-			Soy::StringToType(Preset,PresetString);
-		
-		mEncoder.reset( new X264::TEncoder(Preset,OnOutputPacket) );
+		X264::TEncoderParams Params(Options);
+		mEncoder.reset( new X264::TEncoder(Params,OnOutputPacket) );
 		return;
 	}
 #endif
@@ -67,7 +60,7 @@ PopH264::TEncoderInstance::TEncoderInstance(const std::string& Encoder_)
 		return;
 	
 	std::stringstream Error;
-	Error << "No encoder supported (requested " << Encoder << ")";
+	Error << "No encoder supported (requested " << EncoderName << ")";
 	throw Soy::AssertException(Error);
 }
 

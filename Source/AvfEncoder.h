@@ -3,10 +3,16 @@
 #include "TEncoder.h"
 #include "SoyPixels.h"
 
+//#include "json11.hpp"
+namespace json11
+{
+	class Json;
+}
 
 namespace Avf
 {
 	class TEncoder;
+	class TEncoderParams;
 	
 	//	platform type (obj-c)
 	class TCompressor;
@@ -15,6 +21,18 @@ namespace Avf
 	class TFrameMeta;
 }
 
+class Avf::TEncoderParams
+{
+public:
+	TEncoderParams(){}
+	TEncoderParams(json11::Json& Options);
+	
+	bool	mRealtime = true;
+	size_t	mAverageKbps = 0;	//	0 = not set
+	size_t	mMaxFrameBuffers = 0;
+	size_t	mMaxSliceBytes = 0;
+	bool	mMaximisePowerEfficiency = true;
+};
 
 //	same as X264
 class Avf::TFrameMeta
@@ -27,10 +45,10 @@ public:
 class Avf::TEncoder : public PopH264::TEncoder
 {
 public:
-	static inline const char*	NamePrefix = "Avf";
+	static inline const char*	Name = "Avf";
 	
 public:
-	TEncoder(std::function<void(PopH264::TPacket&)> OnOutputPacket);
+	TEncoder(TEncoderParams& Params,std::function<void(PopH264::TPacket&)> OnOutputPacket);
 	~TEncoder();
 
 	virtual void		Encode(const SoyPixelsImpl& Luma,const SoyPixelsImpl& ChromaU,const SoyPixelsImpl& ChromaV,const std::string& Meta) override;
@@ -47,6 +65,7 @@ private:
 	std::string		GetFrameMeta(size_t FrameNumber);
 	
 protected:
+	TEncoderParams		mParams;
 	std::shared_ptr<TCompressor>	mCompressor;
 	SoyPixelsMeta		mPixelMeta;	//	format the compressor is currently setup for
 	

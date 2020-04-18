@@ -3,6 +3,7 @@
 #include "SoyAvf.h"
 #include "SoyFourcc.h"
 #include "MagicEnum/include/magic_enum.hpp"
+#include "json11.hpp"
 
 #include <CoreMedia/CMBase.h>
 #include <VideoToolbox/VTBase.h>
@@ -18,11 +19,46 @@
 #include <VideoToolbox/VTErrors.h>
 #include "SoyH264.h"
 
+#include "PopH264.h"	//	param keys
+
+Avf::TEncoderParams::TEncoderParams(json11::Json& Options)
+{
+	auto SetInt = [&](const char* Name,size_t& ValueUnsigned)
+	{
+		auto& Handle = Options[Name];
+		if ( !Handle.is_number() )
+			return false;
+		auto Value = Handle.int_value();
+		if ( Value < 0 )
+		{
+			std::stringstream Error;
+			Error << "Value for " << Name << " is " << Value << ", not expecting negative";
+			throw Soy::AssertException(Error);
+		}
+		ValueUnsigned = Value;
+		return true;
+	};
+	auto SetBool = [&](const char* Name,bool& Value)
+	{
+		auto& Handle = Options[Name];
+		if ( !Handle.is_bool() )
+			return false;
+		Value = Handle.bool_value();
+		return true;
+	};
+	SetBool( POPH264_ENCODER_KEY_REALTIME, mRealtime );
+	SetInt( POPH264_ENCODER_KEY_AVERAGEKBPS, mAverageKbps );
+	SetInt( POPH264_ENCODER_KEY_MAXFRAMEBUFFERS, mMaxFrameBuffers );
+	SetInt( POPH264_ENCODER_KEY_MAXSLICEBYTES, mMaxSliceBytes );
+	SetBool( POPH264_ENCODER_KEY_MAXIMISEPOWEREFFICIENCY, mMaximisePowerEfficiency );
+}
+	
+	
 
 class Avf::TCompressor
 {
 public:
-	TCompressor(const SoyPixelsMeta& Meta,std::function<void(const ArrayBridge<uint8_t>&&,size_t)> OnPacket);
+	TCompressor(TEncoderParams& Params,const SoyPixelsMeta& Meta,std::function<void(const ArrayBridge<uint8_t>&&,size_t)> OnPacket);
 	~TCompressor();
 	
 	void	OnCompressed(OSStatus status, VTEncodeInfoFlags infoFlags,CMSampleBufferRef sampleBuffer);
@@ -35,16 +71,10 @@ private:
 	
 private:
 	std::function<void(const ArrayBridge<uint8_t>&&,size_t)>	mOnPacket;
-
 	
-	VTCompressionSessionRef EncodingSession = nil;
-	dispatch_queue_t aQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-	CMFormatDescriptionRef  format;
-	CMSampleTimingInfo * timingInfo;
-	BOOL initialized;
-	int  frameCount = 0;
-	NSData *sps = nullptr;
-	NSData *pps = nullptr;
+	VTCompressionSessionRef	mSession = nil;
+	dispatch_queue_t		mQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+	TEncoderParams			mParams;
 };
 
 void OnCompressedCallback(void *outputCallbackRefCon,void *sourceFrameRefCon, OSStatus status, VTEncodeInfoFlags infoFlags,CMSampleBufferRef sampleBuffer)
@@ -63,7 +93,7 @@ void OnCompressedCallback(void *outputCallbackRefCon,void *sourceFrameRefCon, OS
 
 
 
-Avf::TCompressor::TCompressor(const SoyPixelsMeta& Meta,std::function<void(const ArrayBridge<uint8_t>&&,size_t)> OnPacket) :
+Avf::TCompressor::TCompressor(TEncoderParams& Params,const SoyPixelsMeta& Meta,std::function<void(const ArrayBridge<uint8_t>&&,size_t)> OnPacket) :
 	mOnPacket	( OnPacket )
 {
 	if ( !mOnPacket )
@@ -92,50 +122,81 @@ Avf::TCompressor::TCompressor(const SoyPixelsMeta& Meta,std::function<void(const
 		//        CFNumberRef DataRateLimitsNum = CFNumberCreate(NULL, kCFNumberSInt8Type, &DataRateLimits);
 		//        CFDictionarySetValue(sessionAttributes, kVTCompressionPropertyKey_DataRateLimits, DataRateLimitsNum);
 		//        CFRelease(DataRateLimitsNum);
-		
-		// 创建编码
-		//(__bridge void*) CallbackParam = this;
-		void* CallbackParam = this;
-		auto Width = Meta.GetWidth();
-		auto Height = Meta.GetHeight();
-		OSStatus status = VTCompressionSessionCreate( NULL, Width, Height, kCMVideoCodecType_H264, sessionAttributes, NULL, NULL, OnCompressedCallback, CallbackParam, &EncodingSession );
-		//std::Debug << "H264: VTCompressionSessionCreate " << status << std::endl;
-		Avf::IsOkay(status,"VTCompressionSessionCreate");
 
-#if defined(TARGET_OSX)
-		//	gr: kVTProfileLevel_H264_Baseline_3_0 always fails in compression callback with -12348
-		auto Profile = kVTProfileLevel_H264_Baseline_3_1;
-#else
-		auto Profile = kVTProfileLevel_H264_Baseline_AutoLevel;
-#endif
-		status = VTSessionSetProperty(EncodingSession, kVTCompressionPropertyKey_ProfileLevel, Profile);
-		Avf::IsOkay(status,"kVTCompressionPropertyKey_ProfileLevel");
+		{
+			void* CallbackParam = this;
+			auto Width = Meta.GetWidth();
+			auto Height = Meta.GetHeight();
+			OSStatus status = VTCompressionSessionCreate( NULL, Width, Height, kCMVideoCodecType_H264, sessionAttributes, NULL, NULL, OnCompressedCallback, CallbackParam, &mSession );
+			//std::Debug << "H264: VTCompressionSessionCreate " << status << std::endl;
+			Avf::IsOkay(status,"VTCompressionSessionCreate");
+		}
 		
-		static auto Realtime = kCFBooleanTrue;
-		status = VTSessionSetProperty(EncodingSession, kVTCompressionPropertyKey_RealTime, Realtime);
-		Avf::IsOkay(status,"kVTCompressionPropertyKey_RealTime");
+		{
+#if defined(TARGET_OSX)
+			//	gr: kVTProfileLevel_H264_Baseline_3_0 always fails in compression callback with -12348 on osx
+			auto Profile = kVTProfileLevel_H264_Baseline_3_1;
+#else
+			auto Profile = kVTProfileLevel_H264_Baseline_AutoLevel;
+#endif
+			auto status = VTSessionSetProperty(mSession, kVTCompressionPropertyKey_ProfileLevel, Profile);
+			Avf::IsOkay(status,"kVTCompressionPropertyKey_ProfileLevel");
+		}
+		
+		{
+			auto Realtime = mParams.mRealtime ? kCFBooleanTrue : kCFBooleanFalse;
+			auto status = VTSessionSetProperty(mSession, kVTCompressionPropertyKey_RealTime, Realtime);
+			Avf::IsOkay(status,"kVTCompressionPropertyKey_RealTime");
+		}
 		
 		//	gr: this is the correct logic! (name sounds backwards to me)
 		//		does this also enough more non-keyframes?
-		static auto OutputFramesInOrder = true;
-		auto FrameReorder = OutputFramesInOrder ? kCFBooleanTrue : kCFBooleanFalse;
-		status = VTSessionSetProperty(EncodingSession, kVTCompressionPropertyKey_AllowFrameReordering, FrameReorder );
-		Avf::IsOkay(status,"kVTCompressionPropertyKey_AllowFrameReordering");
-
+		{
+			static auto OutputFramesInOrder = true;
+			auto FrameReorder = OutputFramesInOrder ? kCFBooleanTrue : kCFBooleanFalse;
+			auto status = VTSessionSetProperty(mSession, kVTCompressionPropertyKey_AllowFrameReordering, FrameReorder );
+			Avf::IsOkay(status,"kVTCompressionPropertyKey_AllowFrameReordering");
+		}
+		
 		//	if this is false, it will force all frames to be keyframes
 		//	kVTCompressionPropertyKey_AllowTemporalCompression
 		
 		//	control quality
-		static auto AverageKbRate = 512;//1024 * 1;
-		auto AverageBitRate = AverageKbRate * 8;
-		CFNumberRef AverageBitRateNumber = CFNumberCreate(NULL, kCFNumberSInt32Type, &AverageBitRate);
-		status = VTSessionSetProperty(EncodingSession, kVTCompressionPropertyKey_AverageBitRate, AverageBitRateNumber);
-		Avf::IsOkay(status,"kVTCompressionPropertyKey_AverageBitRate");
-	
-		status = VTCompressionSessionPrepareToEncodeFrames(EncodingSession);
+		if ( mParams.mAverageKbps > 0 )
+		{
+			int32_t AverageBitRate = mParams.mAverageKbps * 1024 * 8;
+			CFNumberRef Number = CFNumberCreate(NULL, kCFNumberSInt32Type, &AverageBitRate );
+			auto status = VTSessionSetProperty(mSession, kVTCompressionPropertyKey_AverageBitRate, Number);
+			Avf::IsOkay(status,"kVTCompressionPropertyKey_AverageBitRate");
+		}
+		
+		if ( mParams.mMaxSliceBytes > 0 )
+		{
+			int32_t MaxSliceBytes = mParams.mMaxSliceBytes;
+			CFNumberRef Number = CFNumberCreate(NULL, kCFNumberSInt32Type, &MaxSliceBytes );
+			auto status = VTSessionSetProperty(mSession, kVTCompressionPropertyKey_MaxH264SliceBytes, Number);
+			Avf::IsOkay(status,"kVTCompressionPropertyKey_MaxH264SliceBytes");
+		}
+		
+		{
+			auto MaximisePE = mParams.mMaximisePowerEfficiency ? kCFBooleanTrue : kCFBooleanFalse;
+			auto status = VTSessionSetProperty(mSession, kVTCompressionPropertyKey_MaximizePowerEfficiency, MaximisePE);
+			Avf::IsOkay(status,"kVTCompressionPropertyKey_MaximizePowerEfficiency");
+		}
+		
+		//	-1 is unlimited, and is the default
+		if ( mParams.mMaxFrameBuffers > 0 )
+		{
+			int32_t MaxFrameBuffers = mParams.mMaxFrameBuffers;
+			CFNumberRef Number = CFNumberCreate(NULL, kCFNumberSInt32Type, &MaxFrameBuffers );
+			auto status = VTSessionSetProperty(mSession, kVTCompressionPropertyKey_MaxFrameDelayCount, Number);
+			Avf::IsOkay(status,"kVTCompressionPropertyKey_MaxFrameDelayCount");
+		}
+		
+		auto status = VTCompressionSessionPrepareToEncodeFrames(mSession);
 		Avf::IsOkay(status,"VTCompressionSessionPrepareToEncodeFrames");
 	};
-	dispatch_sync(aQueue, Lambda);
+	dispatch_sync(mQueue, Lambda);
 }
 
 Avf::TCompressor::~TCompressor()
@@ -143,15 +204,15 @@ Avf::TCompressor::~TCompressor()
 	Flush();
 	
 	// End the session
-	VTCompressionSessionInvalidate( EncodingSession );
-	CFRelease( EncodingSession );
+	VTCompressionSessionInvalidate( mSession );
+	CFRelease( mSession );
 	
 	//	wait for the queue to end
 }
 
 void Avf::TCompressor::Flush()
 {
-	VTCompressionSessionCompleteFrames( EncodingSession, kCMTimeInvalid );
+	VTCompressionSessionCompleteFrames( mSession, kCMTimeInvalid );
 }
 
 
@@ -388,7 +449,7 @@ void Avf::TCompressor::Encode(CVPixelBufferRef PixelBuffer,size_t FrameNumber)
 		CFDictionaryRef frameProperties = nullptr;
 		
 		// Pass it to the encoder
-		auto Status = VTCompressionSessionEncodeFrame(EncodingSession,
+		auto Status = VTCompressionSessionEncodeFrame(mSession,
 													  PixelBuffer,
 													  presentationTimeStamp,
 													  Duration,
@@ -406,13 +467,14 @@ void Avf::TCompressor::Encode(CVPixelBufferRef PixelBuffer,size_t FrameNumber)
 			std::Debug << "VTCompressionSessionEncodeFrame returned FrameDropped=" << FrameDropped << " EncodingAsync=" << EncodingAsync << std::endl;
 		}
 	};
-	dispatch_sync(aQueue,Lambda);
+	dispatch_sync(mQueue,Lambda);
 }
 	
 
 	
-Avf::TEncoder::TEncoder(std::function<void(PopH264::TPacket&)> OnOutputPacket) :
-	PopH264::TEncoder	( OnOutputPacket )
+Avf::TEncoder::TEncoder(TEncoderParams& Params,std::function<void(PopH264::TPacket&)> OnOutputPacket) :
+	PopH264::TEncoder	( OnOutputPacket ),
+	mParams				( Params )
 {
 }
 
@@ -439,7 +501,7 @@ void Avf::TEncoder::AllocEncoder(const SoyPixelsMeta& Meta)
 		this->OnPacketCompressed( PacketData, FrameNumber );
 	};
 
-	mCompressor.reset( new TCompressor( Meta, OnPacket ) );
+	mCompressor.reset( new TCompressor( mParams, Meta, OnPacket ) );
 	mPixelMeta = Meta;
 }
 

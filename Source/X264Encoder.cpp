@@ -1,5 +1,7 @@
 #include "X264Encoder.h"
 #include "SoyPixels.h"
+#include "PopH264.h"	//	param keys
+#include "json11.hpp"
 
 
 namespace X264
@@ -23,11 +25,30 @@ void X264::IsOkay(int Result, const char* Context)
 	throw Soy::AssertException(Error);
 }
 
+X264::TEncoderParams::TEncoderParams(json11::Json& Options)
+{
+	auto SetInt = [&](const char* Name,size_t& ValueUnsigned)
+	{
+		auto& Handle = Options[Name];
+		if ( !Handle.is_number() )
+			return false;
+		auto Value = Handle.int_value();
+		if ( Value < 0 )
+		{
+			std::stringstream Error;
+			Error << "Value for " << Name << " is " << Value << ", not expecting negative";
+			throw Soy::AssertException(Error);
+		}
+		ValueUnsigned = Value;
+		return true;
+	};
+	SetInt( POPH264_ENCODER_KEY_QUALITY, mPreset );
+}
 
-X264::TEncoder::TEncoder(size_t PresetValue,std::function<void(PopH264::TPacket&)> OnOutputPacket) :
+X264::TEncoder::TEncoder(TEncoderParams& Params,std::function<void(PopH264::TPacket&)> OnOutputPacket) :
 	PopH264::TEncoder	( OnOutputPacket )
 {
-	if ( PresetValue > 9 )
+	if ( Params.mPreset > 9 )
 		throw Soy_AssertException("Expecting preset value <= 9");
 	
 	//	trigger dll load
@@ -37,7 +58,7 @@ X264::TEncoder::TEncoder(size_t PresetValue,std::function<void(PopH264::TPacket&
 	
 	//	todo: allow user to set tune options. takes , seperated values
 	const char* Tune = "zerolatency";
-	auto* PresetName = x264_preset_names[PresetValue];
+	auto* PresetName = x264_preset_names[Params.mPreset];
 	auto Result = x264_param_default_preset(&mParam, PresetName, Tune);
 	IsOkay(Result,"x264_param_default_preset");
 }

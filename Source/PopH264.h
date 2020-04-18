@@ -46,11 +46,23 @@ __export int32_t			PopH264_PopFrame(int32_t Instance,uint8_t* Plane0,int32_t Pla
 __export void				PopH264_DecoderAddOnNewFrameCallback(int32_t Instance,PopH264_Callback* Callback, void* Meta);
 
 
+#define POPH264_ENCODER_KEY_ENCODERNAME		"Encoder"
+#define POPH264_ENCODER_KEY_QUALITY			"Quality"
+#define POPH264_ENCODER_KEY_AVERAGEKBPS		"AverageKbps"
+#define POPH264_ENCODER_KEY_REALTIME		"Realtime"
+#define POPH264_ENCODER_KEY_MAXFRAMEBUFFERS	"MaxFrameBuffers"
+#define POPH264_ENCODER_KEY_MAXSLICEBYTES	"MaxSliceBytes"
+#define POPH264_ENCODER_KEY_MAXIMISEPOWEREFFICIENCY	"MaximisePowerEfficiency"
 
-
-//	Encoder param is optional
-//	gr: add error buffer here?
-__export int32_t			PopH264_CreateEncoder(const char* Encoder,char* ErrorBuffer,int32_t ErrorBufferSize);
+//	All options are optional
+//	.Encoder = "avf"|"x264"
+//	.Quality = [0..9]				x264
+//	.AverageKbps = float			avf
+//	.Realtime = true				avf: kVTCompressionPropertyKey_RealTime
+//	.MaxFrameBuffers = undefined	avf: kVTCompressionPropertyKey_MaxFrameDelayCount
+//	.MaxSliceBytes = number			avf: kVTCompressionPropertyKey_MaxH264SliceBytes
+//	.MaximisePowerEfficiency = true	avf: kVTCompressionPropertyKey_MaximizePowerEfficiency
+__export int32_t			PopH264_CreateEncoder(const char* OptionsJson,char* ErrorBuffer,int32_t ErrorBufferSize);
 __export void				PopH264_DestroyEncoder(int32_t Instance);
 
 //	This encodes the frame, but may not have an immediate output, and may have more than one packet output.

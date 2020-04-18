@@ -1,6 +1,8 @@
 #pragma once
 
 #include "TEncoder.h"
+#include "SoyPixels.h"
+//#include "json11.hpp"
 
 #if defined(TARGET_WINDOWS)
 #include "X264/include/x264.h"
@@ -11,11 +13,16 @@
 #include "X264/Ios/include/x264.h"
 #endif
 
-#include "SoyPixels.h"
+
+namespace json11
+{
+	class Json;
+}
 
 namespace X264
 {
 	class TEncoder;
+	class TEncoderParams;
 
 	class TFrameMeta;
 }
@@ -31,14 +38,22 @@ public:
 };
 
 
+class X264::TEncoderParams
+{
+public:
+	TEncoderParams(){}
+	TEncoderParams(json11::Json& Options);
+	
+	size_t	mPreset = 2;
+};
+
 class X264::TEncoder : public PopH264::TEncoder
 {
 public:
-	static inline const char*	NamePrefix = "x264";
-	static const size_t			DefaultPreset = 2;
+	static inline const char*	Name = "x264";
 	
 public:
-	TEncoder(size_t PresetValue,std::function<void(PopH264::TPacket&)> OnOutputPacket);
+	TEncoder(TEncoderParams& Params,std::function<void(PopH264::TPacket&)> OnOutputPacket);
 	~TEncoder();
 
 	virtual void		Encode(const SoyPixelsImpl& Luma,const SoyPixelsImpl& ChromaU,const SoyPixelsImpl& ChromaV,const std::string& Meta) override;

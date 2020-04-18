@@ -11,7 +11,8 @@ namespace PopH264
 	//	1.2.0	removed access to c++ decoder object
 	//	1.2.1	added encoding
 	//	1.2.2	Added PopH264_DecoderAddOnNewFrameCallback
-	const Soy::TVersion	Version(1,2,2);
+	//	1.2.3	PopH264_CreateEncoder now takes JSON instead of encoder name
+	const Soy::TVersion	Version(1,2,3);
 }
 
 
@@ -214,12 +215,12 @@ __export void PopH264_DestroyInstance(int32_t Instance)
 
 
 
-__export int32_t PopH264_CreateEncoder(const char* Encoder,char* ErrorBuffer,int32_t ErrorBufferSize)
+__export int32_t PopH264_CreateEncoder(const char* OptionsJson,char* ErrorBuffer,int32_t ErrorBufferSize)
 {
 	try
 	{
-		std::string Params(Encoder ? Encoder : std::string());
-		auto InstanceId = PopH264::EncoderInstanceManager.CreateInstance( Params );
+		std::string ParamsJson(OptionsJson ? OptionsJson : "{}");
+		auto InstanceId = PopH264::EncoderInstanceManager.CreateInstance( ParamsJson );
 		return InstanceId;
 	}
 	catch(std::exception& e)

@@ -40,7 +40,7 @@ public:
 class PopH264::TEncoderInstance
 {
 public:
-	TEncoderInstance(const std::string& Encoder);
+	TEncoderInstance(const std::string& OptionsJson);
 	
 	void			AddOnNewFrameCallback(std::function<void()> Callback);
 	
