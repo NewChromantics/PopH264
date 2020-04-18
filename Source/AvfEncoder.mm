@@ -52,6 +52,7 @@ Avf::TEncoderParams::TEncoderParams(json11::Json& Options)
 	SetInt( POPH264_ENCODER_KEY_MAXFRAMEBUFFERS, mMaxFrameBuffers );
 	SetInt( POPH264_ENCODER_KEY_MAXSLICEBYTES, mMaxSliceBytes );
 	SetBool( POPH264_ENCODER_KEY_MAXIMISEPOWEREFFICIENCY, mMaximisePowerEfficiency );
+	SetInt( POPH264_ENCODER_KEY_PROFILELEVEL, mProfileLevel );
 }
 	
 	
@@ -123,6 +124,32 @@ Avf::TCompressor::TCompressor(TEncoderParams& Params,const SoyPixelsMeta& Meta,s
 		//        CFDictionarySetValue(sessionAttributes, kVTCompressionPropertyKey_DataRateLimits, DataRateLimitsNum);
 		//        CFRelease(DataRateLimitsNum);
 
+		//	https://en.wikipedia.org/w/index.php?title=Advanced_Video_Coding
+		//	gr: so iphone5s will send resolution above what's supproted, but SE (or ios13) won't
+		//		lets pre-empt this
+		//	problem: the auto baseline the SE chooses(4) won't decode
+		std::map<size_t,size_t> ProfileLevelMaxHeight =
+		{
+			{	30,	576	},	//	720×576@25	720×480@30
+			{	31,	720	},	//	1,280×720@30.0 (5)
+			{	32,	1024	},		//	1,280×1,024@42.2 (4)
+			{	40,	1080	},	//	1,920×1,080@30.1	2,048×1,024@30.0
+		};
+		std::map<size_t,CFStringRef> ProfileLevelValue =
+		{
+			{	0,	kVTProfileLevel_H264_Baseline_AutoLevel	},
+			{	13,	kVTProfileLevel_H264_Baseline_1_3	},
+			{	30,	kVTProfileLevel_H264_Baseline_3_0	},
+			{	31,	kVTProfileLevel_H264_Baseline_3_1	},
+			{	32,	kVTProfileLevel_H264_Baseline_3_2	},
+			{	40,	kVTProfileLevel_H264_Baseline_4_0	},
+			{	41,	kVTProfileLevel_H264_Baseline_4_1	},
+			{	42,	kVTProfileLevel_H264_Baseline_4_2	},
+			{	50,	kVTProfileLevel_H264_Baseline_5_0	},
+			{	51,	kVTProfileLevel_H264_Baseline_5_1	},
+			{	52,	kVTProfileLevel_H264_Baseline_5_2	},
+		};
+		
 		{
 			void* CallbackParam = this;
 			auto Width = Meta.GetWidth();
@@ -131,16 +158,31 @@ Avf::TCompressor::TCompressor(TEncoderParams& Params,const SoyPixelsMeta& Meta,s
 			//std::Debug << "H264: VTCompressionSessionCreate " << status << std::endl;
 			Avf::IsOkay(status,"VTCompressionSessionCreate");
 		}
+
+		std::string ProfileDebug;
+		{
+			auto ProfileNumber = Params.mProfileLevel;
+			auto Profile = ProfileLevelValue[ProfileNumber];
+			std::stringstream Debug;
+			Debug << Soy::CFStringToString( Profile) << "=" << ProfileNumber << ";";
+			ProfileDebug = Debug.str();
+		}
+
 		
 		{
-#if defined(TARGET_OSX)
+			auto ProfileNumber = Params.mProfileLevel;
 			//	gr: kVTProfileLevel_H264_Baseline_3_0 always fails in compression callback with -12348 on osx
-			auto Profile = kVTProfileLevel_H264_Baseline_3_1;
-#else
-			auto Profile = kVTProfileLevel_H264_Baseline_AutoLevel;
-#endif
+			//	32 not supported on iphonese/13 (VTSessionSetProperty fails)
+			auto Profile = ProfileLevelValue[ProfileNumber];
 			auto status = VTSessionSetProperty(mSession, kVTCompressionPropertyKey_ProfileLevel, Profile);
-			Avf::IsOkay(status,"kVTCompressionPropertyKey_ProfileLevel");
+			Avf::IsOkay(status, ProfileDebug + "kVTCompressionPropertyKey_ProfileLevel" );
+			
+			if ( ProfileNumber != 0 )
+			{
+				auto Height = Meta.GetHeight();
+				auto MaxHeight = ProfileLevelMaxHeight[ProfileNumber];
+				std::Debug << "H264 using profile " << ProfileNumber << " with height " << Height << ", max height in spec " << MaxHeight << std::endl;
+			}
 		}
 		
 		{
@@ -166,8 +208,6 @@ Avf::TCompressor::TCompressor(TEncoderParams& Params,const SoyPixelsMeta& Meta,s
 		{
 			//	this was giving about 25x too much, maybe im giving it the wrong values, but I dont think so
 			int32_t AverageBitRate = Params.mAverageKbps * 1024 * 8;
-			//int32_t AverageBitRate = Params.mAverageKbps * (1000 * 8);
-			//AverageBitRate /= 25;
 			CFNumberRef Number = CFNumberCreate(NULL, kCFNumberSInt32Type, &AverageBitRate );
 			auto status = VTSessionSetProperty(mSession, kVTCompressionPropertyKey_AverageBitRate, Number);
 			Avf::IsOkay(status,"kVTCompressionPropertyKey_AverageBitRate");
@@ -199,10 +239,10 @@ Avf::TCompressor::TCompressor(TEncoderParams& Params,const SoyPixelsMeta& Meta,s
 			Avf::IsOkay(status,"kVTCompressionPropertyKey_MaxH264SliceBytes");
 		}
 
+		auto OsVersion = Platform::GetOsVersion();
 #if defined(TARGET_IOS)
 		auto MaxPowerSupported = true;
 #else
-		auto OsVersion = Platform::GetOsVersion();
 		auto MaxPowerSupported = OsVersion.mMinor >= 14;
 #endif
 		if ( MaxPowerSupported )
@@ -226,7 +266,7 @@ Avf::TCompressor::TCompressor(TEncoderParams& Params,const SoyPixelsMeta& Meta,s
 		}
 		
 		auto status = VTCompressionSessionPrepareToEncodeFrames(mSession);
-		Avf::IsOkay(status,"VTCompressionSessionPrepareToEncodeFrames");
+		Avf::IsOkay(status,ProfileDebug + "VTCompressionSessionPrepareToEncodeFrames");
 	};
 	dispatch_sync(mQueue, Lambda);
 }
@@ -469,8 +509,10 @@ void Avf::TCompressor::OnPacket(const ArrayBridge<uint8_t>&& Data,SoyTime Presen
 
 void Avf::TCompressor::Encode(CVPixelBufferRef PixelBuffer,size_t FrameNumber)
 {
-	auto Lambda = ^
-	{
+	//	this throws with uncaught exceptions if in a dispatch queue,
+	//	does it need to be? it was syncronous anyway
+	//auto Lambda = ^
+	//{
 		//	we're using this to pass a frame number, but really we should be giving a real time to aid the encoder
 		CMTime presentationTimeStamp = CMTimeMake(FrameNumber, 1);
 		VTEncodeInfoFlags OutputFlags = 0;
@@ -501,8 +543,8 @@ void Avf::TCompressor::Encode(CVPixelBufferRef PixelBuffer,size_t FrameNumber)
 			auto EncodingAsync = ( OutputFlags & kVTEncodeInfo_Asynchronous) != 0;
 			std::Debug << "VTCompressionSessionEncodeFrame returned FrameDropped=" << FrameDropped << " EncodingAsync=" << EncodingAsync << std::endl;
 		}
-	};
-	dispatch_sync(mQueue,Lambda);
+	//};
+	//dispatch_sync(mQueue,Lambda);
 }
 	
 

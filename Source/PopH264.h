@@ -54,6 +54,7 @@ __export void				PopH264_DecoderAddOnNewFrameCallback(int32_t Instance,PopH264_C
 #define POPH264_ENCODER_KEY_MAXFRAMEBUFFERS	"MaxFrameBuffers"
 #define POPH264_ENCODER_KEY_MAXSLICEBYTES	"MaxSliceBytes"
 #define POPH264_ENCODER_KEY_MAXIMISEPOWEREFFICIENCY	"MaximisePowerEfficiency"
+#define POPH264_ENCODER_KEY_PROFILELEVEL	"ProfileLevel"
 
 //	All options are optional
 //	.Encoder = "avf"|"x264"
@@ -64,6 +65,7 @@ __export void				PopH264_DecoderAddOnNewFrameCallback(int32_t Instance,PopH264_C
 //	.MaxFrameBuffers = undefined	avf: kVTCompressionPropertyKey_MaxFrameDelayCount
 //	.MaxSliceBytes = number			avf: kVTCompressionPropertyKey_MaxH264SliceBytes
 //	.MaximisePowerEfficiency = true	avf: kVTCompressionPropertyKey_MaximizePowerEfficiency
+//	.ProfileLevel = 30(int)			Baseline only at the moment. 30=3.0, 41=4.1 etc this also matches the number in SPS. Default will try and pick correct for resolution or 3.0
 __export int32_t			PopH264_CreateEncoder(const char* OptionsJson,char* ErrorBuffer,int32_t ErrorBufferSize);
 __export void				PopH264_DestroyEncoder(int32_t Instance);
 

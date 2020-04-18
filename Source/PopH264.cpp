@@ -12,7 +12,8 @@ namespace PopH264
 	//	1.2.1	added encoding
 	//	1.2.2	Added PopH264_DecoderAddOnNewFrameCallback
 	//	1.2.3	PopH264_CreateEncoder now takes JSON instead of encoder name
-	const Soy::TVersion	Version(1,2,3);
+	//	1.2.4	Added ProfileLevel
+	const Soy::TVersion	Version(1,2,4);
 }
 
 

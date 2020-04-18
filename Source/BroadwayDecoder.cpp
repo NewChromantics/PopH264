@@ -158,7 +158,7 @@ bool Broadway::TDecoder::DecodeNextPacket(std::function<void(const SoyPixelsImpl
 	H264SwDecOutput Output;
 	Output.pStrmCurrPos = nullptr;
 	
-	static bool Debug = false;
+	static bool Debug = true;
 	if ( Debug )
 	{
 		try

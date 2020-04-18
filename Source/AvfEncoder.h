@@ -35,6 +35,7 @@ public:
 	size_t	mMaxKbps = 0;
 	size_t	mMaxFrameBuffers = 0;
 	size_t	mMaxSliceBytes = 0;
+	size_t	mProfileLevel = 0;
 };
 
 //	same as X264
