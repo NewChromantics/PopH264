@@ -366,15 +366,18 @@ void Avf::TCompressor::OnCompressed(OSStatus status, VTEncodeInfoFlags infoFlags
 	auto DecodeTimecode = Soy::Platform::GetTime(DecodeTimestamp);
 	auto Duration = Soy::Platform::GetTime(SampleDuration);
 	
-	//	look for SPS & PPS data if we have a keyframe
-	CFDictionaryRef Dictionary = static_cast<CFDictionaryRef>( CFArrayGetValueAtIndex(CMSampleBufferGetSampleAttachmentsArray(SampleBuffer, true), 0) );
-	bool IsKeyframe = !CFDictionaryContainsKey( Dictionary, kCMSampleAttachmentKey_NotSync);
-
 	//	doing this check after getting meta to help debug
 	if (!CMSampleBufferDataIsReady(SampleBuffer))
 	{
-		throw Soy::AssertException("Data sample not ready");
+		auto WasDropped = (infoFlags & kVTEncodeInfo_FrameDropped) ? "(Frame Dropped)" : "";
+		throw Soy::AssertException( std::string("Data sample not ready") + WasDropped );
 	}
+
+	//	look for SPS & PPS data if we have a keyframe
+	//	AFTER CMSampleBufferDataIsReady as SampleBuffer may be null
+	CFDictionaryRef Dictionary = static_cast<CFDictionaryRef>( CFArrayGetValueAtIndex(CMSampleBufferGetSampleAttachmentsArray(SampleBuffer, true), 0) );
+	bool IsKeyframe = !CFDictionaryContainsKey( Dictionary, kCMSampleAttachmentKey_NotSync);
+	
 
 	//	extract data
 	{
