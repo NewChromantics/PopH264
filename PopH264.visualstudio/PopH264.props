@@ -27,6 +27,7 @@
     </ClCompile>
     <Link>
       <FullProgramDatabaseFile>true</FullProgramDatabaseFile>
+      <DelayLoadDLLs>x264.dll</DelayLoadDLLs>
     </Link>
     <PostBuildEvent>
       <Command>REM Copy the Build dir contents to unity
