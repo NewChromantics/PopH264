@@ -234,7 +234,7 @@ public static class PopH264
 
 		public int PushFrameData(FrameInput Frame)
 		{
-			CheckH264Frame(Frame);
+			//CheckH264Frame(Frame);
 			//Debug.Log(BitConverter.ToString(Frame.Bytes.SubArray(0, 8)));
 
 			if ( !ThreadedDecoding )
