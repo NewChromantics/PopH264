@@ -65,10 +65,40 @@ public class VideoPacketDecoder : MonoBehaviour
 		if (PendingInputFrames == null)
 			PendingInputFrames = new List<PopH264.FrameInput>();
 
-		var NewPacket = new PopH264.FrameInput();
-		NewPacket.Bytes = Data;
-		NewPacket.FrameNumber = (int)TimeMs;
-		PendingInputFrames.Add(NewPacket);
+		//	gr: for UDP fragmented packets, we're generating massive amounts of packets which is causing a big strain
+		//		the h264 decoder can now take any old bunch of packets, they don't need to be cut up into frames
+		//		we still want to split them when we DO have frame numbers
+		//	todo: keep adding to previous frame until we spot a NAL, would be good to have this split into packets unity side
+		//		for now; keep one big buffer if the timestamp is zero (ie, no frame info)
+		//	todo: even better when we have no meta, one giant buffer with minimal reallocs
+		bool AppendToPrev = (TimeMs == 0);
+		if (PendingInputFrames.Count == 0)
+			AppendToPrev = false;
+
+		if ( !AppendToPrev )
+		{
+			var NewPacket = new PopH264.FrameInput();
+			NewPacket.FrameNumber = (int)TimeMs;
+			PendingInputFrames.Add(NewPacket);
+			if ( VerboseDebug )
+				Debug.Log("New packet in buffer for time " + TimeMs + " x" + Data.Length);
+		}
+
+		//	replace last packet
+		var Packet = PendingInputFrames[PendingInputFrames.Count - 1];
+		if (Packet.Bytes == null)
+		{
+			Packet.Bytes = Data;
+		}
+		else
+		{
+			if ( VerboseDebug )
+				Debug.Log("Joining packets x" + Packet.Bytes.Length + " + x" + Data.Length);
+			Packet.Bytes = Packet.Bytes.JoinArray(Data);
+		}
+
+		//	structs, so we're not modifying in-place, have to override prev
+		PendingInputFrames[PendingInputFrames.Count - 1] = Packet;
 	}
 
 	public void PushPacketWithNoTimestamp(byte[] Data)
