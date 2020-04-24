@@ -234,6 +234,9 @@
     <ClCompile Include="..\Source\SoyLib\src\SoyFilesystem.cpp">
       <Filter>SoyLib</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source\MediaFoundationDecoder.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\SoyLib\src\Array.hpp">
@@ -514,6 +517,9 @@
     </ClInclude>
     <ClInclude Include="..\Source\X264\include\x264_config.h">
       <Filter>x264</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\MediaFoundationDecoder.h">
+      <Filter>Source</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

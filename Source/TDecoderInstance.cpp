@@ -10,8 +10,10 @@
 #endif
 
 #define ENABLE_BROADWAY
+
 #if defined(TARGET_WINDOWS)
 #define ENABLE_INTELMEDIA
+#define ENABLE_MEDIAFOUNDATION
 #endif
 
 #if defined(ENABLE_MAGICLEAP_DECODER)
@@ -24,6 +26,10 @@
 
 #if defined(ENABLE_INTELMEDIA)
 #include "IntelMediaDecoder.h"
+#endif
+
+#if defined(ENABLE_MEDIAFOUNDATION)
+#include "MediaFoundationDecoder.h"
 #endif
 
 
@@ -43,7 +49,21 @@ PopH264::TDecoderInstance::TDecoderInstance(int32_t Mode)
 		}
 	}
 #endif
-	
+
+#if defined(ENABLE_MEDIAFOUNDATION)
+	{
+		try
+		{
+			mDecoder.reset(new MediaFoundation::TDecoder());
+			return;
+		}
+		catch (std::exception& e)
+		{
+			std::Debug << "Failed to create MediaFoundation decoder: " << e.what() << std::endl;
+		}
+	}
+#endif
+
 #if defined(ENABLE_INTELMEDIA)
 	{
 		try
