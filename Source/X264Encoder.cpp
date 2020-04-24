@@ -258,6 +258,8 @@ void X264::TEncoder::FinishEncoding()
 void X264::TEncoder::Encode(x264_picture_t* InputPicture)
 {
 	//	we're assuming here mPicture has been setup, or we're flushing
+	static int LastDecodeOrderNumber = -1;
+	static int LastPictureOrderNumber = -1;
 
 	//	gr: currently, decoder NEEDS to have nal packets split
 	auto OnNalPacket = [&](FixedRemoteArray<uint8_t>& Data)
@@ -265,7 +267,14 @@ void X264::TEncoder::Encode(x264_picture_t* InputPicture)
 		Soy::TScopeTimerPrint Timer("OnNalPacket",2);
 		auto DecodeOrderNumber = mPicture.i_dts;
 		auto FrameNumber = mPicture.i_pts;
-		//std::Debug << "OnNalPacket( pts=" << FrameNumber << ", dts=" << DecodeOrderNumber << ")" << std::endl;
+		
+		auto DecodeInOrder = (DecodeOrderNumber == LastDecodeOrderNumber + 1) || (DecodeOrderNumber == LastDecodeOrderNumber);
+		auto PictureInOrder = (FrameNumber == LastPictureOrderNumber + 1) || (FrameNumber == LastPictureOrderNumber);
+		if ( !DecodeInOrder || !PictureInOrder )
+			std::Debug << "OnNalPacket out of order( pts=" << FrameNumber << ", lastpts=" << LastPictureOrderNumber << " dts=" << DecodeOrderNumber << ") DecodeInOrder=" << DecodeInOrder << " PictureInOrder=" << PictureInOrder << std::endl;
+		LastDecodeOrderNumber = DecodeOrderNumber;
+		LastPictureOrderNumber = FrameNumber;
+
 		auto FrameMeta = GetFrameMeta(FrameNumber);
 		
 		//	todo: either store these to make sure decode order (dts) is kept correct
