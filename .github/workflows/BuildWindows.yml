@@ -14,7 +14,7 @@ on:
 
 jobs:
   buildwindows:
-    runs-on: windows-2016
+    runs-on: [self-hosted, windows]
     
     steps:
     - uses: actions/checkout@v1
