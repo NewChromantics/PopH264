@@ -77,7 +77,8 @@ void PopH264::TEncoderInstance::PushFrame(const std::string& Meta,const uint8_t*
 	auto LumaSize = Json["LumaSize"].int_value();
 	auto ChromaUSize = Json["ChromaUSize"].int_value();
 	auto ChromaVSize = Json["ChromaVSize"].int_value();
-	
+	auto Keyframe = Json["Keyframe"].bool_value();
+
 	//	check for data/size mismatch
 	if ( LumaData && LumaSize==0 )
 		throw Soy::AssertException("Luma pointer but zero LumaSize");
@@ -107,7 +108,7 @@ void PopH264::TEncoderInstance::PushFrame(const std::string& Meta,const uint8_t*
 		SoyPixelsRemote PixelsU( const_cast<uint8_t*>(ChromaUData), WidthChroma, HeightChroma, ChromaUSize, SoyPixelsFormat::ChromaU_8 );
 		SoyPixelsRemote PixelsV( const_cast<uint8_t*>(ChromaVData), WidthChroma, HeightChroma, ChromaVSize, SoyPixelsFormat::ChromaV_8 );
 		
-		mEncoder->Encode( PixelsY, PixelsU, PixelsV, Meta );
+		mEncoder->Encode( PixelsY, PixelsU, PixelsV, Meta, Keyframe );
 		return;
 	}
 	else if ( LumaData && !ChromaUData && !ChromaVData )
@@ -117,7 +118,7 @@ void PopH264::TEncoderInstance::PushFrame(const std::string& Meta,const uint8_t*
 		//	need some dummy chroma
 		SoyPixels PixelsU( SoyPixelsMeta( WidthChroma, HeightChroma, SoyPixelsFormat::ChromaU_8 ) );
 		SoyPixels PixelsV( SoyPixelsMeta( WidthChroma, HeightChroma, SoyPixelsFormat::ChromaV_8 ) );
-		mEncoder->Encode( PixelsY, PixelsU, PixelsV, Meta );
+		mEncoder->Encode( PixelsY, PixelsU, PixelsV, Meta, Keyframe );
 		return;
 	}
 	

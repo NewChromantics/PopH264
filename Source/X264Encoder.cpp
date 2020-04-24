@@ -173,7 +173,7 @@ void X264::TEncoder::AllocEncoder(const SoyPixelsMeta& Meta)
 	mPixelMeta = Meta;
 }
 
-void X264::TEncoder::Encode(const SoyPixelsImpl& Luma,const SoyPixelsImpl& ChromaU,const SoyPixelsImpl& ChromaV,const std::string& Meta)
+void X264::TEncoder::Encode(const SoyPixelsImpl& Luma,const SoyPixelsImpl& ChromaU,const SoyPixelsImpl& ChromaV,const std::string& Meta,bool Keyframe)
 {
 	Soy::TScopeTimerPrint Timer(__PRETTY_FUNCTION__, 2);
 	{
@@ -215,6 +215,8 @@ void X264::TEncoder::Encode(const SoyPixelsImpl& Luma,const SoyPixelsImpl& Chrom
 	
 	mPicture.i_pts = PushFrameMeta(Meta);
 	
+	mPicture.i_type = Keyframe ? X264_TYPE_KEYFRAME : X264_TYPE_AUTO;
+
 	Encode(&mPicture);
 	
 	//	flush any other frames
@@ -256,7 +258,7 @@ void X264::TEncoder::FinishEncoding()
 void X264::TEncoder::Encode(x264_picture_t* InputPicture)
 {
 	//	we're assuming here mPicture has been setup, or we're flushing
-	
+
 	//	gr: currently, decoder NEEDS to have nal packets split
 	auto OnNalPacket = [&](FixedRemoteArray<uint8_t>& Data)
 	{

@@ -77,8 +77,10 @@ __export void				PopH264_DestroyEncoder(int32_t Instance);
 //		.LumaSize (bytes)
 //		.ChromaUSize (bytes if not null)
 //		.ChromaVSize (bytes if not null)
-//	any other fields (eg. frame number) will be copied to output meta
-//	error will be a string mentioning any missing fields (if provided)
+//		.Keyframe (bool, defaults to false)
+//	All fields will be copied to output meta (including those unused above)
+//	Error will be a string mentioning any missing fields (if provided)
+//	Currently .Keyframe is COPIED to output, not updated to the actual state (should check NALU for this)
 __export void				PopH264_EncoderPushFrame(int32_t Instance,const char* MetaJson,const uint8_t* LumaData,const uint8_t* ChromaUData,const uint8_t* ChromaVData,char* ErrorBuffer,int32_t ErrorBufferSize);
 
 //	copies & removes next packet and returns buffer size written (may be greater than input buffer size, in which case data will be lost)
