@@ -37,4 +37,8 @@ private:
 	
 private:
 	H264SwDecInst	mDecoderInstance = nullptr;
+
+	//	broadway goes wrong if we try and decode frames without SPS/PPS and wont recover
+	//	so, reject other packets until we get them
+	bool			mProcessedHeaderPackets = false;
 };

@@ -158,18 +158,30 @@ bool Broadway::TDecoder::DecodeNextPacket(std::function<void(const SoyPixelsImpl
 	H264SwDecOutput Output;
 	Output.pStrmCurrPos = nullptr;
 	
+	//	this may throw, probably shouldn't let it, but not sure what to do yet, so let it throw
+	auto H264PacketType = H264::GetPacketType(GetArrayBridge(Nalu));
+
+	//	if we havent had headers yet, broadway will fail (and not recover)
+	//	if we try and process frames, so drop them
+	if (!mProcessedHeaderPackets)
+	{
+		switch (H264PacketType)
+		{
+		case H264NaluContent::Slice_NonIDRPicture:
+		case H264NaluContent::Slice_CodedPartitionA:
+		case H264NaluContent::Slice_CodedPartitionB:
+		case H264NaluContent::Slice_CodedPartitionC:
+		case H264NaluContent::Slice_CodedIDRPicture:
+		case H264NaluContent::Slice_AuxCodedUnpartitioned:
+			std::Debug << "Dropping packet " << magic_enum::enum_name(H264PacketType) << " as we havent yet processed headers" << std::endl;
+			return true;
+		}
+	}
+
 	static bool Debug = true;
 	if ( Debug )
 	{
-		try
-		{
-			auto H264PacketType = H264::GetPacketType(GetArrayBridge(Nalu));
-			std::Debug << "H264SwDecDecode(" << magic_enum::enum_name(H264PacketType) << ")" << std::endl;
-		}
-		catch (std::exception& e)
-		{
-			std::Debug << "Error getting Nalu packet type; " << e.what() << std::endl;
-		}
+		std::Debug << "H264SwDecDecode(" << magic_enum::enum_name(H264PacketType) << ")" << std::endl;
 	}
 	
 	Soy::TScopeTimerPrint Timer("H264 Decode",15);
@@ -194,6 +206,7 @@ bool Broadway::TDecoder::DecodeNextPacket(std::function<void(const SoyPixelsImpl
 	{
 		case H264SWDEC_HDRS_RDY_BUFF_NOT_EMPTY:
 		{
+			mProcessedHeaderPackets = true;
 			auto Meta = GetMeta();
 			OnMeta( Meta );
 			return true;
