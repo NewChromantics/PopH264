@@ -3,7 +3,7 @@
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
-    <IncludePath>$(ProjectDir)..\Source\SoyLib\src;$(ProjectDir)..\Source\Broadway\Decoder\inc;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)..\Source\SoyLib\src;$(ProjectDir)..\Source\Broadway\Decoder\inc;$(ProjectDir)..\Source\Json11;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
