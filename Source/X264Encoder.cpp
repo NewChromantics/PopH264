@@ -42,13 +42,33 @@ X264::TEncoderParams::TEncoderParams(json11::Json& Options)
 		ValueUnsigned = Value;
 		return true;
 	};
-	SetInt( POPH264_ENCODER_KEY_QUALITY, mPreset );
+	auto SetBool = [&](const char* Name, bool& Value)
+	{
+		auto& Handle = Options[Name];
+		if (!Handle.is_bool())
+			return false;
+		Value = Handle.bool_value();
+		return true;
+	};
+	SetInt(POPH264_ENCODER_KEY_QUALITY, mPreset);
+	SetInt(POPH264_ENCODER_KEY_PROFILELEVEL, mProfileLevel);
+	SetInt(POPH264_ENCODER_KEY_ENCODERTHREADS, mEncoderThreads);
+	SetInt(POPH264_ENCODER_KEY_LOOKAHEADTHREADS, mLookaheadThreads);
+	SetBool(POPH264_ENCODER_KEY_BSLICEDTHREADS, mBSlicedThreads);
+	SetBool(POPH264_ENCODER_KEY_VERBOSEDEBUG, mEnableLog);
+	SetBool(POPH264_ENCODER_KEY_DETERMINISTIC, mDeterministic);
+	SetBool(POPH264_ENCODER_KEY_CPUOPTIMISATIONS, mCpuOptimisations);
+
+	//	0 is auto on AVF, so handle that
+	if (mProfileLevel == 0)
+		mProfileLevel = 30;
 }
 
 X264::TEncoder::TEncoder(TEncoderParams& Params,std::function<void(PopH264::TPacket&)> OnOutputPacket) :
-	PopH264::TEncoder	( OnOutputPacket )
+	PopH264::TEncoder	( OnOutputPacket ),
+	mParams				( Params )
 {
-	if ( Params.mPreset > 9 )
+	if ( mParams.mPreset > 9 )
 		throw Soy_AssertException("Expecting preset value <= 9");
 	
 	//	trigger dll load
@@ -58,7 +78,7 @@ X264::TEncoder::TEncoder(TEncoderParams& Params,std::function<void(PopH264::TPac
 	
 	//	todo: allow user to set tune options. takes , seperated values
 	const char* Tune = "zerolatency";
-	auto* PresetName = x264_preset_names[Params.mPreset];
+	auto* PresetName = x264_preset_names[mParams.mPreset];
 	auto Result = x264_param_default_preset(&mParam, PresetName, Tune);
 	IsOkay(Result,"x264_param_default_preset");
 }
@@ -149,16 +169,19 @@ void X264::TEncoder::AllocEncoder(const SoyPixelsMeta& Meta)
 	mParam.b_repeat_headers = 1;
 	mParam.b_annexb = 1;
 	mParam.p_log_private = reinterpret_cast<void*>(&X264::Log);
-	mParam.i_log_level = X264_LOG_DEBUG;
+
+	mParam.i_log_level = mParams.mEnableLog ? X264_LOG_DEBUG : X264_LOG_WARNING;
 	
 	//	reduce mem usage by reducing threads
 	//	gr: this heavily slows encoding (20ms -> 50/60) on desktop
-	mParam.i_threads = 2;
-	mParam.i_lookahead_threads = 2;
-	mParam.b_sliced_threads = true;
-	
+	mParam.i_threads = mParams.mEncoderThreads;
+	mParam.i_lookahead_threads = mParams.mLookaheadThreads;
+	mParam.b_sliced_threads = mParams.mBSlicedThreads;
+	mParam.b_deterministic = mParams.mDeterministic;
+	mParam.b_cpu_independent = mParams.mCpuOptimisations;
+
 	//	h264 profile level
-	mParam.i_level_idc = 30;//	3.0
+	mParam.i_level_idc = mParams.mProfileLevel;//	3.0
 	
 	auto Profile = "baseline";
 	auto Result = x264_param_apply_profile(&mParam, Profile);

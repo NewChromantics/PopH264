@@ -45,6 +45,14 @@ public:
 	TEncoderParams(json11::Json& Options);
 	
 	size_t	mPreset = 2;
+	size_t	mProfileLevel = 30;
+
+	size_t	mEncoderThreads = 2;
+	size_t	mLookaheadThreads = 2;
+	bool	mBSlicedThreads = true;
+	bool	mEnableLog = false;
+	bool	mDeterministic = false;	//	non-deterministic optimisations
+	bool	mCpuOptimisations = true;
 };
 
 class X264::TEncoder : public PopH264::TEncoder
@@ -88,4 +96,5 @@ protected:
 	
 	size_t				mFrameCount = 0;
 	Array<TFrameMeta>	mFrameMetas;
+	TEncoderParams		mParams;
 };

@@ -46,15 +46,26 @@ __export int32_t			PopH264_PopFrame(int32_t Instance,uint8_t* Plane0,int32_t Pla
 __export void				PopH264_DecoderAddOnNewFrameCallback(int32_t Instance,PopH264_Callback* Callback, void* Meta);
 
 
+//	generic
 #define POPH264_ENCODER_KEY_ENCODERNAME		"Encoder"
-#define POPH264_ENCODER_KEY_QUALITY			"Quality"
+#define POPH264_ENCODER_KEY_PROFILELEVEL	"ProfileLevel"
+
+//	avf
 #define POPH264_ENCODER_KEY_AVERAGEKBPS		"AverageKbps"
 #define POPH264_ENCODER_KEY_MAXKBPS			"MaxKbps"
 #define POPH264_ENCODER_KEY_REALTIME		"Realtime"
 #define POPH264_ENCODER_KEY_MAXFRAMEBUFFERS	"MaxFrameBuffers"
 #define POPH264_ENCODER_KEY_MAXSLICEBYTES	"MaxSliceBytes"
 #define POPH264_ENCODER_KEY_MAXIMISEPOWEREFFICIENCY	"MaximisePowerEfficiency"
-#define POPH264_ENCODER_KEY_PROFILELEVEL	"ProfileLevel"
+
+//	x264
+#define POPH264_ENCODER_KEY_QUALITY				"Quality"
+#define POPH264_ENCODER_KEY_ENCODERTHREADS		"EncoderThreads"
+#define POPH264_ENCODER_KEY_LOOKAHEADTHREADS	"LookaheadThreads"
+#define POPH264_ENCODER_KEY_BSLICEDTHREADS		"BSlicedThreads"
+#define POPH264_ENCODER_KEY_VERBOSEDEBUG		"VerboseDebug"
+#define POPH264_ENCODER_KEY_DETERMINISTIC		"Deterministic"
+#define POPH264_ENCODER_KEY_CPUOPTIMISATIONS	"CpuOptimisations"
 
 //	All options are optional
 //	.Encoder = "avf"|"x264"

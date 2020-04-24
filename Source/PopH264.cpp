@@ -14,7 +14,8 @@ namespace PopH264
 	//	1.2.3	PopH264_CreateEncoder now takes JSON instead of encoder name
 	//	1.2.4	Added ProfileLevel
 	//	1.2.5	Encoder now uses .Keyframe meta setting
-	const Soy::TVersion	Version(1,2,5);
+	//	1.2.6	X264 now uses ProfileLevel + lots of x264 settings exposed
+	const Soy::TVersion	Version(1,2,6);
 }
 
 
