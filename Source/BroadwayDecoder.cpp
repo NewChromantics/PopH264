@@ -178,7 +178,7 @@ bool Broadway::TDecoder::DecodeNextPacket(std::function<void(const SoyPixelsImpl
 		}
 	}
 
-	static bool Debug = true;
+	static bool Debug = false;
 	if ( Debug )
 	{
 		std::Debug << "H264SwDecDecode(" << magic_enum::enum_name(H264PacketType) << ")" << std::endl;
