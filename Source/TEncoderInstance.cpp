@@ -129,7 +129,37 @@ void PopH264::TEncoderInstance::PushFrame(const std::string& Meta,const uint8_t*
 
 void PopH264::TEncoderInstance::PeekPacket(json11::Json::object& Meta)
 {
-	Soy_AssertTodo();
+	if (mPackets.IsEmpty())
+		return;
+
+	size_t DataSize = 0;
+	std::string InputMeta;
+	{
+		std::lock_guard<std::mutex> Lock(mPacketsLock);
+		auto& Packet0 = mPackets[0];
+		DataSize = Packet0.mData ? Packet0.mData->GetDataSize() : 0;
+		InputMeta = Packet0.mInputMeta;
+	}
+
+	//	write meta
+	Meta["DataSize"] = static_cast<int>(DataSize);
+	if (!InputMeta.empty())
+	{
+		using namespace json11;
+		//	we're expecting json, so make it an object
+		std::string ParseError;
+		auto MetaObject = Json::parse(InputMeta, ParseError);
+
+		//	this shouldn't come up, as we've already parsed it on input, but just in case
+		if (!ParseError.empty())
+		{
+			Meta["Meta"] = std::string("PopH264 Unexpected parse error ") + ParseError;
+		}
+		else
+		{
+			Meta["Meta"] = MetaObject;
+		}
+	}
 }
 
 size_t PopH264::TEncoderInstance::PeekNextFrameSize()

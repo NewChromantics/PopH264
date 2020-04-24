@@ -89,7 +89,7 @@ __export int32_t			PopH264_EncoderPopData(int32_t Instance,uint8_t* DataBuffer,i
 
 //	get meta for next packet as json. If MetaJsonSize isn't big enough, it writes as much as possible.
 //	members if pending data
-//		.DataSize			byte-size of packet
+//		.DataSize			byte-size of packet (missing if no packet)
 //		.Meta				all meta passed in to PopH264_EncoderPushFrame
 //		.EncodeDurationMs	time it took to encode
 //		.DelayDurationMs	time spent in queue before encoding (lag)
