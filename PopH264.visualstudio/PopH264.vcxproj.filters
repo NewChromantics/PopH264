@@ -537,10 +537,12 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <CopyFileToFolders Include="..\Source\PopH264.h" />
     <CopyFileToFolders Include="..\Unity\PopH264\Assets\PopH264\PopH264.cs" />
     <CopyFileToFolders Include="..\Source\X264\bin\x64\x264.dll">
       <Filter>x264\x64</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="..\Source\PopH264.h">
+      <Filter>Source</Filter>
     </CopyFileToFolders>
   </ItemGroup>
   <ItemGroup>
