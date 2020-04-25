@@ -162,6 +162,7 @@ public static class PopH264
 				try
 				{
 					Plane = new Texture2D(Meta.Width, Meta.Height, Format, MipMap, Linear);
+					Plane.filterMode = FilterMode.Point;
 				}
 				catch(System.Exception e)
 				{
