@@ -231,7 +231,7 @@ MonoBehaviour:
   OnNewFrameTime:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1809756288}
+      - m_Target: {fileID: 0}
         m_MethodName: set_text
         m_Mode: 0
         m_Arguments:
@@ -321,6 +321,97 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 11
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &238021480
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 238021483}
+  - component: {fileID: 238021482}
+  - component: {fileID: 238021481}
+  - component: {fileID: 238021484}
+  m_Layer: 0
+  m_Name: Cloud
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!23 &238021481
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 238021480}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: b4d8557c662ab4f968252a681f236714, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 0
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+--- !u!33 &238021482
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 238021480}
+  m_Mesh: {fileID: 0}
+--- !u!4 &238021483
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 238021480}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -2.067, y: 1.086, z: 0.768}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 22
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &238021484
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 238021480}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a6d74ea78a12f4550896478c83913cf0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  QuadCountThousand: 307
 --- !u!1 &292209223
 GameObject:
   m_ObjectHideFlags: 0
@@ -380,7 +471,7 @@ MonoBehaviour:
   OnNewFrameTime:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1809756288}
+      - m_Target: {fileID: 0}
         m_MethodName: set_text
         m_Mode: 0
         m_Arguments:
@@ -547,7 +638,7 @@ MonoBehaviour:
   OnNewFrameTime:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1809756288}
+      - m_Target: {fileID: 0}
         m_MethodName: set_text
         m_Mode: 0
         m_Arguments:
@@ -654,7 +745,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &496615612
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -694,7 +785,7 @@ MonoBehaviour:
         m_CallState: 2
     m_TypeName: UnityEvent_Packet, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
       PublicKeyToken=null
-  DecodePacketsPerFrame: 100
+  DecodePacketsPerFrame: 900
 --- !u!114 &496615613
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -786,7 +877,7 @@ MonoBehaviour:
   OnNewFrameTime:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1809756288}
+      - m_Target: {fileID: 0}
         m_MethodName: set_text
         m_Mode: 0
         m_Arguments:
@@ -1175,7 +1266,7 @@ MonoBehaviour:
         m_CallState: 2
     m_TypeName: UnityEvent_Packet, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
       PublicKeyToken=null
-  DecodePacketsPerFrame: 100
+  DecodePacketsPerFrame: 1000
   FragmentedOptions:
     HasFrameNumberAndChecksumAndSize: 1
     HasPartNumber: 1
@@ -1229,7 +1320,7 @@ MonoBehaviour:
   OnError:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1809756288}
+      - m_Target: {fileID: 0}
         m_MethodName: set_text
         m_Mode: 0
         m_Arguments:
@@ -1288,7 +1379,7 @@ MonoBehaviour:
   OnNewFrameTime:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1809756288}
+      - m_Target: {fileID: 0}
         m_MethodName: set_text
         m_Mode: 0
         m_Arguments:
@@ -1735,7 +1826,7 @@ MonoBehaviour:
   OnNewFrameTime:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1809756288}
+      - m_Target: {fileID: 0}
         m_MethodName: set_text
         m_Mode: 0
         m_Arguments:
@@ -1883,7 +1974,7 @@ MonoBehaviour:
   OnNewFrameTime:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1809756288}
+      - m_Target: {fileID: 0}
         m_MethodName: set_text
         m_Mode: 0
         m_Arguments:
@@ -2016,7 +2107,7 @@ MonoBehaviour:
   HardwareDecoding: 0
   DecodeOnSeperateThread: 1
   DecodeImagesPerFrame: 1
-  DecodePacketsPerFrame: 600
+  DecodePacketsPerFrame: 100
   MaterialUniform_LumaTexture: LumaTexture
   MaterialUniform_LumaFormat: LumaFormat
   MaterialUniform_ChromaUTexture: ChromaUTexture
@@ -2024,8 +2115,15 @@ MonoBehaviour:
   MaterialUniform_ChromaVTexture: ChromaVTexture
   MaterialUniform_ChromaVFormat: ChromaVFormat
   SetMaterialFormat: 1
-  RgbTextureBlits: []
+  RgbTextureBlits:
+  - RgbTexture: {fileID: 8400000, guid: cfc37b395b0e746549058ddcc0f4b817, type: 2}
+    YuvMaterial: {fileID: 2100000, guid: 4ffbca6001c0a4969933661552edac81, type: 2}
   OnNewFrameTime:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: UnityEvent_String, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+  OnDebugUpdate:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1809756288}
@@ -2039,11 +2137,6 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-    m_TypeName: UnityEvent_String, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
-  OnDebugUpdate:
-    m_PersistentCalls:
-      m_Calls: []
     m_TypeName: UnityEvent_String, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
       PublicKeyToken=null
 --- !u!23 &1678362410
@@ -2363,7 +2456,7 @@ GameObject:
   - component: {fileID: 1809756289}
   - component: {fileID: 1809756288}
   m_Layer: 5
-  m_Name: Text
+  m_Name: Text Video Debug
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2397,15 +2490,31 @@ MonoBehaviour:
   m_GameObject: {fileID: 1809756286}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 0}
+  m_Script: {fileID: 708705254, guid: f70555f144d8491a825f0804e09c671c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Name: 
-  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
+      Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+  m_FontData:
+    m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
+    m_FontSize: 14
+    m_FontStyle: 0
+    m_BestFit: 0
+    m_MinSize: 10
+    m_MaxSize: 40
+    m_Alignment: 0
+    m_AlignByGeometry: 0
+    m_RichText: 1
+    m_HorizontalOverflow: 0
+    m_VerticalOverflow: 0
+    m_LineSpacing: 1
+  m_Text: Debug
 --- !u!222 &1809756289
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -2472,7 +2581,7 @@ MonoBehaviour:
   OnNewFrameTime:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1809756288}
+      - m_Target: {fileID: 0}
         m_MethodName: set_text
         m_Mode: 0
         m_Arguments:
@@ -2594,7 +2703,7 @@ MonoBehaviour:
   OnError:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1809756288}
+      - m_Target: {fileID: 0}
         m_MethodName: set_text
         m_Mode: 0
         m_Arguments:
