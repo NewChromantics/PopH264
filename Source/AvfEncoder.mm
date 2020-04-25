@@ -66,7 +66,7 @@ public:
 	void	OnCompressed(OSStatus status, VTEncodeInfoFlags infoFlags,CMSampleBufferRef sampleBuffer);
 	void	Flush();
 
-	void	Encode(CVPixelBufferRef PixelBuffer,size_t FrameNumber);
+	void	Encode(CVPixelBufferRef PixelBuffer,size_t FrameNumber,bool Keyframe);
 	
 private:
 	void	OnPacket(const ArrayBridge<uint8_t>&& Data,SoyTime PresentationTime);
@@ -507,12 +507,12 @@ void Avf::TCompressor::OnPacket(const ArrayBridge<uint8_t>&& Data,SoyTime Presen
 }
 
 
-void Avf::TCompressor::Encode(CVPixelBufferRef PixelBuffer,size_t FrameNumber)
+void Avf::TCompressor::Encode(CVPixelBufferRef PixelBuffer,size_t FrameNumber,bool Keyframe)
 {
 	//	this throws with uncaught exceptions if in a dispatch queue,
 	//	does it need to be? it was syncronous anyway
 	//auto Lambda = ^
-	//{
+	{
 		//	we're using this to pass a frame number, but really we should be giving a real time to aid the encoder
 		CMTime presentationTimeStamp = CMTimeMake(FrameNumber, 1);
 		VTEncodeInfoFlags OutputFlags = 0;
@@ -521,16 +521,17 @@ void Avf::TCompressor::Encode(CVPixelBufferRef PixelBuffer,size_t FrameNumber)
 		//kCMTimeInvalid
 		auto Duration = Soy::Platform::GetTime( SoyTime(std::chrono::milliseconds(33)) );
 		void* FrameMeta = nullptr;
-		
-		//	kVTEncodeFrameOptionKey_ForceKeyFrame
-		CFDictionaryRef frameProperties = nullptr;
-		
+
+		//	set keyframe
+		CFMutableDictionaryRef FrameProperties = CFDictionaryCreateMutable( NULL, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks );
+		CFDictionarySetValue( FrameProperties, kVTEncodeFrameOptionKey_ForceKeyFrame, Keyframe ? kCFBooleanTrue : kCFBooleanFalse );
+	
 		// Pass it to the encoder
 		auto Status = VTCompressionSessionEncodeFrame(mSession,
 													  PixelBuffer,
 													  presentationTimeStamp,
 													  Duration,
-													  frameProperties, FrameMeta, &OutputFlags);
+													  FrameProperties, FrameMeta, &OutputFlags);
 		Avf::IsOkay(Status,"VTCompressionSessionEncodeFrame");
 
 		CFRelease(PixelBuffer);
@@ -543,7 +544,7 @@ void Avf::TCompressor::Encode(CVPixelBufferRef PixelBuffer,size_t FrameNumber)
 			auto EncodingAsync = ( OutputFlags & kVTEncodeInfo_Asynchronous) != 0;
 			std::Debug << "VTCompressionSessionEncodeFrame returned FrameDropped=" << FrameDropped << " EncodingAsync=" << EncodingAsync << std::endl;
 		}
-	//};
+	};
 	//dispatch_sync(mQueue,Lambda);
 }
 	
@@ -582,7 +583,7 @@ void Avf::TEncoder::AllocEncoder(const SoyPixelsMeta& Meta)
 	mPixelMeta = Meta;
 }
 
-void Avf::TEncoder::Encode(const SoyPixelsImpl& Luma,const SoyPixelsImpl& ChromaU,const SoyPixelsImpl& ChromaV,const std::string& Meta)
+void Avf::TEncoder::Encode(const SoyPixelsImpl& Luma,const SoyPixelsImpl& ChromaU,const SoyPixelsImpl& ChromaV,const std::string& Meta,bool Keyframe)
 {
 	//	this should be fast as it sends to encoder, but synchronous
 	Soy::TScopeTimerPrint Timer(__PRETTY_FUNCTION__, 2);
@@ -603,7 +604,7 @@ void Avf::TEncoder::Encode(const SoyPixelsImpl& Luma,const SoyPixelsImpl& Chroma
 	auto PixelBuffer = Avf::PixelsToPixelBuffer(EncodePixels);
 	auto FrameNumber = PushFrameMeta(Meta);
 		
-	mCompressor->Encode( PixelBuffer, FrameNumber );
+	mCompressor->Encode( PixelBuffer, FrameNumber, Keyframe );
 }
 
 
