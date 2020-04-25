@@ -24,6 +24,7 @@
 namespace MediaFoundation
 {
 	class TActivateList;
+	class TContext;
 
 	void	IsOkay(HRESULT Result, const char* Context);
 	void	IsOkay(HRESULT Result,const std::string& Context);
@@ -42,6 +43,13 @@ void MediaFoundation::IsOkay(HRESULT Result,const std::string& Context)
 {
 	Platform::IsOkay(Result, Context.c_str());
 }
+
+class MediaFoundation::TContext
+{
+public:
+	TContext();
+	~TContext();
+};
 
 class MediaFoundation::TActivateList
 {
@@ -97,8 +105,30 @@ void MemZero(T& Object)
 }
 
 
+MediaFoundation::TContext::TContext()
+{
+	auto Result = MFStartup(MF_VERSION);
+	IsOkay(Result, "MFStartup");
+}
+
+MediaFoundation::TContext::~TContext()
+{
+	auto Result = MFShutdown();
+	try
+	{
+		IsOkay(Result, "MFShutdown");
+	}
+	catch (std::exception& e)
+	{
+		std::Debug << e.what() << std::endl;
+	}
+}
+
 MediaFoundation::TActivateList MediaFoundation::EnumDecoders()
 {
+	//	auto init context once
+	static TContext Context;
+
 	//	get all availible transform[er]s
 	MFT_REGISTER_TYPE_INFO InputFilter;
 	MemZero(InputFilter);
