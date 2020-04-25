@@ -13,7 +13,7 @@ public class PcapParser : MonoBehaviour {
 
 	public UnityEvent_Packet OnPacket;
 	
-	[Range(0, 100)]
+	[Range(0, 1000)]
 	public int DecodePacketsPerFrame = 1;
 
 	PopX.Pcap.GlobalHeader? Header = null;

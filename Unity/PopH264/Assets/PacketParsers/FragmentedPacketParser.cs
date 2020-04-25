@@ -70,7 +70,7 @@ namespace PopX
 				PartLength = PacketSize - (int)BytesRead;
 			}
 
-			Debug.Log("Frame " + FrameNumber + "x" + PartLength.Value + " Part " + PartNumber + "x" + PartLength);
+			//Debug.Log("Frame " + FrameNumber + "x" + PartLength.Value + " Part " + PartNumber + "x" + PartLength);
 			
 			//	grab the rest of the data (this should match what's left?)
 			var PacketData = ReadData(PartLength.Value);
@@ -145,7 +145,7 @@ public class FragmentedPacketParser : MonoBehaviour {
 
 	public UnityEvent_Packet OnPacket;
 	
-	[Range(0, 100)]
+	[Range(0, 1000)]
 	public int DecodePacketsPerFrame = 1;
 
 	[Header("Some fragments have lengths, but no flags in PCAP to indicate it came from there")]
@@ -187,6 +187,9 @@ public class FragmentedPacketParser : MonoBehaviour {
 
 		System.Action<byte[],long> EnumPacket = (Bytes, Time) =>
 		{
+			Debug.Log("Got Fragmented packet " + Time + " x" + Bytes.Length + "bytes");
+			if (Bytes.Length == 0)
+				return;
 			OnPacket.Invoke(Bytes, Time);
 		};
 
