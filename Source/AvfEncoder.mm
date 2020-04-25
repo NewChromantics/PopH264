@@ -586,7 +586,7 @@ void Avf::TEncoder::AllocEncoder(const SoyPixelsMeta& Meta)
 void Avf::TEncoder::Encode(const SoyPixelsImpl& Luma,const SoyPixelsImpl& ChromaU,const SoyPixelsImpl& ChromaV,const std::string& Meta,bool Keyframe)
 {
 	//	this should be fast as it sends to encoder, but synchronous
-	Soy::TScopeTimerPrint Timer(__PRETTY_FUNCTION__, 2);
+	Soy::TScopeTimerPrint Timer(__PRETTY_FUNCTION__, 13);
 	
 	//	todo: make a complete CVPixelBuffer
 	/*
