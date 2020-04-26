@@ -21,6 +21,7 @@
 
 #include <SoyAutoReleasePtr.h>
 
+//	https://github.com/sipsorcery/mediafoundationsamples/blob/master/MFH264RoundTrip/MFH264RoundTrip.cpp
 
 namespace MediaFoundation
 {
@@ -207,6 +208,18 @@ Soy::TFourcc GetFourCC(const GUID& Guid)
 	//	XXXXXXXX - 0000 - 0010 - 8000 - 00AA00389B71
 	Soy::TFourcc Fourcc(Guid.Data1);
 	return Fourcc;
+}
+
+
+GUID GetGuid(const Soy::TFourcc& Fourcc)
+{
+	//	https://docs.microsoft.com/en-us/windows/win32/medfound/video-subtype-guids#creating-subtype-guids-from-fourccs-and-d3dformat-values
+	//	XXXXXXXX - 0000 - 0010 - 8000 - 00 AA 00 38 9B 71
+	//	see DEFINE_MEDIATYPE_GUID
+	//auto Fourcc32 = _byteswap_ulong(Fourcc.mFourcc32);
+	auto Fourcc32 = (Fourcc.mFourcc32);
+	GUID Guid = { Fourcc32, 0x000, 0x0010, { 0x80, 0x00, 0x00, 0xAA, 0x00, 0x38, 0x9B, 0x71 } };
+	return Guid;
 }
 
 MediaFoundation::TActivateMeta::TActivateMeta(IMFActivate& Activate) :
@@ -428,10 +441,67 @@ MFT_DECODER_EXPOSE_OUTPUT_TYPES_IN_NATIVE_ORDER	Specifies whether a decoder expo
 		}
 	}
 	*/
+
+	//	setup formats
+	{
+		IMFMediaType* InputMediaType = nullptr;
+		auto Result = MFCreateMediaType(&InputMediaType);
+		IsOkay(Result, "MFCreateMediaType");
+		Result = InputMediaType->SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Video);
+		IsOkay(Result, "InputMediaType->SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Video)");
+		auto InputFormatGuid = GetGuid(Transform.mInputs[0]);
+		Result = InputMediaType->SetGUID(MF_MT_SUBTYPE, InputFormatGuid);
+		IsOkay(Result, "InputMediaType->SetGUID(MF_MT_SUBTYPE)");
+		Result = Decoder.SetInputType(0, InputMediaType, 0);
+		IsOkay(Result, "SetInputType");
+	}
+	//	gr: this errors atm, but input status is still accepting
+	/*
+	{
+		IMFMediaType* MediaType = nullptr;
+		auto Result = MFCreateMediaType(&MediaType);
+		IsOkay(Result, "MFCreateMediaType");
+		Result = MediaType->SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Video);
+		IsOkay(Result, "InputMediaType->SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Image)");
+		auto FormatGuid = GetGuid(Transform.mOutputs[0]);
+		Result = MediaType->SetGUID(MF_MT_SUBTYPE, FormatGuid);
+		IsOkay(Result, "InputMediaType->SetGUID(MF_MT_SUBTYPE)");
+		Result = Decoder.SetOutputType(0, MediaType, 0);
+		IsOkay(Result, "SetOutputType");
+	}
+	*/
+	{
+		DWORD StatusFlags = 0;
+		auto Result = Decoder.GetInputStatus(mStreamId, &StatusFlags);
+		IsOkay(Result, "GetInputStatus");
+		std::Debug << "Input status is " << StatusFlags << std::endl;
+
+		auto CanAcceptData = (StatusFlags & MFT_INPUT_STATUS_ACCEPT_DATA) != 0;
+		if (!CanAcceptData)
+		{
+			std::stringstream Error;
+			Error << Transform.mName << " not ready for input data";
+			throw Soy::AssertException(Error);
+		}
+	}
+
+	auto ProcessCommand = [&](MFT_MESSAGE_TYPE Message)
+	{
+		ULONG_PTR Param = 0;// nullptr;
+		auto Result = Decoder.ProcessMessage(Message, Param);
+		IsOkay(Result, std::string("ProcessMessage ") + std::string(magic_enum::enum_name(Message)));
+	};
+
+	//	gr: are these needed?
+	ProcessCommand(MFT_MESSAGE_COMMAND_FLUSH);
+	ProcessCommand(MFT_MESSAGE_NOTIFY_BEGIN_STREAMING);
+	ProcessCommand(MFT_MESSAGE_NOTIFY_START_OF_STREAM);
+	/*	returns not implemented
 	{
 		auto Result = Decoder.AddInputStreams(1, &mStreamId);
 		IsOkay(Result, "AddInputStream");
 	}
+	*/
 }
 
 MediaFoundation::TDecoder::~TDecoder()
