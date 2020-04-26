@@ -463,7 +463,8 @@ MFT_DECODER_EXPOSE_OUTPUT_TYPES_IN_NATIVE_ORDER	Specifies whether a decoder expo
 		IsOkay(Result, "MFCreateMediaType");
 		Result = MediaType->SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Video);
 		IsOkay(Result, "InputMediaType->SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Image)");
-		auto FormatGuid = GetGuid(Transform.mOutputs[0]);
+		//auto FormatGuid = GetGuid(Transform.mOutputs[0]);
+		auto FormatGuid = MFVideoFormat_NV12;
 		Result = MediaType->SetGUID(MF_MT_SUBTYPE, FormatGuid);
 		IsOkay(Result, "InputMediaType->SetGUID(MF_MT_SUBTYPE)");
 		Result = Decoder.SetOutputType(0, MediaType, 0);
@@ -472,7 +473,7 @@ MFT_DECODER_EXPOSE_OUTPUT_TYPES_IN_NATIVE_ORDER	Specifies whether a decoder expo
 	*/
 	{
 		DWORD StatusFlags = 0;
-		auto Result = Decoder.GetInputStatus(mStreamId, &StatusFlags);
+		auto Result = Decoder.GetInputStatus(mInputStreamId, &StatusFlags);
 		IsOkay(Result, "GetInputStatus");
 		std::Debug << "Input status is " << StatusFlags << std::endl;
 
@@ -484,6 +485,15 @@ MFT_DECODER_EXPOSE_OUTPUT_TYPES_IN_NATIVE_ORDER	Specifies whether a decoder expo
 			throw Soy::AssertException(Error);
 		}
 	}
+
+	/* gr: not implemented on all transforms
+	{
+		DWORD InputStreamIds[10];
+		DWORD OutputStreamIds[10];
+		auto Result = Decoder.GetStreamIDs(std::size(InputStreamIds), InputStreamIds, std::size(OutputStreamIds), OutputStreamIds);
+		IsOkay(Result, "GetStreamIDs");
+	}
+	*/
 
 	auto ProcessCommand = [&](MFT_MESSAGE_TYPE Message)
 	{
@@ -512,7 +522,7 @@ MediaFoundation::TDecoder::~TDecoder()
 bool MediaFoundation::TDecoder::DecodeNextPacket(std::function<void(const SoyPixelsImpl&, SoyTime)> OnFrameDecoded)
 {
 	Array<uint8_t> Nalu;
-	if ( !PopNalu( GetArrayBridge(Nalu) ) )
+	if (!PopNalu(GetArrayBridge(Nalu)))
 		return false;
 
 	if (!mDecoder)
@@ -523,7 +533,7 @@ bool MediaFoundation::TDecoder::DecodeNextPacket(std::function<void(const SoyPix
 	auto DebugInputStatus = [&]()
 	{
 		DWORD StatusFlags = 0;
-		auto Result = Decoder.GetInputStatus(mStreamId, &StatusFlags);
+		auto Result = Decoder.GetInputStatus(mInputStreamId, &StatusFlags);
 		try
 		{
 			IsOkay(Result, "GetInputStatus");
@@ -559,13 +569,96 @@ bool MediaFoundation::TDecoder::DecodeNextPacket(std::function<void(const SoyPix
 	DebugInputStatus();
 
 	DWORD Flags = 0;
-	auto Result = Decoder.ProcessInput(mStreamId, pSample.mObject, Flags);
+	auto Result = Decoder.ProcessInput(mInputStreamId, pSample.mObject, Flags);
 	IsOkay(Result, "Decoder.ProcessInput");
 
 	DebugInputStatus();
-	DebugOutputStatus();
 
-	//	todo:
-	//	do we check output here, or stick it on another thread
+	ProcessNextOutputPacket();
 	return true;
+}
+
+void MediaFoundation::TDecoder::SetOutputFormat()
+{
+	auto& Decoder = *mDecoder;
+
+	//	gr: a manual one never seems to work
+	if ( false )
+	{
+		IMFMediaType* MediaType = nullptr;
+		auto Result = MFCreateMediaType(&MediaType);
+		IsOkay(Result, "MFCreateMediaType");
+		Result = MediaType->SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Video);
+		IsOkay(Result, "InputMediaType->SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Image)");
+		//auto FormatGuid = GetGuid(Transform.mOutputs[0]);
+		auto FormatGuid = MFVideoFormat_NV12;
+		Result = MediaType->SetGUID(MF_MT_SUBTYPE, FormatGuid);
+		IsOkay(Result, "InputMediaType->SetGUID(MF_MT_SUBTYPE)");
+		/*
+		Result = MFSetAttributeRatio( MediaType, MF_MT_FRAME_RATE, 30, 1);
+		IsOkay(Result, "MFSetAttributeRatio");
+		Result = MFSetAttributeSize(MediaType,MF_MT_FRAME_SIZE, 640, 480);
+		IsOkay(Result, "MFSetAttributeSize");
+		*/
+		//Result = Decoder.SetOutputType(0, MediaType, 0);
+		//IsOkay(Result, "SetOutputType");
+		Result = Decoder.SetOutputType(0, nullptr, 0);
+		IsOkay(Result, "SetOutputType");
+	}
+
+	//	enum availiable formats and try each
+	for ( auto i=0;	i<1000;	i++ )
+	{
+		Soy::AutoReleasePtr<IMFMediaType> pMediaType;
+		auto Result = Decoder.GetOutputAvailableType(mOutputStreamId, i, &pMediaType.mObject);
+		
+		if (Result == MF_E_NO_MORE_TYPES)
+			break;
+
+		//	input hasn't been set
+		if (Result == MF_E_TRANSFORM_TYPE_NOT_SET)
+			IsOkay(Result, "GetOutputAvailableType");
+		IsOkay(Result, "GetOutputAvailableType");
+		
+		GUID SubType;
+		auto& MediaType = *pMediaType;
+		Result = MediaType.GetGUID(MF_MT_SUBTYPE, &SubType);
+		IsOkay(Result, "OutputFormat GetGuid Subtype");
+		//	todo: is it a format we support?
+		auto Fourcc = GetFourCC(SubType);
+
+		//	set format
+		DWORD Flags = 0;
+		Result = mDecoder->SetOutputType(mOutputStreamId, &MediaType, Flags );
+		IsOkay(Result, "SetOutputType");
+		return;
+	}
+
+	throw Soy::AssertException("Ran out of availible output formats");
+}
+
+
+void MediaFoundation::TDecoder::ProcessNextOutputPacket()
+{
+	if (!mDecoder)
+		throw Soy::AssertException("Decoder is null");
+
+	auto& Decoder = *mDecoder;
+	DWORD StatusFlags = 0;
+	auto Result = Decoder.GetOutputStatus(&StatusFlags);
+	if (Result == MF_E_TRANSFORM_TYPE_NOT_SET)
+	{
+		SetOutputFormat();
+		Result = Decoder.GetOutputStatus(&StatusFlags);
+	}
+	IsOkay(Result, "GetOutputStatus");
+
+	//Decoder.ProcessOutput()
+
+	auto FrameReady = (StatusFlags & MFT_OUTPUT_STATUS_SAMPLE_READY) != 0;
+	if (!FrameReady)
+		return;
+
+	//	read a frame!
+	std::Debug << "Output frame ready!" << std::endl;
 }

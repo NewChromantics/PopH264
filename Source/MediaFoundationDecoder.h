@@ -21,7 +21,11 @@ public:
 private:
 	virtual bool	DecodeNextPacket(std::function<void(const SoyPixelsImpl&,SoyTime)> OnFrameDecoded) override;	//	returns true if more data to proccess
 	
+	void			SetOutputFormat();
+	void			ProcessNextOutputPacket();
+
 private:
 	IMFTransform*	mDecoder = nullptr;
-	DWORD			mStreamId = 0;
+	DWORD			mInputStreamId = 0;
+	DWORD			mOutputStreamId = 0;
 };
