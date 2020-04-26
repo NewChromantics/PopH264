@@ -4,6 +4,7 @@
 #include "SoyLib/src/SoyPixels.h"
 #include "SoyLib/src/SoyH264.h"
 #include "MagicEnum/include/magic_enum.hpp"
+#include "SoyFourcc.h"
 
 #include <mfapi.h>
 #include <mftransform.h>
@@ -25,12 +26,13 @@ namespace MediaFoundation
 {
 	class TActivateList;
 	class TContext;
+	class TActivateMeta;
 
 	void	IsOkay(HRESULT Result, const char* Context);
 	void	IsOkay(HRESULT Result,const std::string& Context);
 
-	TActivateList	EnumEncoders();
-	TActivateList	EnumDecoders();
+	TActivateList	EnumTransforms(const GUID& Category);
+	TActivateMeta	GetBestTransform(const GUID& Category, ArrayBridge<Soy::TFourcc>&& InputFilter, ArrayBridge<Soy::TFourcc>&& OutputFilter);
 }
 
 
@@ -51,10 +53,33 @@ public:
 	~TContext();
 };
 
+class MediaFoundation::TActivateMeta
+{
+public:
+	TActivateMeta() {}
+	TActivateMeta(IMFActivate& Activate);
+
+public:
+	std::string						mName;
+	bool							mHardwareAccelerated = false;
+	BufferArray<Soy::TFourcc, 20>	mInputs;
+	BufferArray<Soy::TFourcc, 20>	mOutputs;
+	Soy::AutoReleasePtr<IMFActivate>	mActivate;
+};
+
 class MediaFoundation::TActivateList
 {
 public:
+	TActivateList() {}
+	TActivateList(TActivateList&& Move)
+	{
+		this->mActivates = Move.mActivates;
+		this->mCount = Move.mCount;
+		Move.mActivates = nullptr;
+	}
 	~TActivateList();
+
+	void			EnumActivates(std::function<void(TActivateMeta&)> EnumMeta);
 
 public:
 	IMFActivate**	mActivates = nullptr;
@@ -78,24 +103,16 @@ MediaFoundation::TActivateList::~TActivateList()
 	}
 }
 
-
-MediaFoundation::TActivateList MediaFoundation::EnumEncoders()
+void MediaFoundation::TActivateList::EnumActivates(std::function<void(TActivateMeta&)> EnumMeta)
 {
-	//	get all availible transform[er]s
-	MFT_REGISTER_TYPE_INFO* InputFilter = nullptr;
-	MFT_REGISTER_TYPE_INFO OutputFilter;
-	OutputFilter.guidMajorType = MFMediaType_Video;
-	OutputFilter.guidSubtype = MFVideoFormat_H264;
-
-	uint32_t Flags = MFT_ENUM_FLAG_ALL;
-	auto Category = MFT_CATEGORY_VIDEO_ENCODER;
-
-	TActivateList Activates;
-	auto Result = MFTEnumEx(Category, Flags, InputFilter, &OutputFilter, &Activates.mActivates, &Activates.mCount);
-	IsOkay(Result, "MFTEnumEx");
-
-	return Activates;
+	for (auto a = 0; a < mCount; a++)
+	{
+		auto* Activate = mActivates[a];
+		TActivateMeta Meta(*Activate);
+		EnumMeta(Meta);
+	}
 }
+
 
 
 template<typename T>
@@ -107,7 +124,9 @@ void MemZero(T& Object)
 
 MediaFoundation::TContext::TContext()
 {
-	auto Result = MFStartup(MF_VERSION);
+	CoInitializeEx(nullptr,COINIT_MULTITHREADED);
+
+	auto Result = MFStartup(MF_VERSION, MFSTARTUP_FULL);
 	IsOkay(Result, "MFStartup");
 }
 
@@ -124,27 +143,117 @@ MediaFoundation::TContext::~TContext()
 	}
 }
 
-MediaFoundation::TActivateList MediaFoundation::EnumDecoders()
+template<typename TYPE>
+void GetBlobs(IMFActivate& Activate, const GUID& Key, ArrayBridge<TYPE>&& Array)
+{
+	//	get blob size
+	uint8_t* BlobData8 = nullptr;
+	uint32_t BlobDataSize = 0;
+	auto Result = Activate.GetAllocatedBlob(Key, &BlobData8, &BlobDataSize);
+
+	auto Cleanup = [&]()
+	{
+		if (!BlobData8)
+			return;
+		CoTaskMemFree(BlobData8);
+		BlobData8 = nullptr;
+	};
+	try
+	{
+		MediaFoundation::IsOkay(Result, "GetAllocatedBlob");
+		auto* BlobData = reinterpret_cast<TYPE*>(BlobData8);
+		auto BlobDataCount = BlobDataSize / sizeof(TYPE);
+
+		auto BlobArray = GetRemoteArray(BlobData, BlobDataCount);
+		Array.Copy(BlobArray);
+		Cleanup();
+	}
+	catch (...)
+	{
+		Cleanup();
+		throw;
+	}
+}
+
+std::string GetString(IMFActivate& Activate, const GUID& Key)
+{
+	//	get length not including terminator
+	uint32_t Length = 0;
+	wchar_t StringWBuffer[1024] = { 0 };
+	auto Result = Activate.GetString(Key, StringWBuffer, std::size(StringWBuffer), &Length);
+	MediaFoundation::IsOkay(Result, "GetString");
+	std::wstring StringW(StringWBuffer, Length);
+
+	auto String = Soy::WStringToString(StringW);
+	return String;
+}
+
+std::string GetStringSafe(IMFActivate& Activate, const GUID& Key)
+{
+	try
+	{
+		return GetString(Activate, Key);
+	}
+	catch (std::exception& e)
+	{
+		//std::Debug << e.what() << std::endl;
+		return std::string();
+	}
+}
+
+Soy::TFourcc GetFourCC(const GUID& Guid)
+{
+	//	https://docs.microsoft.com/en-us/windows/win32/medfound/video-subtype-guids#creating-subtype-guids-from-fourccs-and-d3dformat-values
+	//	XXXXXXXX - 0000 - 0010 - 8000 - 00AA00389B71
+	Soy::TFourcc Fourcc(Guid.Data1);
+	return Fourcc;
+}
+
+MediaFoundation::TActivateMeta::TActivateMeta(IMFActivate& Activate) :
+	mActivate	( &Activate, true )
+{
+	mName = GetStringSafe(Activate, MFT_FRIENDLY_NAME_Attribute);
+	auto HardwareUrl = GetStringSafe(Activate, MFT_ENUM_HARDWARE_URL_Attribute);
+	mHardwareAccelerated = !HardwareUrl.empty();
+
+	Array<MFT_REGISTER_TYPE_INFO> InputTypes;
+	Array<MFT_REGISTER_TYPE_INFO> OutputTypes;
+	GetBlobs(Activate, MFT_INPUT_TYPES_Attributes, GetArrayBridge(InputTypes));
+	GetBlobs(Activate, MFT_OUTPUT_TYPES_Attributes, GetArrayBridge(OutputTypes));
+	
+	for (auto i = 0; i < InputTypes.GetSize(); i++)
+	{
+		auto Fourcc = GetFourCC(InputTypes[i].guidSubtype);
+		mInputs.PushBack(Fourcc);
+	}
+
+	for (auto i = 0; i < OutputTypes.GetSize(); i++)
+	{
+		auto Fourcc = GetFourCC(OutputTypes[i].guidSubtype);
+		mOutputs.PushBack(Fourcc);
+	}
+}
+
+//	MFT_CATEGORY_VIDEO_ENCODER	MFT_CATEGORY_VIDEO_DECODER
+MediaFoundation::TActivateList MediaFoundation::EnumTransforms(const GUID& Category)
 {
 	//	auto init context once
 	static TContext Context;
 
-	//	get all availible transform[er]s
-	MFT_REGISTER_TYPE_INFO InputFilter;
-	MemZero(InputFilter);
-	InputFilter.guidMajorType = MFMediaType_Video;
-	InputFilter.guidSubtype = MFVideoFormat_H264;
+	//	gr: these filters always seem to return zero results, so get all and filter after
+	//MFT_REGISTER_TYPE_INFO InputFilter = { 0 };
+	//InputFilter.guidMajorType = MFMediaType_Video;
+	//InputFilter.guidSubtype = MFVideoFormat_H264;
 	//InputFilter.guidSubtype = MFVideoFormat_H264_ES;
-
+	MFT_REGISTER_TYPE_INFO* InputFilter = nullptr;
 	MFT_REGISTER_TYPE_INFO* OutputFilter = nullptr;
 
 	uint32_t Flags = MFT_ENUM_FLAG_ALL;
-	auto Category = MFT_CATEGORY_VIDEO_ENCODER;
-
+	
 	TActivateList Activates;
-	//auto Result = MFTEnumEx(Category, Flags, &InputFilter, OutputFilter, &Activates.mActivates, &Activates.mCount);
-	auto Result = MFTEnum2(Category, Flags, &InputFilter, OutputFilter, nullptr, &Activates.mActivates, &Activates.mCount);
-	IsOkay(Result, "MFTEnumEx");
+	IMFAttributes* Attributes = nullptr;
+	auto Result = MFTEnum2(Category, Flags, InputFilter, OutputFilter, Attributes, &Activates.mActivates, &Activates.mCount);
+	IsOkay(Result, "MFTEnum2");
 
 	return Activates;
 }
@@ -160,17 +269,98 @@ std::string GetName(const GUID Guid)
 	return "<guid>";
 }
 
+//	get the best activate which matches the input list, and output list
+//	sorted results by hardware, then highest input, then highest output
+MediaFoundation::TActivateMeta MediaFoundation::GetBestTransform(const GUID& Category, ArrayBridge<Soy::TFourcc>&& InputFilter, ArrayBridge<Soy::TFourcc>&& OutputFilter)
+{
+	auto Transformers = EnumTransforms(MFT_CATEGORY_VIDEO_DECODER);
+	TActivateMeta MatchingTransform;
+	size_t MatchingTransformScore = 0;
+	const auto HardwareScore = 1000;
+	const auto InputScore = 10;
+	const auto OutputScore = 1;
+
+	auto AddMatch = [&](TActivateMeta Meta, Soy::TFourcc Input, Soy::TFourcc Output, int Score)
+	{
+		//	is this better than the current match?
+		if (Score <= MatchingTransformScore)
+			return;
+
+		//	set the meta to only have one input/output format which is our preffered
+		Meta.mInputs.Clear();
+		Meta.mInputs.PushBack(Input);
+		Meta.mOutputs.Clear();
+		Meta.mOutputs.PushBack(Output);
+		MatchingTransform = Meta;
+		MatchingTransformScore = Score;
+	};
+
+	auto GetMatchingIndexes = [](BufferArray<Soy::TFourcc, 20>& List, ArrayBridge<Soy::TFourcc>& MatchList)
+	{
+		BufferArray<int, 20> MatchingInputIndexes;
+		for (auto i = 0; i < List.GetSize(); i++)
+		{
+			auto Index = List.FindIndex(MatchList[i]);
+			if (Index == -1)
+				continue;
+			MatchingInputIndexes.PushBack(Index);
+		}
+		return MatchingInputIndexes;
+	};
+
+	auto GetLowestMatchingIndex = [&](BufferArray<Soy::TFourcc, 20>& List, ArrayBridge<Soy::TFourcc>& MatchList)
+	{
+		auto MatchingIndexes = GetMatchingIndexes( List, MatchList );
+		if (MatchingIndexes.IsEmpty())
+			return -1;
+		auto Lowest = MatchingIndexes[0];
+		for (auto i = 1; i < MatchingIndexes.GetSize(); i++)
+			Lowest = std::min(Lowest, MatchingIndexes[i]);
+		return Lowest;
+	};
+
+
+	auto FindTransform = [&](TActivateMeta& Meta)
+	{
+		auto BestInputIndex = GetLowestMatchingIndex(Meta.mInputs, InputFilter);
+		auto BestOutputIndex = GetLowestMatchingIndex(Meta.mOutputs, OutputFilter);
+		//	not a match
+		if (BestInputIndex==-1 || BestOutputIndex==-1)
+			return;
+
+		//	calc a score
+		auto Score = 0;
+		if (Meta.mHardwareAccelerated)
+			Score += HardwareScore;
+		Score += (InputFilter.GetSize() - BestInputIndex) * InputScore;
+		Score += (OutputFilter.GetSize() - BestOutputIndex) * OutputScore;
+		AddMatch(Meta, InputFilter[BestInputIndex], OutputFilter[BestOutputIndex], Score);
+	};
+
+	Transformers.EnumActivates(FindTransform);
+
+	if (MatchingTransformScore == 0)
+	{
+		throw Soy::AssertException("No transformers matching the input/output filters");
+	}
+
+	return MatchingTransform;
+}
 
 MediaFoundation::TDecoder::TDecoder()
 {
-	auto Activates = EnumDecoders();
-	
-	if (Activates.mCount == 0)
-		throw Soy::AssertException("No H264 decoders installed");
+	Soy::TFourcc InputFourccs[] = { "H264" };
+	Soy::TFourcc OutputFourccs[] = { "NV12" };
+	auto Inputs = FixedRemoteArray(InputFourccs);
+	auto Outputs = FixedRemoteArray(OutputFourccs);
+
+	//	todo: support user-selected names
+	auto Transform = GetBestTransform(MFT_CATEGORY_VIDEO_DECODER, GetArrayBridge(Inputs), GetArrayBridge(Outputs));
+	std::Debug << "Picked Transform " << Transform.mName << std::endl;
 
 	//	activate a transformer
 	{
-		auto* Activate = Activates.mActivates[0];
+		auto* Activate = Transform.mActivate.mObject;
 		auto Result = Activate->ActivateObject(IID_PPV_ARGS(&mDecoder));
 		IsOkay(Result, "Activate transform");
 	}
