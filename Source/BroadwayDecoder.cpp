@@ -175,6 +175,8 @@ bool Broadway::TDecoder::DecodeNextPacket(std::function<void(const SoyPixelsImpl
 		case H264NaluContent::Slice_AuxCodedUnpartitioned:
 			std::Debug << "Dropping packet " << magic_enum::enum_name(H264PacketType) << " as we havent yet processed headers" << std::endl;
 			return true;
+			
+		default:break;
 		}
 	}
 
@@ -194,6 +196,19 @@ bool Broadway::TDecoder::DecodeNextPacket(std::function<void(const SoyPixelsImpl
 	//	todo: keep this meta for external debugging
 	//std::Debug << "H264SwDecDecode result: " << GetDecodeResultString(Result) << ". Bytes processed: "  << BytesProcessed << "/" << Input.dataLen << std::endl;
 	
+	//	using AVF encoder, we weren't getting meta even after SPS/PPS (and SEI)
+	//	instead, if the encoder ate a SPS, consider headers delivered (maybe after SPS AND PPS?)
+	switch (H264PacketType)
+	{
+		case H264NaluContent::SequenceParameterSet:
+			this->mProcessedHeaderPackets = true;
+			break;
+	
+		default:
+			break;
+	}
+
+	
 	auto GetMeta = [&]()
 	{
 		H264SwDecInfo Meta;
@@ -206,7 +221,6 @@ bool Broadway::TDecoder::DecodeNextPacket(std::function<void(const SoyPixelsImpl
 	{
 		case H264SWDEC_HDRS_RDY_BUFF_NOT_EMPTY:
 		{
-			mProcessedHeaderPackets = true;
 			auto Meta = GetMeta();
 			OnMeta( Meta );
 			return true;
