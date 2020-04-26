@@ -645,19 +645,56 @@ void MediaFoundation::TDecoder::ProcessNextOutputPacket()
 
 	auto& Decoder = *mDecoder;
 	DWORD StatusFlags = 0;
-	auto Result = Decoder.GetOutputStatus(&StatusFlags);
-	if (Result == MF_E_TRANSFORM_TYPE_NOT_SET)
 	{
-		SetOutputFormat();
-		Result = Decoder.GetOutputStatus(&StatusFlags);
+		auto Result = Decoder.GetOutputStatus(&StatusFlags);
+		if (Result == MF_E_TRANSFORM_TYPE_NOT_SET)
+		{
+			SetOutputFormat();
+			Result = Decoder.GetOutputStatus(&StatusFlags);
+		}
+		IsOkay(Result, "GetOutputStatus");
 	}
-	IsOkay(Result, "GetOutputStatus");
-
-	//Decoder.ProcessOutput()
 
 	auto FrameReady = (StatusFlags & MFT_OUTPUT_STATUS_SAMPLE_READY) != 0;
 	if (!FrameReady)
-		return;
+	{
+		//return;
+	}
+
+	{
+		MFT_OUTPUT_STREAM_INFO OutputInfo;
+		auto Result = Decoder.GetOutputStreamInfo(mOutputStreamId, &OutputInfo);
+		IsOkay(Result, "GetOutputStreamInfo");
+
+		bool PreAllocatedSamples = (OutputInfo.dwFlags & (MFT_OUTPUT_STREAM_PROVIDES_SAMPLES | MFT_OUTPUT_STREAM_CAN_PROVIDE_SAMPLES)) != 0;
+
+		/*
+		hr = mf->fptr_MFCreateSample(&output_sample);
+		if (FAILED(hr))
+		goto error;
+
+		IMFMediaBuffer *output_media_buffer = NULL;
+		DWORD allocation_size = output_info.cbSize;
+		DWORD alignment = output_info.cbAlignment;
+		if (alignment > 0)
+		hr = mf->fptr_MFCreateAlignedMemoryBuffer(allocation_size, alignment - 1, &output_media_buffer);
+		else
+		hr = mf->fptr_MFCreateMemoryBuffer(allocation_size, &output_media_buffer);
+		if (FAILED(hr))
+		goto error;
+*/
+		IMFSample* OutputSample = nullptr;
+		MFT_OUTPUT_DATA_BUFFER output_buffer = { mOutputStreamId, OutputSample, 0, nullptr };
+		DWORD Flags = 0;
+		DWORD Status = 0;
+		Result = Decoder.ProcessOutput( Flags, 1, &output_buffer, &Status );
+
+		//	not ready
+		if (Result == MF_E_TRANSFORM_NEED_MORE_INPUT)
+			return;
+		IsOkay(Result, "ProcessOutput");
+	}
+
 
 	//	read a frame!
 	std::Debug << "Output frame ready!" << std::endl;
