@@ -30,7 +30,7 @@ public:
 public:
 	//	this returns false if the data was not pushed (where we need to unpop the data, as to not lose it)
 	bool			PushFrame(const ArrayBridge<uint8_t>&& Data);
-	void			PopFrame(const ArrayBridge<uint8_t>&& Data);
+	void			PopFrame(ArrayBridge<uint8_t>&& Data,Soy::TFourcc& Format);
 
 private:
 	void			SetOutputFormat();
@@ -40,4 +40,5 @@ private:
 	IMFTransform*	mTransformer = nullptr;
 	DWORD			mInputStreamId = 0;
 	DWORD			mOutputStreamId = 0;
+	Soy::TFourcc	mOutputFourcc;
 };

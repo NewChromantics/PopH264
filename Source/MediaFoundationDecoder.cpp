@@ -53,7 +53,8 @@ bool MediaFoundation::TDecoder::DecodeNextPacket(std::function<void(const SoyPix
 	//	todo: other thread
 	{
 		Array<uint8_t> OutFrame;
-		mTransformer->PopFrame(GetArrayBridge(OutFrame));
+		Soy::TFourcc Format;
+		mTransformer->PopFrame(GetArrayBridge(OutFrame),Format);
 	}
 
 	return true;

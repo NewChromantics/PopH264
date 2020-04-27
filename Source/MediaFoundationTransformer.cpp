@@ -43,6 +43,9 @@ namespace MediaFoundation
 
 	Soy::AutoReleasePtr<IMFSample>		CreateSample(const ArrayBridge<uint8_t>& Data, Soy::TFourcc Fourcc);
 	Soy::AutoReleasePtr<IMFMediaBuffer>	CreateBuffer(const ArrayBridge<uint8_t>& Data);
+	Soy::AutoReleasePtr<IMFMediaBuffer>	CreateBuffer(DWORD Size, DWORD Alignment);
+	Soy::AutoReleasePtr<IMFSample>		CreateSample(DWORD Size, DWORD Alignment);
+	void								ReadData(IMFSample& Sample,ArrayBridge<uint8_t>& Data);
 }
 
 
@@ -565,17 +568,16 @@ Soy::AutoReleasePtr<IMFMediaBuffer> MediaFoundation::CreateBuffer(const ArrayBri
 	pBuffer.Retain();
 
 	//	copy data
-	byte *reconByteBuffer;
-	DWORD reconBuffCurrLen = 0;
-	DWORD reconBuffMaxLen = 0;
 	uint8_t* DestData = nullptr;
 	DWORD DestMaxSize = 0;
 	DWORD DestCurrentSize = 0;
 	Result = pBuffer->Lock(&DestData, &DestMaxSize, &DestCurrentSize);
 	IsOkay(Result, "Buffer Lock");
+
 	size_t NewSize = 0;
 	auto DestArray = GetRemoteArray(DestData, DestMaxSize, NewSize);
 	DestArray.Copy(Data);
+	
 	Result = pBuffer->Unlock();
 	IsOkay(Result, "Buffer Unlock");
 	Result = pBuffer->SetCurrentLength(NewSize);
@@ -583,6 +585,26 @@ Soy::AutoReleasePtr<IMFMediaBuffer> MediaFoundation::CreateBuffer(const ArrayBri
 
 	return pBuffer;
 }
+
+Soy::AutoReleasePtr<IMFMediaBuffer> MediaFoundation::CreateBuffer(DWORD Size, DWORD Alignment)
+{
+	Soy::AutoReleasePtr<IMFMediaBuffer> pBuffer;
+
+	//	gr: just always align?
+	if (Alignment > 0)
+	{
+		auto Result = MFCreateAlignedMemoryBuffer(Size, Alignment, &pBuffer.mObject);
+		IsOkay(Result, "MFCreateAlignedMemoryBuffer");
+	}
+	else
+	{
+		auto Result = MFCreateMemoryBuffer(Size, &pBuffer.mObject);
+		IsOkay(Result, "MFCreateMemoryBuffer");
+	}
+
+	return pBuffer;
+}
+
 
 Soy::AutoReleasePtr<IMFSample> MediaFoundation::CreateSample(const ArrayBridge<uint8_t>& Data,Soy::TFourcc Fourcc)
 {
@@ -601,6 +623,49 @@ Soy::AutoReleasePtr<IMFSample> MediaFoundation::CreateSample(const ArrayBridge<u
 
 	return pSample;
 }
+
+
+Soy::AutoReleasePtr<IMFSample> MediaFoundation::CreateSample(DWORD Size, DWORD Alignment)
+{
+	auto Buffer = CreateBuffer(Size, Alignment);
+
+	Soy::AutoReleasePtr<IMFSample> pSample;
+	auto Result = MFCreateSample(&pSample.mObject);
+	IsOkay(Result, "MFCreateSample");
+	pSample.Retain();
+
+	Result = pSample.mObject->AddBuffer(Buffer.mObject);
+	IsOkay(Result, "AddBuffer");
+
+	return pSample;
+}
+
+void MediaFoundation::ReadData(IMFSample& Sample, ArrayBridge<uint8_t>& Data)
+{
+	//	ConvertToContiguousBuffer automatically retains
+	Soy::AutoReleasePtr<IMFMediaBuffer> pBuffer;
+	auto Result = Sample.ConvertToContiguousBuffer(&pBuffer.mObject);
+	IsOkay(Result, "ConvertToContiguousBuffer");
+	if ( !pBuffer )
+		throw Soy::AssertException("Missing Media buffer object");
+
+	auto& Buffer = *pBuffer;
+
+	//	lock
+	uint8_t* SrcData = nullptr;
+	DWORD SrcSize = 0;
+
+	//	note: lock is garunteed to be contiguous
+	Result = Buffer.Lock(&SrcData, nullptr, &SrcSize);
+	IsOkay(Result, "MediaBuffer::Lock");
+
+	auto LockedArray = GetRemoteArray(SrcData, SrcSize);
+	Data.Copy(LockedArray);
+
+	Buffer.Unlock();
+}
+
+
 
 bool MediaFoundation::TTransformer::PushFrame(const ArrayBridge<uint8_t>&& Data)
 {
@@ -704,11 +769,15 @@ void MediaFoundation::TTransformer::SetOutputFormat()
 		IsOkay(Result, "OutputFormat GetGuid Subtype");
 		//	todo: is it a format we support?
 		auto Fourcc = GetFourCC(SubType);
-
+		
 		//	set format
 		DWORD Flags = 0;
 		Result = Transformer.SetOutputType(mOutputStreamId, &MediaType, Flags );
 		IsOkay(Result, "SetOutputType");
+
+		//	gr: from what I can tell, we can't get the guid again, so cache it
+		mOutputFourcc = Fourcc;
+
 		return;
 	}
 
@@ -716,7 +785,7 @@ void MediaFoundation::TTransformer::SetOutputFormat()
 }
 
 
-void MediaFoundation::TTransformer::PopFrame(const ArrayBridge<uint8_t>&& Data)
+void MediaFoundation::TTransformer::PopFrame(ArrayBridge<uint8_t>&& Data,Soy::TFourcc& Format)
 {
 	if (!mTransformer)
 		throw Soy::AssertException("Transformer is null");
@@ -740,40 +809,39 @@ void MediaFoundation::TTransformer::PopFrame(const ArrayBridge<uint8_t>&& Data)
 		//return;
 	}
 
+	MFT_OUTPUT_STREAM_INFO OutputInfo;
+	auto Result = Transformer.GetOutputStreamInfo(mOutputStreamId, &OutputInfo);
+	IsOkay(Result, "GetOutputStreamInfo");
+
+	bool PreAllocatedSamples = (OutputInfo.dwFlags & (MFT_OUTPUT_STREAM_PROVIDES_SAMPLES | MFT_OUTPUT_STREAM_CAN_PROVIDE_SAMPLES)) != 0;
+	if (PreAllocatedSamples)
 	{
-		MFT_OUTPUT_STREAM_INFO OutputInfo;
-		auto Result = Transformer.GetOutputStreamInfo(mOutputStreamId, &OutputInfo);
-		IsOkay(Result, "GetOutputStreamInfo");
+		std::Debug << "Todo: process pre-allocated samples" << std::endl;
+	}
 
-		bool PreAllocatedSamples = (OutputInfo.dwFlags & (MFT_OUTPUT_STREAM_PROVIDES_SAMPLES | MFT_OUTPUT_STREAM_CAN_PROVIDE_SAMPLES)) != 0;
+	//	get output
+	auto pSample = CreateSample(OutputInfo.cbSize,OutputInfo.cbAlignment);
+	MFT_OUTPUT_DATA_BUFFER output_buffer = { mOutputStreamId, pSample.mObject, 0, nullptr };
+	DWORD Flags = 0;
+	DWORD Status = 0;
+	Result = Transformer.ProcessOutput( Flags, 1, &output_buffer, &Status );
 
-		/*
-		hr = mf->fptr_MFCreateSample(&output_sample);
-		if (FAILED(hr))
-		goto error;
-
-		IMFMediaBuffer *output_media_buffer = NULL;
-		DWORD allocation_size = output_info.cbSize;
-		DWORD alignment = output_info.cbAlignment;
-		if (alignment > 0)
-		hr = mf->fptr_MFCreateAlignedMemoryBuffer(allocation_size, alignment - 1, &output_media_buffer);
-		else
-		hr = mf->fptr_MFCreateMemoryBuffer(allocation_size, &output_media_buffer);
-		if (FAILED(hr))
-		goto error;
-*/
-		IMFSample* OutputSample = nullptr;
-		MFT_OUTPUT_DATA_BUFFER output_buffer = { mOutputStreamId, OutputSample, 0, nullptr };
-		DWORD Flags = 0;
-		DWORD Status = 0;
-		Result = Transformer.ProcessOutput( Flags, 1, &output_buffer, &Status );
-
-		//	not ready
-		if (Result == MF_E_TRANSFORM_NEED_MORE_INPUT)
-			return;
+	//	handle some special retu
+	if (Result == MF_E_TRANSFORM_NEED_MORE_INPUT)
+	{
+		return;
+	}
+	else if (Result == MF_E_TRANSFORM_STREAM_CHANGE)
+	{
+		std::Debug << "Stream changed, expecting 0 byte buffer..." << std::endl;
+	}
+	else
+	{
 		IsOkay(Result, "ProcessOutput");
 	}
-	
+
 	//	read a frame!
-	std::Debug << "Output frame ready!" << std::endl;
+	std::Debug << "Output frame (" << mOutputFourcc << ") ready!" << std::endl;
+	ReadData(*pSample.mObject, Data);
+	Format = mOutputFourcc;
 }
