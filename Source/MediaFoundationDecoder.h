@@ -1,10 +1,7 @@
 #pragma once
 
-#include <functional>
-#include "SoyLib/src/Array.hpp"
-#include "SoyLib/src/HeapArray.hpp"
-#include "TDecoder.h"
 #include "MediaFoundationTransformer.h"
+#include "TDecoder.h"
 
 namespace MediaFoundation
 {
@@ -22,9 +19,6 @@ public:
 private:
 	virtual bool	DecodeNextPacket(std::function<void(const SoyPixelsImpl&,SoyTime)> OnFrameDecoded) override;	//	returns true if more data to proccess
 	
-	void			SetOutputFormat();
-	void			ProcessNextOutputPacket();
-
 private:
 	std::shared_ptr<TTransformer>	mTransformer;
 };

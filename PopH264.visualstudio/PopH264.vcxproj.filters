@@ -240,6 +240,9 @@
     <ClCompile Include="..\Source\MediaFoundationTransformer.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source\MediaFoundationEncoder.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\SoyLib\src\Array.hpp">
@@ -525,6 +528,9 @@
       <Filter>Source</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\MediaFoundationTransformer.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\MediaFoundationEncoder.h">
       <Filter>Source</Filter>
     </ClInclude>
   </ItemGroup>
