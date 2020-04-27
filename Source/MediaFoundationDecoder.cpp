@@ -29,7 +29,7 @@ MediaFoundation::TDecoder::TDecoder()
 	auto Inputs = FixedRemoteArray(InputFourccs);
 	auto Outputs = FixedRemoteArray(OutputFourccs);
 
-	mTransformer.reset(new MediaFoundation::TTransformer(GetArrayBridge(Inputs), GetArrayBridge(Outputs)));
+	mTransformer.reset(new MediaFoundation::TTransformer( TransformerCategory::VideoDecoder, GetArrayBridge(Inputs), GetArrayBridge(Outputs)));
 }
 
 MediaFoundation::TDecoder::~TDecoder()

@@ -29,8 +29,8 @@ MediaFoundation::TEncoder::TEncoder(TEncoderParams Params,std::function<void(Pop
 	Soy::TFourcc OutputFourccs[] = { "H264" };
 	auto Inputs = FixedRemoteArray(InputFourccs);
 	auto Outputs = FixedRemoteArray(OutputFourccs);
-
-	mTransformer.reset(new MediaFoundation::TTransformer(GetArrayBridge(Inputs), GetArrayBridge(Outputs)));
+		
+	mTransformer.reset(new MediaFoundation::TTransformer(TransformerCategory::VideoEncoder, GetArrayBridge(Inputs), GetArrayBridge(Outputs)));
 }
 
 MediaFoundation::TEncoder::~TEncoder()

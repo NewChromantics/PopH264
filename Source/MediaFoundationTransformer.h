@@ -8,6 +8,15 @@
 namespace MediaFoundation
 {
 	class TTransformer;
+
+	namespace TransformerCategory
+	{
+		enum Type
+		{
+			VideoDecoder,
+			VideoEncoder,
+		};
+	}
 }
 
 class IMFTransform;
@@ -15,7 +24,7 @@ class IMFTransform;
 class MediaFoundation::TTransformer
 {
 public:
-	TTransformer(const ArrayBridge<Soy::TFourcc>&& InputFormats, const ArrayBridge<Soy::TFourcc>&& OutputFormats);
+	TTransformer(TransformerCategory::Type Category,const ArrayBridge<Soy::TFourcc>&& InputFormats, const ArrayBridge<Soy::TFourcc>&& OutputFormats);
 	~TTransformer();
 
 public:

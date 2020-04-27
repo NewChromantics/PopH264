@@ -29,11 +29,17 @@ namespace MediaFoundation
 	class TContext;
 	class TActivateMeta;
 
+	std::ostream& operator<<(std::ostream &out, const TActivateMeta& in);
+
+
 	void	IsOkay(HRESULT Result, const char* Context);
-	void	IsOkay(HRESULT Result,const std::string& Context);
+	void	IsOkay(HRESULT Result, const std::string& Context);
 
 	TActivateList	EnumTransforms(const GUID& Category);
-	TActivateMeta	GetBestTransform(const GUID& Category,const ArrayBridge<Soy::TFourcc>& InputFilter,const ArrayBridge<Soy::TFourcc>& OutputFilter);
+	TActivateMeta	GetBestTransform(const GUID& Category, const ArrayBridge<Soy::TFourcc>& InputFilter, const ArrayBridge<Soy::TFourcc>& OutputFilter);
+
+	GUID		GetGuid(TransformerCategory::Type Category);
+	GUID		GetGuid(Soy::TFourcc Fourcc);
 }
 
 
@@ -67,6 +73,7 @@ public:
 	BufferArray<Soy::TFourcc, 20>	mOutputs;
 	Soy::AutoReleasePtr<IMFActivate>	mActivate;
 };
+
 
 class MediaFoundation::TActivateList
 {
@@ -120,6 +127,23 @@ template<typename T>
 void MemZero(T& Object)
 {
 	memset(&Object, 0, sizeof(T));
+}
+
+std::ostream& MediaFoundation::operator<<(std::ostream &out, const MediaFoundation::TActivateMeta& in)
+{
+	out << "Name=" << in.mName;
+	if (in.mHardwareAccelerated)
+		out << "(Hardware)";
+
+	out << " Inputs=";
+	for (auto i = 0; i < in.mInputs.GetSize(); i++)
+		out << in.mInputs[i] << ",";
+
+	out << " Outputs=";
+	for (auto i = 0; i < in.mOutputs.GetSize(); i++)
+		out << in.mOutputs[i] << ",";
+
+	return out;
 }
 
 
@@ -211,7 +235,7 @@ Soy::TFourcc GetFourCC(const GUID& Guid)
 }
 
 
-GUID GetGuid(const Soy::TFourcc& Fourcc)
+GUID MediaFoundation::GetGuid(Soy::TFourcc Fourcc)
 {
 	//	https://docs.microsoft.com/en-us/windows/win32/medfound/video-subtype-guids#creating-subtype-guids-from-fourccs-and-d3dformat-values
 	//	XXXXXXXX - 0000 - 0010 - 8000 - 00 AA 00 38 9B 71
@@ -220,6 +244,15 @@ GUID GetGuid(const Soy::TFourcc& Fourcc)
 	auto Fourcc32 = (Fourcc.mFourcc32);
 	GUID Guid = { Fourcc32, 0x000, 0x0010, { 0x80, 0x00, 0x00, 0xAA, 0x00, 0x38, 0x9B, 0x71 } };
 	return Guid;
+}
+
+GUID MediaFoundation::GetGuid(TransformerCategory::Type Category)
+{
+	switch (Category)
+	{
+	case TransformerCategory::VideoDecoder:	return MFT_CATEGORY_VIDEO_DECODER;
+	case TransformerCategory::VideoEncoder:	return MFT_CATEGORY_VIDEO_ENCODER;
+	}
 }
 
 MediaFoundation::TActivateMeta::TActivateMeta(IMFActivate& Activate) :
@@ -286,7 +319,7 @@ std::string GetName(const GUID Guid)
 //	sorted results by hardware, then highest input, then highest output
 MediaFoundation::TActivateMeta MediaFoundation::GetBestTransform(const GUID& Category,const ArrayBridge<Soy::TFourcc>& InputFilter,const ArrayBridge<Soy::TFourcc>& OutputFilter)
 {
-	auto Transformers = EnumTransforms(MFT_CATEGORY_VIDEO_DECODER);
+	auto Transformers = EnumTransforms(Category);
 	TActivateMeta MatchingTransform;
 	size_t MatchingTransformScore = 0;
 	const auto HardwareScore = 1000;
@@ -335,6 +368,8 @@ MediaFoundation::TActivateMeta MediaFoundation::GetBestTransform(const GUID& Cat
 
 	auto FindTransform = [&](TActivateMeta& Meta)
 	{
+		std::Debug << "Transformer: " << Meta << std::endl;
+
 		auto BestInputIndex = GetLowestMatchingIndex(Meta.mInputs, InputFilter);
 		auto BestOutputIndex = GetLowestMatchingIndex(Meta.mOutputs, OutputFilter);
 		//	not a match
@@ -360,10 +395,14 @@ MediaFoundation::TActivateMeta MediaFoundation::GetBestTransform(const GUID& Cat
 	return MatchingTransform;
 }
 
-MediaFoundation::TTransformer::TTransformer(const ArrayBridge<Soy::TFourcc>&& InputFormats, const ArrayBridge<Soy::TFourcc>&& OutputFormats)
+
+
+MediaFoundation::TTransformer::TTransformer(TransformerCategory::Type Category, const ArrayBridge<Soy::TFourcc>&& InputFormats, const ArrayBridge<Soy::TFourcc>&& OutputFormats)
 {
+	auto CategoryGuid = GetGuid(Category);
+
 	//	todo: support user-selected names
-	auto Transform = GetBestTransform(MFT_CATEGORY_VIDEO_DECODER, InputFormats, OutputFormats );
+	auto Transform = GetBestTransform(CategoryGuid, InputFormats, OutputFormats );
 	std::Debug << "Picked Transform " << Transform.mName << std::endl;
 
 	//	activate a transformer
