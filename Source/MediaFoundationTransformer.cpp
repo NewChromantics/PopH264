@@ -800,9 +800,12 @@ void MediaFoundation::TTransformer::SetOutputFormat()
 		Result = Transformer.SetOutputType(mOutputStreamId, &MediaType, Flags );
 		IsOkay(Result, "SetOutputType");
 
-		//	gr: from what I can tell, we can't get the guid again, so cache it
-		mOutputFourcc = Fourcc;
-		mOutputMediaType = pMediaType;
+		//	gr: this media info (specifically width& height)
+		//		is not correct. GetCurrentOutput is also wrong,
+		//		the correct one comes after the streams changed notification 
+		//		and with the GetAvailibleFormat
+		//mOutputMediaType = pMediaType;
+		mOutputMediaType.Release();	//	make sure its not set
 
 		return;
 	}
@@ -817,7 +820,11 @@ SoyPixelsMeta MediaFoundation::TTransformer::GetOutputPixelMeta()
 	uint32_t Width = 0;
 	uint32_t Height = 0;
 	auto Result = MFGetAttributeSize(&MediaType, MF_MT_FRAME_SIZE, &Width, &Height);
-	IsOkay(Result,"GetOutputPixelMeta MFGetAttributeSize");
+	IsOkay(Result, "GetOutputPixelMeta MFGetAttributeSize");
+	
+	uint32_t Stride = 0;
+	Result = MediaType.GetUINT32( MF_MT_DEFAULT_STRIDE, &Stride );
+	IsOkay(Result, "GetOutputPixelMeta MFGetAttributeSize");
 
 	//	get format
 	GUID VideoFormatGuid;
@@ -825,17 +832,25 @@ SoyPixelsMeta MediaFoundation::TTransformer::GetOutputPixelMeta()
 	IsOkay(Result, "GetOutputPixelMeta MF_MT_SUBTYPE");
 	auto PixelFormat = GetPixelFormat(VideoFormatGuid);
 
-	Width = 640;
-	Height = 480;
-
 	return SoyPixelsMeta(Width, Height, PixelFormat);
 }
 
 
 IMFMediaType& MediaFoundation::TTransformer::GetOutputMediaType()
 {
+	if (mOutputMediaType)
+		return *mOutputMediaType;
+
+	//	get latest media type
+	//	gr: OutputCurrent is WRONG, but availible IS (after we get the streams changed result)
+	//auto Result = mTransformer->GetOutputCurrentType(mOutputStreamId, &mOutputMediaType.mObject);
+	auto Result = mTransformer->GetOutputAvailableType(mOutputStreamId,0, &mOutputMediaType.mObject);
+	IsOkay(Result, "GetOutputAvailableType");
+	//mOutputMediaType.Retain();
+	
 	if (!mOutputMediaType)
 		throw Soy::AssertException("GetOutputMediaType but output media type has not yet been set");
+	
 	return *mOutputMediaType.mObject;
 }
 
@@ -888,6 +903,14 @@ void MediaFoundation::TTransformer::PopFrame(ArrayBridge<uint8_t>&& Data,SoyTime
 	else if (Result == MF_E_TRANSFORM_STREAM_CHANGE)
 	{
 		std::Debug << "Stream changed, expecting 0 byte buffer..." << std::endl;
+		//	reset output media type
+		mOutputMediaType.Release();
+
+		//	refresh format now
+		auto& Format = GetOutputMediaType();
+		//	only for pixel streams!
+		auto PixelMeta = GetOutputPixelMeta();
+		std::Debug << "Streams changed: " << PixelMeta << std::endl;
 	}
 	else
 	{
@@ -895,7 +918,6 @@ void MediaFoundation::TTransformer::PopFrame(ArrayBridge<uint8_t>&& Data,SoyTime
 	}
 	
 	//	read a frame!
-	std::Debug << "Output frame (" << mOutputFourcc << ") no error... Ready=" << FrameReady << std::endl;
 	ReadData(*pSample.mObject, Data);
 	std::Debug << "size is " << Data.GetDataSize() << std::endl;
 

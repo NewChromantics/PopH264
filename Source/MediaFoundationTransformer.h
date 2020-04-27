@@ -46,6 +46,5 @@ private:
 	IMFTransform*	mTransformer = nullptr;
 	DWORD			mInputStreamId = 0;
 	DWORD			mOutputStreamId = 0;
-	Soy::TFourcc	mOutputFourcc;
 	Soy::AutoReleasePtr<IMFMediaType> mOutputMediaType;
 };
