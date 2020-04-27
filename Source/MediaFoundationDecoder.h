@@ -4,6 +4,7 @@
 #include "SoyLib/src/Array.hpp"
 #include "SoyLib/src/HeapArray.hpp"
 #include "TDecoder.h"
+#include "MediaFoundationTransformer.h"
 
 namespace MediaFoundation
 {
@@ -25,7 +26,5 @@ private:
 	void			ProcessNextOutputPacket();
 
 private:
-	IMFTransform*	mDecoder = nullptr;
-	DWORD			mInputStreamId = 0;
-	DWORD			mOutputStreamId = 0;
+	std::shared_ptr<TTransformer>	mTransformer;
 };
