@@ -49,8 +49,8 @@ void MediaFoundation::TEncoder::Encode(const SoyPixelsImpl& Luma, const SoyPixel
 	{
 		PopH264::TPacket Packet;
 		Packet.mData.reset(new Array<uint8_t>());
-		Soy::TFourcc Format;
-		mTransformer->PopFrame(GetArrayBridge(*Packet.mData),Format);
+		SoyTime Time;
+		mTransformer->PopFrame(GetArrayBridge(*Packet.mData), Time);
 		if (!Packet.mData->IsEmpty())
 		{
 			OnOutputPacket(Packet);

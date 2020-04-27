@@ -19,7 +19,6 @@
 #pragma comment(lib,"mfreadwrite.lib")	
 #pragma comment(lib,"mfuuid.lib")	
 
-#include <SoyAutoReleasePtr.h>
 
 //	https://github.com/sipsorcery/mediafoundationsamples/blob/master/MFH264RoundTrip/MFH264RoundTrip.cpp
 
@@ -38,8 +37,9 @@ namespace MediaFoundation
 	TActivateList	EnumTransforms(const GUID& Category);
 	TActivateMeta	GetBestTransform(const GUID& Category, const ArrayBridge<Soy::TFourcc>& InputFilter, const ArrayBridge<Soy::TFourcc>& OutputFilter);
 
-	GUID		GetGuid(TransformerCategory::Type Category);
-	GUID		GetGuid(Soy::TFourcc Fourcc);
+	GUID					GetGuid(TransformerCategory::Type Category);
+	GUID					GetGuid(Soy::TFourcc Fourcc);
+	SoyPixelsFormat::Type	GetPixelFormat(const GUID& Guid);
 
 	Soy::AutoReleasePtr<IMFSample>		CreateSample(const ArrayBridge<uint8_t>& Data, Soy::TFourcc Fourcc);
 	Soy::AutoReleasePtr<IMFMediaBuffer>	CreateBuffer(const ArrayBridge<uint8_t>& Data);
@@ -240,6 +240,31 @@ Soy::TFourcc GetFourCC(const GUID& Guid)
 	return Fourcc;
 }
 
+constexpr uint32_t GetFourcc(const char Str[])
+{
+	//	gr: figure out how to make this class const-expr-happy
+	//Soy::TFourcc Fourcc(Str);
+	//return Fourcc.mFourcc32;
+	uint8_t a = Str[0];
+	uint8_t b = Str[1];
+	uint8_t c = Str[2];
+	uint8_t d = Str[3];
+	uint32_t abcd = (a << 0) | (b << 8) | (c << 16) | (d << 24);
+	return abcd;
+}
+
+SoyPixelsFormat::Type MediaFoundation::GetPixelFormat(const GUID& Guid)
+{
+	auto Fourcc = GetFourCC(Guid);
+	switch (Fourcc.mFourcc32)
+	{
+	case GetFourcc("NV12"):	return SoyPixelsFormat::Nv12;
+	}
+
+	std::stringstream Error;
+	Error << "Failed to get pixelformat from fourcc " << Fourcc;
+	throw Soy::AssertException(Error);
+}
 
 GUID MediaFoundation::GetGuid(Soy::TFourcc Fourcc)
 {
@@ -654,7 +679,7 @@ void MediaFoundation::ReadData(IMFSample& Sample, ArrayBridge<uint8_t>& Data)
 	//	lock
 	uint8_t* SrcData = nullptr;
 	DWORD SrcSize = 0;
-
+	
 	//	note: lock is garunteed to be contiguous
 	Result = Buffer.Lock(&SrcData, nullptr, &SrcSize);
 	IsOkay(Result, "MediaBuffer::Lock");
@@ -769,7 +794,7 @@ void MediaFoundation::TTransformer::SetOutputFormat()
 		IsOkay(Result, "OutputFormat GetGuid Subtype");
 		//	todo: is it a format we support?
 		auto Fourcc = GetFourCC(SubType);
-		
+				
 		//	set format
 		DWORD Flags = 0;
 		Result = Transformer.SetOutputType(mOutputStreamId, &MediaType, Flags );
@@ -777,6 +802,7 @@ void MediaFoundation::TTransformer::SetOutputFormat()
 
 		//	gr: from what I can tell, we can't get the guid again, so cache it
 		mOutputFourcc = Fourcc;
+		mOutputMediaType = pMediaType;
 
 		return;
 	}
@@ -784,8 +810,36 @@ void MediaFoundation::TTransformer::SetOutputFormat()
 	throw Soy::AssertException("Ran out of availible output formats");
 }
 
+SoyPixelsMeta MediaFoundation::TTransformer::GetOutputPixelMeta()
+{
+	auto& MediaType = GetOutputMediaType();
 
-void MediaFoundation::TTransformer::PopFrame(ArrayBridge<uint8_t>&& Data,Soy::TFourcc& Format)
+	uint32_t Width = 0;
+	uint32_t Height = 0;
+	auto Result = MFGetAttributeSize(&MediaType, MF_MT_FRAME_SIZE, &Width, &Height);
+	IsOkay(Result,"GetOutputPixelMeta MFGetAttributeSize");
+
+	//	get format
+	GUID VideoFormatGuid;
+	Result = MediaType.GetGUID(MF_MT_SUBTYPE, &VideoFormatGuid);
+	IsOkay(Result, "GetOutputPixelMeta MF_MT_SUBTYPE");
+	auto PixelFormat = GetPixelFormat(VideoFormatGuid);
+
+	Width = 640;
+	Height = 480;
+
+	return SoyPixelsMeta(Width, Height, PixelFormat);
+}
+
+
+IMFMediaType& MediaFoundation::TTransformer::GetOutputMediaType()
+{
+	if (!mOutputMediaType)
+		throw Soy::AssertException("GetOutputMediaType but output media type has not yet been set");
+	return *mOutputMediaType.mObject;
+}
+
+void MediaFoundation::TTransformer::PopFrame(ArrayBridge<uint8_t>&& Data,SoyTime& Time)
 {
 	if (!mTransformer)
 		throw Soy::AssertException("Transformer is null");
@@ -839,9 +893,22 @@ void MediaFoundation::TTransformer::PopFrame(ArrayBridge<uint8_t>&& Data,Soy::TF
 	{
 		IsOkay(Result, "ProcessOutput");
 	}
-
+	
 	//	read a frame!
-	std::Debug << "Output frame (" << mOutputFourcc << ") ready!" << std::endl;
+	std::Debug << "Output frame (" << mOutputFourcc << ") no error... Ready=" << FrameReady << std::endl;
 	ReadData(*pSample.mObject, Data);
-	Format = mOutputFourcc;
+	std::Debug << "size is " << Data.GetDataSize() << std::endl;
+
+	try
+	{
+		LONGLONG TimestampNs = 0;
+		auto Result = pSample->GetSampleTime(&TimestampNs);
+		IsOkay(Result, "GetSampleTime");
+		Time.mTime = TimestampNs / 10000;
+	}
+	catch (std::exception& e)
+	{
+		std::Debug <<  e.what() << std::endl;
+	}
+
 }

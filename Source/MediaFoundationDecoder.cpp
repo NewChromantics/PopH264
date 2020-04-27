@@ -53,8 +53,16 @@ bool MediaFoundation::TDecoder::DecodeNextPacket(std::function<void(const SoyPix
 	//	todo: other thread
 	{
 		Array<uint8_t> OutFrame;
-		Soy::TFourcc Format;
-		mTransformer->PopFrame(GetArrayBridge(OutFrame),Format);
+		SoyTime Time;
+		mTransformer->PopFrame(GetArrayBridge(OutFrame), Time);
+
+		//	no frame
+		if (OutFrame.IsEmpty())
+			return false;
+
+		auto PixelMeta = mTransformer->GetOutputPixelMeta();
+		SoyPixelsRemote Pixels(OutFrame.GetArray(), OutFrame.GetDataSize(), PixelMeta);
+		OnFrameDecoded(Pixels, Time);
 	}
 
 	return true;
