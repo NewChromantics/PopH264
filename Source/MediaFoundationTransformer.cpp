@@ -40,6 +40,9 @@ namespace MediaFoundation
 
 	GUID		GetGuid(TransformerCategory::Type Category);
 	GUID		GetGuid(Soy::TFourcc Fourcc);
+
+	Soy::AutoReleasePtr<IMFSample>		CreateSample(const ArrayBridge<uint8_t>& Data, Soy::TFourcc Fourcc);
+	Soy::AutoReleasePtr<IMFMediaBuffer>	CreateBuffer(const ArrayBridge<uint8_t>& Data);
 }
 
 
@@ -553,7 +556,53 @@ MediaFoundation::TTransformer::~TTransformer()
 	
 }
 
-void MediaFoundation::TTransformer::PushFrame(const ArrayBridge<uint8_t>&& Data)
+
+Soy::AutoReleasePtr<IMFMediaBuffer> MediaFoundation::CreateBuffer(const ArrayBridge<uint8_t>& Data)
+{
+	Soy::AutoReleasePtr<IMFMediaBuffer> pBuffer;
+	auto Result = MFCreateMemoryBuffer(Data.GetDataSize(), &pBuffer.mObject);
+	IsOkay(Result, "MFCreateMemoryBuffer");
+	pBuffer.Retain();
+
+	//	copy data
+	byte *reconByteBuffer;
+	DWORD reconBuffCurrLen = 0;
+	DWORD reconBuffMaxLen = 0;
+	uint8_t* DestData = nullptr;
+	DWORD DestMaxSize = 0;
+	DWORD DestCurrentSize = 0;
+	Result = pBuffer->Lock(&DestData, &DestMaxSize, &DestCurrentSize);
+	IsOkay(Result, "Buffer Lock");
+	size_t NewSize = 0;
+	auto DestArray = GetRemoteArray(DestData, DestMaxSize, NewSize);
+	DestArray.Copy(Data);
+	Result = pBuffer->Unlock();
+	IsOkay(Result, "Buffer Unlock");
+	Result = pBuffer->SetCurrentLength(NewSize);
+	IsOkay(Result, "Buffer SetCurrentLength");
+
+	return pBuffer;
+}
+
+Soy::AutoReleasePtr<IMFSample> MediaFoundation::CreateSample(const ArrayBridge<uint8_t>& Data,Soy::TFourcc Fourcc)
+{
+//#pragma message("This binary will not load on windows 7")
+	auto Buffer = CreateBuffer(Data);
+
+	Soy::AutoReleasePtr<IMFSample> pSample;
+	auto Result = MFCreateSample(&pSample.mObject);
+	IsOkay(Result, "MFCreateSample");
+	pSample.Retain();
+
+	Result = pSample.mObject->AddBuffer(Buffer.mObject);
+	IsOkay(Result, "AddBuffer");
+	//CHECK_HR(reConstructedVideoSample->SetSampleTime(llVideoTimeStamp), "Error setting the recon video sample time.\n");
+	//CHECK_HR(reConstructedVideoSample->SetSampleDuration(llSampleDuration), "Error setting recon video sample duration.\n");
+
+	return pSample;
+}
+
+bool MediaFoundation::TTransformer::PushFrame(const ArrayBridge<uint8_t>&& Data)
 {
 	if (!mTransformer)
 		throw Soy::AssertException("Decoder is null");
@@ -590,20 +639,21 @@ void MediaFoundation::TTransformer::PushFrame(const ArrayBridge<uint8_t>&& Data)
 		}
 	};
 
-	Soy::AutoReleasePtr<IMFSample> pSample;
-	{
-		auto Result = MFCreateSample(&pSample.mObject);
-		IsOkay(Result, "MFCreateSample");
-		throw Soy::AssertException("Put data here");
-	}
+	auto pSample = CreateSample(Data,Soy::TFourcc());
 
 	DebugInputStatus();
 
 	DWORD Flags = 0;
 	auto Result = Transformer.ProcessInput(mInputStreamId, pSample.mObject, Flags);
+	
+	//	gr: getting this result, even though status says "is accepting"
+	if (Result == MF_E_NOTACCEPTING)
+		return false;
+
 	IsOkay(Result, "Decoder.ProcessInput");
 
 	DebugInputStatus();
+	return true;
 }
 
 void MediaFoundation::TTransformer::SetOutputFormat()
@@ -683,6 +733,7 @@ void MediaFoundation::TTransformer::PopFrame(const ArrayBridge<uint8_t>&& Data)
 		IsOkay(Result, "GetOutputStatus");
 	}
 
+	//	gr: this also says false, when ProcessOutput tries to copy a sample!
 	auto FrameReady = (StatusFlags & MFT_OUTPUT_STATUS_SAMPLE_READY) != 0;
 	if (!FrameReady)
 	{

@@ -17,6 +17,15 @@ void PopH264::TDecoder::Decode(ArrayBridge<uint8_t>&& PacketData,std::function<v
 	}
 }
 
+
+void PopH264::TDecoder::UnpopNalu(ArrayBridge<uint8_t>&& Buffer)
+{
+	//	put-back data at the start of the queue
+	//	todo: if pending data offset size is > buffersize, can I always just reduce this?
+	InsertPendingData(Buffer);
+}
+
+
 bool PopH264::TDecoder::PopNalu(ArrayBridge<uint8_t>&& Buffer)
 {
 	std::lock_guard<std::mutex> Lock( mPendingDataLock );
@@ -72,5 +81,26 @@ void PopH264::TDecoder::RemovePendingData(size_t Size)
 		mPendingOffset = 0;
 	}
 }
+
+void PopH264::TDecoder::InsertPendingData(ArrayBridge<uint8_t>& Data)
+{
+	std::lock_guard<std::mutex> Lock(mPendingDataLock);
+
+	//	overwrite the used-data part
+	//	note: can we just reset this? can we ensure this call is always from unpop?
+	uint8_t* Dest = nullptr;
+	auto DataSize = Data.GetDataSize();
+	if (mPendingOffset >= DataSize)
+	{
+		mPendingOffset -= DataSize;
+		Dest = &mPendingData[mPendingOffset];
+	}
+	else
+	{
+		Dest = mPendingData.InsertBlock(mPendingOffset, DataSize);
+	}
+	memcpy(Dest, Data.GetArray(), DataSize);
+}
+
 
 

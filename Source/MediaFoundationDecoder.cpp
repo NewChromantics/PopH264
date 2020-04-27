@@ -43,7 +43,11 @@ bool MediaFoundation::TDecoder::DecodeNextPacket(std::function<void(const SoyPix
 	if (!PopNalu(GetArrayBridge(Nalu)))
 		return false;
 
-	mTransformer->PushFrame(GetArrayBridge(Nalu));
+	if (!mTransformer->PushFrame(GetArrayBridge(Nalu)))
+	{
+		//	data was rejected
+		UnpopNalu(GetArrayBridge(Nalu));
+	}
 
 	//	try and pop frames
 	//	todo: other thread

@@ -28,7 +28,8 @@ public:
 	~TTransformer();
 
 public:
-	void			PushFrame(const ArrayBridge<uint8_t>&& Data);
+	//	this returns false if the data was not pushed (where we need to unpop the data, as to not lose it)
+	bool			PushFrame(const ArrayBridge<uint8_t>&& Data);
 	void			PopFrame(const ArrayBridge<uint8_t>&& Data);
 
 private:

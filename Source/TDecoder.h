@@ -22,9 +22,11 @@ protected:
 	
 	bool			HasPendingData()	{	return !mPendingData.IsEmpty();	}
 	bool			PopNalu(ArrayBridge<uint8_t>&& Buffer);
+	void			UnpopNalu(ArrayBridge<uint8_t>&& Buffer);
 
 private:
 	void			RemovePendingData(size_t Size);
+	void			InsertPendingData(ArrayBridge<uint8_t>& Data);	//	insert data (back) to the start
 	
 private:
 	std::mutex		mPendingDataLock;
