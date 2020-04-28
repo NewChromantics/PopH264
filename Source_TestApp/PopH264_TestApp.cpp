@@ -13,7 +13,9 @@
 #include <thread>
 
 extern void MakeGreyscalePng(const char* Filename);
-extern void CompareGreyscale(const char* MetaJson,uint8_t* Plane0);
+extern void CompareGreyscale(const char* MetaJson,uint8_t* Plane0Data,uint8_t* Plane1Data,uint8_t* Plane2Data);
+extern void MakeRainbowPng(const char* Filename);
+extern void CompareRainbow(const char* MetaJson,uint8_t* Plane0Data,uint8_t* Plane1Data,uint8_t* Plane2Data);
 
 void DebugPrint(const std::string& Message)
 {
@@ -24,13 +26,15 @@ void DebugPrint(const std::string& Message)
 	std::cout << Message.c_str() << std::endl;
 }
 
-typedef void CompareFunc_t(const char* MetaJson,uint8_t* Plane0);
+typedef void CompareFunc_t(const char* MetaJson,uint8_t* Plane0,uint8_t* Plane1,uint8_t* Plane2);
 
 
 void DecoderTest(const char* TestDataName,CompareFunc_t* Compare)
 {
-	uint8_t TestData[1000];
+	uint8_t TestData[7*1024];
 	auto TestDataSize = PopH264_GetTestData(TestDataName,TestData,std::size(TestData));
+	if ( TestDataSize > std::size(TestData) )
+		throw std::runtime_error("Buffer for test data not big enough");
 	
 	auto Handle = PopH264_CreateInstance(0);
 
@@ -46,8 +50,10 @@ void DecoderTest(const char* TestDataName,CompareFunc_t* Compare)
 	{
 		char MetaJson[1000];
 		PopH264_PeekFrame( Handle, MetaJson, std::size(MetaJson) );
-		uint8_t Plane0[256*100];
-		auto FrameTime = PopH264_PopFrame(Handle, Plane0, std::size(Plane0), nullptr, 0, nullptr, 0 );
+		uint8_t Plane0[256*256];
+		uint8_t Plane1[256*256];
+		uint8_t Plane2[256*256];
+		auto FrameTime = PopH264_PopFrame(Handle, Plane0, std::size(Plane0), Plane1, std::size(Plane1), Plane2, std::size(Plane2) );
 		std::stringstream Error;
 		Error << "Decoded testdata; " << MetaJson << " frame=" << FrameTime;
 		DebugPrint(Error.str());
@@ -58,7 +64,7 @@ void DecoderTest(const char* TestDataName,CompareFunc_t* Compare)
 			continue;
 		}
 		
-		Compare( MetaJson, Plane0 );
+		Compare( MetaJson, Plane0, Plane1, Plane2 );
 		break;
 	}
 	
@@ -70,9 +76,23 @@ void DecoderTest(const char* TestDataName,CompareFunc_t* Compare)
 int main()
 {
 	MakeGreyscalePng("PopH264Test_GreyscaleGradient.png");
-	
+	MakeRainbowPng("PopH264Test_RainbowGradient01.png");
+	MakeRainbowPng("PopH264Test_RainbowGradient02.png");
+	MakeRainbowPng("PopH264Test_RainbowGradient03.png");
+	MakeRainbowPng("PopH264Test_RainbowGradient04.png");
+	MakeRainbowPng("PopH264Test_RainbowGradient05.png");
+
 	DebugPrint("PopH264_UnitTests");
 	//PopH264_UnitTests();
+
+	try
+	{
+		DecoderTest("RainbowGradient.h264",CompareRainbow);
+	}
+	catch (std::exception& e)
+	{
+		DebugPrint(e.what());
+	}
 
 	try
 	{
