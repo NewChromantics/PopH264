@@ -1,6 +1,7 @@
 #include "TDecoderInstance.h"
 #include "SoyLib/src/SoyPng.h"
 #include "SoyLib/src/SoyImage.h"
+#include "PopH264.h"
 
 
 //	gr: this works on osx, but currently, none of the functions are implemented :)
@@ -36,7 +37,7 @@
 PopH264::TDecoderInstance::TDecoderInstance(int32_t Mode)
 {
 #if defined(ENABLE_MAGICLEAP_DECODER)
-	if (Mode != MODE_BROADWAY)
+	if (Mode != POPH264_DECODERMODE_SOFTWARE)
 	{
 		try
 		{
@@ -51,6 +52,7 @@ PopH264::TDecoderInstance::TDecoderInstance(int32_t Mode)
 #endif
 
 #if defined(ENABLE_MEDIAFOUNDATION)
+	if (Mode != POPH264_DECODERMODE_SOFTWARE)
 	{
 		try
 		{

@@ -10,12 +10,21 @@
 #define ENABLE_AVF
 #endif
 
+#if defined(TARGET_WINDOWS)
+#define ENABLE_MEDIAFOUNDATION
+#endif
+
+
 #if defined(ENABLE_X264)
 #include "X264Encoder.h"
 #endif
 
 #if defined(ENABLE_AVF)
 #include "AvfEncoder.h"
+#endif
+
+#if defined(ENABLE_MEDIAFOUNDATION)
+#include "MediaFoundationEncoder.h"
 #endif
 
 
@@ -46,6 +55,14 @@ PopH264::TEncoderInstance::TEncoderInstance(const std::string& OptionsJsonString
 	}
 #endif
 	
+#if defined(ENABLE_MEDIAFOUNDATION)
+	if (EncoderName.empty() || EncoderName == MediaFoundation::TEncoder::Name)
+	{
+		MediaFoundation::TEncoderParams Params(Options);
+		mEncoder.reset(new MediaFoundation::TEncoder(Params, OnOutputPacket));
+		return;
+	}
+#endif
 	
 #if defined(ENABLE_X264)
 	if ( EncoderName.empty() || EncoderName == X264::TEncoder::Name )

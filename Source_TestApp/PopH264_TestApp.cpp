@@ -19,16 +19,35 @@ void DebugPrint(const std::string& Message)
 	std::cout << Message.c_str() << std::endl;
 }
 
-
+void DecoderTest()
+{
+	auto Handle = PopH264_CreateInstance(0);
+	PopH264_DestroyInstance(Handle);
+}
 
 int main()
 {
 	DebugPrint("PopH264_UnitTests");
 	//PopH264_UnitTests();
 
+	try
+	{
+		DecoderTest();
+	}
+	catch (std::exception& e)
+	{
+		DebugPrint(e.what());
+	}
+
+	const char* EncoderOptionsJson =
+	R"V0G0N(
+	{
+	}
+	)V0G0N";
+
 	//	testing the apple encoder
 	char ErrorBuffer[1000] = {0};
-	auto Handle = PopH264_CreateEncoder("avf", ErrorBuffer, std::size(ErrorBuffer) );
+	auto Handle = PopH264_CreateEncoder(EncoderOptionsJson, ErrorBuffer, std::size(ErrorBuffer) );
 	std::stringstream Debug;
 	Debug << "PopH264_CreateEncoder handle=" << Handle << " error=" << ErrorBuffer;
 	DebugPrint(Debug.str());
