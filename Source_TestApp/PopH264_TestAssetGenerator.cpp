@@ -151,28 +151,22 @@ SoyPixels MakeRainbowPixels()
 	return Pixels;
 }
 
-void CompareRainbow(const char* MetaJson,uint8_t* Plane0Data,uint8_t* Plane1Data,uint8_t* Plane2Data)
+void CompareRainbow(SoyPixelsImpl& Original,SoyPixelsImpl& Plane0,SoyPixelsImpl& Plane1,SoyPixelsImpl& Plane2,float ChromaVRed,float ChromaUGreen,float ChromaVGreen,float ChromaUBlue)
 {
-	auto Plane0Meta = GetPlaneMeta(MetaJson,0);
-	auto Plane1Meta = GetPlaneMeta(MetaJson,1);
-	auto Plane2Meta = GetPlaneMeta(MetaJson,2);
-	auto Plane0DataSize = Plane0Meta.GetDataSize();
-	auto Plane1DataSize = Plane1Meta.GetDataSize();
-	auto Plane2DataSize = Plane2Meta.GetDataSize();
-	SoyPixelsRemote Plane0( Plane0Data, Plane0DataSize, Plane0Meta );
-	SoyPixelsRemote Plane1( Plane1Data, Plane1DataSize, Plane1Meta );
-	SoyPixelsRemote Plane2( Plane2Data, Plane2DataSize, Plane2Meta );
-
 	//	compare with original
-	SoyPixels Original = MakeRainbowPixels();
 	SoyPixels Converted = Original;
 
+	auto range = [](float Min,float Max,float Value)
+	{
+		return (Value-Min) / (Max-Min);
+	};
 	auto GetYuv = [&](int x,int y,uint8_t& Luma,uint8_t& ChromaU,uint8_t& ChromaV)
 	{
 		Luma = Plane0.GetPixel(x,y,0);
 		ChromaU = Plane1.GetPixel(x/2,y/2,0);
 		ChromaV = Plane2.GetPixel(x/2,y/2,0);
 	};
+	
 	auto YuvToRgb = [&](int x,int y,int& r,int& g,int& b)
 	{
 		uint8_t l,u,v;
@@ -181,11 +175,7 @@ void CompareRainbow(const char* MetaJson,uint8_t* Plane0Data,uint8_t* Plane1Data
 		//	convert
 		float ChromaU = (u/255.f) - 0.5f;
 		float ChromaV = (v/255.f) - 0.5f;
-		float Luma = (l/255.f);
-		float ChromaVRed = 1.5958f;
-		float ChromaUGreen = -0.39173f;
-		float ChromaVGreen = -0.81290f;
-		float ChromaUBlue = 2.017f;
+		float Luma = range( 3, 253, l );
 		float rf = Luma + (ChromaVRed * ChromaV);
 		float gf = Luma + (ChromaUGreen * ChromaU) + (ChromaVGreen * ChromaV);
 		float bf = Luma + (ChromaUBlue * ChromaU);
@@ -198,9 +188,8 @@ void CompareRainbow(const char* MetaJson,uint8_t* Plane0Data,uint8_t* Plane1Data
 	{
 		int SectionWidth = 16;
 		std::stringstream Debug;
-		auto Width = Plane0Meta.GetWidth();
-		auto Height = Plane0Meta.GetHeight();
-		auto Channels = Plane0Meta.GetChannels();
+		auto Width = Plane0.GetWidth();
+		auto Height = Plane0.GetHeight();
 		int TotalDiff[3] = {0,0,0};
 		int MinDiff[3] = {999,999,999};
 		int MaxDiff[3] = {-999,-999,-999};
@@ -209,6 +198,10 @@ void CompareRainbow(const char* MetaJson,uint8_t* Plane0Data,uint8_t* Plane1Data
 		{
 			for ( auto s=0;	s<Width/SectionWidth;	s++ )
 			{
+				//	ignore last one as there's some black
+				if ( s == 5 && y > 240 )
+					continue;
+				
 				auto x = s*SectionWidth;
 				x += SectionWidth/2;	//	sample from middle
 				int Old[3];
@@ -227,7 +220,7 @@ void CompareRainbow(const char* MetaJson,uint8_t* Plane0Data,uint8_t* Plane1Data
 				auto Diffb = (New[2]-Old[2]);
 				
 				//	ignore outliers
-				auto OutlierDiff = 30;
+				auto OutlierDiff = 90;
 				if ( abs(Diffr) > OutlierDiff || abs(Diffg) > OutlierDiff || abs(Diffb) > OutlierDiff )
 				{
 			
@@ -246,7 +239,7 @@ void CompareRainbow(const char* MetaJson,uint8_t* Plane0Data,uint8_t* Plane1Data
 				}
 			
 				DiffCount++;
-				Debug << " " << Diffr << "," << Diffg << "," << Diffb << " ";
+				//Debug << " " << Diffr << "," << Diffg << "," << Diffb << " ";
 				
 				//	write the converted for testing
 				for ( auto sx=0;	sx<SectionWidth;	sx++ )
@@ -269,17 +262,68 @@ void CompareRainbow(const char* MetaJson,uint8_t* Plane0Data,uint8_t* Plane1Data
 		Debug << "Average diff " << AverageDiff[0] << "," << AverageDiff[1] << "," << AverageDiff[2] << std::endl;
 		Debug << "Min diff " << MinDiff[0] << "," << MinDiff[1] << "," << MinDiff[2] << std::endl;
 		Debug << "Max diff " << MaxDiff[0] << "," << MaxDiff[1] << "," << MaxDiff[2] << std::endl;
+		
+		Debug << "ChromaVRed=" << ChromaVRed << std::endl;
+		Debug << "ChromaUGreen=" << ChromaUGreen << std::endl;
+		Debug << "ChromaVGreen=" << ChromaVGreen << std::endl;
+		Debug << "ChromaUBlue=" << ChromaUBlue << std::endl;
 
 		DebugPrint(Debug.str());
 		
 	}
+}
+
+void CompareRainbow(const char* MetaJson,uint8_t* Plane0Data,uint8_t* Plane1Data,uint8_t* Plane2Data)
+{
+	auto Plane0Meta = GetPlaneMeta(MetaJson,0);
+	auto Plane1Meta = GetPlaneMeta(MetaJson,1);
+	auto Plane2Meta = GetPlaneMeta(MetaJson,2);
+	auto Plane0DataSize = Plane0Meta.GetDataSize();
+	auto Plane1DataSize = Plane1Meta.GetDataSize();
+	auto Plane2DataSize = Plane2Meta.GetDataSize();
+	SoyPixelsRemote Plane0( Plane0Data, Plane0DataSize, Plane0Meta );
+	SoyPixelsRemote Plane1( Plane1Data, Plane1DataSize, Plane1Meta );
+	SoyPixelsRemote Plane2( Plane2Data, Plane2DataSize, Plane2Meta );
 	
+	//	compare with original
+	SoyPixels Original = MakeRainbowPixels();
+/*
+	float ChromaVRed = 1.426f;//1.5958f;
+	float ChromaUGreen = -0.39173f;
+	float ChromaVGreen = -0.81290f;
+	float ChromaUBlue = 2.017f;
+*/
+	float vr[]{ 1.426f};
+	float ub[]{ 1.78f };
+	float ug[]{ -0.390f };
+	float vg[]{ -0.780f };
+	
+	for ( auto a=0;	a<std::size(vr);	a++ )
+	{
+		for ( auto b=0;	b<std::size(ug);	b++ )
+		{
+			for ( auto c=0;	c<std::size(vg);	c++ )
+			{
+				for ( auto d=0;	d<std::size(ub);	d++ )
+				{
+					float ChromaVRed = vr[a];
+					float ChromaUGreen = ug[b];
+					float ChromaVGreen = vg[c];
+					float ChromaUBlue = ub[d];
+					
+					CompareRainbow( Original, Plane0, Plane1, Plane2, ChromaVRed, ChromaUGreen, ChromaVGreen, ChromaUBlue );
+				}
+			}
+		}
+	}
+	
+	/*
 	Array<uint8_t> PngData;
 	TPng::GetPng( Converted, GetArrayBridge(PngData), 0 );
 	auto* Filename ="RainbowConvert.png";
 	Soy::ArrayToFile( GetArrayBridge(PngData), Filename);
 	Platform::ShowFileExplorer(Filename);
-
+	*/
 }
 
 void MakeRainbowPng(const char* Filename)
