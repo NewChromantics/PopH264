@@ -165,7 +165,8 @@ void CompareRainbow(const char* MetaJson,uint8_t* Plane0Data,uint8_t* Plane1Data
 
 	//	compare with original
 	SoyPixels Original = MakeRainbowPixels();
-	
+	SoyPixels Converted = Original;
+
 	auto GetYuv = [&](int x,int y,uint8_t& Luma,uint8_t& ChromaU,uint8_t& ChromaV)
 	{
 		Luma = Plane0.GetPixel(x,y,0);
@@ -210,29 +211,54 @@ void CompareRainbow(const char* MetaJson,uint8_t* Plane0Data,uint8_t* Plane1Data
 			{
 				auto x = s*SectionWidth;
 				x += SectionWidth/2;	//	sample from middle
-				uint8_t Old[3];
+				int Old[3];
 				int New[3];
 				Old[0] = Original.GetPixel(x,y,0);
 				Old[1] = Original.GetPixel(x,y,1);
 				Old[2] = Original.GetPixel(x,y,2);
 				YuvToRgb( x,y,New[0], New[1], New[2] );
 				
+				std::clamp(New[0],0,255);
+				std::clamp(New[1],0,255);
+				std::clamp(New[2],0,255);
+				
 				auto Diffr = (New[0]-Old[0]);
 				auto Diffg = (New[1]-Old[1]);
 				auto Diffb = (New[2]-Old[2]);
-				TotalDiff[0] += Diffr;
-				TotalDiff[1] += Diffg;
-				TotalDiff[2] += Diffb;
-				MinDiff[0] = std::min(MinDiff[0],Diffr);
-				MinDiff[1] = std::min(MinDiff[1],Diffg);
-				MinDiff[2] = std::min(MinDiff[2],Diffb);
-				MaxDiff[0] = std::max(MaxDiff[0],Diffr);
-				MaxDiff[1] = std::max(MaxDiff[1],Diffg);
-				MaxDiff[2] = std::max(MaxDiff[2],Diffb);
-
+				
+				//	ignore outliers
+				auto OutlierDiff = 30;
+				if ( abs(Diffr) > OutlierDiff || abs(Diffg) > OutlierDiff || abs(Diffb) > OutlierDiff )
+				{
+			
+				}
+				else
+				{
+					TotalDiff[0] += Diffr;
+					TotalDiff[1] += Diffg;
+					TotalDiff[2] += Diffb;
+					MinDiff[0] = std::min(MinDiff[0],Diffr);
+					MinDiff[1] = std::min(MinDiff[1],Diffg);
+					MinDiff[2] = std::min(MinDiff[2],Diffb);
+					MaxDiff[0] = std::max(MaxDiff[0],Diffr);
+					MaxDiff[1] = std::max(MaxDiff[1],Diffg);
+					MaxDiff[2] = std::max(MaxDiff[2],Diffb);
+				}
 			
 				DiffCount++;
 				Debug << " " << Diffr << "," << Diffg << "," << Diffb << " ";
+				
+				//	write the converted for testing
+				for ( auto sx=0;	sx<SectionWidth;	sx++ )
+				{
+					int ox = (s*SectionWidth) + sx;
+					std::clamp(New[0],0,255);
+					std::clamp(New[1],0,255);
+					std::clamp(New[2],0,255);
+					Converted.SetPixel(ox, y, 0, New[0] );
+					Converted.SetPixel(ox, y, 1, New[1] );
+					Converted.SetPixel(ox, y, 2, New[2] );
+				}
 			}
 		}
 		float AverageDiff[3];
@@ -247,6 +273,13 @@ void CompareRainbow(const char* MetaJson,uint8_t* Plane0Data,uint8_t* Plane1Data
 		DebugPrint(Debug.str());
 		
 	}
+	
+	Array<uint8_t> PngData;
+	TPng::GetPng( Converted, GetArrayBridge(PngData), 0 );
+	auto* Filename ="RainbowConvert.png";
+	Soy::ArrayToFile( GetArrayBridge(PngData), Filename);
+	Platform::ShowFileExplorer(Filename);
+
 }
 
 void MakeRainbowPng(const char* Filename)
