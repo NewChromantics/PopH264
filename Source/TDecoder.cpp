@@ -1,6 +1,20 @@
 #include "TDecoder.h"
+#include "SoyH264.h"
 
 
+
+void PopH264::TDecoder::OnEndOfStream(std::function<void(const SoyPixelsImpl&,SoyTime)> OnFrameDecoded)
+{
+	//	send an explicit end of stream nalu
+	//	todo: overload this for implementation specific flushes
+	auto Eos = H264::EncodeNaluByte(H264NaluContent::EndOfStream,H264NaluPriority::Important);
+	uint8_t EndOfStreamNalu[]{ 0,0,0,1,Eos };
+	auto DataArray = GetRemoteArray( EndOfStreamNalu );
+	
+	//	mark pending data as finished
+	mPendingDataFinished = true;
+	Decode( GetArrayBridge(DataArray), OnFrameDecoded );
+}
 
 void PopH264::TDecoder::Decode(ArrayBridge<uint8_t>&& PacketData,std::function<void(const SoyPixelsImpl&,SoyTime)> OnFrameDecoded)
 {
@@ -55,7 +69,13 @@ bool PopH264::TDecoder::PopNalu(ArrayBridge<uint8_t>&& Buffer)
 	auto DataSize = GetNextNalOffset();
 	//	no next nal yet
 	if ( DataSize == 0 )
-		return false;
+	{
+		if ( !mPendingDataFinished )
+			return false;
+
+		//	we're out of data, so pop the remaining data
+		DataSize = PendingDataSize;
+	}
 	
 	auto* Data = PendingData;
 	auto PendingDataArray = GetRemoteArray( Data, DataSize );

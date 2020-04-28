@@ -16,6 +16,9 @@ class PopH264::TDecoder
 {
 public:
 	void			Decode(ArrayBridge<uint8_t>&& PacketData,std::function<void(const SoyPixelsImpl&,SoyTime)> OnFrameDecoded);
+
+	//	gr: this has a callback because of flushing old packets. Need to overhaul the framenumber<->packet relationship
+	void			OnEndOfStream(std::function<void(const SoyPixelsImpl&,SoyTime)> OnFrameDecoded);
 	
 protected:
 	virtual bool	DecodeNextPacket(std::function<void(const SoyPixelsImpl&,SoyTime)> OnFrameDecoded)=0;	//	returns true if more data to proccess
@@ -31,5 +34,6 @@ private:
 private:
 	std::mutex		mPendingDataLock;
 	size_t			mPendingOffset = 0;		//	to reduce reallocations, we keep an offset where we've read
+	bool			mPendingDataFinished = false;	//	when we know we're at EOS
 	Array<uint8_t>	mPendingData;
 };

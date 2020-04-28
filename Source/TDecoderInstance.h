@@ -41,6 +41,7 @@ public:
 
 	//	input
 	void									PushData(const uint8_t* Data,size_t DataSize,int32_t FrameNumber);
+	void									PushEndOfStream();
 	
 	//	output
 	void									PopFrame(int32_t& FrameNumber,ArrayBridge<uint8_t>&& Plane0,ArrayBridge<uint8_t>&& Plane1,ArrayBridge<uint8_t>&& Plane2);

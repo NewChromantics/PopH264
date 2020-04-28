@@ -94,6 +94,18 @@ PopH264::TDecoderInstance::TDecoderInstance(int32_t Mode)
 
 void PopH264::TDecoderInstance::PushData(const uint8_t* Data,size_t DataSize,int32_t FrameNumber)
 {
+	auto PushFrame = [this,FrameNumber](const SoyPixelsImpl& Pixels,SoyTime DecodeDuration)
+	{
+		this->PushFrame( Pixels, FrameNumber, DecodeDuration.GetMilliSeconds() );
+	};
+
+	//	if user passes null, we want to end stream/flush
+	if ( Data == nullptr )
+	{
+		mDecoder->OnEndOfStream(PushFrame);
+		return;
+	}
+	
 	auto DataArray = GetRemoteArray( Data, DataSize );
 	
 	//	gr: temporary hack, if the data coming in is a different format, detect it, and switch decoders
@@ -121,10 +133,6 @@ void PopH264::TDecoderInstance::PushData(const uint8_t* Data,size_t DataSize,int
 		std::Debug << __PRETTY_FUNCTION__ << " trying to detect image caused exception; " << e.what() << std::endl;
 	}
 	
-	auto PushFrame = [this,FrameNumber](const SoyPixelsImpl& Pixels,SoyTime DecodeDuration)
-	{
-		this->PushFrame( Pixels, FrameNumber, DecodeDuration.GetMilliSeconds() );
-	};
 	mDecoder->Decode( GetArrayBridge(DataArray), PushFrame );
 }
 
