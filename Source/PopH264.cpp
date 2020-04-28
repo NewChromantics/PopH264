@@ -4,7 +4,7 @@
 #include "SoyLib/src/SoyPixels.h"
 #include "Json11/json11.hpp"
 #include "TInstanceManager.h"
-
+#include "PopH264TestData.h"
 
 namespace PopH264
 {
@@ -16,7 +16,8 @@ namespace PopH264
 	//	1.2.5	Encoder now uses .Keyframe meta setting
 	//	1.2.6	X264 now uses ProfileLevel + lots of x264 settings exposed
 	//	1.2.7	Added MediaFoundation decoder to windows
-	const Soy::TVersion	Version(1,2,7);
+	//	1.2.8	Added Test data
+	const Soy::TVersion	Version(1,2,8);
 }
 
 
@@ -357,3 +358,16 @@ __export void PopH264_DecoderAddOnNewFrameCallback(int32_t Instance,PopH264_Call
 	SafeCall(Function, __func__, 0);
 }
 
+__export int32_t PopH264_GetTestData(char* Name,uint8_t* Buffer,int32_t BufferSize)
+{
+	auto Function = [&]()
+	{
+		auto BufferArray = GetRemoteArray( Buffer, BufferSize );
+		size_t FullSize = 0;
+
+		//	todo: catch "name doesnt exist"
+		PopH264::GetTestData( Name, GetArrayBridge(BufferArray), FullSize );
+		return FullSize;
+	};
+	return SafeCall(Function, __func__, -1);
+}
