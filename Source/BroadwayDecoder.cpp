@@ -126,15 +126,6 @@ void Broadway::IsOkay(H264SwDecRet Result,const char* Context)
 	throw Soy::AssertException(Error.str());
 }
 
-bool IsNal(const uint8_t* pData)
-{
-	if ( pData[0] != 0 )	return false;
-	if ( pData[1] != 0 )	return false;
-	if ( pData[2] != 0 )	return false;
-	if ( pData[3] != 1 )	return false;
-	return true;
-}
-
 //	returns true if more data to proccess
 bool Broadway::TDecoder::DecodeNextPacket(std::function<void(const SoyPixelsImpl&,SoyTime)> OnFrameDecoded)
 {
@@ -180,10 +171,10 @@ bool Broadway::TDecoder::DecodeNextPacket(std::function<void(const SoyPixelsImpl
 		}
 	}
 
-	static bool Debug = false;
+	static bool Debug = true;
 	if ( Debug )
 	{
-		std::Debug << "H264SwDecDecode(" << magic_enum::enum_name(H264PacketType) << ")" << std::endl;
+		std::Debug << "H264SwDecDecode(" << magic_enum::enum_name(H264PacketType) << ") x" << Nalu.GetDataSize() << std::endl;
 	}
 	
 	Soy::TScopeTimerPrint Timer("H264 Decode",15);

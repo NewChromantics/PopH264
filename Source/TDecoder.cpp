@@ -48,13 +48,17 @@ bool PopH264::TDecoder::PopNalu(ArrayBridge<uint8_t>&& Buffer)
 	
 	auto GetNextNalOffset = [&]
 	{
-		//	todo: handle 001 as well as 0001
+		//	detect 001
 		for ( int i=3;	i<PendingDataSize;	i++ )
 		{
 			if ( PendingData[i+0] != 0 )	continue;
 			if ( PendingData[i+1] != 0 )	continue;
-			if ( PendingData[i+2] != 0 )	continue;
-			if ( PendingData[i+3] != 1 )	continue;
+			if ( PendingData[i+2] != 1 )	continue;
+			
+			//	check i-1 for 0 in case it's 0001 rather than 001
+			if ( PendingData[i-1] == 0 )
+				return i-1;
+			
 			return i;
 		}
 		
