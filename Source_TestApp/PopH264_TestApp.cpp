@@ -10,6 +10,8 @@
 #include <Windows.h>
 #endif
 
+#include <thread>
+
 void DebugPrint(const std::string& Message)
 {
 #if defined(TARGET_WINDOWS)
@@ -19,14 +21,70 @@ void DebugPrint(const std::string& Message)
 	std::cout << Message.c_str() << std::endl;
 }
 
+
 void DecoderTest()
 {
+	uint8_t TestData[1000];
+	auto TestDataSize = PopH264_GetTestData("GreyscaleGradient.h264",TestData,std::size(TestData));
+	
 	auto Handle = PopH264_CreateInstance(0);
+
+	auto Result = PopH264_PushData( Handle, TestData, TestDataSize, 0 );
+	if ( Result < 0 )
+		throw std::runtime_error("DecoderTest: PushData error");
+	
+	//	flush
+	PopH264_PushData(Handle,nullptr,0,0);
+	
+	//	wait for it to decode
+	for ( auto i=0;	i<100;	i++ )
+	{
+		char MetaJson[1000];
+		PopH264_PeekFrame( Handle, MetaJson, std::size(MetaJson) );
+		uint8_t Plane0[256*100];
+		auto FrameTime = PopH264_PopFrame(Handle, Plane0, std::size(Plane0), nullptr, 0, nullptr, 0 );
+		std::stringstream Error;
+		Error << "Decoded testdata; " << MetaJson << " frame=" << FrameTime;
+		DebugPrint(Error.str());
+		bool IsValid = FrameTime >= 0;
+		if ( IsValid )
+			break;
+		std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	}
+	
 	PopH264_DestroyInstance(Handle);
 }
 
+#include "SoyPixels.h"
+#include "SoyPng.h"
+#include "SoyFileSystem.h"
+void MakeGreyscalePng(const char* Filename)
+{
+	SoyPixels Pixels(SoyPixelsMeta(10,256,SoyPixelsFormat::RGB));
+	auto Components = Pixels.GetMeta().GetChannels();
+	auto& PixelsArray = Pixels.GetPixelsArray();
+	for ( auto y=0;	y<Pixels.GetHeight();	y++ )
+	{
+		for ( auto x=0;	x<Pixels.GetWidth();	x++ )
+		{
+			auto i = y*Pixels.GetWidth();
+			i += x;
+			i *= Components;
+			PixelsArray[i+0] = y;
+			PixelsArray[i+1] = y;
+			PixelsArray[i+2] = y;
+		}
+	}
+	Array<uint8_t> PngData;
+	TPng::GetPng( Pixels, GetArrayBridge(PngData), 0 );
+	Soy::ArrayToFile( GetArrayBridge(PngData), Filename);
+	Platform::ShowFileExplorer(Filename);
+}
+
+
 int main()
 {
+	MakeGreyscalePng("PopH264Test_GreyscaleGradient.png");
 	DebugPrint("PopH264_UnitTests");
 	//PopH264_UnitTests();
 
