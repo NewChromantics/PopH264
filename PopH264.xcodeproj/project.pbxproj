@@ -99,6 +99,8 @@
 		BFFBE9722458389B00E9BE1B /* SoyPixels.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFBE9702458389B00E9BE1B /* SoyPixels.cpp */; };
 		BFFBE974245838B000E9BE1B /* SoyFilesystem.mm in Sources */ = {isa = PBXBuildFile; fileRef = BFFBE973245838B000E9BE1B /* SoyFilesystem.mm */; };
 		BFFBE9762458390900E9BE1B /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BFFBE9752458390900E9BE1B /* AppKit.framework */; };
+		BFFBE9782458796C00E9BE1B /* PopH264_TestAssetGenerator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFBE9772458796C00E9BE1B /* PopH264_TestAssetGenerator.cpp */; };
+		BFFBE97924587F7600E9BE1B /* json11.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF18269024226126006FEB93 /* json11.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -325,6 +327,7 @@
 		BFFBE9702458389B00E9BE1B /* SoyPixels.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SoyPixels.cpp; path = Source/SoyLib/src/SoyPixels.cpp; sourceTree = SOURCE_ROOT; };
 		BFFBE973245838B000E9BE1B /* SoyFilesystem.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = SoyFilesystem.mm; path = Source/SoyLib/src/SoyFilesystem.mm; sourceTree = SOURCE_ROOT; };
 		BFFBE9752458390900E9BE1B /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
+		BFFBE9772458796C00E9BE1B /* PopH264_TestAssetGenerator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PopH264_TestAssetGenerator.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -573,6 +576,7 @@
 			children = (
 				BFFBE95F245835B400E9BE1B /* SoyLib */,
 				BFC471792447509600A2DA70 /* PopH264_TestApp.cpp */,
+				BFFBE9772458796C00E9BE1B /* PopH264_TestAssetGenerator.cpp */,
 			);
 			path = Source_TestApp;
 			sourceTree = "<group>";
@@ -919,7 +923,9 @@
 				BFFBE961245835CD00E9BE1B /* SoyFilesystem.cpp in Sources */,
 				BFFBE9712458389B00E9BE1B /* SoyPng.cpp in Sources */,
 				BFFBE9722458389B00E9BE1B /* SoyPixels.cpp in Sources */,
+				BFFBE97924587F7600E9BE1B /* json11.cpp in Sources */,
 				BFFBE974245838B000E9BE1B /* SoyFilesystem.mm in Sources */,
+				BFFBE9782458796C00E9BE1B /* PopH264_TestAssetGenerator.cpp in Sources */,
 				BFC4717B2447509600A2DA70 /* PopH264_TestApp.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

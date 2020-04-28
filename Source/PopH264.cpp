@@ -358,7 +358,7 @@ __export void PopH264_DecoderAddOnNewFrameCallback(int32_t Instance,PopH264_Call
 	SafeCall(Function, __func__, 0);
 }
 
-__export int32_t PopH264_GetTestData(char* Name,uint8_t* Buffer,int32_t BufferSize)
+__export int32_t PopH264_GetTestData(const char* Name,uint8_t* Buffer,int32_t BufferSize)
 {
 	auto Function = [&]()
 	{

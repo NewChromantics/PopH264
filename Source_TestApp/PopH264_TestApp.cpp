@@ -12,6 +12,9 @@
 
 #include <thread>
 
+extern void MakeGreyscalePng(const char* Filename);
+extern void CompareGreyscale(const char* MetaJson,uint8_t* Plane0);
+
 void DebugPrint(const std::string& Message)
 {
 #if defined(TARGET_WINDOWS)
@@ -21,11 +24,13 @@ void DebugPrint(const std::string& Message)
 	std::cout << Message.c_str() << std::endl;
 }
 
+typedef void CompareFunc_t(const char* MetaJson,uint8_t* Plane0);
 
-void DecoderTest()
+
+void DecoderTest(const char* TestDataName,CompareFunc_t* Compare)
 {
 	uint8_t TestData[1000];
-	auto TestDataSize = PopH264_GetTestData("GreyscaleGradient.h264",TestData,std::size(TestData));
+	auto TestDataSize = PopH264_GetTestData(TestDataName,TestData,std::size(TestData));
 	
 	auto Handle = PopH264_CreateInstance(0);
 
@@ -53,61 +58,25 @@ void DecoderTest()
 			continue;
 		}
 		
-		//	debug first column (for the greyscale test image)
-		{
-			std::stringstream Debug;
-			auto Width = 16;
-			for ( auto y=0;	y<256;	y++ )
-			{
-				auto i = Width * y;
-				auto l = Plane0[i];
-				Debug << static_cast<int>(l) << ' ';
-			}
-			DebugPrint(Debug.str());
-		}
-		
+		Compare( MetaJson, Plane0 );
 		break;
 	}
 	
 	PopH264_DestroyInstance(Handle);
 }
 
-#include "SoyPixels.h"
-#include "SoyPng.h"
-#include "SoyFileSystem.h"
-void MakeGreyscalePng(const char* Filename)
-{
-	SoyPixels Pixels(SoyPixelsMeta(10,256,SoyPixelsFormat::RGB));
-	auto Components = Pixels.GetMeta().GetChannels();
-	auto& PixelsArray = Pixels.GetPixelsArray();
-	for ( auto y=0;	y<Pixels.GetHeight();	y++ )
-	{
-		for ( auto x=0;	x<Pixels.GetWidth();	x++ )
-		{
-			auto i = y*Pixels.GetWidth();
-			i += x;
-			i *= Components;
-			PixelsArray[i+0] = y;
-			PixelsArray[i+1] = y;
-			PixelsArray[i+2] = y;
-		}
-	}
-	Array<uint8_t> PngData;
-	TPng::GetPng( Pixels, GetArrayBridge(PngData), 0 );
-	Soy::ArrayToFile( GetArrayBridge(PngData), Filename);
-	Platform::ShowFileExplorer(Filename);
-}
 
 
 int main()
 {
 	MakeGreyscalePng("PopH264Test_GreyscaleGradient.png");
+	
 	DebugPrint("PopH264_UnitTests");
 	//PopH264_UnitTests();
 
 	try
 	{
-		DecoderTest();
+		DecoderTest("GreyscaleGradient.h264",CompareGreyscale);
 	}
 	catch (std::exception& e)
 	{

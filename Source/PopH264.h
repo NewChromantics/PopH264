@@ -29,7 +29,7 @@ __export int32_t			PopH264_GetVersion();
 //	if Buffer is null, this will just return the size
 //	returns -1 on error
 //	returns 0 if Name doesnt exist
-__export int32_t			PopH264_GetTestData(char* Name,uint8_t* Buffer,int32_t BufferSize);
+__export int32_t			PopH264_GetTestData(const char* Name,uint8_t* Buffer,int32_t BufferSize);
 
 //	todo: rename these to CreateDecoder and DestroyDecoder
 __export int32_t			PopH264_CreateInstance(int32_t Mode);
