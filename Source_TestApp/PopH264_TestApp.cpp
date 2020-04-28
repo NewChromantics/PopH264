@@ -76,11 +76,7 @@ void DecoderTest(const char* TestDataName,CompareFunc_t* Compare)
 int main()
 {
 	MakeGreyscalePng("PopH264Test_GreyscaleGradient.png");
-	MakeRainbowPng("PopH264Test_RainbowGradient01.png");
-	MakeRainbowPng("PopH264Test_RainbowGradient02.png");
-	MakeRainbowPng("PopH264Test_RainbowGradient03.png");
-	MakeRainbowPng("PopH264Test_RainbowGradient04.png");
-	MakeRainbowPng("PopH264Test_RainbowGradient05.png");
+	MakeRainbowPng("PopH264Test_RainbowGradient.png");
 
 	DebugPrint("PopH264_UnitTests");
 	//PopH264_UnitTests();

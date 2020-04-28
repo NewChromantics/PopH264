@@ -154,8 +154,8 @@ SoyPixels MakeRainbowPixels()
 void CompareRainbow(const char* MetaJson,uint8_t* Plane0Data,uint8_t* Plane1Data,uint8_t* Plane2Data)
 {
 	auto Plane0Meta = GetPlaneMeta(MetaJson,0);
-	auto Plane1Meta = GetPlaneMeta(MetaJson,0);
-	auto Plane2Meta = GetPlaneMeta(MetaJson,0);
+	auto Plane1Meta = GetPlaneMeta(MetaJson,1);
+	auto Plane2Meta = GetPlaneMeta(MetaJson,2);
 	auto Plane0DataSize = Plane0Meta.GetDataSize();
 	auto Plane1DataSize = Plane1Meta.GetDataSize();
 	auto Plane2DataSize = Plane2Meta.GetDataSize();
@@ -166,21 +166,86 @@ void CompareRainbow(const char* MetaJson,uint8_t* Plane0Data,uint8_t* Plane1Data
 	//	compare with original
 	SoyPixels Original = MakeRainbowPixels();
 	
+	auto GetYuv = [&](int x,int y,uint8_t& Luma,uint8_t& ChromaU,uint8_t& ChromaV)
+	{
+		Luma = Plane0.GetPixel(x,y,0);
+		ChromaU = Plane1.GetPixel(x/2,y/2,0);
+		ChromaV = Plane2.GetPixel(x/2,y/2,0);
+	};
+	auto YuvToRgb = [&](int x,int y,int& r,int& g,int& b)
+	{
+		uint8_t l,u,v;
+		GetYuv( x,y,l,u,v );
+		
+		//	convert
+		float ChromaU = (u/255.f) - 0.5f;
+		float ChromaV = (v/255.f) - 0.5f;
+		float Luma = (l/255.f);
+		float ChromaVRed = 1.5958f;
+		float ChromaUGreen = -0.39173f;
+		float ChromaVGreen = -0.81290f;
+		float ChromaUBlue = 2.017f;
+		float rf = Luma + (ChromaVRed * ChromaV);
+		float gf = Luma + (ChromaUGreen * ChromaU) + (ChromaVGreen * ChromaV);
+		float bf = Luma + (ChromaUBlue * ChromaU);
+		r = rf * 255;
+		g = gf * 255;
+		b = bf * 255;
+	};
+	
 	//	debug first column (for the greyscale test image)
 	{
+		int SectionWidth = 16;
 		std::stringstream Debug;
 		auto Width = Plane0Meta.GetWidth();
 		auto Height = Plane0Meta.GetHeight();
 		auto Channels = Plane0Meta.GetChannels();
+		int TotalDiff[3] = {0,0,0};
+		int MinDiff[3] = {999,999,999};
+		int MaxDiff[3] = {-999,-999,-999};
+		int DiffCount = 0;
 		for ( auto y=0;	y<Height;	y++ )
 		{
-			auto x = 0;
-			auto Old = Original.GetPixel(x,y,0);
-			auto New = Plane0.GetPixel(x,y,0);
-			auto Diff = New-Old;
-			Debug << static_cast<int>(Diff) << ' ';
+			for ( auto s=0;	s<Width/SectionWidth;	s++ )
+			{
+				auto x = s*SectionWidth;
+				x += SectionWidth/2;	//	sample from middle
+				uint8_t Old[3];
+				int New[3];
+				Old[0] = Original.GetPixel(x,y,0);
+				Old[1] = Original.GetPixel(x,y,1);
+				Old[2] = Original.GetPixel(x,y,2);
+				YuvToRgb( x,y,New[0], New[1], New[2] );
+				
+				auto Diffr = (New[0]-Old[0]);
+				auto Diffg = (New[1]-Old[1]);
+				auto Diffb = (New[2]-Old[2]);
+				TotalDiff[0] += Diffr;
+				TotalDiff[1] += Diffg;
+				TotalDiff[2] += Diffb;
+				MinDiff[0] = std::min(MinDiff[0],Diffr);
+				MinDiff[1] = std::min(MinDiff[1],Diffg);
+				MinDiff[2] = std::min(MinDiff[2],Diffb);
+				MaxDiff[0] = std::max(MaxDiff[0],Diffr);
+				MaxDiff[1] = std::max(MaxDiff[1],Diffg);
+				MaxDiff[2] = std::max(MaxDiff[2],Diffb);
+
+			
+				DiffCount++;
+				Debug << " " << Diffr << "," << Diffg << "," << Diffb << " ";
+			}
 		}
+		float AverageDiff[3];
+		AverageDiff[0] = TotalDiff[0] / static_cast<float>(DiffCount);
+		AverageDiff[1] = TotalDiff[1] / static_cast<float>(DiffCount);
+		AverageDiff[2] = TotalDiff[2] / static_cast<float>(DiffCount);
+		Debug << std::endl << std::endl;
+		Debug << "Average diff " << AverageDiff[0] << "," << AverageDiff[1] << "," << AverageDiff[2] << std::endl;
+		Debug << "Min diff " << MinDiff[0] << "," << MinDiff[1] << "," << MinDiff[2] << std::endl;
+		Debug << "Max diff " << MaxDiff[0] << "," << MaxDiff[1] << "," << MaxDiff[2] << std::endl;
+
 		DebugPrint(Debug.str());
+		
 	}
 }
 
