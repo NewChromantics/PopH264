@@ -47,9 +47,26 @@ void DecoderTest()
 		Error << "Decoded testdata; " << MetaJson << " frame=" << FrameTime;
 		DebugPrint(Error.str());
 		bool IsValid = FrameTime >= 0;
-		if ( IsValid )
-			break;
-		std::this_thread::sleep_for(std::chrono::milliseconds(500));
+		if ( !IsValid )
+		{
+			std::this_thread::sleep_for(std::chrono::milliseconds(500));
+			continue;
+		}
+		
+		//	debug first column (for the greyscale test image)
+		{
+			std::stringstream Debug;
+			auto Width = 16;
+			for ( auto y=0;	y<256;	y++ )
+			{
+				auto i = Width * y;
+				auto l = Plane0[i];
+				Debug << static_cast<int>(l) << ' ';
+			}
+			DebugPrint(Debug.str());
+		}
+		
+		break;
 	}
 	
 	PopH264_DestroyInstance(Handle);
