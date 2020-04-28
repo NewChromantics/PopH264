@@ -179,6 +179,15 @@ bool Broadway::TDecoder::DecodeNextPacket(std::function<void(const SoyPixelsImpl
 	
 	Soy::TScopeTimerPrint Timer("H264 Decode",15);
 	auto Result = H264SwDecDecode( mDecoderInstance, &Input, &Output );
+	
+	//	the first time we decode the first keyframe, it recognises new headers, but doesn't
+	//	actually decode the frame, so it never comes out (we havent got it flushing correctly yet)
+	//	processing this keyframe again has the active SPS setup, so we get a frame decoded immediately!
+	if ( Result == H264SWDEC_HDRS_RDY_BUFF_NOT_EMPTY && H264PacketType == H264NaluContent::Slice_CodedIDRPicture )
+	{
+		Result = H264SwDecDecode( mDecoderInstance, &Input, &Output );
+		//	gr; OnMeta() may not be called now
+	}
 	auto DecodeDuration = Timer.Stop();
 	IsOkay( Result, "H264SwDecDecode" );
 	
