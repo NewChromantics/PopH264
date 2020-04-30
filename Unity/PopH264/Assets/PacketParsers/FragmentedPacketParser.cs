@@ -187,6 +187,7 @@ public class FragmentedPacketParser : MonoBehaviour {
 
 		System.Action<byte[],long> EnumPacket = (Bytes, Time) =>
 		{
+			Debug.Log("Completed fragmented frame " + Time + " x" + Bytes.Length);
 			OnPacket.Invoke(Bytes, Time);
 		};
 
