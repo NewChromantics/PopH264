@@ -68,12 +68,12 @@ Material:
     - DegenerateFarNeighbours: 0
     - ImageWidth: 256
     - JoinQuads: 0
-    - LocalScale: 0.0022
+    - LocalScale: 0.0043
     - MaxNeighbourDistance: 0.5
     - TriangleCap: 0
     - UseAlpha: 0
     - WorldScale: 1
-    - ZScale: 0.16
+    - ZScale: 0.35
     - _BumpScale: 1
     - _Cutoff: 0.5
     - _DebugDepthAsColour: 1
