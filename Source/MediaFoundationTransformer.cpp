@@ -284,6 +284,7 @@ GUID MediaFoundation::GetGuid(TransformerCategory::Type Category)
 	case TransformerCategory::VideoDecoder:	return MFT_CATEGORY_VIDEO_DECODER;
 	case TransformerCategory::VideoEncoder:	return MFT_CATEGORY_VIDEO_ENCODER;
 	}
+	throw Soy::AssertException("Unhandled Transformer category");
 }
 
 MediaFoundation::TActivateMeta::TActivateMeta(IMFActivate& Activate) :
