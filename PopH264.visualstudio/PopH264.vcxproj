@@ -69,6 +69,7 @@
     <ClCompile Include="..\Source\MediaFoundationEncoder.cpp" />
     <ClCompile Include="..\Source\MediaFoundationTransformer.cpp" />
     <ClCompile Include="..\Source\PopH264.cpp" />
+    <ClCompile Include="..\Source\PopH264TestData.cpp" />
     <ClCompile Include="..\Source\SoyH264.cpp" />
     <ClCompile Include="..\Source\SoyLib\src\memheap.cpp" />
     <ClCompile Include="..\Source\SoyLib\src\SoyArray.cpp" />
@@ -163,6 +164,7 @@
     <ClInclude Include="..\Source\MediaFoundationDecoder.h" />
     <ClInclude Include="..\Source\MediaFoundationEncoder.h" />
     <ClInclude Include="..\Source\MediaFoundationTransformer.h" />
+    <ClInclude Include="..\Source\PopH264TestData.h" />
     <ClInclude Include="..\Source\SoyAvf.h" />
     <ClInclude Include="..\Source\SoyH264.h" />
     <ClInclude Include="..\Source\SoyLib\src\SoyFilesystem.h" />

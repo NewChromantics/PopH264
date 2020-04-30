@@ -6,16 +6,22 @@
 #define TARGET_WINDOWS
 #endif
 
+#if !defined(TARGET_WINDOWS)
+#define TEST_ASSETS
+#endif
+
 #if defined(TARGET_WINDOWS)
 #include <Windows.h>
 #endif
 
 #include <thread>
 
+#if defined(TEST_ASSETS)
 extern void MakeGreyscalePng(const char* Filename);
 extern void CompareGreyscale(const char* MetaJson,uint8_t* Plane0Data,uint8_t* Plane1Data,uint8_t* Plane2Data);
 extern void MakeRainbowPng(const char* Filename);
 extern void CompareRainbow(const char* MetaJson,uint8_t* Plane0Data,uint8_t* Plane1Data,uint8_t* Plane2Data);
+#endif
 
 void DebugPrint(const std::string& Message)
 {
@@ -75,15 +81,19 @@ void DecoderTest(const char* TestDataName,CompareFunc_t* Compare)
 
 int main()
 {
-	//MakeGreyscalePng("PopH264Test_GreyscaleGradient.png");
-	//MakeRainbowPng("PopH264Test_RainbowGradient.png");
+#if defined(TEST_ASSETS)
+	MakeGreyscalePng("PopH264Test_GreyscaleGradient.png");
+	MakeRainbowPng("PopH264Test_RainbowGradient.png");
+#endif
 
 	DebugPrint("PopH264_UnitTests");
 	//PopH264_UnitTests();
 
 	try
 	{
+#if defined(TEST_ASSETS)
 		DecoderTest("RainbowGradient.h264",CompareRainbow);
+#endif
 	}
 	catch (std::exception& e)
 	{
@@ -92,7 +102,9 @@ int main()
 
 	try
 	{
+#if defined(TEST_ASSETS)
 		DecoderTest("GreyscaleGradient.h264",CompareGreyscale);
+#endif
 	}
 	catch (std::exception& e)
 	{
