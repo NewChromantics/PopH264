@@ -58,9 +58,16 @@ PopH264::TEncoderInstance::TEncoderInstance(const std::string& OptionsJsonString
 #if defined(ENABLE_MEDIAFOUNDATION)
 	if (EncoderName.empty() || EncoderName == MediaFoundation::TEncoder::Name)
 	{
-		MediaFoundation::TEncoderParams Params(Options);
-		mEncoder.reset(new MediaFoundation::TEncoder(Params, OnOutputPacket));
-		return;
+		try
+		{
+			MediaFoundation::TEncoderParams Params(Options);
+			mEncoder.reset(new MediaFoundation::TEncoder(Params, OnOutputPacket));
+			return;
+		}
+		catch (std::exception& e)
+		{
+			std::Debug << e.what() << std::endl;
+		}
 	}
 #endif
 	
