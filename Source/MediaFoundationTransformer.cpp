@@ -373,15 +373,17 @@ MediaFoundation::TActivateMeta MediaFoundation::GetBestTransform(const GUID& Cat
 		MatchingTransformScore = Score;
 	};
 
+	//	get the indexes of MatchList that match
 	auto GetMatchingIndexes = [](BufferArray<Soy::TFourcc, 20>& List,const ArrayBridge<Soy::TFourcc>& MatchList)
 	{
 		BufferArray<int, 20> MatchingInputIndexes;
-		for (auto i = 0; i < List.GetSize(); i++)
+		for (auto mi = 0; mi < MatchList.GetSize(); mi++)
 		{
-			auto Index = List.FindIndex(MatchList[i]);
-			if (Index == -1)
+			auto Match = MatchList[mi];
+			auto ListIndex = List.FindIndex(Match);
+			if (ListIndex == -1)
 				continue;
-			MatchingInputIndexes.PushBack(Index);
+			MatchingInputIndexes.PushBack(mi);
 		}
 		return MatchingInputIndexes;
 	};
@@ -392,8 +394,6 @@ MediaFoundation::TActivateMeta MediaFoundation::GetBestTransform(const GUID& Cat
 		if (MatchingIndexes.IsEmpty())
 			return -1;
 		auto Lowest = MatchingIndexes[0];
-		for (auto i = 1; i < MatchingIndexes.GetSize(); i++)
-			Lowest = std::min(Lowest, MatchingIndexes[i]);
 		return Lowest;
 	};
 
@@ -407,6 +407,11 @@ MediaFoundation::TActivateMeta MediaFoundation::GetBestTransform(const GUID& Cat
 		//	not a match
 		if (BestInputIndex==-1 || BestOutputIndex==-1)
 			return;
+		//	Catch programming error
+		if (BestInputIndex >= InputFilter.GetSize())
+			throw Soy::AssertException("Internal Error: Input index out of bounds");
+		if (BestOutputIndex >= OutputFilter.GetSize())
+			throw Soy::AssertException("Internal Error: Output index out of bounds");
 
 		//	calc a score
 		auto Score = 0;
