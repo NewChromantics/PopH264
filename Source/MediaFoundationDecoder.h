@@ -19,6 +19,8 @@ public:
 private:
 	virtual bool	DecodeNextPacket(std::function<void(const SoyPixelsImpl&,SoyTime)> OnFrameDecoded) override;	//	returns true if more data to proccess
 	
+	void			SetInputFormat();
+
 private:
 	std::shared_ptr<TTransformer>	mTransformer;
 };

@@ -22,10 +22,13 @@ class MediaFoundation::TEncoderParams
 {
 public:
 	TEncoderParams() {}
-	TEncoderParams(json11::Json& Options)
-	{
+	TEncoderParams(json11::Json& Options);
 
-	}
+	size_t	mQuality = 100;
+
+	//	zero means don't apply
+	size_t	mAverageKbps = 0;
+	size_t	mProfileLevel = 0;
 };
 
 
@@ -42,7 +45,10 @@ public:
 private:
 	virtual void	Encode(const SoyPixelsImpl& Luma, const SoyPixelsImpl& ChromaU, const SoyPixelsImpl& ChromaV, const std::string& Meta, bool Keyframe) override;
 	virtual void	FinishEncoding() override;
+	
+	void			SetInputFormat(SoyPixelsFormat::Type PixelFormat);
 
 private:
+	TEncoderParams					mParams;
 	std::shared_ptr<TTransformer>	mTransformer;
 };

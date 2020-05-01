@@ -19,6 +19,7 @@ namespace MediaFoundation
 {
 	void	IsOkay(HRESULT Result, const char* Context);
 	void	IsOkay(HRESULT Result,const std::string& Context);
+	GUID	GetGuid(Soy::TFourcc Fourcc);
 }
 
 
@@ -37,11 +38,34 @@ MediaFoundation::TDecoder::~TDecoder()
 	mTransformer.reset();
 }
 
+void MediaFoundation::TDecoder::SetInputFormat()
+{
+	if (mTransformer->IsInputFormatReady())
+		return;
+
+	//	should get this from the initial meta
+	Soy::TFourcc InputFormat("H264");
+
+	IMFMediaType* InputMediaType = nullptr;
+	auto Result = MFCreateMediaType(&InputMediaType);
+	IsOkay(Result, "MFCreateMediaType");
+	Result = InputMediaType->SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Video);
+	IsOkay(Result, "InputMediaType->SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Video)");
+	auto InputFormatGuid = GetGuid(InputFormat);
+	Result = InputMediaType->SetGUID(MF_MT_SUBTYPE, InputFormatGuid);
+	IsOkay(Result, "InputMediaType->SetGUID(MF_MT_SUBTYPE)");
+	mTransformer->SetInputFormat(*InputMediaType);
+	//Result = Transformer.SetInputType(0, InputMediaType, 0);
+	//IsOkay(Result, "SetInputType");
+}
+
 bool MediaFoundation::TDecoder::DecodeNextPacket(std::function<void(const SoyPixelsImpl&, SoyTime)> OnFrameDecoded)
 {
 	Array<uint8_t> Nalu;
 	if (!PopNalu(GetArrayBridge(Nalu)))
 		return false;
+
+	SetInputFormat();
 
 	if (!mTransformer->PushFrame(GetArrayBridge(Nalu)))
 	{

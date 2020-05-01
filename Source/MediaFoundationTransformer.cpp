@@ -439,7 +439,7 @@ MediaFoundation::TTransformer::TTransformer(TransformerCategory::Type Category, 
 	auto CategoryGuid = GetGuid(Category);
 
 	//	todo: support user-selected names
-	auto Transform = GetBestTransform(CategoryGuid, InputFormats, OutputFormats );
+	auto Transform = GetBestTransform(CategoryGuid, InputFormats, OutputFormats);
 	std::Debug << "Picked Transform " << Transform.mName << std::endl;
 
 	//	activate a transformer
@@ -466,82 +466,12 @@ MediaFoundation::TTransformer::TTransformer(TransformerCategory::Type Category, 
 			Attributes->Release();
 		}
 	}
+}
 
-	/*
-	
-	In Windows 8, the H.264 decoder also supports the following attributes.
-
-TABLE 4
-Attribute	Description
-CODECAPI_AVLowLatencyMode	Enables or disables low-latency decoding mode.
-CODECAPI_AVDecNumWorkerThreads	Sets the number of worker threads used by the decoder.
-CODECAPI_AVDecVideoMaxCodedWidth	Sets the maximum picture width that the decoder will accept as an input type.
-CODECAPI_AVDecVideoMaxCodedHeight	Sets the maximum picture height that the decoder will accept as an input type.
-MF_SA_MINIMUM_OUTPUT_SAMPLE_COUNT	Specifies the maximum number of output samples.
-MFT_DECODER_EXPOSE_OUTPUT_TYPES_IN_NATIVE_ORDER	Specifies whether a decoder exposes IYUV/I420 output types (suitable for transcoding) before other formats.
-
-
-	//	stream is always 0?
-	auto StreamIndex = 0;
-
-	IMFMediaType OutputFormatTypes[] =
-	{
-		MFVideoFormat_NV12,
-		MFVideoFormat_YUY2,
-		MFVideoFormat_YV12,
-		MFVideoFormat_IYUV,
-		MFVideoFormat_I420
-	};
-
-	//	try and set output type
-	for (auto ot = 0; ot < std::size(OutputFormatTypes); ot++)
-	{
-		try
-		{
-			auto OutputFormat = OutputFormatTypes[ot];
-			auto OutputFormatName = GetName(OutputFormat);
-			auto Flags = 0;
-			auto Result = Decoder->SetOutputType(StreamIndex, &OutputFormat, Flags);
-			IsOkay(Result, std::string("SetOutputType ") + OutputFormatName);
-			break;
-		}
-		catch (std::exception& e)
-		{
-			std::Debug << "Error setting output format " << e.what() << std::endl;
-			continue;
-		}
-	}
-	*/
-
-	//	setup formats
-	{
-		IMFMediaType* InputMediaType = nullptr;
-		auto Result = MFCreateMediaType(&InputMediaType);
-		IsOkay(Result, "MFCreateMediaType");
-		Result = InputMediaType->SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Video);
-		IsOkay(Result, "InputMediaType->SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Video)");
-		auto InputFormatGuid = GetGuid(Transform.mInputs[0]);
-		Result = InputMediaType->SetGUID(MF_MT_SUBTYPE, InputFormatGuid);
-		IsOkay(Result, "InputMediaType->SetGUID(MF_MT_SUBTYPE)");
-		Result = Transformer.SetInputType(0, InputMediaType, 0);
-		IsOkay(Result, "SetInputType");
-	}
-	//	gr: this errors atm, but input status is still accepting
-	/*
-	{
-		IMFMediaType* MediaType = nullptr;
-		auto Result = MFCreateMediaType(&MediaType);
-		IsOkay(Result, "MFCreateMediaType");
-		Result = MediaType->SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Video);
-		IsOkay(Result, "InputMediaType->SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Image)");
-		//auto FormatGuid = GetGuid(Transform.mOutputs[0]);
-		auto FormatGuid = MFVideoFormat_NV12;
-		Result = MediaType->SetGUID(MF_MT_SUBTYPE, FormatGuid);
-		IsOkay(Result, "InputMediaType->SetGUID(MF_MT_SUBTYPE)");
-		Result = Decoder.SetOutputType(0, MediaType, 0);
-		IsOkay(Result, "SetOutputType");
-	}
-	*/
+bool MediaFoundation::TTransformer::IsInputFormatReady()
+{
+	return mInputFormatSet;
+	auto& Transformer = *this->mTransformer;
 	{
 		DWORD StatusFlags = 0;
 		auto Result = Transformer.GetInputStatus(mInputStreamId, &StatusFlags);
@@ -552,11 +482,49 @@ MFT_DECODER_EXPOSE_OUTPUT_TYPES_IN_NATIVE_ORDER	Specifies whether a decoder expo
 		if (!CanAcceptData)
 		{
 			std::stringstream Error;
-			Error << Transform.mName << " not ready for input data";
+			Error << "Not ready for input data";
 			throw Soy::AssertException(Error);
 		}
 	}
+	//	get status?
+	return false;
+}
 
+void MediaFoundation::TTransformer::LockTransformer(std::function<void()> Run)
+{
+	auto& Transformer = *this->mTransformer;
+
+	//	for async transforms we get an error if not locked
+	//	https://docs.microsoft.com/en-us/windows/win32/medfound/asynchronous-mfts
+	//	this func locks, executes the lambda, then unlocks
+	
+	//	todo; cache this state
+	auto IsAsync = false;
+	{
+		Soy::AutoReleasePtr<IMFAttributes> Attributes;
+		auto Result = Transform.GetAttributes(&Attributes.mObject);
+		IsOkay(Result, "GetAttributes for async check");
+		auto Result = Transform.GetBool(MF_TRANSFORM_ASYNC, &IsAsync);
+		IsOkay(Result, "Get MF_TRANSFORM_ASYNC attribute");
+	}
+
+	if (IsAsync)
+	{
+		//	unlock
+		Soy::AutoReleasePtr<IMFAttributes> Attributes;
+		auto Result = Attributes->SetUINT32(MF_TRANSFORM_ASYNC_UNLOCK, true);
+		IsOkay(Result, "Set MF_TRANSFORM_ASYNC_UNLOCK attribute");
+	}
+
+	Execute();
+
+	//	relock?
+}
+
+
+void MediaFoundation::TTransformer::SetInputFormat(IMFMediaType& InputMediaType)
+{
+	auto& Transformer = *this->mTransformer;
 	/* gr: not implemented on all transforms
 	{
 		DWORD InputStreamIds[10];
@@ -565,6 +533,12 @@ MFT_DECODER_EXPOSE_OUTPUT_TYPES_IN_NATIVE_ORDER	Specifies whether a decoder expo
 		IsOkay(Result, "GetStreamIDs");
 	}
 	*/
+	auto Set = [&]()
+	{
+		auto Result = Transformer.SetInputType(0, &InputMediaType, 0);
+		IsOkay(Result, "SetInputType");
+	};
+	LockTransformer(Set);
 
 	auto ProcessCommand = [&](MFT_MESSAGE_TYPE Message)
 	{
@@ -577,12 +551,9 @@ MFT_DECODER_EXPOSE_OUTPUT_TYPES_IN_NATIVE_ORDER	Specifies whether a decoder expo
 	ProcessCommand(MFT_MESSAGE_COMMAND_FLUSH);
 	ProcessCommand(MFT_MESSAGE_NOTIFY_BEGIN_STREAMING);
 	ProcessCommand(MFT_MESSAGE_NOTIFY_START_OF_STREAM);
-	/*	returns not implemented
-	{
-		auto Result = Decoder.AddInputStreams(1, &mStreamId);
-		IsOkay(Result, "AddInputStream");
-	}
-	*/
+
+	auto InputReady = IsInputFormatReady();
+	mInputFormatSet = true;
 }
 
 MediaFoundation::TTransformer::~TTransformer()

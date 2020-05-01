@@ -38,13 +38,18 @@ public:
 	IMFMediaType&	GetOutputMediaType();	//	get access to media type to read output meta
 	SoyPixelsMeta	GetOutputPixelMeta();
 
+	void			SetInputFormat(IMFMediaType& InputMediaType);
+	bool			IsInputFormatReady();
+
 private:
 	void			SetOutputFormat();
 	void			ProcessNextOutputPacket();
+	void			LockTransformer(std::function<void()> Run);
 
 private:
 	IMFTransform*	mTransformer = nullptr;
 	DWORD			mInputStreamId = 0;
 	DWORD			mOutputStreamId = 0;
+	bool			mInputFormatSet = false;
 	Soy::AutoReleasePtr<IMFMediaType> mOutputMediaType;
 };
