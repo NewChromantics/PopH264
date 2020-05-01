@@ -414,7 +414,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a6d74ea78a12f4550896478c83913cf0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  QuadCountThousand: 100
+  QuadCountThousand: 400
 --- !u!1 &292209223
 GameObject:
   m_ObjectHideFlags: 0
@@ -1580,7 +1580,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   MaxJobsPerFrame: 100
-  MaxPacketsPerFrame: 100
+  MaxPacketsPerFrame: 200
   UseAsyncServer: 1
   VerboseDebug: 0
   Ports: d2040000
@@ -2021,7 +2021,7 @@ MonoBehaviour:
   HardwareDecoding: 1
   DecodeOnSeperateThread: 1
   DecodeImagesPerFrame: 1
-  DecodePacketsPerFrame: 100
+  DecodePacketsPerFrame: 200
   MaterialUniform_LumaTexture: LumaTexture
   MaterialUniform_LumaFormat: LumaFormat
   MaterialUniform_ChromaUTexture: ChromaUTexture
