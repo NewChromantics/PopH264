@@ -353,7 +353,7 @@ MediaFoundation::TActivateMeta MediaFoundation::GetBestTransform(const GUID& Cat
 {
 	auto Transformers = EnumTransforms(Category);
 	TActivateMeta MatchingTransform;
-	size_t MatchingTransformScore = 0;
+	int MatchingTransformScore = 0;
 	const auto HardwareScore = 1000;
 	const auto InputScore = 10;
 	const auto OutputScore = 1;
@@ -364,11 +364,12 @@ MediaFoundation::TActivateMeta MediaFoundation::GetBestTransform(const GUID& Cat
 		if (Score <= MatchingTransformScore)
 			return;
 
-		//	set the meta to only have one input/output format which is our preffered
+		/*
 		Meta.mInputs.Clear();
 		Meta.mInputs.PushBack(Input);
 		Meta.mOutputs.Clear();
 		Meta.mOutputs.PushBack(Output);
+		*/
 		MatchingTransform = Meta;
 		MatchingTransformScore = Score;
 	};
@@ -442,6 +443,8 @@ MediaFoundation::TTransformer::TTransformer(TransformerCategory::Type Category, 
 	auto Transform = GetBestTransform(CategoryGuid, InputFormats, OutputFormats);
 	std::Debug << "Picked Transform " << Transform.mName << std::endl;
 
+	mSupportedInputFormats = Transform.mInputs;
+
 	//	activate a transformer
 	{
 		auto* Activate = Transform.mActivate.mObject;
@@ -490,7 +493,7 @@ bool MediaFoundation::TTransformer::IsInputFormatReady()
 	return false;
 }
 
-void MediaFoundation::TTransformer::LockTransformer(std::function<void()> Run)
+void MediaFoundation::TTransformer::LockTransformer(std::function<void()> Execute)
 {
 	auto& Transformer = *this->mTransformer;
 
@@ -499,19 +502,23 @@ void MediaFoundation::TTransformer::LockTransformer(std::function<void()> Run)
 	//	this func locks, executes the lambda, then unlocks
 	
 	//	todo; cache this state
+	Soy::AutoReleasePtr<IMFAttributes> Attributes;
 	auto IsAsync = false;
 	{
-		Soy::AutoReleasePtr<IMFAttributes> Attributes;
-		auto Result = Transform.GetAttributes(&Attributes.mObject);
+		auto Result = Transformer.GetAttributes(&Attributes.mObject);
 		IsOkay(Result, "GetAttributes for async check");
-		auto Result = Transform.GetBool(MF_TRANSFORM_ASYNC, &IsAsync);
-		IsOkay(Result, "Get MF_TRANSFORM_ASYNC attribute");
+		uint32_t IsAsync32 = 0;
+		Result = Attributes->GetUINT32(MF_TRANSFORM_ASYNC, &IsAsync32);
+		if (Result != MF_E_ATTRIBUTENOTFOUND)
+		{
+			IsOkay(Result, "Get MF_TRANSFORM_ASYNC attribute");
+			IsAsync = IsAsync32 != 0;
+		}
 	}
 
 	if (IsAsync)
 	{
 		//	unlock
-		Soy::AutoReleasePtr<IMFAttributes> Attributes;
 		auto Result = Attributes->SetUINT32(MF_TRANSFORM_ASYNC_UNLOCK, true);
 		IsOkay(Result, "Set MF_TRANSFORM_ASYNC_UNLOCK attribute");
 	}
@@ -521,8 +528,24 @@ void MediaFoundation::TTransformer::LockTransformer(std::function<void()> Run)
 	//	relock?
 }
 
+void MediaFoundation::TTransformer::SetOutputFormat(IMFMediaType& MediaType)
+{
+	auto& Transformer = *this->mTransformer;
+	
+	auto Set = [&]()
+	{
+		auto Result = Transformer.SetOutputType(mOutputStreamId, &MediaType, 0);
+		if (Result == MF_E_INVALIDTYPE)
+			throw Soy::AssertException("Invalid");
+		if (Result == MF_E_TRANSFORM_TYPE_NOT_SET)
+			throw Soy::AssertException("Input type must be set before output");
+		IsOkay(Result, "SetOutputType");
+	};
+	LockTransformer(Set);
+}
 
-void MediaFoundation::TTransformer::SetInputFormat(IMFMediaType& InputMediaType)
+
+void MediaFoundation::TTransformer::SetInputFormat(IMFMediaType& MediaType)
 {
 	auto& Transformer = *this->mTransformer;
 	/* gr: not implemented on all transforms
@@ -535,7 +558,7 @@ void MediaFoundation::TTransformer::SetInputFormat(IMFMediaType& InputMediaType)
 	*/
 	auto Set = [&]()
 	{
-		auto Result = Transformer.SetInputType(0, &InputMediaType, 0);
+		auto Result = Transformer.SetInputType(0, &MediaType, 0);
 		IsOkay(Result, "SetInputType");
 	};
 	LockTransformer(Set);

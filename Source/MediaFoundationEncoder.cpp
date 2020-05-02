@@ -60,15 +60,18 @@ MediaFoundation::TEncoderParams::TEncoderParams(json11::Json& Options)
 
 
 MediaFoundation::TEncoder::TEncoder(TEncoderParams Params,std::function<void(PopH264::TPacket&)> OnOutputPacket) :
-	PopH264::TEncoder	( OnOutputPacket ),
-	mParams				( Params )
+	PopH264::TEncoder	( OnOutputPacket )
 {
 	Soy::TFourcc InputFourccs[] = { "NV12" };
 	Soy::TFourcc OutputFourccs[] = { "H264" };
 	auto Inputs = FixedRemoteArray(InputFourccs);
 	auto Outputs = FixedRemoteArray(OutputFourccs);
-		
+
 	mTransformer.reset(new MediaFoundation::TTransformer(TransformerCategory::VideoEncoder, GetArrayBridge(Inputs), GetArrayBridge(Outputs)));
+
+	//	encoder needs to set output type before input type
+	//	https://docs.microsoft.com/en-us/windows/win32/medfound/h-264-video-encoder
+	SetOutputFormat(Params);
 }
 
 MediaFoundation::TEncoder::~TEncoder()
@@ -99,12 +102,113 @@ Soy::TFourcc GetFourcc(SoyPixelsFormat::Type Format)
 	throw Soy::AssertException(Error);
 }
 
+void MediaFoundation::TEncoder::SetOutputFormat(TEncoderParams Params)
+{
+	auto& Transformer = *mTransformer->mTransformer;
+	static bool UseNewFormat = true;
+
+	Soy::AutoReleasePtr<IMFMediaType> pMediaType;
+	if ( UseNewFormat )
+	{
+		auto Result = MFCreateMediaType(&pMediaType.mObject);
+		IsOkay(Result, "MFCreateMediaType");
+	}
+	else //	start from existing output
+	{
+		//	gr: this doesn't always work, but probe it for defaults like kbps
+		auto OutputFormatIndex = 0;
+		auto Result = Transformer.GetOutputAvailableType(0, OutputFormatIndex, &pMediaType.mObject);
+		IsOkay(Result, "GetOutputAvailableType");
+	}
+	auto* MediaType = pMediaType.mObject;
+
+
+	{
+		auto Result = MediaType->SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Video);
+		IsOkay(Result, "MediaType->SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Video)");
+		auto FormatGuid = MFVideoFormat_H264;
+		Result = MediaType->SetGUID(MF_MT_SUBTYPE, FormatGuid);
+		IsOkay(Result, "MediaType->SetGUID(MF_MT_SUBTYPE)");
+	}
+
+	//	setup required encoder things
+	//	kbps required, must be >0
+	if (Params.mAverageKbps == 0)
+		throw Soy::AssertException("Encoder AverageKbps must be above zero");
+	{
+		auto BitRate = Params.mAverageKbps * 1024 * 8;
+		auto Result = MediaType->SetUINT32(MF_MT_AVG_BITRATE, BitRate);
+		IsOkay(Result, "Set encoder bitrate MF_MT_AVG_BITRATE");
+	}
+
+	//	interlace mode must be set
+	{
+		auto Result = MediaType->SetUINT32(MF_MT_INTERLACE_MODE, 2);
+		IsOkay(Result, "MF_MT_INTERLACE_MODE");
+	}
+
+	{
+		auto Numerator = 30000;
+		auto Denominator = 1001;
+		auto Result = MFSetAttributeRatio(MediaType, MF_MT_FRAME_RATE, Numerator, Denominator);
+		IsOkay(Result, "MF_MT_FRAME_RATE");
+	}
+
+	{
+		auto Width = 640;
+		auto Height = 480;
+		auto Result = MFSetAttributeSize(MediaType, MF_MT_FRAME_SIZE, Width, Height);
+		IsOkay(Result, "MF_MT_FRAME_SIZE");
+	}
+
+	{
+		auto Profile = eAVEncH264VProfile_Base;
+		//Result = MFSetAttributeRatio(InputMediaType, MF_MT_MPEG2_PROFILE, Profile, 1);
+		auto Result = MediaType->SetUINT32(MF_MT_MPEG2_PROFILE, Profile);
+		IsOkay(Result, "Set encoder profile MF_MT_MPEG2_PROFILE");
+	}
+
+	//	gr: this results in "attribute not found" in SetOutputType if not set
+	//		but docs say its optional
+	//if (Params.mProfileLevel != 0)
+	{
+		double Level = Params.mProfileLevel / 10;	//	30 -> 3.1
+		auto Result = MediaType->SetDouble(MF_MT_MPEG2_LEVEL, Level);
+		IsOkay(Result, "Set encoder level MF_MT_MPEG2_LEVEL");
+	}
+
+	//	should we support zero?
+	/*
+	if (Params.mQuality != 0)
+	{
+		Result = MediaType->SetUINT32(CODECAPI_AVEncCommonQuality, Params.mQuality);
+		IsOkay(Result, "Set encoder quality CODECAPI_AVEncCommonQuality");
+	}
+	*/
+	mTransformer->SetOutputFormat(*MediaType);
+}
+
 void MediaFoundation::TEncoder::SetInputFormat(SoyPixelsFormat::Type PixelFormat)
 {
 	if (mTransformer->IsInputFormatReady())
 		return;
 	
+	//	gr: check against supported formats, as error later could be vague
 	Soy::TFourcc InputFormat = GetFourcc(PixelFormat);
+	{
+		auto& SupportedFormats = mTransformer->mSupportedInputFormats;
+		if (!SupportedFormats.Find(InputFormat))
+		{
+			std::stringstream Error;
+			Error << "Input format " << PixelFormat << "/" << InputFormat << " not supported (";
+			for (auto i=0;	i<SupportedFormats.GetSize();	i++)
+			{
+				Error << SupportedFormats[i] << ", ";
+			}
+			Error << ")";
+			throw Soy::AssertException(Error);
+		}
+	}
 
 	IMFMediaType* InputMediaType = nullptr;
 	auto Result = MFCreateMediaType(&InputMediaType);
@@ -113,9 +217,12 @@ void MediaFoundation::TEncoder::SetInputFormat(SoyPixelsFormat::Type PixelFormat
 	Result = InputMediaType->SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Video);
 	IsOkay(Result, "InputMediaType->SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Video)");
 	auto InputFormatGuid = GetGuid(InputFormat);
+	//auto InputFormatGuid = MFVideoFormat_NV12;
 	Result = InputMediaType->SetGUID(MF_MT_SUBTYPE, InputFormatGuid);
 	IsOkay(Result, "InputMediaType->SetGUID(MF_MT_SUBTYPE)");
 
+	//	gr: encoder settings are for output
+	/*
 	//	setup required encoder things
 	if (mParams.mAverageKbps != 0)
 	{
@@ -126,7 +233,8 @@ void MediaFoundation::TEncoder::SetInputFormat(SoyPixelsFormat::Type PixelFormat
 
 	//CHECK_HR(pMFTOutputMediaType->SetUINT32(MF_MT_INTERLACE_MODE, 2), "Error setting interlace mode.");
 	auto Profile = eAVEncH264VProfile_Base;
-	Result = MFSetAttributeRatio(InputMediaType, MF_MT_MPEG2_PROFILE, Profile, 1);
+	//Result = MFSetAttributeRatio(InputMediaType, MF_MT_MPEG2_PROFILE, Profile, 1);
+	Result = InputMediaType->SetUINT32( MF_MT_MPEG2_PROFILE, Profile );
 	IsOkay(Result, "Set encoder profile MF_MT_MPEG2_PROFILE");
 
 	if (mParams.mProfileLevel != 0)
@@ -142,15 +250,18 @@ void MediaFoundation::TEncoder::SetInputFormat(SoyPixelsFormat::Type PixelFormat
 		Result = InputMediaType->SetUINT32(CODECAPI_AVEncCommonQuality, mParams.mQuality);
 		IsOkay(Result, "Set encoder quality CODECAPI_AVEncCommonQuality");
 	}
-
+	*/
 	mTransformer->SetInputFormat(*InputMediaType);
 }
+
+
 
 void MediaFoundation::TEncoder::Encode(const SoyPixelsImpl& Luma, const SoyPixelsImpl& ChromaU, const SoyPixelsImpl& ChromaV, const std::string& Meta, bool Keyframe)
 {
 	//	convert to the format required
 	//	todo: allow override of base Encode so we dont split & rejoin
-	SetInputFormat(SoyPixelsFormat::Yuv_8_8_8_Full);
+	//SetInputFormat(SoyPixelsFormat::Yuv_8_8_8_Full);
+	SetInputFormat(SoyPixelsFormat::Yuv_844_Full);
 
 
 	//	pop H264 frames

@@ -26,9 +26,9 @@ public:
 
 	size_t	mQuality = 100;
 
-	//	zero means don't apply
-	size_t	mAverageKbps = 0;
-	size_t	mProfileLevel = 0;
+	//	these are required by MediaFoundation
+	size_t	mAverageKbps = 2000;	//	REALLY high rate gives D3D error for nvidia encoder
+	size_t	mProfileLevel = 30;
 };
 
 
@@ -47,8 +47,8 @@ private:
 	virtual void	FinishEncoding() override;
 	
 	void			SetInputFormat(SoyPixelsFormat::Type PixelFormat);
+	void			SetOutputFormat(TEncoderParams Params);
 
 private:
-	TEncoderParams					mParams;
 	std::shared_ptr<TTransformer>	mTransformer;
 };
