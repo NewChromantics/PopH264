@@ -16,12 +16,10 @@
 
 #include <thread>
 
-#if defined(TEST_ASSETS)
 extern void MakeGreyscalePng(const char* Filename);
 extern void CompareGreyscale(const char* MetaJson,uint8_t* Plane0Data,uint8_t* Plane1Data,uint8_t* Plane2Data);
 extern void MakeRainbowPng(const char* Filename);
 extern void CompareRainbow(const char* MetaJson,uint8_t* Plane0Data,uint8_t* Plane1Data,uint8_t* Plane2Data);
-#endif
 
 void DebugPrint(const std::string& Message)
 {
@@ -91,9 +89,7 @@ int main()
 
 	try
 	{
-#if defined(TEST_ASSETS)
 		DecoderTest("RainbowGradient.h264",CompareRainbow);
-#endif
 	}
 	catch (std::exception& e)
 	{
@@ -138,8 +134,15 @@ int main()
 	Debug << "PopH264_EncoderPushFrame error=" << ErrorBuffer;
 	DebugPrint(Debug.str());
 
+	//	todo: decode it again
+	
 	PopH264_DestroyEncoder(Handle);
 	
 	return 0;
 }
 
+#if !defined(TEST_ASSETS)
+void CompareRainbow(const char* MetaJson,uint8_t* Plane0Data,uint8_t* Plane1Data,uint8_t* Plane2Data)
+{
+}
+#endif

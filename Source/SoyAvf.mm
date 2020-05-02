@@ -379,3 +379,27 @@ CVPixelBufferRef Avf::PixelsToPixelBuffer(const SoyPixelsImpl& Image)
 }
 
 
+CFPtr<CMFormatDescriptionRef> Avf::GetFormatDescriptionH264(const ArrayBridge<uint8_t>& Sps,const ArrayBridge<uint8_t>& Pps,H264::NaluPrefixSize::Type NaluPrefixSize)
+{
+	CFAllocatorRef Allocator = nil;
+	
+	BufferArray<const uint8_t*,2> Params;
+	BufferArray<size_t,2> ParamSizes;
+	Params.PushBack( Sps.GetArray() );
+	ParamSizes.PushBack( Sps.GetDataSize() );
+	Params.PushBack( Pps.GetArray() );
+	ParamSizes.PushBack( Pps.GetDataSize() );
+	
+	//	ios doesnt support annexb, so we will have to convert inputs
+	//	lets use 32 bit nalu size prefix
+	if ( NaluPrefixSize == H264::NaluPrefixSize::AnnexB )
+		NaluPrefixSize = H264::NaluPrefixSize::ThirtyTwo;
+	auto NaluLengthSize = static_cast<int>(NaluPrefixSize);
+
+	CFPtr<CMFormatDescriptionRef> FormatDesc;
+	//	-12712 http://stackoverflow.com/questions/25078364/cmvideoformatdescriptioncreatefromh264parametersets-issues
+	auto Result = CMVideoFormatDescriptionCreateFromH264ParameterSets( Allocator, Params.GetSize(), Params.GetArray(), ParamSizes.GetArray(), size_cast<int>(NaluLengthSize), &FormatDesc.mObject );
+	Avf::IsOkay( Result, "CMVideoFormatDescriptionCreateFromH264ParameterSets" );
+
+	return FormatDesc;
+}
