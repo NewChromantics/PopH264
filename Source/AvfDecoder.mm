@@ -33,7 +33,7 @@ public:
 	
 	void								Decode(ArrayBridge<uint8_t>&& Nalu,size_t FrameNumber);
 	void								Flush();
-	H264::NaluPrefixSize::Type			GetFormatNaluPrefixSize()	{	return H264::NaluPrefixSize::ThirtyTwo;	}
+	H264::NaluPrefix::Type				GetFormatNaluPrefixType()	{	return H264::NaluPrefix::ThirtyTwo;	}
 	
 	void								OnDecodedFrame(OSStatus Status,CVImageBufferRef ImageBuffer,VTDecodeInfoFlags Flags,CMTime PresentationTimeStamp );
 	void								OnDecodeError(const char* Error,CMTime PresentationTime);
@@ -78,7 +78,7 @@ Avf::TDecompressor::TDecompressor(const ArrayBridge<uint8_t>& Sps,const ArrayBri
 	mDecoderRenderer	( new AvfDecoderRenderer() ),
 	mOnFrame			( OnFrame )
 {
-	mInputFormat = Avf::GetFormatDescriptionH264( Sps, Pps, GetFormatNaluPrefixSize() );
+	mInputFormat = Avf::GetFormatDescriptionH264( Sps, Pps, GetFormatNaluPrefixType() );
 		
 	CFAllocatorRef Allocator = nil;
 	
@@ -163,6 +163,8 @@ Avf::TDecompressor::~TDecompressor()
 
 void Avf::TDecompressor::OnDecodedFrame(OSStatus Status,CVImageBufferRef ImageBuffer,VTDecodeInfoFlags Flags,CMTime PresentationTimeStamp)
 {
+	IsOkay(Status,__PRETTY_FUNCTION__);
+	
 	//	gr: seem to need an extra retain. find out what's releaseing this twice despite retain below
 	//auto RetainCount = CFGetRetainCount( ImageBuffer );
 	//std::Debug << "On decoded frame, retain count=" << RetainCount << std::endl;
@@ -184,7 +186,7 @@ void Avf::TDecompressor::OnDecodeError(const char* Error,CMTime PresentationTime
 	std::Debug << __PRETTY_FUNCTION__ << Error << std::endl;
 }
 
-H264::NaluPrefixSize::Type GetNaluPrefixSize(CMFormatDescriptionRef Format)
+H264::NaluPrefix::Type GetNaluPrefixType(CMFormatDescriptionRef Format)
 {
 	//	need length-byte-size to get proper h264 format
 	int nal_size_field_bytes = 0;
@@ -192,14 +194,8 @@ H264::NaluPrefixSize::Type GetNaluPrefixSize(CMFormatDescriptionRef Format)
 	Avf::IsOkay( Result, "Get H264 param NAL size");
 	if ( nal_size_field_bytes < 0 )
 		nal_size_field_bytes = 0;
-	auto Type = static_cast<H264::NaluPrefixSize::Type>(nal_size_field_bytes);
+	auto Type = static_cast<H264::NaluPrefix::Type>(nal_size_field_bytes);
 	return Type;
-}
-
-void ConvertNaluSize(ArrayBridge<uint8_t>& Nalu,H264::NaluPrefixSize::Type NaluSize)
-{
-	//	detect 001 or 0001 and convert
-	Soy_AssertTodo();
 }
 
 
@@ -285,8 +281,8 @@ CFPtr<CMSampleBufferRef> CreateSampleBuffer(ArrayBridge<uint8_t>& DataArray,SoyT
 
 void Avf::TDecompressor::Decode(ArrayBridge<uint8_t>&& Nalu, size_t FrameNumber)
 {
-	auto NaluSize = GetFormatNaluPrefixSize();
-	ConvertNaluSize( Nalu, NaluSize );
+	auto NaluSize = GetFormatNaluPrefixType();
+	H264::ConvertNaluPrefix( Nalu, NaluSize );
 	
 	SoyTime PresentationTime( static_cast<uint64_t>(FrameNumber) );
 	SoyTime DecodeTime( static_cast<uint64_t>(FrameNumber) );

@@ -4,22 +4,10 @@
 #include <CoreVideo/CoreVideo.h>
 #include "Array.hpp"
 #include "SoyPixels.h"
+#include "SoyH264.h"
 
 class SoyPixelsImpl;
 
-namespace H264
-{
-	namespace NaluPrefixSize
-	{
-		enum Type
-		{
-			AnnexB		= 0,	//	001 or 0001
-			Eight		= 1,
-			Sixteen		= 2,
-			ThirtyTwo	= 4
-		};
-	}
-}
 namespace Avf
 {
 #if defined(__OBJC__)
@@ -34,7 +22,7 @@ namespace Avf
 	SoyPixelsFormat::Type			GetPixelFormat(NSNumber* Format);
 	OSType							GetPlatformPixelFormat(SoyPixelsFormat::Type Format);
 
-	CFPtr<CMFormatDescriptionRef>	GetFormatDescriptionH264(const ArrayBridge<uint8_t>& Sps,const ArrayBridge<uint8_t>& Pps,H264::NaluPrefixSize::Type NaluPrefixSize);
+	CFPtr<CMFormatDescriptionRef>	GetFormatDescriptionH264(const ArrayBridge<uint8_t>& Sps,const ArrayBridge<uint8_t>& Pps,H264::NaluPrefix::Type NaluPrefixType);
 
 #endif
 }

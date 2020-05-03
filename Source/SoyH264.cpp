@@ -2,12 +2,39 @@
 
 
 
-size_t H264::GetNaluLength(const ArrayBridge<uint8_t>& Data)
+size_t H264::GetNaluLength(const ArrayBridge<uint8_t>& Packet)
 {
-	auto Data0 = Data[0];
-	auto Data1 = Data[1];
-	auto Data2 = Data[2];
-	auto Data3 = Data[3];
+	//	todo: test for u8/u16/u32 size prefix
+	if ( Packet.GetSize() < 4 )
+		return 0;
+	
+	auto p0 = Packet[0];
+	auto p1 = Packet[1];
+	auto p2 = Packet[2];
+	auto p3 = Packet[3];
+	
+	if ( p0 == 0 && p1 == 0 && p2 == 1 )
+		return 3;
+	
+	if ( p0 == 0 && p1 == 0 && p2 == 0 && p3 == 1)
+		return 4;
+	
+	//	couldn't detect, possibly no prefx and it's raw data
+	//	could parse packet type to verify
+	return 0;
+}
+
+
+size_t H264::GetNaluAnnexBLength(const ArrayBridge<uint8_t>& Packet)
+{
+	//	todo: test for u8/u16/u32 size prefix
+	if ( Packet.GetSize() < 4 )
+		throw Soy::AssertException("Packet not long enough for annexb");
+
+	auto Data0 = Packet[0];
+	auto Data1 = Packet[1];
+	auto Data2 = Packet[2];
+	auto Data3 = Packet[3];
 	if (Data0 != 0 || Data1 != 0)
 		throw Soy::AssertException("Data is not bytestream NALU header (leading zeroes)");
 	if (Data2 == 1)
@@ -77,4 +104,31 @@ uint8 H264::EncodeNaluByte(H264NaluContent::Type Content,H264NaluPriority::Type 
 	
 	uint8 Byte = Idc|Type;
 	return Byte;
+}
+
+
+void H264::ConvertNaluPrefix(ArrayBridge<uint8_t>& Nalu,H264::NaluPrefix::Type NaluPrefixType)
+{
+	//	assuming annexb, this will throw if not
+	auto PrefixLength = H264::GetNaluAnnexBLength(Nalu);
+	
+	//	quick implementation for now
+	if ( NaluPrefixType != H264::NaluPrefix::ThirtyTwo )
+		Soy_AssertTodo();
+	
+	auto NewPrefixSize = static_cast<int>(NaluPrefixType);
+	
+	//	pad if prefix was 3 bytes
+	if ( PrefixLength == 3 )
+		Nalu.InsertAt(0,0);
+	else if ( PrefixLength != 4)
+		throw Soy::AssertException("Expecting nalu size of 4");
+	
+	//	write over prefix
+	uint32_t Size32 = Nalu.GetDataSize() - NewPrefixSize;
+	uint8_t* Size8s = reinterpret_cast<uint8_t*>(&Size32);
+	Nalu[0] = Size8s[3];
+	Nalu[1] = Size8s[2];
+	Nalu[2] = Size8s[1];
+	Nalu[3] = Size8s[0];
 }

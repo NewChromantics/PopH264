@@ -378,35 +378,13 @@ CVPixelBufferRef Avf::PixelsToPixelBuffer(const SoyPixelsImpl& Image)
 	return PixelBuffer;
 }
 
-size_t GetNaluLength(const ArrayBridge<uint8_t>& Packet)
-{
-	//	todo: test for u8/u16/u32 size prefix
-	if ( Packet.GetSize() < 4 )
-		return 0;
-	
-	auto p0 = Packet[0];
-	auto p1 = Packet[1];
-	auto p2 = Packet[2];
-	auto p3 = Packet[3];
-	
-	if ( p0 == 0 && p1 == 0 && p2 == 1 )
-		return 3;
-
-	if ( p0 == 0 && p1 == 0 && p2 == 0 && p3 == 1)
-		return 4;
-
-	//	couldn't detect, possibly no prefx and it's raw data
-	//	could parse packet type to verify
-	return 0;
-}
-
-CFPtr<CMFormatDescriptionRef> Avf::GetFormatDescriptionH264(const ArrayBridge<uint8_t>& Sps,const ArrayBridge<uint8_t>& Pps,H264::NaluPrefixSize::Type NaluPrefixSize)
+CFPtr<CMFormatDescriptionRef> Avf::GetFormatDescriptionH264(const ArrayBridge<uint8_t>& Sps,const ArrayBridge<uint8_t>& Pps,H264::NaluPrefix::Type NaluPrefixType)
 {
 	CFAllocatorRef Allocator = nil;
 	
 	//	need to strip nalu prefix from these
-	auto SpsPrefixLength = GetNaluLength(Sps);
-	auto PpsPrefixLength = GetNaluLength(Pps);
+	auto SpsPrefixLength = H264::GetNaluLength(Sps);
+	auto PpsPrefixLength = H264::GetNaluLength(Pps);
 
 	auto* SpsStart = &Sps[SpsPrefixLength];
 	auto* PpsStart = &Pps[PpsPrefixLength];
@@ -420,13 +398,13 @@ CFPtr<CMFormatDescriptionRef> Avf::GetFormatDescriptionH264(const ArrayBridge<ui
 	
 	//	ios doesnt support annexb, so we will have to convert inputs
 	//	lets use 32 bit nalu size prefix
-	if ( NaluPrefixSize == H264::NaluPrefixSize::AnnexB )
-		NaluPrefixSize = H264::NaluPrefixSize::ThirtyTwo;
-	auto NaluLengthSize = static_cast<int>(NaluPrefixSize);
+	if ( NaluPrefixType == H264::NaluPrefix::AnnexB )
+		NaluPrefixType = H264::NaluPrefix::ThirtyTwo;
+	auto NaluLength = static_cast<int>(NaluPrefixType);
 
 	CFPtr<CMFormatDescriptionRef> FormatDesc;
 	//	-12712 http://stackoverflow.com/questions/25078364/cmvideoformatdescriptioncreatefromh264parametersets-issues
-	auto Result = CMVideoFormatDescriptionCreateFromH264ParameterSets( Allocator, Params.GetSize(), Params.GetArray(), ParamSizes.GetArray(), size_cast<int>(NaluLengthSize), &FormatDesc.mObject );
+	auto Result = CMVideoFormatDescriptionCreateFromH264ParameterSets( Allocator, Params.GetSize(), Params.GetArray(), ParamSizes.GetArray(), NaluLength, &FormatDesc.mObject );
 	Avf::IsOkay( Result, "CMVideoFormatDescriptionCreateFromH264ParameterSets" );
 
 	return FormatDesc;
