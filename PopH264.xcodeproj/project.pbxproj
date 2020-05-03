@@ -333,6 +333,9 @@
 		BFFBE97A245DB65000E9BE1B /* AvfDecoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AvfDecoder.h; path = Source/AvfDecoder.h; sourceTree = "<group>"; };
 		BFFBE97B245DB65000E9BE1B /* AvfDecoder.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = AvfDecoder.mm; path = Source/AvfDecoder.mm; sourceTree = "<group>"; };
 		BFFC941A245DC0B900AEE711 /* SoyTypes_CoreFoundation.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SoyTypes_CoreFoundation.h; path = Source/SoyLib/src/SoyTypes_CoreFoundation.h; sourceTree = "<group>"; };
+		BFFC941B245EE11600AEE711 /* AvfPixelBuffer.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = AvfPixelBuffer.mm; path = Source/AvfPixelBuffer.mm; sourceTree = "<group>"; };
+		BFFC941C245EE11700AEE711 /* AvfPixelBuffer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = AvfPixelBuffer.h; path = Source/AvfPixelBuffer.h; sourceTree = "<group>"; };
+		BFFC941D245EE17900AEE711 /* SoyMedia.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SoyMedia.h; path = Source/SoyLib/src/SoyMedia.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -536,6 +539,7 @@
 				BF8AB6A821F22602008E7E76 /* SoyDebug.h */,
 				BF8AB6B721F22895008E7E76 /* SoyDebug.mm */,
 				BFF1C6E622E3A1D600AFDFD5 /* SoyFilesystem.h */,
+				BFFC941D245EE17900AEE711 /* SoyMedia.h */,
 				BF1826AD24228D31006FEB93 /* SoyFourcc.cpp */,
 				BF1826AC24228D31006FEB93 /* SoyFourcc.h */,
 				BFDB2BAB2448B4CE009EC370 /* SoyH264.cpp */,
@@ -590,6 +594,8 @@
 		BFD6076D1EA16ED20035C814 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				BFFC941C245EE11700AEE711 /* AvfPixelBuffer.h */,
+				BFFC941B245EE11600AEE711 /* AvfPixelBuffer.mm */,
 				BFFBE97A245DB65000E9BE1B /* AvfDecoder.h */,
 				BFFBE97B245DB65000E9BE1B /* AvfDecoder.mm */,
 				BFC471802447523000A2DA70 /* AvfEncoder.h */,

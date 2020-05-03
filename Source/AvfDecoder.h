@@ -29,9 +29,11 @@ public:
 	
 private:
 	virtual bool	DecodeNextPacket(std::function<void(const SoyPixelsImpl&,SoyTime)> OnFrameDecoded) override;	//	returns true if more data to proccess
+	void			AllocDecoder();
 	
 private:
-	std::shared_ptr<TDecompressor>	mCompressor;
+	size_t							mFrameNumber = 0;
+	std::shared_ptr<TDecompressor>	mDecompressor;
 	Array<uint8_t>					mNaluSps;
 	Array<uint8_t>					mNaluPps;
 };

@@ -10,11 +10,19 @@
 #define ENABLE_MAGICLEAP_DECODER
 #endif
 
+#if defined(TARGET_OSX)||defined(TARGET_IOS)
+#define ENABLE_AVF
+#endif
+
 #define ENABLE_BROADWAY
 
 #if defined(TARGET_WINDOWS)
 #define ENABLE_INTELMEDIA
 #define ENABLE_MEDIAFOUNDATION
+#endif
+
+#if defined(ENABLE_AVF)
+#include "AvfDecoder.h"
 #endif
 
 #if defined(ENABLE_MAGICLEAP_DECODER)
@@ -36,6 +44,21 @@
 
 PopH264::TDecoderInstance::TDecoderInstance(int32_t Mode)
 {
+#if defined(ENABLE_AVF)
+	//if (Mode != POPH264_DECODERMODE_SOFTWARE)
+	{
+		try
+		{
+			mDecoder.reset(new Avf::TDecoder());
+			return;
+		}
+		catch (std::exception& e)
+		{
+			std::Debug << "Failed to create Avf decoder: " << e.what() << std::endl;
+		}
+	}
+#endif
+	
 #if defined(ENABLE_MAGICLEAP_DECODER)
 	if (Mode != POPH264_DECODERMODE_SOFTWARE)
 	{

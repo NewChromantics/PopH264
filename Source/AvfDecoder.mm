@@ -4,6 +4,7 @@
 #include "SoyFourcc.h"
 #include "MagicEnum/include/magic_enum.hpp"
 #include "json11.hpp"
+#include "SoyTime.h"
 
 #include <CoreMedia/CMBase.h>
 #include <VideoToolbox/VTBase.h>
@@ -18,6 +19,7 @@
 #include <VideoToolbox/VTDecompressionSession.h>
 #include <VideoToolbox/VTErrors.h>
 #include "SoyH264.h"
+#include "AvfPixelBuffer.h"
 
 #include "PopH264.h"	//	param keys
 
@@ -26,14 +28,20 @@
 class Avf::TDecompressor
 {
 public:
-	TDecompressor(const ArrayBridge<uint8_t>& Sps,const ArrayBridge<uint8_t>& Pps);
-	~TCompressor();
+	TDecompressor(const ArrayBridge<uint8_t>& Sps,const ArrayBridge<uint8_t>& Pps,std::function<void(std::shared_ptr<TPixelBuffer>,SoyTime)> OnFrame);
+	~TDecompressor();
 	
-	void								Decode(const ArrayBridge<uint8_t>&& Nalu,size_t FrameNumber);
+	void								Decode(ArrayBridge<uint8_t>&& Nalu,size_t FrameNumber);
+	void								Flush();
 	H264::NaluPrefixSize::Type			GetFormatNaluPrefixSize()	{	return H264::NaluPrefixSize::ThirtyTwo;	}
 	
+	void								OnDecodedFrame(OSStatus Status,CVImageBufferRef ImageBuffer,VTDecodeInfoFlags Flags,CMTime PresentationTimeStamp );
+	void								OnDecodeError(const char* Error,CMTime PresentationTime);
+
+	std::shared_ptr<AvfDecoderRenderer>	mDecoderRenderer;
 	CFPtr<VTDecompressionSessionRef>	mSession;
 	CFPtr<CMFormatDescriptionRef>		mInputFormat;
+	std::function<void(std::shared_ptr<TPixelBuffer>,SoyTime)>	mOnFrame;
 };
 
 
@@ -45,17 +53,14 @@ void OnDecompress(void* DecompressionContext,void* SourceContext,OSStatus Status
 		return;
 	}
 	
-	AvfMediaDecoder& Encoder = *reinterpret_cast<Avf::TDecompressor*>( DecompressionContext );
-	SoyTime Timecode = Soy::Platform::GetTime( PresentationTimeStamp );
-	
+	auto& Decoder = *reinterpret_cast<Avf::TDecompressor*>( DecompressionContext );
 	try
 	{
-		Avf::IsOkay( Status, "OnDecompress" );
-		Encoder.OnDecodedFrame( ImageBuffer, Timecode );
+		Decoder.OnDecodedFrame( Status, ImageBuffer, Flags, PresentationTimeStamp );
 	}
 	catch (std::exception& e)
 	{
-		Encoder.OnDecodeError( e.what(), Timecode );
+		Decoder.OnDecodeError( e.what(), PresentationTimeStamp );
 	}
 }
 
@@ -64,22 +69,21 @@ SoyPixelsMeta GetFormatDescriptionPixelMeta(CMFormatDescriptionRef Format)
 	Boolean usePixelAspectRatio = false;
 	Boolean useCleanAperture = false;
 	auto Dim = CMVideoFormatDescriptionGetPresentationDimensions( Format, usePixelAspectRatio, useCleanAperture );
-	Meta.mPixelMeta.DumbSetWidth( Dim.width );
-	Meta.mPixelMeta.DumbSetHeight( Dim.height );
-
+	
 	return SoyPixelsMeta( Dim.width, Dim.height, SoyPixelsFormat::Invalid );
 }
 
 
-Avf::TDecompressor::TDecompressor(const ArrayBridge<uint8_t>& Sps,const ArrayBridge<uint8_t>& Pps)
+Avf::TDecompressor::TDecompressor(const ArrayBridge<uint8_t>& Sps,const ArrayBridge<uint8_t>& Pps,std::function<void(std::shared_ptr<TPixelBuffer>,SoyTime)> OnFrame) :
+	mDecoderRenderer	( new AvfDecoderRenderer() ),
+	mOnFrame			( OnFrame )
 {
 	mInputFormat = Avf::GetFormatDescriptionH264( Sps, Pps, GetFormatNaluPrefixSize() );
 		
 	CFAllocatorRef Allocator = nil;
-	Soy::Assert( mFormatDesc!=nullptr, "Format missing" );
 	
 	// Set the pixel attributes for the destination buffer
-	CFMutableDictionaryRef destinationPixelBufferAttributes = CFDictionaryCreateMutable( &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks );
+	CFMutableDictionaryRef destinationPixelBufferAttributes = CFDictionaryCreateMutable( Allocator, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks );
 	
 	auto FormatPixelMeta = GetFormatDescriptionPixelMeta( mInputFormat.mObject );
 	
@@ -131,31 +135,60 @@ Avf::TDecompressor::TDecompressor(const ArrayBridge<uint8_t>& Sps,const ArrayBri
 	CFDictionarySetValue(decoderParameters,kVTDecompressionPropertyKey_RealTime, AllowDroppedFrames ? kCFBooleanTrue : kCFBooleanFalse );
 	
 	const VTDecompressionOutputCallbackRecord callback = { OnDecompress, this };
-	auto Result = VTDecompressionSessionCreate( Allocator, mFormatDesc->mDesc, decoderParameters, destinationPixelBufferAttributes, &callback, &mSession );
+	
+	auto Result = VTDecompressionSessionCreate(
+											   Allocator,
+											   mInputFormat.mObject,
+											   decoderParameters,
+											   destinationPixelBufferAttributes,
+											   &callback,
+											   &mSession.mObject );
 	
 	CFRelease(destinationPixelBufferAttributes);
 	CFRelease(decoderParameters);
 	
 	Avf::IsOkay( Result, "TDecompressionSessionCreate" );
-	Soy::Assert( Session !=nullptr, "Failed to create decompression session");
 }
 
 Avf::TDecompressor::~TDecompressor()
 {
-	Flush();
+	//Flush();
 	
 	// End the session
-	VTDecompressionSessionInvalidate( mSession );
-	CFRelease( mSession );
+	VTDecompressionSessionInvalidate( mSession.mObject );
+	mSession.Release();
 	
 	//	wait for the queue to end
 }
 
-H264::NaluPrefixSize::Type GetNaluPrefixSize()
+void Avf::TDecompressor::OnDecodedFrame(OSStatus Status,CVImageBufferRef ImageBuffer,VTDecodeInfoFlags Flags,CMTime PresentationTimeStamp)
+{
+	//	gr: seem to need an extra retain. find out what's releaseing this twice despite retain below
+	//auto RetainCount = CFGetRetainCount( ImageBuffer );
+	//std::Debug << "On decoded frame, retain count=" << RetainCount << std::endl;
+	CFRetain( ImageBuffer );
+	
+	//	todo: expand this to meta
+	//	todo: this shouldn't be in CVPixelBuffer, and should be higherup as its part of the STREAM not the frame
+	float3x3 Transform;
+
+	auto Retain = true;
+	std::shared_ptr<TPixelBuffer> PixelBuffer( new CVPixelBuffer(ImageBuffer, Retain, mDecoderRenderer, Transform ) );
+	
+	auto Time = Soy::Platform::GetTime(PresentationTimeStamp);
+	mOnFrame( PixelBuffer, Time );
+}
+
+void Avf::TDecompressor::OnDecodeError(const char* Error,CMTime PresentationTime)
+{
+	std::Debug << __PRETTY_FUNCTION__ << Error << std::endl;
+}
+
+H264::NaluPrefixSize::Type GetNaluPrefixSize(CMFormatDescriptionRef Format)
 {
 	//	need length-byte-size to get proper h264 format
 	int nal_size_field_bytes = 0;
-	auto Result = CMVideoFormatDescriptionGetH264ParameterSetAtIndex( Desc, 0, nullptr, nullptr, nullptr, &nal_size_field_bytes );
+	auto Result = CMVideoFormatDescriptionGetH264ParameterSetAtIndex( Format, 0, nullptr, nullptr, nullptr, &nal_size_field_bytes );
 	Avf::IsOkay( Result, "Get H264 param NAL size");
 	if ( nal_size_field_bytes < 0 )
 		nal_size_field_bytes = 0;
@@ -170,7 +203,7 @@ void ConvertNaluSize(ArrayBridge<uint8_t>& Nalu,H264::NaluPrefixSize::Type NaluS
 }
 
 
-CFPtr<CMSampleBufferRef> CreateSampleBuffer(const ArrayBridge<uint8_t>&& Data,size_t PresentationTime,size_t DecodeTime,size_t DurationMs)
+CFPtr<CMSampleBufferRef> CreateSampleBuffer(ArrayBridge<uint8_t>& DataArray,SoyTime PresentationTime,SoyTime DecodeTime,SoyTime DurationMs,CMFormatDescriptionRef Format)
 {
 	//	create buffer from packet
 	CFAllocatorRef Allocator = nil;
@@ -184,10 +217,19 @@ CFPtr<CMSampleBufferRef> CreateSampleBuffer(const ArrayBridge<uint8_t>&& Data,si
 		
 	//	gr: when you pass memory to a block buffer, it only bloody frees it. make sure kCFAllocatorNull is the "allocator" for the data
 	//		also means of course, for async decoding the data could go out of scope. May explain the wierd MACH__O error that came from the decoder?
-	void* Data = (void*)AvccData.GetArray();
-	auto DataSize = AvccData.GetDataSize();
+	void* Data = DataArray.GetArray();
+	auto DataSize = DataArray.GetDataSize();
 	size_t Offset = 0;
-		
+	/*
+	CMBlockBufferRef CM_NONNULL theBuffer,
+	void * CM_NULLABLE memoryBlock,
+	size_t blockLength,
+	CFAllocatorRef CM_NULLABLE blockAllocator,
+	const CMBlockBufferCustomBlockSource * CM_NULLABLE customBlockSource,
+	size_t offsetToData,
+	size_t dataLength,
+	CMBlockBufferFlags flags)
+	*/
 	Result = CMBlockBufferAppendMemoryBlock( BlockBuffer.mObject,
 											Data,
 											DataSize,
@@ -213,7 +255,7 @@ CFPtr<CMSampleBufferRef> CreateSampleBuffer(const ArrayBridge<uint8_t>&& Data,si
 		
 	int NumSamples = 1;
 	BufferArray<size_t,1> SampleSizes;
-	SampleSizes.PushBack( AvccData.GetDataSize() );
+	SampleSizes.PushBack( DataSize );
 	BufferArray<CMSampleTimingInfo,1> SampleTimings;
 	auto& FrameTiming = SampleTimings.PushBack();
 	FrameTiming.duration = Soy::Platform::GetTime( DurationMs );
@@ -241,13 +283,15 @@ CFPtr<CMSampleBufferRef> CreateSampleBuffer(const ArrayBridge<uint8_t>&& Data,si
 	return SampleBuffer;
 }
 
-Avf::TDecompressor::Decode(ArrayBridge<uint8_t>&& Nalu, size_t FrameNumber)
+void Avf::TDecompressor::Decode(ArrayBridge<uint8_t>&& Nalu, size_t FrameNumber)
 {
-	auto NaluSize = GetNaluPrefixSize();
+	auto NaluSize = GetFormatNaluPrefixSize();
 	ConvertNaluSize( Nalu, NaluSize );
 	
-	auto DurationMs = 16;
-	auto Sample = CreateSampleBuffer( Nalue, FrameNumber, FrameNumber, DurationMs );
+	SoyTime PresentationTime( static_cast<uint64_t>(FrameNumber) );
+	SoyTime DecodeTime( static_cast<uint64_t>(FrameNumber) );
+	SoyTime Duration(16ull);
+	auto SampleBuffer = CreateSampleBuffer( Nalu, PresentationTime, DecodeTime, Duration, mInputFormat.mObject );
 	
 	
 	VTDecodeFrameFlags Flags = 0;
@@ -277,14 +321,12 @@ Avf::TDecompressor::Decode(ArrayBridge<uint8_t>&& Nalu, size_t FrameNumber)
 	
 	bool RecreateStream = false;
 	{
-		OnDecodeFrameSubmitted( Packet.mTimecode );
-		
 		//std::Debug << "decompressing " << Packet.mTimecode << "..." << std::endl;
 		Soy::TScopeTimer Timer("VTDecompressionSessionDecodeFrame", 1, OnFinished, true );
-		auto Result = VTDecompressionSessionDecodeFrame( mSession->mSession, SampleBuffer, Flags, nullptr, &FlagsOut );
+		auto Result = VTDecompressionSessionDecodeFrame( mSession.mObject, SampleBuffer.mObject, Flags, nullptr, &FlagsOut );
 		Timer.Stop();
 		//std::Debug << "Decompress " << Packet.mTimecode << " took " << DecodeDuration << "; error=" << (int)Result << std::endl;
-		Avf::IsOkay( Result, "VTDecompressionSessionDecodeFrame", false );
+		Avf::IsOkay( Result, "VTDecompressionSessionDecodeFrame" );
 		
 		static int FakeInvalidateSessionCounter = 0;
 		static int FakeInvalidateSessionOnCount = -1;
@@ -314,7 +356,7 @@ Avf::TDecompressor::Decode(ArrayBridge<uint8_t>&& Nalu, size_t FrameNumber)
 				//  gr: need to re-create session. Session dies when app sleeps and restores
 				std::stringstream Error;
 				Error << "Lost decompression session; " << Avf::GetString(Result);
-				OnDecodeError( Error.str(), Packet.mTimecode );
+				//OnDecodeError( Error.str(), Packet.mTimecode );
 				//	make errors visible for debugging
 				//std::this_thread::sleep_for( std::chrono::milliseconds(1000));
 				RecreateStream = true;
@@ -334,32 +376,27 @@ Avf::TDecompressor::Decode(ArrayBridge<uint8_t>&& Nalu, size_t FrameNumber)
 		
 		//	gr: do we NEED to make sure all referecnes are GONE here? as the data in block buffer is still in use if >1?
 		//auto SampleCount = CFGetRetainCount( SampleBuffer );
-		CFRelease( SampleBuffer );
+		//CFRelease( SampleBuffer );
 		
 		
 		//	gr: hanging on destruction waiting for async frames, see if this makes it go away.
 		if ( bool_cast(Flags & kVTDecodeFrame_EnableAsynchronousDecompression) )
-			VTDecompressionSessionWaitForAsynchronousFrames( mSession->mSession );
+			VTDecompressionSessionWaitForAsynchronousFrames( mSession.mObject );
 	}
 	
+	//	recover from errors
 	if ( RecreateStream )
 	{
-		Soy::TScopeTimerPrint Timer("Recreating decompression session", 1);
-		bool Dummy;
-		mOnStreamChanged.OnTriggered(Dummy);
-		
-		//	gr: if packet was a keyframe, maybe return false to re-process the packet so immediate next frame is not scrambled
-		if ( Packet.mIsKeyFrame )
-		{
-			std::Debug << "Returning keyframe back to buffer after session recreation" << std::endl;
-			return false;
-		}
+		std::Debug << "recreate decoder!" << std::endl;
 	}
 }
 
 void Avf::TDecompressor::Flush()
 {
-	VTDecompressionSessionCompleteFrames( mSession, kCMTimeInvalid );
+	if ( !mSession )
+		return;
+	
+	//VTDecompressionSessionCompleteFrames( mSession.mObject, kCMTimeInvalid );
 }
 
 
@@ -368,7 +405,7 @@ Avf::TDecoder::TDecoder()
 {
 }
 
-Avf::TEncoder::~TEncoder()
+Avf::TDecoder::~TDecoder()
 {
 	mDecompressor.reset();
 }
@@ -376,16 +413,16 @@ Avf::TEncoder::~TEncoder()
 
 void Avf::TDecoder::AllocDecoder()
 {
-	auto OnPacket = [this](std::shared_ptr<TPixelBuffer> pPixelBuffer,size_t FrameNumber)
+	auto OnPacket = [this](std::shared_ptr<TPixelBuffer> pPixelBuffer,SoyTime PresentationTime)
 	{
-		std::Debug << "Decompressed pixel buffer " << FrameNumber << std::endl;
+		std::Debug << "Decompressed pixel buffer " << PresentationTime << std::endl;
 	};
 
 	if ( mDecompressor )
 		return;
 	
 	//	gr: does decompressor need to wait for SPS&PPS?
-	mDecompressor.reset( new TDecompressor( mParams, OnPacket ) );
+	mDecompressor.reset( new TDecompressor( GetArrayBridge(mNaluSps), GetArrayBridge(mNaluPps), OnPacket ) );
 }
 
 bool Avf::TDecoder::DecodeNextPacket(std::function<void(const SoyPixelsImpl&,SoyTime)> OnFrameDecoded)
@@ -400,12 +437,12 @@ bool Avf::TDecoder::DecodeNextPacket(std::function<void(const SoyPixelsImpl&,Soy
 	if ( H264PacketType == H264NaluContent::SequenceParameterSet )
 	{
 		mNaluSps = Nalu;
-		return;
+		return true;
 	}
 	else if ( H264PacketType == H264NaluContent::PictureParameterSet )
 	{
 		mNaluPps = Nalu;
-		return;
+		return true;
 	}
 
 	//	make sure we have a decoder
@@ -415,8 +452,11 @@ bool Avf::TDecoder::DecodeNextPacket(std::function<void(const SoyPixelsImpl&,Soy
 	if ( !mDecompressor )
 	{
 		std::Debug << "Dropping H264 frame (" << magic_enum::enum_name(H264PacketType) << ") as decompressor isn't ready (waiting for sps/pps)" << std::endl;
-		return;
+		return true;
 	}
 	
-	mDecompressor->Decode( GetArrayBridge(Nalu) );
+	auto FrameNumber = mFrameNumber;
+	mFrameNumber++;
+	mDecompressor->Decode( GetArrayBridge(Nalu), FrameNumber );
+	return true;
 }

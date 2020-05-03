@@ -378,16 +378,44 @@ CVPixelBufferRef Avf::PixelsToPixelBuffer(const SoyPixelsImpl& Image)
 	return PixelBuffer;
 }
 
+size_t GetNaluLength(const ArrayBridge<uint8_t>& Packet)
+{
+	//	todo: test for u8/u16/u32 size prefix
+	if ( Packet.GetSize() < 4 )
+		return 0;
+	
+	auto p0 = Packet[0];
+	auto p1 = Packet[1];
+	auto p2 = Packet[2];
+	auto p3 = Packet[3];
+	
+	if ( p0 == 0 && p1 == 0 && p2 == 1 )
+		return 3;
+
+	if ( p0 == 0 && p1 == 0 && p2 == 0 && p3 == 1)
+		return 4;
+
+	//	couldn't detect, possibly no prefx and it's raw data
+	//	could parse packet type to verify
+	return 0;
+}
 
 CFPtr<CMFormatDescriptionRef> Avf::GetFormatDescriptionH264(const ArrayBridge<uint8_t>& Sps,const ArrayBridge<uint8_t>& Pps,H264::NaluPrefixSize::Type NaluPrefixSize)
 {
 	CFAllocatorRef Allocator = nil;
 	
+	//	need to strip nalu prefix from these
+	auto SpsPrefixLength = GetNaluLength(Sps);
+	auto PpsPrefixLength = GetNaluLength(Pps);
+
+	auto* SpsStart = &Sps[SpsPrefixLength];
+	auto* PpsStart = &Pps[PpsPrefixLength];
+
 	BufferArray<const uint8_t*,2> Params;
 	BufferArray<size_t,2> ParamSizes;
-	Params.PushBack( Sps.GetArray() );
+	Params.PushBack( SpsStart );
 	ParamSizes.PushBack( Sps.GetDataSize() );
-	Params.PushBack( Pps.GetArray() );
+	Params.PushBack( PpsStart );
 	ParamSizes.PushBack( Pps.GetDataSize() );
 	
 	//	ios doesnt support annexb, so we will have to convert inputs
