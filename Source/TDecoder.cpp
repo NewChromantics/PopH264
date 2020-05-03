@@ -79,6 +79,10 @@ bool PopH264::TDecoder::PopNalu(ArrayBridge<uint8_t>&& Buffer)
 
 		//	we're out of data, so pop the remaining data
 		DataSize = PendingDataSize;
+		
+		//	no more data, finished!
+		if ( DataSize == 0 )
+			return false;
 	}
 	
 	auto* Data = PendingData;
