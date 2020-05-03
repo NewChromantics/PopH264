@@ -167,11 +167,12 @@ class CVPixelBuffer : public AvfPixelBuffer
 {
 public:
 	CVPixelBuffer(CVPixelBufferRef Buffer,bool DoRetain,std::shared_ptr<AvfDecoderRenderer>& Decoder,const float3x3& Transform) :
-	AvfPixelBuffer	( DoRetain, Decoder, Transform ),
-	mSample			( Buffer, DoRetain )
+		AvfPixelBuffer	( DoRetain, Decoder, Transform ),
+		mSample			( Buffer, DoRetain )
 	{
-		if ( !Soy::Assert( mSample, "Sample expected") )
-			return;
+		if ( !mSample )
+			throw Soy::AssertException("Sample expected");
+		auto RetainCount = mSample.GetRetainCount();
 	}
 	~CVPixelBuffer();
 	
