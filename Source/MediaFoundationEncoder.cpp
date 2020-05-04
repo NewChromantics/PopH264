@@ -105,9 +105,10 @@ Soy::TFourcc GetFourcc(SoyPixelsFormat::Type Format)
 void MediaFoundation::TEncoder::SetOutputFormat(TEncoderParams Params)
 {
 	auto& Transformer = *mTransformer->mTransformer;
-	static bool UseNewFormat = true;
-
+	
 	Soy::AutoReleasePtr<IMFMediaType> pMediaType;
+
+	static bool UseNewFormat = true;
 	if ( UseNewFormat )
 	{
 		auto Result = MFCreateMediaType(&pMediaType.mObject);
@@ -210,17 +211,40 @@ void MediaFoundation::TEncoder::SetInputFormat(SoyPixelsFormat::Type PixelFormat
 		}
 	}
 
-	IMFMediaType* InputMediaType = nullptr;
-	auto Result = MFCreateMediaType(&InputMediaType);
-	IsOkay(Result, "MFCreateMediaType");
+	Soy::AutoReleasePtr<IMFMediaType> pMediaType;
 
-	Result = InputMediaType->SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Video);
+	auto& Transformer = *mTransformer->mTransformer;
+	static bool UseNewFormat = false;
+	if (UseNewFormat)
+	{
+		auto Result = MFCreateMediaType(&pMediaType.mObject);
+		IsOkay(Result, "MFCreateMediaType");
+	}
+	else //	start from existing output
+	{
+		//	gr: todo: get the input type matching our format
+		auto OutputFormatIndex = 0;
+		auto Result = Transformer.GetInputAvailableType( 0, OutputFormatIndex, &pMediaType.mObject);
+		IsOkay(Result, "GetOutputAvailableType");
+	}
+	auto* MediaType = pMediaType.mObject;
+
+	/*
+	Result = MediaType->SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Video);
 	IsOkay(Result, "InputMediaType->SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Video)");
 	auto InputFormatGuid = GetGuid(InputFormat);
 	//auto InputFormatGuid = MFVideoFormat_NV12;
-	Result = InputMediaType->SetGUID(MF_MT_SUBTYPE, InputFormatGuid);
+	Result = MediaType->SetGUID(MF_MT_SUBTYPE, InputFormatGuid);
 	IsOkay(Result, "InputMediaType->SetGUID(MF_MT_SUBTYPE)");
-
+	*/
+	/*
+	{
+		auto Width = 640;
+		auto Height = 480;
+		auto Result = MFSetAttributeSize(MediaType, MF_MT_FRAME_SIZE, Width, Height);
+		IsOkay(Result, "MF_MT_FRAME_SIZE");
+	}
+	*/
 	//	gr: encoder settings are for output
 	/*
 	//	setup required encoder things
@@ -251,7 +275,7 @@ void MediaFoundation::TEncoder::SetInputFormat(SoyPixelsFormat::Type PixelFormat
 		IsOkay(Result, "Set encoder quality CODECAPI_AVEncCommonQuality");
 	}
 	*/
-	mTransformer->SetInputFormat(*InputMediaType);
+	mTransformer->SetInputFormat(*MediaType);
 }
 
 
