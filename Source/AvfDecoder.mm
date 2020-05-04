@@ -168,21 +168,19 @@ void Avf::TDecompressor::OnDecodedFrame(OSStatus Status,CVImageBufferRef ImageBu
 	//	gr: seem to need an extra retain. find out what's releaseing this twice despite retain below
 	auto RetainCount = CFGetRetainCount( ImageBuffer );
 	//std::Debug << "On decoded frame, retain count=" << RetainCount << std::endl;
-	CFRetain( ImageBuffer );
-	RetainCount = CFGetRetainCount( ImageBuffer );
+	//CFRetain( ImageBuffer );
+	//RetainCount = CFGetRetainCount( ImageBuffer );
 	
 	//	todo: expand this to meta
 	//	todo: this shouldn't be in CVPixelBuffer, and should be higherup as its part of the STREAM not the frame
 	float3x3 Transform;
 
 	//	gr: this is double deleting the cfptr somewhere
-	auto Retain = true;
-	//std::shared_ptr<TPixelBuffer> PixelBuffer( new CVPixelBuffer(ImageBuffer, Retain, mDecoderRenderer, Transform ) );
-	CFRelease( ImageBuffer );
-	RetainCount = CFGetRetainCount( ImageBuffer );
-	//PixelBuffer.reset();
+	bool Retain = true;
+	std::shared_ptr<TPixelBuffer> PixelBuffer( new CVPixelBuffer(ImageBuffer, Retain, mDecoderRenderer, Transform ) );
+	
 	auto Time = Soy::Platform::GetTime(PresentationTimeStamp);
-	//mOnFrame( PixelBuffer, Time );
+	mOnFrame( PixelBuffer, Time );
 }
 
 void Avf::TDecompressor::OnDecodeError(const char* Error,CMTime PresentationTime)

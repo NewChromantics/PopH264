@@ -92,8 +92,6 @@
 		BFF1C71222E3CF8B00AFDFD5 /* SoyArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFF1C70F22E3CF8B00AFDFD5 /* SoyArray.cpp */; };
 		BFFBE95524582ED000E9BE1B /* PopH264TestData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFBE95324582ED000E9BE1B /* PopH264TestData.cpp */; };
 		BFFBE95624582ED000E9BE1B /* PopH264TestData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFBE95324582ED000E9BE1B /* PopH264TestData.cpp */; };
-		BFFBE95A2458318600E9BE1B /* TestData in Resources */ = {isa = PBXBuildFile; fileRef = BFFBE9592458318600E9BE1B /* TestData */; };
-		BFFBE95B2458318600E9BE1B /* TestData in Resources */ = {isa = PBXBuildFile; fileRef = BFFBE9592458318600E9BE1B /* TestData */; };
 		BFFBE961245835CD00E9BE1B /* SoyFilesystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFBE960245835CD00E9BE1B /* SoyFilesystem.cpp */; };
 		BFFBE9712458389B00E9BE1B /* SoyPng.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFBE96F2458389B00E9BE1B /* SoyPng.cpp */; };
 		BFFBE9722458389B00E9BE1B /* SoyPixels.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFBE9702458389B00E9BE1B /* SoyPixels.cpp */; };
@@ -323,7 +321,6 @@
 		BFF1C70F22E3CF8B00AFDFD5 /* SoyArray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SoyArray.cpp; path = Source/SoyLib/src/SoyArray.cpp; sourceTree = "<group>"; };
 		BFFBE95324582ED000E9BE1B /* PopH264TestData.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PopH264TestData.cpp; path = Source/PopH264TestData.cpp; sourceTree = "<group>"; };
 		BFFBE95424582ED000E9BE1B /* PopH264TestData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PopH264TestData.h; path = Source/PopH264TestData.h; sourceTree = "<group>"; };
-		BFFBE9592458318600E9BE1B /* TestData */ = {isa = PBXFileReference; lastKnownFileType = folder; path = TestData; sourceTree = "<group>"; };
 		BFFBE960245835CD00E9BE1B /* SoyFilesystem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SoyFilesystem.cpp; path = Source/SoyLib/src/SoyFilesystem.cpp; sourceTree = SOURCE_ROOT; };
 		BFFBE96F2458389B00E9BE1B /* SoyPng.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SoyPng.cpp; path = Source/SoyLib/src/SoyPng.cpp; sourceTree = SOURCE_ROOT; };
 		BFFBE9702458389B00E9BE1B /* SoyPixels.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SoyPixels.cpp; path = Source/SoyLib/src/SoyPixels.cpp; sourceTree = SOURCE_ROOT; };
@@ -333,8 +330,6 @@
 		BFFBE97A245DB65000E9BE1B /* AvfDecoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AvfDecoder.h; path = Source/AvfDecoder.h; sourceTree = "<group>"; };
 		BFFBE97B245DB65000E9BE1B /* AvfDecoder.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = AvfDecoder.mm; path = Source/AvfDecoder.mm; sourceTree = "<group>"; };
 		BFFC941A245DC0B900AEE711 /* SoyTypes_CoreFoundation.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SoyTypes_CoreFoundation.h; path = Source/SoyLib/src/SoyTypes_CoreFoundation.h; sourceTree = "<group>"; };
-		BFFC941B245EE11600AEE711 /* AvfPixelBuffer.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = AvfPixelBuffer.mm; path = Source/AvfPixelBuffer.mm; sourceTree = "<group>"; };
-		BFFC941C245EE11700AEE711 /* AvfPixelBuffer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = AvfPixelBuffer.h; path = Source/AvfPixelBuffer.h; sourceTree = "<group>"; };
 		BFFC941D245EE17900AEE711 /* SoyMedia.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SoyMedia.h; path = Source/SoyLib/src/SoyMedia.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -417,7 +412,6 @@
 		BF4A6A0B1EA16D7C00613A64 = {
 			isa = PBXGroup;
 			children = (
-				BFFBE9592458318600E9BE1B /* TestData */,
 				BFBC07F423882FB90070BCB4 /* libml_mediaerror.dylib */,
 				BF15207C2385930B00A70EBF /* libml_media_ccparser.dylib */,
 				BF15207A2385910800A70EBF /* libml_mediacodeclist.dylib */,
@@ -594,8 +588,6 @@
 		BFD6076D1EA16ED20035C814 /* Source */ = {
 			isa = PBXGroup;
 			children = (
-				BFFC941C245EE11700AEE711 /* AvfPixelBuffer.h */,
-				BFFC941B245EE11600AEE711 /* AvfPixelBuffer.mm */,
 				BFFBE97A245DB65000E9BE1B /* AvfDecoder.h */,
 				BFFBE97B245DB65000E9BE1B /* AvfDecoder.mm */,
 				BFC471802447523000A2DA70 /* AvfEncoder.h */,
@@ -837,7 +829,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BFFBE95B2458318600E9BE1B /* TestData in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -845,7 +836,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BFFBE95A2458318600E9BE1B /* TestData in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1259,7 +1249,7 @@
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 2HGDT7H2KX;
+				DEVELOPMENT_TEAM = 2Z7A93M5G3;
 				GCC_PREPROCESSOR_DEFINITIONS = TARGET_OSX;
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				PRODUCT_NAME = PopH264_TestApp;
