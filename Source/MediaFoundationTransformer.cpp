@@ -356,12 +356,6 @@ MediaFoundation::TActivateMeta MediaFoundation::GetBestTransform(const GUID& Cat
 		if (Score <= MatchingTransformScore)
 			return;
 
-		/*
-		Meta.mInputs.Clear();
-		Meta.mInputs.PushBack(Input);
-		Meta.mOutputs.Clear();
-		Meta.mOutputs.PushBack(Output);
-		*/
 		MatchingTransform = Meta;
 		MatchingTransformScore = Score;
 	};
@@ -446,20 +440,12 @@ MediaFoundation::TTransformer::TTransformer(TransformerCategory::Type Category, 
 
 	auto& Transformer = *mTransformer;
 
-	//	grab attribs
+	//	debug attribs
 	{
-		IMFAttributes* Attributes = nullptr;
-		auto Result = Transformer.GetAttributes(&Attributes);
+		Soy::AutoReleasePtr<IMFAttributes> Attributes;
+		auto Result = Transformer.GetAttributes(&Attributes.mObject);
 		if (Attributes)
-		{
-			uint32_t HasAcceleration = 0;
-			auto Result = Attributes->GetUINT32(CODECAPI_AVDecVideoAcceleration_H264, &HasAcceleration);
-			if (Result == MF_E_ATTRIBUTENOTFOUND)
-				std::Debug << "no CODECAPI_AVDecVideoAcceleration_H264 key" << std::endl;
-			else
-				std::Debug << "HasAcceleration = " << HasAcceleration << std::endl;
-			Attributes->Release();
-		}
+			MediaFoundation::EnumAttributes(*Attributes);
 	}
 }
 

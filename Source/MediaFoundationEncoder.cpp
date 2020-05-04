@@ -153,6 +153,9 @@ std::string MediaFoundation::GetName(const GUID& Guid)
 	CASE_GUID(MFMediaType_Stream);
 	CASE_GUID(MFMediaType_MultiplexedFrames);
 	CASE_GUID(MFMediaType_Subtitle);
+	
+	CASE_GUID(MFT_ENCODER_SUPPORTS_CONFIG_EVENT);
+	CASE_GUID(CODECAPI_AVDecVideoAcceleration_H264);
 
 	WCHAR StringBuffer[100];
 	StringFromGUID2( Guid, StringBuffer, std::size(StringBuffer) );
@@ -320,14 +323,6 @@ void MediaFoundation::TEncoder::SetOutputFormat(TEncoderParams Params,size_t Wid
 	mTransformer->SetOutputFormat(*MediaType);
 }
 
-namespace MediaFoundation
-{
-	void			EnumAttributes(IMFAttributes& Attributes);
-	std::string		GetValue(const PROPVARIANT& Variant, const GUID& Key);
-}
-std::ostream&	operator<<(std::ostream &out, const PROPVARIANT& in);
-
-#include <propvarutil.h>
 
 std::ostream& operator<<(std::ostream &out, const PROPVARIANT& in)
 {
@@ -335,6 +330,12 @@ std::ostream& operator<<(std::ostream &out, const PROPVARIANT& in)
 	switch (Type)
 	{
 	case VT_BOOL:	out << in.boolVal;	break;
+	case VT_I2:		out << in.iVal;	break;
+	case VT_UI2:	out << in.uiVal;	break;
+	case VT_I4:		out << in.intVal;	break;
+	case VT_UI4:	out << in.uintVal;	break;
+	case VT_I8:		out << in.hVal.QuadPart;	break;
+	case VT_UI8:	out << in.uhVal.QuadPart;	break;
 
 	case VT_CLSID:	
 	{

@@ -7,6 +7,10 @@
 #include <SoyAutoReleasePtr.h>
 #include <SoyPixels.h>
 
+#include <combaseapi.h>
+
+class IMFAttributes;
+
 namespace MediaFoundation
 {
 	class TTransformer;
@@ -27,7 +31,11 @@ namespace MediaFoundation
 	GUID					GetGuid(Soy::TFourcc Fourcc);
 	SoyPixelsFormat::Type	GetPixelFormat(const GUID& Guid);
 	std::string				GetName(const GUID& Guid);	//	get friendly known name of guid
+
+	void					EnumAttributes(IMFAttributes& Attributes);
+	std::string				GetValue(const PROPVARIANT& Variant, const GUID& Key);
 }
+std::ostream&	operator<<(std::ostream &out, const PROPVARIANT& in);
 
 class IMFTransform;
 class IMFMediaType;
