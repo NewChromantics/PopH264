@@ -128,14 +128,17 @@ void PopH264::TEncoderInstance::PushFrame(const std::string& Meta,const uint8_t*
 		{
 			//	todo: check for fourccs
 			auto PixelFormatMaybe = magic_enum::enum_cast<SoyPixelsFormat::Type>(FormatName);
-			if (!PixelFormatMaybe.has_value())
+			if (PixelFormatMaybe.has_value())
+			{
+				PixelFormat = PixelFormatMaybe.value();
+			}
+			else
 			{
 				//	gr: magic_enum currenty isnt working
 				PixelFormat = SoyPixelsFormat::ToType(FormatName);
 				if (PixelFormat == SoyPixelsFormat::Invalid)
 					throw Soy::AssertException(std::string("Unrecognised pixel format ") + FormatName);
 			}
-			PixelFormat = PixelFormatMaybe.value();			
 		}
 		SoyPixelsRemote Pixels(const_cast<uint8_t*>(LumaData), Width, Height, LumaSize, PixelFormat );
 		mEncoder->Encode(Pixels, Meta, Keyframe);
