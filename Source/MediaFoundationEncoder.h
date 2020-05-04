@@ -46,9 +46,10 @@ private:
 	virtual void	Encode(const SoyPixelsImpl& Luma, const SoyPixelsImpl& ChromaU, const SoyPixelsImpl& ChromaV, const std::string& Meta, bool Keyframe) override;
 	virtual void	FinishEncoding() override;
 	
-	void			SetInputFormat(SoyPixelsFormat::Type PixelFormat);
-	void			SetOutputFormat(TEncoderParams Params);
+	void			SetInputFormat(SoyPixelsMeta PixelsMeta);
+	void			SetOutputFormat(TEncoderParams Params,size_t Width,size_t Height);
 
 private:
+	TEncoderParams					mParams;
 	std::shared_ptr<TTransformer>	mTransformer;
 };

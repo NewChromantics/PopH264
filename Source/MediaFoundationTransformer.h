@@ -19,6 +19,14 @@ namespace MediaFoundation
 			VideoEncoder,
 		};
 	}
+
+	void	IsOkay(HRESULT Result, const char* Context);
+	void	IsOkay(HRESULT Result, const std::string& Context);
+
+	GUID					GetGuid(TransformerCategory::Type Category);
+	GUID					GetGuid(Soy::TFourcc Fourcc);
+	SoyPixelsFormat::Type	GetPixelFormat(const GUID& Guid);
+	std::string				GetName(const GUID& Guid);	//	get friendly known name of guid
 }
 
 class IMFTransform;
@@ -39,7 +47,9 @@ public:
 	SoyPixelsMeta	GetOutputPixelMeta();
 
 	void			SetOutputFormat(IMFMediaType& MediaType);
+
 	void			SetInputFormat(IMFMediaType& MediaType);
+	void			SetInputFormat(Soy::TFourcc Fourcc, std::function<void(IMFMediaType&)> ConfigMedia);
 	bool			IsInputFormatReady();
 
 private:

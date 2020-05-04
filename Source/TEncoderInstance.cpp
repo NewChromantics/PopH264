@@ -97,7 +97,6 @@ void PopH264::TEncoderInstance::PushFrame(const std::string& Meta,const uint8_t*
 	//	these return 0 if missing
 	auto Width = Json["Width"].int_value();
 	auto Height = Json["Height"].int_value();
-	auto Fail = Json["sgfgfsdgf"].int_value();
 	auto LumaSize = Json["LumaSize"].int_value();
 	auto ChromaUSize = Json["ChromaUSize"].int_value();
 	auto ChromaVSize = Json["ChromaVSize"].int_value();

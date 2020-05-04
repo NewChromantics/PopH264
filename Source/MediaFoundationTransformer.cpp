@@ -29,18 +29,10 @@ namespace MediaFoundation
 	class TActivateMeta;
 
 	std::ostream& operator<<(std::ostream &out, const TActivateMeta& in);
-
-
-	void	IsOkay(HRESULT Result, const char* Context);
-	void	IsOkay(HRESULT Result, const std::string& Context);
-
+	
 	TActivateList	EnumTransforms(const GUID& Category);
 	TActivateMeta	GetBestTransform(const GUID& Category, const ArrayBridge<Soy::TFourcc>& InputFilter, const ArrayBridge<Soy::TFourcc>& OutputFilter);
-
-	GUID					GetGuid(TransformerCategory::Type Category);
-	GUID					GetGuid(Soy::TFourcc Fourcc);
-	SoyPixelsFormat::Type	GetPixelFormat(const GUID& Guid);
-
+	
 	Soy::AutoReleasePtr<IMFSample>		CreateSample(const ArrayBridge<uint8_t>& Data, Soy::TFourcc Fourcc);
 	Soy::AutoReleasePtr<IMFMediaBuffer>	CreateBuffer(const ArrayBridge<uint8_t>& Data);
 	Soy::AutoReleasePtr<IMFMediaBuffer>	CreateBuffer(DWORD Size, DWORD Alignment);
@@ -354,7 +346,7 @@ MediaFoundation::TActivateMeta MediaFoundation::GetBestTransform(const GUID& Cat
 	auto Transformers = EnumTransforms(Category);
 	TActivateMeta MatchingTransform;
 	int MatchingTransformScore = 0;
-	const auto HardwareScore = 1000;
+	const auto HardwareScore = -1000;
 	const auto InputScore = 10;
 	const auto OutputScore = 1;
 
@@ -544,6 +536,50 @@ void MediaFoundation::TTransformer::SetOutputFormat(IMFMediaType& MediaType)
 	LockTransformer(Set);
 }
 
+
+void MediaFoundation::TTransformer::SetInputFormat(Soy::TFourcc Fourcc, std::function<void(IMFMediaType&)> ConfigMedia)
+{
+	//	nvidia(+others?) encoder seems to need to use an input
+	//	media type provided, find the one matching our format and then 
+	//	callback for modifications before setting
+	auto& Transformer = *mTransformer;
+
+	Soy::AutoReleasePtr<IMFMediaType> pMatchedMediaType;
+	for (auto i = 0; i < 1000; i++)
+	{
+		Soy::AutoReleasePtr<IMFMediaType> MediaType;
+		auto Result = Transformer.GetInputAvailableType(mInputStreamId, i, &MediaType.mObject);
+		if (Result == MF_E_NO_MORE_TYPES)
+			break;
+
+		//	input hasn't been set
+		if (Result == MF_E_TRANSFORM_TYPE_NOT_SET)
+			throw Soy::AssertException("Cannot get Input types until output is set");
+		IsOkay(Result, "GetInputAvailableType");
+
+		GUID SubType;
+		Result = MediaType->GetGUID(MF_MT_SUBTYPE, &SubType);
+		IsOkay(Result, "OutputFormat GetGuid Subtype");
+		//	todo: is it a format we support?
+		auto MatchFourcc = GetFourCC(SubType);
+		if (MatchFourcc != Fourcc)
+			continue;
+
+		//	match!
+		pMatchedMediaType = MediaType;
+		break;
+	}
+
+	if (!pMatchedMediaType)
+		throw Soy::AssertException("Didn't find a matching input type");
+
+	//	let user modify before submitting
+	if (ConfigMedia)
+		ConfigMedia(*pMatchedMediaType);
+
+	//	now set it
+	SetInputFormat(*pMatchedMediaType);
+}
 
 void MediaFoundation::TTransformer::SetInputFormat(IMFMediaType& MediaType)
 {
