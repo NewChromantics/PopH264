@@ -31,6 +31,9 @@ namespace MediaFoundation
 	GUID					GetGuid(Soy::TFourcc Fourcc);
 	SoyPixelsFormat::Type	GetPixelFormat(const GUID& Guid);
 	std::string				GetName(const GUID& Guid);	//	get friendly known name of guid
+	Soy::TFourcc			GetFourcc(SoyPixelsFormat::Type Format);
+	constexpr uint32_t		GetFourcc(const char Str[]);
+	Soy::TFourcc			GetFourCC(const GUID& Guid);
 
 	void					EnumAttributes(IMFAttributes& Attributes);
 	std::string				GetValue(const PROPVARIANT& Variant, const GUID& Key);
