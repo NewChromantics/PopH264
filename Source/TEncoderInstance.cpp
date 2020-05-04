@@ -101,6 +101,7 @@ void PopH264::TEncoderInstance::PushFrame(const std::string& Meta,const uint8_t*
 	auto ChromaUSize = Json["ChromaUSize"].int_value();
 	auto ChromaVSize = Json["ChromaVSize"].int_value();
 	auto Keyframe = Json["Keyframe"].bool_value();
+	auto FormatName = Json["Format"].string_value();
 
 	//	check for data/size mismatch
 	if ( LumaData && LumaSize==0 )
@@ -118,29 +119,37 @@ void PopH264::TEncoderInstance::PushFrame(const std::string& Meta,const uint8_t*
 	if ( !ChromaVData && ChromaVSize!=0 )
 		throw Soy::AssertException("ChromaV null but ChromaVSize nonzero");
 	
-	SoyPixelsMeta YuvMeta(Width,Height,SoyPixelsFormat::Yuv_8_8_8_Ntsc);
-	BufferArray<SoyPixelsMeta,3> YuvMetas;
-	YuvMeta.GetPlanes(GetArrayBridge(YuvMetas));
-	auto WidthChroma = YuvMetas[1].GetWidth();
-	auto HeightChroma = YuvMetas[1].GetHeight();
+	//	check for special case of 1 plane
+	if (LumaData && !ChromaUData && !ChromaVData)
+	{
+		auto PixelFormat = SoyPixelsFormat::Greyscale;
+		//	only one plane
+		if (!FormatName.empty())
+		{
+			//	todo: check for fourccs
+			auto PixelFormatMaybe = magic_enum::enum_cast<SoyPixelsFormat::Type>(FormatName);
+			if (!PixelFormatMaybe.has_value())
+				throw Soy::AssertException(std::string("Unrecognised pixel format ") + FormatName);
+			PixelFormat = PixelFormatMaybe.value();
+		}
+		SoyPixelsRemote Pixels(const_cast<uint8_t*>(LumaData), Width, Height, LumaSize, PixelFormat );
+		mEncoder->Encode(Pixels, Meta, Keyframe);
+		return;
+	}
 
 	if ( LumaData && ChromaUData && ChromaVData )
 	{
+		SoyPixelsMeta YuvMeta(Width, Height, SoyPixelsFormat::Yuv_8_8_8_Ntsc);
+		BufferArray<SoyPixelsMeta, 3> YuvMetas;
+		YuvMeta.GetPlanes(GetArrayBridge(YuvMetas));
+		auto WidthChroma = YuvMetas[1].GetWidth();
+		auto HeightChroma = YuvMetas[1].GetHeight();
+
 		//	yuv_8_8_8
 		SoyPixelsRemote PixelsY( const_cast<uint8_t*>(LumaData), Width, Height, LumaSize, SoyPixelsFormat::Luma_Ntsc );
 		SoyPixelsRemote PixelsU( const_cast<uint8_t*>(ChromaUData), WidthChroma, HeightChroma, ChromaUSize, SoyPixelsFormat::ChromaU_8 );
 		SoyPixelsRemote PixelsV( const_cast<uint8_t*>(ChromaVData), WidthChroma, HeightChroma, ChromaVSize, SoyPixelsFormat::ChromaV_8 );
 		
-		mEncoder->Encode( PixelsY, PixelsU, PixelsV, Meta, Keyframe );
-		return;
-	}
-	else if ( LumaData && !ChromaUData && !ChromaVData )
-	{
-		//	greyscale/luma
-		SoyPixelsRemote PixelsY( const_cast<uint8_t*>(LumaData), Width, Height, LumaSize, SoyPixelsFormat::Luma_Ntsc );
-		//	need some dummy chroma
-		SoyPixels PixelsU( SoyPixelsMeta( WidthChroma, HeightChroma, SoyPixelsFormat::ChromaU_8 ) );
-		SoyPixels PixelsV( SoyPixelsMeta( WidthChroma, HeightChroma, SoyPixelsFormat::ChromaV_8 ) );
 		mEncoder->Encode( PixelsY, PixelsU, PixelsV, Meta, Keyframe );
 		return;
 	}

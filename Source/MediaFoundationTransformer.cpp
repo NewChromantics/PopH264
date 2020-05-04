@@ -303,11 +303,11 @@ Soy::TFourcc MediaFoundation::GetFourcc(SoyPixelsFormat::Type Format)
 	case SoyPixelsFormat::Yuv_8_8_8_Ntsc:
 		return Soy::TFourcc("YV12");
 
-	case SoyPixelsFormat::Yuv_844_Full:
-	case SoyPixelsFormat::Yuv_844_Ntsc:
+	case SoyPixelsFormat::Yuv_8_88_Full:
+	case SoyPixelsFormat::Yuv_8_88_Ntsc:
 		return Soy::TFourcc("NV12");
 
-	case SoyPixelsFormat::Yvu_844_Ntsc:
+	case SoyPixelsFormat::Yvu_8_88_Ntsc:
 		return Soy::TFourcc("NV21");	//	also 420O
 	}
 
@@ -501,10 +501,19 @@ constexpr uint32_t MediaFoundation::GetFourcc(const char Str[])
 SoyPixelsFormat::Type MediaFoundation::GetPixelFormat(const GUID& Guid)
 {
 	auto Fourcc = GetFourCC(Guid);
+	return GetPixelFormat(Fourcc);
+}
+
+
+SoyPixelsFormat::Type MediaFoundation::GetPixelFormat(Soy::TFourcc Fourcc)
+{
 	switch (Fourcc.mFourcc32)
 	{
 	case MediaFoundation::GetFourcc("NV12"):	return SoyPixelsFormat::Nv12;
+	//case MediaFoundation::GetFourcc("IYUV"):	return SoyPixelsFormat::Yvu_8_8_8_Full;
+	//case MediaFoundation::GetFourcc("I420"):	return SoyPixelsFormat::Yvu_8_8_8_Full;
 	}
+	
 
 	std::stringstream Error;
 	Error << "Failed to get pixelformat from fourcc " << Fourcc;

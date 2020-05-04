@@ -44,10 +44,15 @@ public:
 
 private:
 	virtual void	Encode(const SoyPixelsImpl& Luma, const SoyPixelsImpl& ChromaU, const SoyPixelsImpl& ChromaV, const std::string& Meta, bool Keyframe) override;
+	virtual void	Encode(const SoyPixelsImpl& Pixels, const std::string& Meta, bool Keyframe) override;
 	virtual void	FinishEncoding() override;
 	
 	void			SetInputFormat(SoyPixelsMeta PixelsMeta);
 	void			SetOutputFormat(TEncoderParams Params,size_t Width,size_t Height);
+	SoyPixelsFormat::Type	GetInputFormat(SoyPixelsFormat::Type Format);
+
+	//	returns true if there are more to try
+	bool			FlushOutputFrame();
 
 private:
 	TEncoderParams					mParams;

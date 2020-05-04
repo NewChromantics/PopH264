@@ -199,38 +199,108 @@ void MediaFoundation::TEncoder::SetInputFormat(SoyPixelsMeta PixelsMeta)
 	mTransformer->SetInputFormat(InputFormat, Configure);
 }
 
-
-
-
 void MediaFoundation::TEncoder::Encode(const SoyPixelsImpl& Luma, const SoyPixelsImpl& ChromaU, const SoyPixelsImpl& ChromaV, const std::string& Meta, bool Keyframe)
 {
+	//	todo: need to convert this format to a supported format
+	Soy_AssertTodo();
+}
+
+
+void MediaFoundation::TEncoder::Encode(const SoyPixelsImpl& _Pixels, const std::string& Meta, bool Keyframe)
+{
+	const SoyPixelsImpl* pEncodePixels = &_Pixels;
+
+	//	work out if we need to change formats to one that's supported
+	SoyPixels ConvertedPixels;
+	auto EncodeFormat = GetInputFormat(_Pixels.GetFormat());
+	if (EncodeFormat != _Pixels.GetFormat())
+	{
+		Soy::TScopeTimerPrint Timer("MediaFoundation::TEncoder::Encode re-encode", 2);
+		ConvertedPixels.Copy(_Pixels);
+		ConvertedPixels.SetFormat(EncodeFormat);
+		pEncodePixels = &ConvertedPixels;
+	}
+	auto& EncodePixels = *pEncodePixels;
+
 	//	encoder needs to set output type before input type
 	//	and we need to know the resolution before we can set it
 	//	https://docs.microsoft.com/en-us/windows/win32/medfound/h-264-video-encoder
-	SetOutputFormat(mParams, Luma.GetWidth(), Luma.GetHeight());
+	SetOutputFormat(mParams, EncodePixels.GetWidth(), EncodePixels.GetHeight());
+	
+	SetInputFormat(EncodePixels.GetMeta());
 
-	//	convert to the format required
-	//	todo: allow override of base Encode so we dont split & rejoin
-	//SetInputFormat(SoyPixelsFormat::Yuv_8_8_8_Full);
-	SoyPixelsMeta PixelMeta(Luma.GetWidth(), Luma.GetHeight(), SoyPixelsFormat::Yuv_844_Full);
-	SetInputFormat(PixelMeta);
 
-	//	pop H264 frames
+	//	pop H264 frames that have been output
+	//	gr: other thread for this, and get as many as possible in one go
+	while (true)
+	{
+		auto More = FlushOutputFrame();
+		if (!More)
+			break;
+	}
+	
+}
+
+bool MediaFoundation::TEncoder::FlushOutputFrame()
+{
 	try
 	{
 		PopH264::TPacket Packet;
 		Packet.mData.reset(new Array<uint8_t>());
 		SoyTime Time;
 		mTransformer->PopFrame(GetArrayBridge(*Packet.mData), Time);
-		if (!Packet.mData->IsEmpty())
-		{
-			OnOutputPacket(Packet);
-		}
+
+		//	no packet
+		if (Packet.mData->IsEmpty())
+			return false;
+
+		OnOutputPacket(Packet);
+		return true;
 	}
 	catch (std::exception& e)
 	{
 		std::Debug << e.what() << std::endl;
+		return false;
 	}
+}
+
+
+SoyPixelsFormat::Type MediaFoundation::TEncoder::GetInputFormat(SoyPixelsFormat::Type Format)
+{
+	auto& Transformer = *mTransformer;
+
+	//	is this fourcc supported?
+	try
+	{
+		auto Fourcc = MediaFoundation::GetFourcc(Format);
+		//	is it in the supported list?
+		if (Transformer.mSupportedInputFormats.Find(Fourcc))
+			return Format;
+	}
+	catch (std::exception& e)
+	{
+		//	not supported
+	}
+
+	//	convert to the first supported format (assuming first is best)
+	auto& SupportedFormats = Transformer.mSupportedInputFormats;
+	for (auto i = 0; i < SupportedFormats.GetSize(); i++)
+	{
+		try
+		{
+			auto NewFourcc = Transformer.mSupportedInputFormats[i];
+			auto NewFormat = MediaFoundation::GetPixelFormat(NewFourcc);
+			return NewFormat;
+		}
+		catch (std::exception& e)
+		{
+			//	fourcc not supported
+		}
+	}
+
+	std::stringstream Error;
+	Error << "No supported input fourcc's to convert " << Format << " to";
+	throw Soy::AssertException(Error);
 }
 
 void MediaFoundation::TEncoder::FinishEncoding()

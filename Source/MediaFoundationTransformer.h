@@ -30,6 +30,7 @@ namespace MediaFoundation
 	GUID					GetGuid(TransformerCategory::Type Category);
 	GUID					GetGuid(Soy::TFourcc Fourcc);
 	SoyPixelsFormat::Type	GetPixelFormat(const GUID& Guid);
+	SoyPixelsFormat::Type	GetPixelFormat(Soy::TFourcc Fourcc);
 	std::string				GetName(const GUID& Guid);	//	get friendly known name of guid
 	Soy::TFourcc			GetFourcc(SoyPixelsFormat::Type Format);
 	constexpr uint32_t		GetFourcc(const char Str[]);
