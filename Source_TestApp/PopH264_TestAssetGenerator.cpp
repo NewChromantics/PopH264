@@ -12,8 +12,10 @@ SoyPixelsMeta GetPlaneMeta(const char* MetaJson,int PlaneIndex)
 	std::string JsonError;
 	auto Json = json11::Json::parse( MetaJson, JsonError );
 	if ( !JsonError.empty() )
-	throw std::runtime_error(JsonError);
+		throw std::runtime_error(JsonError);
 	auto Planes = Json["Planes"].array_items();
+	if ( PlaneIndex >= Planes.size() )
+		throw Soy::AssertException("Plane out of range");
 	auto Plane = Planes[PlaneIndex];
 	auto Width = Plane["Width"].int_value();
 	auto Height = Plane["Height"].int_value();
