@@ -386,15 +386,12 @@ CFPtr<CMFormatDescriptionRef> Avf::GetFormatDescriptionH264(const ArrayBridge<ui
 	auto SpsPrefixLength = H264::GetNaluLength(Sps);
 	auto PpsPrefixLength = H264::GetNaluLength(Pps);
 
-	auto* SpsStart = &Sps[SpsPrefixLength];
-	auto* PpsStart = &Pps[PpsPrefixLength];
-
 	BufferArray<const uint8_t*,2> Params;
 	BufferArray<size_t,2> ParamSizes;
-	Params.PushBack( SpsStart );
-	ParamSizes.PushBack( Sps.GetDataSize() );
-	Params.PushBack( PpsStart );
-	ParamSizes.PushBack( Pps.GetDataSize() );
+	Params.PushBack( Sps.GetArray()+SpsPrefixLength );
+	ParamSizes.PushBack( Sps.GetDataSize()-SpsPrefixLength );
+	Params.PushBack( Pps.GetArray()+PpsPrefixLength );
+	ParamSizes.PushBack( Pps.GetDataSize()-PpsPrefixLength );
 	
 	//	ios doesnt support annexb, so we will have to convert inputs
 	//	lets use 32 bit nalu size prefix
