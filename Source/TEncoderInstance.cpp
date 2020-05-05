@@ -130,7 +130,7 @@ void PopH264::TEncoderInstance::PushFrame(const std::string& Meta,const uint8_t*
 			auto PixelFormatMaybe = magic_enum::enum_cast<SoyPixelsFormat::Type>(FormatName);
 			if (PixelFormatMaybe.has_value())
 			{
-				PixelFormat = PixelFormatMaybe.value();
+				PixelFormat = *PixelFormatMaybe;
 			}
 			else
 			{

@@ -56,6 +56,7 @@ public:
 	~TEncoder();
 
 	virtual void		Encode(const SoyPixelsImpl& Luma,const SoyPixelsImpl& ChromaU,const SoyPixelsImpl& ChromaV,const std::string& Meta,bool Keyframe) override;
+	virtual void		Encode(const SoyPixelsImpl& Pixels,const std::string& Meta,bool Keyframe) override;
 	virtual void		FinishEncoding() override;
 	
 private:

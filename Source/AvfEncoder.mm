@@ -585,28 +585,22 @@ void Avf::TEncoder::AllocEncoder(const SoyPixelsMeta& Meta)
 
 void Avf::TEncoder::Encode(const SoyPixelsImpl& Luma,const SoyPixelsImpl& ChromaU,const SoyPixelsImpl& ChromaV,const std::string& Meta,bool Keyframe)
 {
+	Soy_AssertTodo();
+}
+
+
+void Avf::TEncoder::Encode(const SoyPixelsImpl& Pixels,const std::string& Meta,bool Keyframe)
+{
 	//	this should be fast as it sends to encoder, but synchronous
 	Soy::TScopeTimerPrint Timer(__PRETTY_FUNCTION__, 13);
 	
-	//	todo: make a complete CVPixelBuffer
-	/*
-	{
-		auto YuvFormat = SoyPixelsFormat::GetMergedFormat( Luma.GetFormat(), ChromaU.GetFormat(), ChromaV.GetFormat() );
-		auto YuvWidth = Luma.GetWidth();
-		auto YuvHeight = Luma.GetHeight();
-		SoyPixelsMeta YuvMeta( YuvWidth, YuvHeight, YuvFormat );
-		AllocEncoder(YuvMeta);
-	}
-	*/
-	auto& EncodePixels = Luma;
-	AllocEncoder( EncodePixels.GetMeta() );
-
-	auto PixelBuffer = Avf::PixelsToPixelBuffer(EncodePixels);
+	AllocEncoder( Pixels.GetMeta() );
+	
+	auto PixelBuffer = Avf::PixelsToPixelBuffer(Pixels);
 	auto FrameNumber = PushFrameMeta(Meta);
-		
+	
 	mCompressor->Encode( PixelBuffer, FrameNumber, Keyframe );
 }
-
 
 
 void Avf::TEncoder::FinishEncoding()
