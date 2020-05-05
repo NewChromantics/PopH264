@@ -400,7 +400,8 @@ void Avf::TDecompressor::Flush()
 
 
 	
-Avf::TDecoder::TDecoder()
+Avf::TDecoder::TDecoder(std::function<void(const SoyPixelsImpl&,size_t)> OnDecodedFrame) :
+	PopH264::TDecoder	( OnDecodedFrame )
 {
 }
 
@@ -409,12 +410,49 @@ Avf::TDecoder::~TDecoder()
 	mDecompressor.reset();
 }
 
+void Avf::TDecoder::OnDecodedFrame(TPixelBuffer& PixelBuffer,SoyTime PresentationTime)
+{
+	BufferArray<SoyPixelsImpl*,4> Planes;
+	float3x3 Transform;
+	PixelBuffer.Lock( GetArrayBridge(Planes), Transform );
+	try
+	{
+		size_t FrameNumber = PresentationTime.mTime;
+		if ( Planes.GetSize() == 0 )
+		{
+			throw Soy::AssertException("No planes from pixel buffer");
+		}
+		else if ( Planes.GetSize() == 1 )
+		{
+			OnDecodedFrame( *Planes[0], FrameNumber );
+		}
+		else
+		{
+			//	merge planes
+			SoyPixels Merged( *Planes[0] );
+			if ( Planes.GetSize() == 2 )
+				Merged.AppendPlane(*Planes[1]);
+			else
+				Merged.AppendPlane(*Planes[1],*Planes[2]);
+			OnDecodedFrame( Merged, FrameNumber );
+		}
+		
+		PixelBuffer.Unlock();
+	}
+	catch(...)
+	{
+		PixelBuffer.Unlock();
+		throw;
+	}
+}
+
 
 void Avf::TDecoder::AllocDecoder()
 {
 	auto OnPacket = [this](std::shared_ptr<TPixelBuffer> pPixelBuffer,SoyTime PresentationTime)
 	{
 		std::Debug << "Decompressed pixel buffer " << PresentationTime << std::endl;
+		this->OnDecodedFrame( *pPixelBuffer, PresentationTime );
 	};
 
 	if ( mDecompressor )
@@ -424,7 +462,7 @@ void Avf::TDecoder::AllocDecoder()
 	mDecompressor.reset( new TDecompressor( GetArrayBridge(mNaluSps), GetArrayBridge(mNaluPps), OnPacket ) );
 }
 
-bool Avf::TDecoder::DecodeNextPacket(std::function<void(const SoyPixelsImpl&,SoyTime)> OnFrameDecoded)
+bool Avf::TDecoder::DecodeNextPacket()
 {
 	Array<uint8_t> Nalu;
 	if ( !PopNalu( GetArrayBridge(Nalu) ) )
@@ -454,6 +492,7 @@ bool Avf::TDecoder::DecodeNextPacket(std::function<void(const SoyPixelsImpl&,Soy
 		return true;
 	}
 	
+	//	gr: get this from the pending list
 	auto FrameNumber = mFrameNumber;
 	mFrameNumber++;
 	mDecompressor->Decode( GetArrayBridge(Nalu), FrameNumber );

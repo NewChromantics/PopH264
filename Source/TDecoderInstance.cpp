@@ -44,12 +44,17 @@
 
 PopH264::TDecoderInstance::TDecoderInstance(int32_t Mode)
 {
+	auto OnFrameDecoded = [this](const SoyPixelsImpl& Pixels,size_t FrameNumber)
+	{
+		this->PushFrame(Pixels, FrameNumber );
+	};
+	
 #if defined(ENABLE_AVF)
 	//if (Mode != POPH264_DECODERMODE_SOFTWARE)
 	{
 		try
 		{
-			mDecoder.reset(new Avf::TDecoder());
+			mDecoder.reset(new Avf::TDecoder(OnFrameDecoded));
 			return;
 		}
 		catch (std::exception& e)
@@ -64,7 +69,7 @@ PopH264::TDecoderInstance::TDecoderInstance(int32_t Mode)
 	{
 		try
 		{
-			mDecoder.reset(new MagicLeap::TDecoder(Mode));
+			mDecoder.reset(new MagicLeap::TDecoder(Mode,OnFrameDecoded));
 			return;
 		}
 		catch (std::exception& e)
@@ -79,7 +84,7 @@ PopH264::TDecoderInstance::TDecoderInstance(int32_t Mode)
 	{
 		try
 		{
-			mDecoder.reset(new MediaFoundation::TDecoder());
+			mDecoder.reset(new MediaFoundation::TDecoder(OnFrameDecoded));
 			return;
 		}
 		catch (std::exception& e)
@@ -105,8 +110,10 @@ PopH264::TDecoderInstance::TDecoderInstance(int32_t Mode)
 	
 	
 #if defined(ENABLE_BROADWAY)
-	mDecoder.reset( new Broadway::TDecoder );
-	return;
+	{
+		mDecoder.reset( new Broadway::TDecoder(OnFrameDecoded) );
+		return;
+	}
 #endif
 	
 	std::stringstream Error;
@@ -115,17 +122,12 @@ PopH264::TDecoderInstance::TDecoderInstance(int32_t Mode)
 }
 
 
-void PopH264::TDecoderInstance::PushData(const uint8_t* Data,size_t DataSize,int32_t FrameNumber)
+void PopH264::TDecoderInstance::PushData(const uint8_t* Data,size_t DataSize,size_t FrameNumber)
 {
-	auto PushFrame = [this,FrameNumber](const SoyPixelsImpl& Pixels,SoyTime DecodeDuration)
-	{
-		this->PushFrame( Pixels, FrameNumber, DecodeDuration.GetMilliSeconds() );
-	};
-
 	//	if user passes null, we want to end stream/flush
 	if ( Data == nullptr )
 	{
-		mDecoder->OnEndOfStream(PushFrame);
+		mDecoder->OnEndOfStream();
 		return;
 	}
 	
@@ -146,7 +148,7 @@ void PopH264::TDecoderInstance::PushData(const uint8_t* Data,size_t DataSize,int
 			{
 				SoyPixels Pixels;
 				Soy::DecodeImage(Pixels, GetArrayBridge(DataArray));
-				this->PushFrame(Pixels, FrameNumber, DecodeDuration.GetMilliSeconds());
+				this->PushFrame(Pixels, FrameNumber );
 				return;
 			}
 		}
@@ -156,7 +158,7 @@ void PopH264::TDecoderInstance::PushData(const uint8_t* Data,size_t DataSize,int
 		std::Debug << __PRETTY_FUNCTION__ << " trying to detect image caused exception; " << e.what() << std::endl;
 	}
 	
-	mDecoder->Decode( GetArrayBridge(DataArray), PushFrame );
+	mDecoder->Decode( GetArrayBridge(DataArray), FrameNumber );
 }
 
 
@@ -212,12 +214,11 @@ bool PopH264::TDecoderInstance::PopFrame(TFrame& Frame)
 	return true;
 }
 
-void PopH264::TDecoderInstance::PushFrame(const SoyPixelsImpl& Frame,int32_t FrameNumber,std::chrono::milliseconds DecodeDuration)
+void PopH264::TDecoderInstance::PushFrame(const SoyPixelsImpl& Frame,size_t FrameNumber)
 {
 	TFrame NewFrame;
 	NewFrame.mFrameNumber = FrameNumber;
 	NewFrame.mPixels.reset( new SoyPixels( Frame ) );
-	NewFrame.mDecodeDuration = DecodeDuration;
 	
 	{
 		std::lock_guard<std::mutex> Lock(mFramesLock);

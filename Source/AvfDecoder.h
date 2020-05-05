@@ -20,17 +20,22 @@ namespace Avf
 	class TFrameMeta;
 }
 
+class TPixelBuffer;
+
 
 class Avf::TDecoder : public PopH264::TDecoder
 {
 public:
-	TDecoder();
+	TDecoder(std::function<void(const SoyPixelsImpl&,size_t)> OnDecodedFrame);
 	~TDecoder();
 	
 private:
-	virtual bool	DecodeNextPacket(std::function<void(const SoyPixelsImpl&,SoyTime)> OnFrameDecoded) override;	//	returns true if more data to proccess
+	virtual bool	DecodeNextPacket() override;	//	returns true if more data to proccess
 	void			AllocDecoder();
-	
+
+	using			PopH264::TDecoder::OnDecodedFrame;	//	reveal inherited versions of OnDecodedFrame when resolving
+	void			OnDecodedFrame(TPixelBuffer& PixelBuffer,SoyTime PresentationTime);
+
 private:
 	size_t							mFrameNumber = 0;
 	std::shared_ptr<TDecompressor>	mDecompressor;

@@ -47,7 +47,8 @@ void H264SwDecMemset(void *ptr, i32 value, u32 count)
 }
 */
 
-Broadway::TDecoder::TDecoder()
+Broadway::TDecoder::TDecoder(std::function<void(const SoyPixelsImpl&,size_t)> OnDecodedFrame) :
+	PopH264::TDecoder	( OnDecodedFrame )
 {
 	auto disableOutputReordering = false;
 	auto Result = H264SwDecInit( &mDecoderInstance, disableOutputReordering );
@@ -58,12 +59,6 @@ Broadway::TDecoder::TDecoder()
 		mDecoderInstance = nullptr;
 		throw Soy::AssertException(Error.str());
 	}
-
-	/*
-	mDecoderInstance.pStream = decoder[i]->byteStrmStart;
-	mDecoderInstance.dataLen = strmLen;
-	mDecoderInstance.intraConcealmentMethod = 0;
-	 */
 }
 
 Broadway::TDecoder::~TDecoder()
@@ -127,7 +122,7 @@ void Broadway::IsOkay(H264SwDecRet Result,const char* Context)
 }
 
 //	returns true if more data to proccess
-bool Broadway::TDecoder::DecodeNextPacket(std::function<void(const SoyPixelsImpl&,SoyTime)> OnFrameDecoded)
+bool Broadway::TDecoder::DecodeNextPacket()
 {
 	Array<uint8_t> Nalu;
 	if ( !PopNalu( GetArrayBridge(Nalu) ) )
@@ -233,11 +228,7 @@ bool Broadway::TDecoder::DecodeNextPacket(std::function<void(const SoyPixelsImpl
 		{
 			//	gr: this should be fast, it just extracts references from the buffer
 			Soy::TScopeTimerPrint PictureTimer("H264 Picture Decode",1);
-			//	if no callback, just skip image extraction
-			if ( !OnFrameDecoded )
-			{
-				//return true;
-			}
+			
 			auto Meta = GetMeta();
 			H264SwDecPicture Picture;
 			u32 EndOfStream = false;
@@ -262,7 +253,7 @@ bool Broadway::TDecoder::DecodeNextPacket(std::function<void(const SoyPixelsImpl
 					   decPicture.nbrOfErrMBs);
 				*/
 				//	YuvToRgb( decPicture.pOutputPicture, pRgbPicture );
-				OnPicture( Picture, Meta, OnFrameDecoded, DecodeDuration );
+				OnPicture( Picture, Meta, DecodeDuration );
 			}
 			return true;
 		}
@@ -286,7 +277,7 @@ void Broadway::TDecoder::OnMeta(const H264SwDecInfo& Meta)
 	
 }
 
-void Broadway::TDecoder::OnPicture(const H264SwDecPicture& Picture,const H264SwDecInfo& Meta,std::function<void(const SoyPixelsImpl&,SoyTime)> OnFrameDecoded,SoyTime DecodeDuration)
+void Broadway::TDecoder::OnPicture(const H264SwDecPicture& Picture,const H264SwDecInfo& Meta,SoyTime DecodeDuration)
 {
 	//		headers just say
 	//	u32 *pOutputPicture;    /* Pointer to the picture, YUV format       */
@@ -301,8 +292,8 @@ void Broadway::TDecoder::OnPicture(const H264SwDecPicture& Picture,const H264SwD
 
 	auto* Pixels8 = reinterpret_cast<uint8_t*>(Picture.pOutputPicture);
 	SoyPixelsRemote Pixels( Pixels8, DataSize, PixelMeta );
-	if ( OnFrameDecoded )
-		OnFrameDecoded( Pixels, DecodeDuration );
+	
+	OnDecodedFrame( Pixels );
 }
 
 

@@ -15,13 +15,17 @@ namespace PopH264
 class PopH264::TDecoder
 {
 public:
-	void			Decode(ArrayBridge<uint8_t>&& PacketData,std::function<void(const SoyPixelsImpl&,SoyTime)> OnFrameDecoded);
+	TDecoder(std::function<void(const SoyPixelsImpl&,size_t)> OnDecodedFrame);
+	
+	void			Decode(ArrayBridge<uint8_t>&& PacketData,size_t FrameNumber);
 
 	//	gr: this has a callback because of flushing old packets. Need to overhaul the framenumber<->packet relationship
-	void			OnEndOfStream(std::function<void(const SoyPixelsImpl&,SoyTime)> OnFrameDecoded);
+	void			OnEndOfStream();
 	
 protected:
-	virtual bool	DecodeNextPacket(std::function<void(const SoyPixelsImpl&,SoyTime)> OnFrameDecoded)=0;	//	returns true if more data to proccess
+	void			OnDecodedFrame(const SoyPixelsImpl& Pixels);
+	void			OnDecodedFrame(const SoyPixelsImpl& Pixels,size_t FrameNumber);
+	virtual bool	DecodeNextPacket()=0;	//	returns true if more data to proccess
 	
 	bool			HasPendingData()	{	return !mPendingData.IsEmpty();	}
 	bool			PopNalu(ArrayBridge<uint8_t>&& Buffer);
@@ -36,4 +40,6 @@ private:
 	size_t			mPendingOffset = 0;		//	to reduce reallocations, we keep an offset where we've read
 	bool			mPendingDataFinished = false;	//	when we know we're at EOS
 	Array<uint8_t>	mPendingData;
+	Array<size_t>	mPendingFrameNumbers;
+	std::function<void(const SoyPixelsImpl&,size_t)>	mOnDecodedFrame;
 };

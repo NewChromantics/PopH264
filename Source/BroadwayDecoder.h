@@ -27,13 +27,13 @@ namespace Broadway
 class Broadway::TDecoder : public PopH264::TDecoder
 {
 public:
-	TDecoder();
+	TDecoder(std::function<void(const SoyPixelsImpl&,size_t)> OnDecodedFrame);
 	~TDecoder();
 
 private:
 	void			OnMeta(const H264SwDecInfo& Meta);
-	void			OnPicture(const H264SwDecPicture& Picture,const H264SwDecInfo& Meta,std::function<void(const SoyPixelsImpl&,SoyTime)> OnFrameDecoded,SoyTime DecodeDuration);
-	virtual bool	DecodeNextPacket(std::function<void(const SoyPixelsImpl&,SoyTime)> OnFrameDecoded) override;	//	returns true if more data to proccess
+	void			OnPicture(const H264SwDecPicture& Picture,const H264SwDecInfo& Meta,SoyTime DecodeDuration);
+	virtual bool	DecodeNextPacket() override;	//	returns true if more data to proccess
 	
 private:
 	H264SwDecInst	mDecoderInstance = nullptr;

@@ -2,8 +2,26 @@
 #include "SoyH264.h"
 
 
+PopH264::TDecoder::TDecoder(std::function<void(const SoyPixelsImpl&,size_t)> OnDecodedFrame) :
+	mOnDecodedFrame	( OnDecodedFrame )
+{
+}
 
-void PopH264::TDecoder::OnEndOfStream(std::function<void(const SoyPixelsImpl&,SoyTime)> OnFrameDecoded)
+void PopH264::TDecoder::OnDecodedFrame(const SoyPixelsImpl& Pixels)
+{
+	auto FrameNumber = mPendingFrameNumbers.PopAt(0);
+	OnDecodedFrame( Pixels, FrameNumber );
+}
+
+
+void PopH264::TDecoder::OnDecodedFrame(const SoyPixelsImpl& Pixels,size_t FrameNumber)
+{
+	//	check against pending frame numbers?
+	mPendingFrameNumbers.Remove(FrameNumber);
+	mOnDecodedFrame( Pixels, FrameNumber );
+}
+
+void PopH264::TDecoder::OnEndOfStream()
 {
 	//	send an explicit end of stream nalu
 	//	todo: overload this for implementation specific flushes
@@ -13,20 +31,23 @@ void PopH264::TDecoder::OnEndOfStream(std::function<void(const SoyPixelsImpl&,So
 	
 	//	mark pending data as finished
 	mPendingDataFinished = true;
-	Decode( GetArrayBridge(DataArray), OnFrameDecoded );
+	Decode( GetArrayBridge(DataArray), 0 );
 }
 
-void PopH264::TDecoder::Decode(ArrayBridge<uint8_t>&& PacketData,std::function<void(const SoyPixelsImpl&,SoyTime)> OnFrameDecoded)
+void PopH264::TDecoder::Decode(ArrayBridge<uint8_t>&& PacketData,size_t FrameNumber)
 {
 	{
 		std::lock_guard<std::mutex> Lock(mPendingDataLock);
 		mPendingData.PushBackArray(PacketData);
+		//	todo: proper data<->number relationships, but we also need to cope with
+		//		when we don't have this
+		mPendingFrameNumbers.PushBack(FrameNumber);
 	}
 	
 	while ( true )
 	{
 		//	keep decoding until no more data to process
-		if ( !DecodeNextPacket( OnFrameDecoded ) )
+		if ( !DecodeNextPacket() )
 			break;
 	}
 }
