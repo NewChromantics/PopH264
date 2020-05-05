@@ -163,6 +163,7 @@ Avf::TDecompressor::~TDecompressor()
 
 void Avf::TDecompressor::OnDecodedFrame(OSStatus Status,CVImageBufferRef ImageBuffer,VTDecodeInfoFlags Flags,CMTime PresentationTimeStamp)
 {
+	//	gr: the error -12349 is still undocumented, but we do continue to get frames after, seems to just be the first frame?
 	IsOkay(Status,__PRETTY_FUNCTION__);
 	
 	//	gr: seem to need an extra retain. find out what's releaseing this twice despite retain below
