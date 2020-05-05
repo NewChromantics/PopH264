@@ -7,6 +7,10 @@
 #include <SoyAutoReleasePtr.h>
 #include <SoyPixels.h>
 
+#include <combaseapi.h>
+
+class IMFAttributes;
+
 namespace MediaFoundation
 {
 	class TTransformer;
@@ -19,7 +23,23 @@ namespace MediaFoundation
 			VideoEncoder,
 		};
 	}
+
+	void	IsOkay(HRESULT Result, const char* Context);
+	void	IsOkay(HRESULT Result, const std::string& Context);
+
+	GUID					GetGuid(TransformerCategory::Type Category);
+	GUID					GetGuid(Soy::TFourcc Fourcc);
+	SoyPixelsFormat::Type	GetPixelFormat(const GUID& Guid);
+	SoyPixelsFormat::Type	GetPixelFormat(Soy::TFourcc Fourcc);
+	std::string				GetName(const GUID& Guid);	//	get friendly known name of guid
+	Soy::TFourcc			GetFourcc(SoyPixelsFormat::Type Format);
+	constexpr uint32_t		GetFourcc(const char Str[]);
+	Soy::TFourcc			GetFourCC(const GUID& Guid);
+
+	void					EnumAttributes(IMFAttributes& Attributes);
+	std::string				GetValue(const PROPVARIANT& Variant, const GUID& Key);
 }
+std::ostream&	operator<<(std::ostream &out, const PROPVARIANT& in);
 
 class IMFTransform;
 class IMFMediaType;
@@ -38,7 +58,10 @@ public:
 	IMFMediaType&	GetOutputMediaType();	//	get access to media type to read output meta
 	SoyPixelsMeta	GetOutputPixelMeta();
 
-	void			SetInputFormat(IMFMediaType& InputMediaType);
+	void			SetOutputFormat(IMFMediaType& MediaType);
+
+	void			SetInputFormat(IMFMediaType& MediaType);
+	void			SetInputFormat(Soy::TFourcc Fourcc, std::function<void(IMFMediaType&)> ConfigMedia);
 	bool			IsInputFormatReady();
 
 private:
@@ -46,10 +69,14 @@ private:
 	void			ProcessNextOutputPacket();
 	void			LockTransformer(std::function<void()> Run);
 
-private:
+public:
 	IMFTransform*	mTransformer = nullptr;
+private:
 	DWORD			mInputStreamId = 0;
 	DWORD			mOutputStreamId = 0;
 	bool			mInputFormatSet = false;
 	Soy::AutoReleasePtr<IMFMediaType> mOutputMediaType;
+
+public:
+	Array<Soy::TFourcc>	mSupportedInputFormats;
 };

@@ -196,6 +196,13 @@ void X264::TEncoder::AllocEncoder(const SoyPixelsMeta& Meta)
 	mPixelMeta = Meta;
 }
 
+
+void X264::TEncoder::Encode(const SoyPixelsImpl& Pixels, const std::string& Meta, bool Keyframe)
+{
+	//	convert to 3 plane format
+	Soy_AssertTodo();
+}
+
 void X264::TEncoder::Encode(const SoyPixelsImpl& Luma,const SoyPixelsImpl& ChromaU,const SoyPixelsImpl& ChromaV,const std::string& Meta,bool Keyframe)
 {
 	Soy::TScopeTimerPrint Timer(__PRETTY_FUNCTION__, 2);

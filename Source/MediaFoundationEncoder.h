@@ -26,9 +26,9 @@ public:
 
 	size_t	mQuality = 100;
 
-	//	zero means don't apply
-	size_t	mAverageKbps = 0;
-	size_t	mProfileLevel = 0;
+	//	these are required by MediaFoundation
+	size_t	mAverageKbps = 2000;	//	REALLY high rate gives D3D error for nvidia encoder
+	size_t	mProfileLevel = 30;
 };
 
 
@@ -44,9 +44,15 @@ public:
 
 private:
 	virtual void	Encode(const SoyPixelsImpl& Luma, const SoyPixelsImpl& ChromaU, const SoyPixelsImpl& ChromaV, const std::string& Meta, bool Keyframe) override;
+	virtual void	Encode(const SoyPixelsImpl& Pixels, const std::string& Meta, bool Keyframe) override;
 	virtual void	FinishEncoding() override;
 	
-	void			SetInputFormat(SoyPixelsFormat::Type PixelFormat);
+	void			SetInputFormat(SoyPixelsMeta PixelsMeta);
+	void			SetOutputFormat(TEncoderParams Params,size_t Width,size_t Height);
+	SoyPixelsFormat::Type	GetInputFormat(SoyPixelsFormat::Type Format);
+
+	//	returns true if there are more to try
+	bool			FlushOutputFrame();
 
 private:
 	TEncoderParams					mParams;
