@@ -75,10 +75,80 @@ void DecoderTest(const char* TestDataName,CompareFunc_t* Compare)
 	PopH264_DestroyInstance(Handle);
 }
 
+void EncoderGreyscaleTest()
+{
+	const char* EncoderOptionsJson =
+	R"V0G0N(
+	{
+	}
+	)V0G0N";
+	
+	//	testing the apple encoder
+	char ErrorBuffer[1000] = {0};
+	auto Handle = PopH264_CreateEncoder(EncoderOptionsJson, ErrorBuffer, std::size(ErrorBuffer) );
+	std::stringstream Debug;
+	Debug << "PopH264_CreateEncoder handle=" << Handle << " error=" << ErrorBuffer;
+	DebugPrint(Debug.str());
+	
+	//	encode a test image
+	const uint8_t TestImage[128*128]={128};
+	const char* TestMetaJson =
+	R"V0G0N(
+	{
+		"Width":128,
+		"Height":128,
+		"LumaSize":16384
+	}
+	)V0G0N";
+	PopH264_EncoderPushFrame( Handle, TestMetaJson, TestImage, nullptr, nullptr, ErrorBuffer, std::size(ErrorBuffer) );
+	Debug << "PopH264_EncoderPushFrame error=" << ErrorBuffer;
+	DebugPrint(Debug.str());
+	
+	//	todo: decode it again
+	
+	PopH264_DestroyEncoder(Handle);
+}
 
+#include "SoyPixels.h"
 
+void EncoderYuv8_88Test()
+{
+	const char* EncoderOptionsJson =
+	R"V0G0N(
+	{
+	}
+	)V0G0N";
+	
+	char ErrorBuffer[1000] = {0};
+	auto Handle = PopH264_CreateEncoder(EncoderOptionsJson, ErrorBuffer, std::size(ErrorBuffer) );
+	std::stringstream Debug;
+	Debug << "PopH264_CreateEncoder handle=" << Handle << " error=" << ErrorBuffer;
+	DebugPrint(Debug.str());
+
+	SoyPixels Yuv( SoyPixelsMeta(128,128,SoyPixelsFormat::Yuv_8_88_Full));
+	auto Size = Yuv.GetPixelsArray().GetDataSize();
+	const char* TestMetaJson =
+	R"V0G0N(
+	{
+		"Width":128,
+		"Height":128,
+		"LumaSize":24576,
+		"Format":"Yuv_8_88_Full"
+	}
+	)V0G0N";
+	PopH264_EncoderPushFrame( Handle, TestMetaJson, Yuv.GetPixelsArray().GetArray(), nullptr, nullptr, ErrorBuffer, std::size(ErrorBuffer) );
+	Debug << "PopH264_EncoderPushFrame error=" << ErrorBuffer;
+	DebugPrint(Debug.str());
+	
+	//	todo: decode it again
+	
+	PopH264_DestroyEncoder(Handle);
+}
+	
 int main()
 {
+	EncoderYuv8_88Test();
+
 #if defined(TEST_ASSETS)
 	MakeGreyscalePng("PopH264Test_GreyscaleGradient.png");
 	MakeRainbowPng("PopH264Test_RainbowGradient.png");
@@ -107,36 +177,7 @@ int main()
 		DebugPrint(e.what());
 	}
 
-	const char* EncoderOptionsJson =
-	R"V0G0N(
-	{
-	}
-	)V0G0N";
-
-	//	testing the apple encoder
-	char ErrorBuffer[1000] = {0};
-	auto Handle = PopH264_CreateEncoder(EncoderOptionsJson, ErrorBuffer, std::size(ErrorBuffer) );
-	std::stringstream Debug;
-	Debug << "PopH264_CreateEncoder handle=" << Handle << " error=" << ErrorBuffer;
-	DebugPrint(Debug.str());
-	
-	//	encode a test image
-	const uint8_t TestImage[128*128]={128};
-	const char* TestMetaJson =
-	R"V0G0N(
-	{
-		"Width":128,
-		"Height":128,
-		"LumaSize":16384
-	}
-	)V0G0N";
-	PopH264_EncoderPushFrame( Handle, TestMetaJson, TestImage, nullptr, nullptr, ErrorBuffer, std::size(ErrorBuffer) );
-	Debug << "PopH264_EncoderPushFrame error=" << ErrorBuffer;
-	DebugPrint(Debug.str());
-
-	//	todo: decode it again
-	
-	PopH264_DestroyEncoder(Handle);
+	EncoderGreyscaleTest();
 	
 	return 0;
 }

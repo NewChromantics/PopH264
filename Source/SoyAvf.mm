@@ -367,9 +367,53 @@ CVPixelBufferRef Avf::PixelsToPixelBuffer(const SoyPixelsImpl& Image)
 	}
 #endif
 	
+
+	void* BaseAddress = Pixels;
+	BufferArray<std::shared_ptr<SoyPixelsImpl>,3> Planes;
+	Image.SplitPlanes( GetArrayBridge(Planes));
+	Array<uint8_t> Buffer;
+
+	//	special cases
+	//		baseAddr points to a XXXX
+	if ( PixelFormatType == kCVPixelFormatType_420YpCbCr8Planar || PixelFormatType == kCVPixelFormatType_420YpCbCr8PlanarFullRange )
+	{
+		//	gr: I want to support a pixelformat with arbirtry data that would cover this
+		//	offset from main base address to base address of this plane, big-endian
+		auto& YuvInfo = *Buffer.PushBackReinterpret(CVPlanarPixelBufferInfo_YCbCrPlanar());
+		YuvInfo.componentInfoY.offset = sizeof(YuvInfo);
+		YuvInfo.componentInfoY.rowBytes = Planes[0]->GetMeta().GetRowDataSize();
+		YuvInfo.componentInfoCb.offset = YuvInfo.componentInfoY.offset + Planes[0]->GetMeta().GetDataSize();
+		YuvInfo.componentInfoCb.rowBytes = Planes[1]->GetMeta().GetRowDataSize();
+		YuvInfo.componentInfoCr.offset = YuvInfo.componentInfoCb.offset + Planes[1]->GetMeta().GetDataSize();
+		YuvInfo.componentInfoCr.rowBytes = Planes[2]->GetMeta().GetRowDataSize();
+		
+		Buffer.PushBackArray(PixelsArray);
+		BaseAddress = Buffer.GetArray();
+	}
+	else if ( PixelFormatType == kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange || PixelFormatType == kCVPixelFormatType_420YpCbCr8BiPlanarFullRange )
+	{
+		auto& YuvInfo = *Buffer.PushBackReinterpret(CVPlanarPixelBufferInfo_YCbCrBiPlanar());
+		YuvInfo.componentInfoY.offset = sizeof(YuvInfo);
+		YuvInfo.componentInfoY.rowBytes = Planes[0]->GetMeta().GetRowDataSize();
+		YuvInfo.componentInfoCbCr.offset = YuvInfo.componentInfoY.offset + Planes[0]->GetMeta().GetDataSize();
+		YuvInfo.componentInfoCbCr.rowBytes = Planes[1]->GetMeta().GetRowDataSize();
+
+		YuvInfo.componentInfoY.offset = CFSwapInt32HostToBig(YuvInfo.componentInfoY.offset);
+		YuvInfo.componentInfoY.rowBytes = CFSwapInt32HostToBig(YuvInfo.componentInfoY.rowBytes);
+		YuvInfo.componentInfoCbCr.offset = CFSwapInt32HostToBig(YuvInfo.componentInfoCbCr.offset);
+		YuvInfo.componentInfoCbCr.rowBytes = CFSwapInt32HostToBig(YuvInfo.componentInfoCbCr.rowBytes);
+		
+
+		Buffer.PushBackArray(PixelsArray);
+		BaseAddress = Buffer.GetArray();
+	}
+	else
+	{
+		//	just using pixels directly
+	}
+
 	CVPixelBufferRef PixelBuffer = nullptr;
-	auto Result = CVPixelBufferCreateWithBytes( PixelBufferAllocator, Image.GetWidth(), Image.GetHeight(), PixelFormatType, Pixels, BytesPerRow, PixelReleaseCallback, ReleaseContext, PixelBufferAttributes, &PixelBuffer );
-	
+	auto Result = CVPixelBufferCreateWithBytes( PixelBufferAllocator, Image.GetWidth(), Image.GetHeight(), PixelFormatType, BaseAddress, BytesPerRow, PixelReleaseCallback, ReleaseContext, PixelBufferAttributes, &PixelBuffer );
 	Soy::TFourcc Fourcc(PixelFormatType);
 	std::stringstream Error;
 	Error << "CVPixelBufferCreateWithBytes " << Image.GetMeta() << "(" << Fourcc << ")";
