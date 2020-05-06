@@ -233,7 +233,7 @@ void PopH264::TEncoderInstance::PopPacket(ArrayBridge<uint8_t>&& Data)
 
 void PopH264::TEncoderInstance::OnNewPacket(TPacket& Packet)
 {
-	static bool Debug = false;
+	static bool Debug = true;
 	if ( Debug )
 	{
 		try
