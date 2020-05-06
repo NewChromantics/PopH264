@@ -154,6 +154,15 @@ void EncoderYuv8_88Test()
 	DebugPrint(Debug.str());
 	
 	//	todo: decode it again
+	while(true)
+	{
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
+		uint8_t PacketBuffer[1024*50];
+		auto FrameSize = PopH264_EncoderPopData(Handle, PacketBuffer, std::size(PacketBuffer) );
+		if ( FrameSize < 0 )
+			break;
+		std::Debug << "Encoder packet: x" << FrameSize << std::endl;
+	}
 	
 	PopH264_DestroyEncoder(Handle);
 }
