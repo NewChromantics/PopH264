@@ -68,6 +68,16 @@ bool MediaFoundation::TDecoder::DecodeNextPacket()
 
 	SetInputFormat();
 
+	if (NaluType == H264NaluContent::EndOfStream)
+	{
+		//	flush ditches pending inputs!
+		//mTransformer->ProcessCommand(MFT_MESSAGE_COMMAND_FLUSH);
+		//mTransformer->ProcessCommand(MFT_MESSAGE_COMMAND_DRAIN);
+		mTransformer->ProcessCommand(MFT_MESSAGE_NOTIFY_END_STREAMING);
+		mTransformer->ProcessCommand(MFT_MESSAGE_NOTIFY_END_OF_STREAM);
+		//mTransformer->ProcessCommand(MFT_MESSAGE_COMMAND_FLUSH_OUTPUT_STREAM);
+	}
+
 	if (!mTransformer->PushFrame(GetArrayBridge(Nalu)))
 	{
 		//	data was rejected
@@ -83,7 +93,10 @@ bool MediaFoundation::TDecoder::DecodeNextPacket()
 
 		//	no frame
 		if (OutFrame.IsEmpty())
-			return false;
+		{
+			//	try and decode more nalu though
+			return true;
+		}
 
 		auto PixelMeta = mTransformer->GetOutputPixelMeta();
 		SoyPixelsRemote Pixels(OutFrame.GetArray(), OutFrame.GetDataSize(), PixelMeta);

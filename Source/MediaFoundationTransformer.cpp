@@ -729,8 +729,8 @@ bool MediaFoundation::TTransformer::IsInputFormatReady()
 			throw Soy::AssertException(Error);
 		}
 	}
-	//	get status?
-	return false;
+
+	return true;
 }
 
 void MediaFoundation::TTransformer::LockTransformer(std::function<void()> Execute)
@@ -828,6 +828,15 @@ void MediaFoundation::TTransformer::SetInputFormat(Soy::TFourcc Fourcc, std::fun
 	//	now set it
 	SetInputFormat(*pMatchedMediaType);
 }
+
+void MediaFoundation::TTransformer::ProcessCommand(MFT_MESSAGE_TYPE Command)
+{
+	auto& Transformer = *this->mTransformer;
+	ULONG_PTR Param = 0;// nullptr;
+	auto Result = Transformer.ProcessMessage(Command, Param);
+	IsOkay(Result, std::string("ProcessMessage ") + std::string(magic_enum::enum_name(Command)));
+}
+
 
 void MediaFoundation::TTransformer::SetInputFormat(IMFMediaType& MediaType)
 {
