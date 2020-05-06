@@ -134,18 +134,19 @@
     <OutDir>$(SolutionDir)..\Build\$(Configuration)_$(Platform)\</OutDir>
     <IncludePath>$(OutDir);$(ProjectDir)..\Source\SoyLib\src;$(ProjectDir)..\Source\Json11;$(IncludePath)</IncludePath>
     <LibraryPath>$(OutDir);$(LibraryPath)</LibraryPath>
+    <IntDir>$(SolutionDir)$(ProjectName)_$(Platform)_$(Configuration)\Temp\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)..\Build\$(Configuration)_$(Platform)\</OutDir>
-    <IntDir>$(Platform)\$(Configuration)\</IntDir>
+    <IntDir>$(SolutionDir)$(ProjectName)_$(Platform)_$(Configuration)\Temp\</IntDir>
     <IncludePath>$(OutDir);$(ProjectDir)..\Source\SoyLib\src;$(ProjectDir)..\Source\Json11;$(IncludePath)</IncludePath>
     <LibraryPath>$(OutDir);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)..\Build\$(Configuration)_$(Platform)\</OutDir>
-    <IntDir>$(Platform)\$(Configuration)\</IntDir>
+    <IntDir>$(SolutionDir)$(ProjectName)_$(Platform)_$(Configuration)\Temp\</IntDir>
     <IncludePath>$(OutDir);$(ProjectDir)..\Source\SoyLib\src;$(ProjectDir)..\Source\Json11;$(IncludePath)</IncludePath>
     <LibraryPath>$(OutDir);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
@@ -154,6 +155,7 @@
     <OutDir>$(SolutionDir)..\Build\$(Configuration)_$(Platform)\</OutDir>
     <IncludePath>$(OutDir);$(ProjectDir)..\Source\SoyLib\src;$(ProjectDir)..\Source\Json11;$(IncludePath)</IncludePath>
     <LibraryPath>$(OutDir);$(LibraryPath)</LibraryPath>
+    <IntDir>$(SolutionDir)$(ProjectName)_$(Platform)_$(Configuration)\Temp\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>

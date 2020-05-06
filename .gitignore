@@ -42,3 +42,7 @@ build-iphonesimulator/
 PopH264.visualstudio/PopH264_TestApp/x64/
 
 *.user
+
+PopH264.visualstudio/PopH264_TestApp_x64_Debug/
+
+PopH264.visualstudio/PopH264_x64_Debug/
