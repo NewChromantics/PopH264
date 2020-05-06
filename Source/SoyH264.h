@@ -23,5 +23,6 @@ namespace H264
 	inline size_t			GetNaluAnnexBLength(const ArrayBridge<uint8_t>&& Data) { return GetNaluAnnexBLength(Data); }
 	H264NaluContent::Type	GetPacketType(const ArrayBridge<uint8_t>&& Data);
 	void					ConvertNaluPrefix(ArrayBridge<uint8_t>& Nalu,H264::NaluPrefix::Type NaluSize);
+	size_t					GetNextNaluOffset(const ArrayBridge<uint8_t>&& Data, size_t StartFrom = 3);	//	returns 0 if there is no next
 }
 

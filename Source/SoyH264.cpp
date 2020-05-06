@@ -132,3 +132,24 @@ void H264::ConvertNaluPrefix(ArrayBridge<uint8_t>& Nalu,H264::NaluPrefix::Type N
 	Nalu[2] = Size8s[1];
 	Nalu[3] = Size8s[0];
 }
+
+size_t H264::GetNextNaluOffset(const ArrayBridge<uint8_t>&& Data, size_t StartFrom)
+{
+	//	detect 001
+	auto* DataPtr = Data.GetArray();
+
+	for (int i = StartFrom; i < Data.GetDataSize()-3; i++)
+	{
+		if (DataPtr[i + 0] != 0)	continue;
+		if (DataPtr[i + 1] != 0)	continue;
+		if (DataPtr[i + 2] != 1)	continue;
+
+		//	check i-1 for 0 in case it's 0001 rather than 001
+		if (DataPtr[i - 1] == 0)
+			return i - 1;
+		
+		return i;
+	}
+
+	return 0;
+}
