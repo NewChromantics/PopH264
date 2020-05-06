@@ -68,6 +68,28 @@ bool MediaFoundation::TDecoder::DecodeNextPacket()
 
 	SetInputFormat();
 
+	auto NaluType = H264::GetPacketType(GetArrayBridge(Nalu));
+	std::Debug << "MediaFoundation decode " << magic_enum::enum_name(NaluType) << " x" << Nalu.GetSize() << std::endl;
+
+	if (NaluType == H264NaluContent::SequenceParameterSet)
+	{
+		static bool SpsSet = false;
+		if (SpsSet)return true;
+		SpsSet = true;
+	}
+	if (NaluType == H264NaluContent::PictureParameterSet)
+	{
+		static bool SpsSet = false;
+		if (SpsSet)return true;
+		SpsSet = true;
+	}
+	if (NaluType == H264NaluContent::SupplimentalEnhancementInformation)
+	{
+		static bool SpsSet = false;
+		if (SpsSet)return true;
+		SpsSet = true;
+	}
+
 	if (NaluType == H264NaluContent::EndOfStream)
 	{
 		//	flush ditches pending inputs!
