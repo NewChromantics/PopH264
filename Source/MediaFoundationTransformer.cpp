@@ -608,7 +608,7 @@ MediaFoundation::TActivateMeta MediaFoundation::GetBestTransform(const GUID& Cat
 	auto Transformers = EnumTransforms(Category);
 	TActivateMeta MatchingTransform;
 	int MatchingTransformScore = 0;
-	const auto HardwareScore = -1000;
+	const auto HardwareScore = 1000;
 	const auto InputScore = 10;
 	const auto OutputScore = 1;
 
@@ -713,11 +713,13 @@ MediaFoundation::TTransformer::TTransformer(TransformerCategory::Type Category, 
 
 bool MediaFoundation::TTransformer::IsInputFormatReady()
 {
-	return mInputFormatSet;
+	//return mInputFormatSet;
 	auto& Transformer = *this->mTransformer;
 	{
 		DWORD StatusFlags = 0;
 		auto Result = Transformer.GetInputStatus(mInputStreamId, &StatusFlags);
+		if (Result == MF_E_TRANSFORM_TYPE_NOT_SET)
+			return false;
 		IsOkay(Result, "GetInputStatus");
 		std::Debug << "Input status is " << StatusFlags << std::endl;
 
@@ -782,6 +784,8 @@ void MediaFoundation::TTransformer::SetOutputFormat(IMFMediaType& MediaType)
 		IsOkay(Result, "SetOutputType");
 	};
 	LockTransformer(Set);
+
+	mOutputFormatSet = true;
 }
 
 
@@ -855,20 +859,21 @@ void MediaFoundation::TTransformer::SetInputFormat(IMFMediaType& MediaType)
 		IsOkay(Result, "SetInputType");
 	};
 	LockTransformer(Set);
-
-	auto ProcessCommand = [&](MFT_MESSAGE_TYPE Message)
-	{
-		ULONG_PTR Param = 0;// nullptr;
-		auto Result = Transformer.ProcessMessage(Message, Param);
-		IsOkay(Result, std::string("ProcessMessage ") + std::string(magic_enum::enum_name(Message)));
-	};
-
+	
 	//	gr: are these needed?
 	ProcessCommand(MFT_MESSAGE_COMMAND_FLUSH);
 	ProcessCommand(MFT_MESSAGE_NOTIFY_BEGIN_STREAMING);
 	ProcessCommand(MFT_MESSAGE_NOTIFY_START_OF_STREAM);
 
-	auto InputReady = IsInputFormatReady();
+	try
+	{
+		auto InputReady = IsInputFormatReady();
+		std::Debug << "IsInputFormatReady = " << InputReady << std::endl;
+	}
+	catch (std::exception& e)
+	{
+		std::Debug << "Exception: " << e.what() << std::endl;
+	}
 	mInputFormatSet = true;
 }
 
@@ -1022,7 +1027,7 @@ bool MediaFoundation::TTransformer::PushFrame(const ArrayBridge<uint8_t>&& Data)
 		}
 	};
 
-	auto pSample = CreateSample(Data,Soy::TFourcc());
+	auto pSample = CreateSample(Data,Soy::TFourcc("H264"));
 
 	DebugInputStatus();
 
@@ -1175,22 +1180,30 @@ void MediaFoundation::TTransformer::PopFrame(ArrayBridge<uint8_t>&& Data,SoyTime
 	auto Result = Transformer.GetOutputStreamInfo(mOutputStreamId, &OutputInfo);
 	IsOkay(Result, "GetOutputStreamInfo");
 
-	bool PreAllocatedSamples = (OutputInfo.dwFlags & (MFT_OUTPUT_STREAM_PROVIDES_SAMPLES | MFT_OUTPUT_STREAM_CAN_PROVIDE_SAMPLES)) != 0;
-	if (PreAllocatedSamples)
-	{
-		std::Debug << "Todo: process pre-allocated samples" << std::endl;
-	}
+	auto PreAllocatedSamples = (OutputInfo.dwFlags & MFT_OUTPUT_STREAM_PROVIDES_SAMPLES) != 0;
 
 	//	get output
-	auto pSample = CreateSample(OutputInfo.cbSize,OutputInfo.cbAlignment);
-	MFT_OUTPUT_DATA_BUFFER output_buffer = { mOutputStreamId, pSample.mObject, 0, nullptr };
+	Soy::AutoReleasePtr<IMFSample> AllocatedSample;
+	if (!PreAllocatedSamples)
+	{
+		AllocatedSample = CreateSample(OutputInfo.cbSize, OutputInfo.cbAlignment);
+	}
+	MFT_OUTPUT_DATA_BUFFER output_buffer = { mOutputStreamId, AllocatedSample.mObject, 0, nullptr };
 	DWORD Flags = 0;
 	DWORD Status = 0;
 	Result = Transformer.ProcessOutput( Flags, 1, &output_buffer, &Status );
 
-	//	handle some special retu
+	//	handle some special returns
 	if (Result == MF_E_TRANSFORM_NEED_MORE_INPUT)
 	{
+		return;
+	}
+	else if (Result == E_UNEXPECTED)
+	{
+		//	on an async transform, we should only call ProcessOutput on response to a METransformHaveOutput event
+		//			If the client calls ProcessOutput at any other time, the method returns E_UNEXPECTED.
+		//	therefore, if we get this result, there just isnt one ready?
+		std::Debug << "Unexpected ProcessOutput - this is BAD if not async" << std::endl;
 		return;
 	}
 	else if (Result == MF_E_TRANSFORM_STREAM_CHANGE)
@@ -1211,13 +1224,20 @@ void MediaFoundation::TTransformer::PopFrame(ArrayBridge<uint8_t>&& Data,SoyTime
 	}
 	
 	//	read a frame!
-	ReadData(*pSample.mObject, Data);
+	//	if this is missing, then we didn't allocate it, and the system didn't give us one
+	if (!output_buffer.pSample)
+	{
+		throw Soy::AssertException("Missing sample from output");
+	}
+	
+	//	read!
+	ReadData(*output_buffer.pSample, Data);
 	std::Debug << "size is " << Data.GetDataSize() << std::endl;
 
 	try
 	{
 		LONGLONG TimestampNs = 0;
-		auto Result = pSample->GetSampleTime(&TimestampNs);
+		auto Result = output_buffer.pSample->GetSampleTime(&TimestampNs);
 		IsOkay(Result, "GetSampleTime");
 		Time.mTime = TimestampNs / 10000;
 	}

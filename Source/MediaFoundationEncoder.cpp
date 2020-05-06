@@ -71,6 +71,9 @@ MediaFoundation::TEncoder::~TEncoder()
 
 void MediaFoundation::TEncoder::SetOutputFormat(TEncoderParams Params,size_t Width,size_t Height)
 {
+	if (mTransformer->IsOutputFormatSet())
+		return;
+
 	auto& Transformer = *mTransformer->mTransformer;
 	
 	Soy::AutoReleasePtr<IMFMediaType> pMediaType;
@@ -123,8 +126,8 @@ void MediaFoundation::TEncoder::SetOutputFormat(TEncoderParams Params,size_t Wid
 	}
 
 	{
-		auto Width = 640;
-		auto Height = 400;
+		//auto Width = 640;
+		//auto Height = 400;
 		auto Result = MFSetAttributeSize(MediaType, MF_MT_FRAME_SIZE, Width, Height);
 		IsOkay(Result, "MF_MT_FRAME_SIZE");
 	}
@@ -159,7 +162,7 @@ void MediaFoundation::TEncoder::SetOutputFormat(TEncoderParams Params,size_t Wid
 
 void MediaFoundation::TEncoder::SetInputFormat(SoyPixelsMeta PixelsMeta)
 {
-	if (mTransformer->IsInputFormatReady())
+	if (mTransformer->IsInputFormatSet())
 		return;
 	
 	Soy::TFourcc InputFormat = GetFourcc(PixelsMeta.GetFormat());
@@ -229,6 +232,11 @@ void MediaFoundation::TEncoder::Encode(const SoyPixelsImpl& _Pixels, const std::
 	
 	SetInputFormat(EncodePixels.GetMeta());
 
+	auto& PixelsArray = EncodePixels.GetPixelsArray();
+	if (!mTransformer->PushFrame(GetArrayBridge(PixelsArray)))
+	{
+		std::Debug << "Input rejected... dropping frame?" << std::endl;
+	}
 
 	//	pop H264 frames that have been output
 	//	gr: other thread for this, and get as many as possible in one go

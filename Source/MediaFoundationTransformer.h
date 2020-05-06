@@ -8,6 +8,7 @@
 #include <SoyPixels.h>
 
 #include <combaseapi.h>
+#include <mftransform.h>	//	can't forward declare _MFT_MESSAGE_TYPE
 
 class IMFAttributes;
 
@@ -54,6 +55,8 @@ public:
 	//	this returns false if the data was not pushed (where we need to unpop the data, as to not lose it)
 	bool			PushFrame(const ArrayBridge<uint8_t>&& Data);
 	void			PopFrame(ArrayBridge<uint8_t>&& Data,SoyTime& Format);
+	
+	void			ProcessCommand(MFT_MESSAGE_TYPE Command);
 
 	IMFMediaType&	GetOutputMediaType();	//	get access to media type to read output meta
 	SoyPixelsMeta	GetOutputPixelMeta();
@@ -63,6 +66,9 @@ public:
 	void			SetInputFormat(IMFMediaType& MediaType);
 	void			SetInputFormat(Soy::TFourcc Fourcc, std::function<void(IMFMediaType&)> ConfigMedia);
 	bool			IsInputFormatReady();
+
+	bool			IsInputFormatSet() { return mInputFormatSet; }
+	bool			IsOutputFormatSet() { return mOutputFormatSet; }
 
 private:
 	void			SetOutputFormat();
@@ -75,6 +81,7 @@ private:
 	DWORD			mInputStreamId = 0;
 	DWORD			mOutputStreamId = 0;
 	bool			mInputFormatSet = false;
+	bool			mOutputFormatSet = false;
 	Soy::AutoReleasePtr<IMFMediaType> mOutputMediaType;
 
 public:

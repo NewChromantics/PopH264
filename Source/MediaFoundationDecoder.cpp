@@ -5,6 +5,7 @@
 #include "SoyLib/src/SoyH264.h"
 #include "MagicEnum/include/magic_enum.hpp"
 #include "SoyFourcc.h"
+#include "SoyH264.h"
 
 #include <mfapi.h>
 #include <mftransform.h>

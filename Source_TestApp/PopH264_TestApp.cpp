@@ -41,13 +41,22 @@ void DecoderTest(const char* TestDataName,CompareFunc_t* Compare)
 	if ( TestDataSize > std::size(TestData) )
 		throw std::runtime_error("Buffer for test data not big enough");
 	
-	auto Handle = PopH264_CreateInstance(0);
+	auto Mode = 1;
+	auto Handle = PopH264_CreateInstance(Mode);
 
 	auto Result = PopH264_PushData( Handle, TestData, TestDataSize, 0 );
 	if ( Result < 0 )
 		throw std::runtime_error("DecoderTest: PushData error");
 	
+	PopH264_PushData(Handle, TestData, TestDataSize, 0);
+	PopH264_PushData(Handle, TestData, TestDataSize, 0);
+	PopH264_PushData(Handle, TestData, TestDataSize, 0);
+
 	//	flush
+	PopH264_PushData(Handle, nullptr, 0, 0);
+	PopH264_PushData(Handle, nullptr, 0, 0);
+	PopH264_PushData(Handle, nullptr, 0, 0);
+	PopH264_PushData(Handle, nullptr, 0, 0);
 	PopH264_PushData(Handle,nullptr,0,0);
 	
 	//	wait for it to decode
@@ -125,17 +134,21 @@ void EncoderYuv8_88Test()
 	Debug << "PopH264_CreateEncoder handle=" << Handle << " error=" << ErrorBuffer;
 	DebugPrint(Debug.str());
 
-	SoyPixels Yuv( SoyPixelsMeta(128,128,SoyPixelsFormat::Yuv_8_88_Full));
+	SoyPixels Yuv( SoyPixelsMeta(640,480,SoyPixelsFormat::Yuv_8_88_Full));
 	auto Size = Yuv.GetPixelsArray().GetDataSize();
 	const char* TestMetaJson =
 	R"V0G0N(
 	{
-		"Width":128,
-		"Height":128,
-		"LumaSize":24576,
+		"Width":640,
+		"Height":480,
+		"LumaSize":460800,
 		"Format":"Yuv_8_88_Full"
 	}
 	)V0G0N";
+	PopH264_EncoderPushFrame(Handle, TestMetaJson, Yuv.GetPixelsArray().GetArray(), nullptr, nullptr, ErrorBuffer, std::size(ErrorBuffer));
+	PopH264_EncoderPushFrame(Handle, TestMetaJson, Yuv.GetPixelsArray().GetArray(), nullptr, nullptr, ErrorBuffer, std::size(ErrorBuffer));
+	PopH264_EncoderPushFrame(Handle, TestMetaJson, Yuv.GetPixelsArray().GetArray(), nullptr, nullptr, ErrorBuffer, std::size(ErrorBuffer));
+	PopH264_EncoderPushFrame(Handle, TestMetaJson, Yuv.GetPixelsArray().GetArray(), nullptr, nullptr, ErrorBuffer, std::size(ErrorBuffer));
 	PopH264_EncoderPushFrame( Handle, TestMetaJson, Yuv.GetPixelsArray().GetArray(), nullptr, nullptr, ErrorBuffer, std::size(ErrorBuffer) );
 	Debug << "PopH264_EncoderPushFrame error=" << ErrorBuffer;
 	DebugPrint(Debug.str());
@@ -165,6 +178,8 @@ int main()
 	{
 		DebugPrint(e.what());
 	}
+
+	return 0;
 
 	try
 	{

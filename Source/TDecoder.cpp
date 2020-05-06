@@ -64,34 +64,12 @@ void PopH264::TDecoder::UnpopNalu(ArrayBridge<uint8_t>&& Buffer)
 bool PopH264::TDecoder::PopNalu(ArrayBridge<uint8_t>&& Buffer)
 {
 	std::lock_guard<std::mutex> Lock( mPendingDataLock );
-	auto* PendingData = &mPendingData[mPendingOffset];
-	auto PendingDataSize = mPendingData.GetDataSize()-mPendingOffset;
+	auto* _PendingDataPtr = &mPendingData[mPendingOffset];
+	auto PendingDataSize = mPendingData.GetDataSize() - mPendingOffset;
+	auto PendingDataArray = GetRemoteArray(_PendingDataPtr, PendingDataSize);
+
 	
-	auto GetNextNalOffset = [&]
-	{
-		//	detect 001
-		for ( int i=3;	i<PendingDataSize;	i++ )
-		{
-			if ( PendingData[i+0] != 0 )	continue;
-			if ( PendingData[i+1] != 0 )	continue;
-			if ( PendingData[i+2] != 1 )	continue;
-			
-			//	check i-1 for 0 in case it's 0001 rather than 001
-			if ( PendingData[i-1] == 0 )
-				return i-1;
-			
-			return i;
-		}
-		
-		//	gr: to deal with fragmented data (eg. udp) we now wait
-		//		for the next complete NAL
-		//	we should look for EOF packets to handle this though
-		//	assume is complete...
-		//return (int)mPendingData.GetDataSize();
-		return 0;
-	};
-	
-	auto DataSize = GetNextNalOffset();
+	auto DataSize = H264::GetNextNaluOffset( GetArrayBridge(PendingDataArray) );
 	//	no next nal yet
 	if ( DataSize == 0 )
 	{
@@ -106,10 +84,10 @@ bool PopH264::TDecoder::PopNalu(ArrayBridge<uint8_t>&& Buffer)
 			return false;
 	}
 	
-	auto* Data = PendingData;
-	auto PendingDataArray = GetRemoteArray( Data, DataSize );
+	auto* Data = PendingDataArray.GetArray();
+	auto DataArray = GetRemoteArray( Data, DataSize );
 	
-	Buffer.Copy( PendingDataArray );
+	Buffer.Copy(DataArray);
 	RemovePendingData( DataSize );
 	return true;
 }
