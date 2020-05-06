@@ -26,7 +26,7 @@ void PopH264::TEncoder::OnOutputPacket(TPacket& Packet)
 	size_t PrevNalu = 0;
 	while (true)
 	{
-		auto& PacketData = GetArrayBridge(*Packet.mData).GetSubArray(PrevNalu);
+		auto PacketData = GetArrayBridge(*Packet.mData).GetSubArray(PrevNalu);
 		auto NextNalu = H264::GetNextNaluOffset(GetArrayBridge(PacketData));
 		if (NextNalu == 0)
 		{

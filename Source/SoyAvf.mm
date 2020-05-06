@@ -351,12 +351,8 @@ CVPixelBufferRef Avf::PixelsToPixelBuffer(const SoyPixelsImpl& Image)
 {
 	CFAllocatorRef PixelBufferAllocator = nullptr;
 	OSType PixelFormatType = GetPlatformPixelFormat( Image.GetFormat() );
-	auto& PixelsArray = Image.GetPixelsArray();
-	auto* Pixels = const_cast<uint8*>( PixelsArray.GetArray() );
-	auto BytesPerRow = Image.GetMeta().GetRowDataSize();
 	void* ReleaseContext = nullptr;
-	CFDictionaryRef PixelBufferAttributes = nullptr;
-	
+
 #if defined(TARGET_OSX)
 	//	gr: hack, cannot create RGBA pixel buffer on OSX. do a last-min conversion here, but ideally it's done beforehand
 	//		REALLY ideally we can go from texture to CVPixelBuffer
@@ -367,57 +363,62 @@ CVPixelBufferRef Avf::PixelsToPixelBuffer(const SoyPixelsImpl& Image)
 	}
 #endif
 	
-
-	void* BaseAddress = Pixels;
 	BufferArray<std::shared_ptr<SoyPixelsImpl>,3> Planes;
 	Image.SplitPlanes( GetArrayBridge(Planes));
-	Array<uint8_t> Buffer;
+	
+	CVPixelBufferRef PixelBuffer = nullptr;
 
-	//	special cases
-	//		baseAddr points to a XXXX
-	if ( PixelFormatType == kCVPixelFormatType_420YpCbCr8Planar || PixelFormatType == kCVPixelFormatType_420YpCbCr8PlanarFullRange )
+	CFDictionaryRef PixelBufferAttributes = nullptr;
+
+
+	//	handle multiplane
+	if ( Planes.GetSize() > 1 )
 	{
-		//	gr: I want to support a pixelformat with arbirtry data that would cover this
-		//	offset from main base address to base address of this plane, big-endian
-		auto& YuvInfo = *Buffer.PushBackReinterpret(CVPlanarPixelBufferInfo_YCbCrPlanar());
-		YuvInfo.componentInfoY.offset = sizeof(YuvInfo);
-		YuvInfo.componentInfoY.rowBytes = Planes[0]->GetMeta().GetRowDataSize();
-		YuvInfo.componentInfoCb.offset = YuvInfo.componentInfoY.offset + Planes[0]->GetMeta().GetDataSize();
-		YuvInfo.componentInfoCb.rowBytes = Planes[1]->GetMeta().GetRowDataSize();
-		YuvInfo.componentInfoCr.offset = YuvInfo.componentInfoCb.offset + Planes[1]->GetMeta().GetDataSize();
-		YuvInfo.componentInfoCr.rowBytes = Planes[2]->GetMeta().GetRowDataSize();
-		
-		Buffer.PushBackArray(PixelsArray);
-		BaseAddress = Buffer.GetArray();
-	}
-	else if ( PixelFormatType == kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange || PixelFormatType == kCVPixelFormatType_420YpCbCr8BiPlanarFullRange )
-	{
-		auto& YuvInfo = *Buffer.PushBackReinterpret(CVPlanarPixelBufferInfo_YCbCrBiPlanar());
-		YuvInfo.componentInfoY.offset = sizeof(YuvInfo);
-		YuvInfo.componentInfoY.rowBytes = Planes[0]->GetMeta().GetRowDataSize();
-		YuvInfo.componentInfoCbCr.offset = YuvInfo.componentInfoY.offset + Planes[0]->GetMeta().GetDataSize();
-		YuvInfo.componentInfoCbCr.rowBytes = Planes[1]->GetMeta().GetRowDataSize();
+		auto& Plane0 = *Planes[0];
+		size_t Widths[3] = {0};
+		size_t Heights[3] = {0};
+		size_t RowSizes[3] = {0};
+		void* Datas[3] = {nullptr};
+		for ( auto p=0;	p<Planes.GetSize();	p++ )
+		{
+			auto& Plane = *Planes[p];
+			Widths[p] = Plane.GetWidth();
+			Heights[p] = Plane.GetHeight();
+			RowSizes[p] = Plane.GetRowPitchBytes();
+			Datas[p] = Plane.GetPixelsArray().GetArray();
+		}
 
-		YuvInfo.componentInfoY.offset = CFSwapInt32HostToBig(YuvInfo.componentInfoY.offset);
-		YuvInfo.componentInfoY.rowBytes = CFSwapInt32HostToBig(YuvInfo.componentInfoY.rowBytes);
-		YuvInfo.componentInfoCbCr.offset = CFSwapInt32HostToBig(YuvInfo.componentInfoCbCr.offset);
-		YuvInfo.componentInfoCbCr.rowBytes = CFSwapInt32HostToBig(YuvInfo.componentInfoCbCr.rowBytes);
+		CVPixelBufferReleasePlanarBytesCallback Callback = [](void* CallbackReference,const void* DataPtr,size_t DataSize,size_t PlaneCount,const void* PlaneAddresses[])
+		{
+			std::Debug << "Pixel Buffer released" << std::endl;
+		};
+		void* CallbackReference = nullptr;
 		
-
-		Buffer.PushBackArray(PixelsArray);
-		BaseAddress = Buffer.GetArray();
+		auto Result = CVPixelBufferCreateWithPlanarBytes( PixelBufferAllocator, Widths[0], Heights[0], PixelFormatType,
+										   nullptr, 0,//use these if contigiuous
+										   Planes.GetSize(),
+										   Datas, Widths, Heights,
+										   RowSizes,
+										   Callback, CallbackReference,
+										   PixelBufferAttributes,
+										   &PixelBuffer );
+		Avf::IsOkay( Result, "CVPixelBufferCreateWithPlanarBytes");
 	}
 	else
 	{
-		//	just using pixels directly
-	}
+		//	without this, we had use-after-free,
+		//	but we still have a crash
+		Array<uint8_t>* pBuffer = new Array<uint8_t>();
+		Array<uint8_t>& Buffer = *pBuffer;
+		auto& PixelsArray = Image.GetPixelsArray();
+		auto* Pixels = const_cast<uint8*>( PixelsArray.GetArray() );
+		auto BytesPerRow = Image.GetMeta().GetRowDataSize();
 
-	CVPixelBufferRef PixelBuffer = nullptr;
-	auto Result = CVPixelBufferCreateWithBytes( PixelBufferAllocator, Image.GetWidth(), Image.GetHeight(), PixelFormatType, BaseAddress, BytesPerRow, PixelReleaseCallback, ReleaseContext, PixelBufferAttributes, &PixelBuffer );
-	Soy::TFourcc Fourcc(PixelFormatType);
-	std::stringstream Error;
-	Error << "CVPixelBufferCreateWithBytes " << Image.GetMeta() << "(" << Fourcc << ")";
-	Avf::IsOkay( Result, Error.str() );
+		
+		//	just using pixels directly
+		auto Result = CVPixelBufferCreateWithBytes( PixelBufferAllocator, Image.GetWidth(), Image.GetHeight(), PixelFormatType, Pixels, BytesPerRow, PixelReleaseCallback, ReleaseContext, PixelBufferAttributes, &PixelBuffer );
+		Avf::IsOkay( Result, "CVPixelBufferCreateWithBytes");
+	}
 	
 	return PixelBuffer;
 }
