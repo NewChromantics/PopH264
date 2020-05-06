@@ -23,7 +23,8 @@ namespace MediaFoundation
 }
 
 
-MediaFoundation::TDecoder::TDecoder()
+MediaFoundation::TDecoder::TDecoder(std::function<void(const SoyPixelsImpl&, size_t)> OnDecodedFrame) :
+	PopH264::TDecoder	( OnDecodedFrame )
 {
 	Soy::TFourcc InputFourccs[] = { "H264" };
 	Soy::TFourcc OutputFourccs[] = { "NV12" };
@@ -59,7 +60,7 @@ void MediaFoundation::TDecoder::SetInputFormat()
 	//IsOkay(Result, "SetInputType");
 }
 
-bool MediaFoundation::TDecoder::DecodeNextPacket(std::function<void(const SoyPixelsImpl&, SoyTime)> OnFrameDecoded)
+bool MediaFoundation::TDecoder::DecodeNextPacket()
 {
 	Array<uint8_t> Nalu;
 	if (!PopNalu(GetArrayBridge(Nalu)))
@@ -86,7 +87,8 @@ bool MediaFoundation::TDecoder::DecodeNextPacket(std::function<void(const SoyPix
 
 		auto PixelMeta = mTransformer->GetOutputPixelMeta();
 		SoyPixelsRemote Pixels(OutFrame.GetArray(), OutFrame.GetDataSize(), PixelMeta);
-		OnFrameDecoded(Pixels, Time);
+		auto FrameNumber = Time.mTime;
+		OnDecodedFrame(Pixels, FrameNumber);
 	}
 
 	return true;

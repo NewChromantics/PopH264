@@ -1,8 +1,9 @@
 #include <iostream>
 #include <sstream>
 #include "PopH264.h"
+#include "SoyPixels.h"
 
-#if defined(_MSC_VER)
+#if !defined(TARGET_WINDOWS) && defined(_MSC_VER)
 #define TARGET_WINDOWS
 #endif
 
@@ -11,7 +12,7 @@
 #endif
 
 #if defined(TARGET_WINDOWS)
-#include <Windows.h>
+//#include <Windows.h>
 #endif
 
 #include <thread>
@@ -109,7 +110,6 @@ void EncoderGreyscaleTest()
 	PopH264_DestroyEncoder(Handle);
 }
 
-#include "SoyPixels.h"
 
 void EncoderYuv8_88Test()
 {

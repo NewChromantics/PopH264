@@ -32,7 +32,8 @@ void IntelMedia::IsOkay(mfxStatus Result, const char* Context)
 }
 
 
-IntelMedia::TDecoder::TDecoder()
+IntelMedia::TDecoder::TDecoder(std::function<void(const SoyPixelsImpl&, size_t)> OnDecodedFrame) :
+	PopH264::TDecoder	( OnDecodedFrame )
 {
 	mfxInitParam Params;
 	MemZero(Params);
@@ -107,7 +108,7 @@ IntelMedia::TDecoder::~TDecoder()
 	}
 }
 
-bool IntelMedia::TDecoder::DecodeNextPacket(std::function<void(const SoyPixelsImpl&, SoyTime)> OnFrameDecoded)
+bool IntelMedia::TDecoder::DecodeNextPacket()
 {
 	Soy_AssertTodo();
 }

@@ -28,6 +28,24 @@
     <ClCompile Include="..\Source\SoyLib\src\SoyString.cpp">
       <Filter>Source Files\SoyLib</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source\SoyLib\src\memheap.cpp">
+      <Filter>Source Files\SoyLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\SoyLib\src\SoyTypes.cpp">
+      <Filter>Source Files\SoyLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\SoyLib\src\SoyDebug.cpp">
+      <Filter>Source Files\SoyLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\SoyLib\src\SoyArray.cpp">
+      <Filter>Source Files\SoyLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\SoyLib\src\SoyTime.cpp">
+      <Filter>Source Files\SoyLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\SoyLib\src\SoyAssert.cpp">
+      <Filter>Source Files\SoyLib</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\SoyLib\src\SoyFilesystem.h">
@@ -40,6 +58,15 @@
       <Filter>Source Files\SoyLib</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\SoyLib\src\SoyString.h">
+      <Filter>Source Files\SoyLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\SoyLib\src\SoyDebug.h">
+      <Filter>Source Files\SoyLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\SoyLib\src\SoyArray.h">
+      <Filter>Source Files\SoyLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\SoyLib\src\SoyAssert.h">
       <Filter>Source Files\SoyLib</Filter>
     </ClInclude>
   </ItemGroup>

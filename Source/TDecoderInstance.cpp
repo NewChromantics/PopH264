@@ -98,7 +98,7 @@ PopH264::TDecoderInstance::TDecoderInstance(int32_t Mode)
 	{
 		try
 		{
-			mDecoder.reset(new IntelMedia::TDecoder());
+			mDecoder.reset(new IntelMedia::TDecoder(OnFrameDecoded));
 			return;
 		}
 		catch (std::exception& e)

@@ -13,11 +13,11 @@ class IMFTransform;
 class MediaFoundation::TDecoder : public PopH264::TDecoder
 {
 public:
-	TDecoder();
+	TDecoder(std::function<void(const SoyPixelsImpl&, size_t)> OnDecodedFrame);
 	~TDecoder();
 
 private:
-	virtual bool	DecodeNextPacket(std::function<void(const SoyPixelsImpl&,SoyTime)> OnFrameDecoded) override;	//	returns true if more data to proccess
+	virtual bool	DecodeNextPacket() override;
 	
 	void			SetInputFormat();
 
