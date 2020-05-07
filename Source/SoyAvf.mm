@@ -347,6 +347,8 @@ void PixelReleaseCallback(void *releaseRefCon, const void *baseAddress)
 	}
 }
 
+//	gr: these create buffers that hold their lifetime AFTER this function, so the Image and the PixelBuffer ref must be kept together
+//		todo: pass in a lambda that gets called when image is released
 CVPixelBufferRef Avf::PixelsToPixelBuffer(const SoyPixelsImpl& Image)
 {
 	CFAllocatorRef PixelBufferAllocator = nullptr;
@@ -406,14 +408,9 @@ CVPixelBufferRef Avf::PixelsToPixelBuffer(const SoyPixelsImpl& Image)
 	}
 	else
 	{
-		//	without this, we had use-after-free,
-		//	but we still have a crash
-		Array<uint8_t>* pBuffer = new Array<uint8_t>();
-		Array<uint8_t>& Buffer = *pBuffer;
 		auto& PixelsArray = Image.GetPixelsArray();
 		auto* Pixels = const_cast<uint8*>( PixelsArray.GetArray() );
 		auto BytesPerRow = Image.GetMeta().GetRowDataSize();
-
 		
 		//	just using pixels directly
 		auto Result = CVPixelBufferCreateWithBytes( PixelBufferAllocator, Image.GetWidth(), Image.GetHeight(), PixelFormatType, Pixels, BytesPerRow, PixelReleaseCallback, ReleaseContext, PixelBufferAttributes, &PixelBuffer );
