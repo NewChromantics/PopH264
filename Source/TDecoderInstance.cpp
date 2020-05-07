@@ -200,7 +200,7 @@ void PopH264::TDecoderInstance::PopFrame(int32_t& FrameNumber,ArrayBridge<uint8_
 		PlaneDstPixels.Copy(PlaneSrcPixelsMin);
 	}
 	
-	std::Debug << "PoppedFrame(" << FrameNumber << ") Frames Ready x" << mFrames.GetSize() << std::endl;
+	//std::Debug << "PoppedFrame(" << FrameNumber << ") Frames Ready x" << mFrames.GetSize() << std::endl;
 }
 
 bool PopH264::TDecoderInstance::PopFrame(TFrame& Frame)

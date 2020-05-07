@@ -451,7 +451,7 @@ void Avf::TDecoder::AllocDecoder()
 {
 	auto OnPacket = [this](std::shared_ptr<TPixelBuffer> pPixelBuffer,SoyTime PresentationTime)
 	{
-		std::Debug << "Decompressed pixel buffer " << PresentationTime << std::endl;
+		//std::Debug << "Decompressed pixel buffer " << PresentationTime << std::endl;
 		this->OnDecodedFrame( *pPixelBuffer, PresentationTime );
 	};
 
