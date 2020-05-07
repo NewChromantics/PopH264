@@ -46,6 +46,7 @@ public:
 	
 	//	input
 	void 			PushFrame(const std::string& Meta,const uint8_t* LumaData,const uint8_t* ChromaUData,const uint8_t* ChromaVData);
+	void			EndOfStream();
 	
 	//	output
 	size_t			GetPacketQueueCount()	{	return mPackets.GetSize();	}

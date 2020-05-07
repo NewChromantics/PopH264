@@ -89,6 +89,10 @@ PopH264::TEncoderInstance::TEncoderInstance(const std::string& OptionsJsonString
 	throw Soy::AssertException(Error);
 }
 
+void PopH264::TEncoderInstance::EndOfStream()
+{
+	mEncoder->FinishEncoding();
+}
 
 void PopH264::TEncoderInstance::PushFrame(const std::string& Meta,const uint8_t* LumaData,const uint8_t* ChromaUData,const uint8_t* ChromaVData)
 {

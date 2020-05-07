@@ -17,7 +17,8 @@ namespace PopH264
 	//	1.2.6	X264 now uses ProfileLevel + lots of x264 settings exposed
 	//	1.2.7	Added MediaFoundation decoder to windows
 	//	1.2.8	Added Test data
-	const Soy::TVersion	Version(1,2,8);
+	//	1.2.9	Added PopH264_EncoderEndOfStream
+	const Soy::TVersion	Version(1,2,9);
 }
 
 
@@ -268,6 +269,25 @@ __export void PopH264_EncoderPushFrame(int32_t Instance,const char* MetaJson,con
 		Soy::StringToBuffer("Unknown exception", ErrorBuffer, ErrorBufferSize );
 	}
 }
+
+
+__export void PopH264_EncoderEndOfStream(int32_t Instance)
+{
+	try
+	{
+		auto& Encoder = PopH264::EncoderInstanceManager.GetInstance(Instance);
+		Encoder.EndOfStream();
+	}
+	catch(std::exception& e)
+	{
+		std::Debug << __PRETTY_FUNCTION__ << " exception " << e.what() << std::endl;
+	}
+	catch(...)
+	{
+		std::Debug << __PRETTY_FUNCTION__ << " unknown exception" << std::endl;
+	}
+}
+
 
 __export int32_t PopH264_EncoderPopData(int32_t Instance,uint8_t* DataBuffer,int32_t DataBufferSize)
 {

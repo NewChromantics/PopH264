@@ -100,6 +100,9 @@ __export void				PopH264_DestroyEncoder(int32_t Instance);
 //	Currently .Keyframe is COPIED to output, not updated to the actual state (should check NALU for this)
 __export void				PopH264_EncoderPushFrame(int32_t Instance,const char* MetaJson,const uint8_t* LumaData,const uint8_t* ChromaUData,const uint8_t* ChromaVData,char* ErrorBuffer,int32_t ErrorBufferSize);
 
+//	Use this to try and cause a flush of any remaining frames
+__export void				PopH264_EncoderEndOfStream(int32_t Instance);
+
 //	copies & removes next packet and returns buffer size written (may be greater than input buffer size, in which case data will be lost)
 //	if DataBuffer is null, the size is returned, but data NOT discarded. This can be used to Peek for buffer size. (Use Peek function to also get meta)
 //	returns 0 if there is no Data to pop.

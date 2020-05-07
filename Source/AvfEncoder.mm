@@ -284,7 +284,8 @@ Avf::TCompressor::~TCompressor()
 
 void Avf::TCompressor::Flush()
 {
-	VTCompressionSessionCompleteFrames( mSession, kCMTimeInvalid );
+	auto Error = VTCompressionSessionCompleteFrames( mSession, kCMTimeInvalid );
+	IsOkay(Error,"VTCompressionSessionCompleteFrames");
 }
 
 
@@ -605,7 +606,11 @@ void Avf::TEncoder::Encode(const SoyPixelsImpl& Pixels,const std::string& Meta,b
 
 void Avf::TEncoder::FinishEncoding()
 {
-	mCompressor.reset();
+	//	flush out frames
+	if ( !mCompressor )
+		return;
+	
+	mCompressor->Flush();
 }
 
 

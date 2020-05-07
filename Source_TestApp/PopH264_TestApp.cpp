@@ -153,6 +153,8 @@ void EncoderYuv8_88Test()
 	Debug << "PopH264_EncoderPushFrame error=" << ErrorBuffer;
 	DebugPrint(Debug.str());
 	
+	PopH264_EncoderEndOfStream(Handle);
+	
 	//	todo: decode it again
 	while(true)
 	{
