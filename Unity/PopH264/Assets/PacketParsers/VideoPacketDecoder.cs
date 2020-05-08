@@ -13,7 +13,8 @@ public class VideoPacketDecoder : MonoBehaviour
 	public bool AutoTrackTimeOnEnable = true;
 	float? StartTime = null;    //	set this to time.time on enable if AutoTrackTimeOnEnable
 
-	public UnityEngine.Events.UnityEvent OnFinished;
+	public UnityEngine.Events.UnityEvent	OnFinished;
+	bool									OnFinishedCalled = false;	//	call once
 
 	[Range(0, 20)]
 	public float DecodeToVideoTime = 0;
@@ -58,6 +59,7 @@ public class VideoPacketDecoder : MonoBehaviour
 		{
 			StartTime = Time.time;
 		}
+		OnFinishedCalled = false;
 	}
 
 	public void PushPacket(byte[] Data, long TimeMs)
@@ -107,6 +109,19 @@ public class VideoPacketDecoder : MonoBehaviour
 		PushPacket(Data, 0);
 	}
 
+	public void PushEndOfStreamPacket()
+	{
+		//	manually push a endofstream h264 packet
+		if (PendingInputFrames == null)
+			PendingInputFrames = new List<PopH264.FrameInput>();
+
+		var NewPacket = new PopH264.FrameInput();
+		PendingInputFrames.Add(NewPacket);
+		if (!NewPacket.EndOfStream)
+			throw new System.Exception("New blank PopH264.FrameInput should be marked as EndOfStream");
+	}
+
+
 
 	static T[] CombineTwoArrays<T>(T[] a1, T[] a2)
 	{
@@ -128,6 +143,12 @@ public class VideoPacketDecoder : MonoBehaviour
 		PendingInputFrames = null;
 		
 		StartTime = null;
+	}
+
+	public void Reset()
+	{
+		OnDisable();
+		OnEnable();
 	}
 
 
@@ -229,7 +250,19 @@ public class VideoPacketDecoder : MonoBehaviour
 
 		//	nothing decoded
 		if (!FrameTime.HasValue)
+		{
+			if (Decoder.HadEndOfStream)
+			{
+				Debug.Log("EndOfStream detected");
+				if (!OnFinishedCalled)
+				{
+					Debug.Log("OnFinished call");
+					OnFinished.Invoke();
+					OnFinishedCalled = true;
+				}
+			}
 			return false;
+		}
 
 		var ExpectedTime = PendingOutputFrameTimes[0];
 		//	gr: there's something off here, we don't seem to decode early frames
@@ -256,7 +289,8 @@ public class VideoPacketDecoder : MonoBehaviour
 		{
 			if (VerboseDebug)
 				Debug.Log("Decoded last frame");
-			OnFinished.Invoke();
+			if ( !OnFinishedCalled )
+				OnFinished.Invoke();
 		}
 
 		return true;

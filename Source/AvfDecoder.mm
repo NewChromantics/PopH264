@@ -152,13 +152,26 @@ Avf::TDecompressor::TDecompressor(const ArrayBridge<uint8_t>& Sps,const ArrayBri
 
 Avf::TDecompressor::~TDecompressor()
 {
-	//Flush();
+	try
+	{
+		Flush();
+	}
+	catch(std::exception& e)
+	{
+		std::Debug << __PRETTY_FUNCTION__ << " flush exception: " << e.what() << std::endl;
+	}
 	
 	// End the session
 	VTDecompressionSessionInvalidate( mSession.mObject );
-	mSession.Release();
 	
-	//	wait for the queue to end
+	try
+	{
+		mSession.Release();
+	}
+	catch(std::exception& e)
+	{
+		std::Debug << __PRETTY_FUNCTION__ << " mSession.Release exception: " << e.what() << std::endl;
+	}
 }
 
 void Avf::TDecompressor::OnDecodedFrame(OSStatus Status,CVImageBufferRef ImageBuffer,VTDecodeInfoFlags Flags,CMTime PresentationTimeStamp)
@@ -284,6 +297,17 @@ CFPtr<CMSampleBufferRef> CreateSampleBuffer(ArrayBridge<uint8_t>& DataArray,SoyT
 
 void Avf::TDecompressor::Decode(ArrayBridge<uint8_t>&& Nalu, size_t FrameNumber)
 {
+	//	if we get an endofstream packet, do a flush
+	{
+		auto H264PacketType = H264::GetPacketType(GetArrayBridge(Nalu));
+		if ( H264PacketType == H264NaluContent::EndOfStream )
+		{
+			//	synchronous flush
+			Flush();
+			return;
+		}
+	}
+	
 	auto NaluSize = GetFormatNaluPrefixType();
 	H264::ConvertNaluPrefix( Nalu, NaluSize );
 	
@@ -395,7 +419,11 @@ void Avf::TDecompressor::Flush()
 	if ( !mSession )
 		return;
 	
-	//VTDecompressionSessionCompleteFrames( mSession.mObject, kCMTimeInvalid );
+	auto Error = VTDecompressionSessionFinishDelayedFrames(mSession.mObject);
+	IsOkay(Error,"VTDecompressionSessionFinishDelayedFrames");
+	
+	Error = VTDecompressionSessionWaitForAsynchronousFrames(mSession.mObject);
+	IsOkay(Error,"VTDecompressionSessionWaitForAsynchronousFrames");
 }
 
 
@@ -502,5 +530,14 @@ bool Avf::TDecoder::DecodeNextPacket()
 	auto FrameNumber = mFrameNumber;
 	mFrameNumber++;
 	mDecompressor->Decode( GetArrayBridge(Nalu), FrameNumber );
+	
+	//	if this was an end of stream packet, the decompressor should have flushed, so now
+	//	queue up an EndOfStream packet
+	//	todo: see if avf is marking a last packet as EOS
+	if ( H264PacketType == H264NaluContent::EndOfStream )
+	{
+		OnDecodedEndOfStream();
+	}
+	
 	return true;
 }

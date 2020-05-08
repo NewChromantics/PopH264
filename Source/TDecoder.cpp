@@ -21,7 +21,13 @@ void PopH264::TDecoder::OnDecodedFrame(const SoyPixelsImpl& Pixels,size_t FrameN
 	mOnDecodedFrame( Pixels, FrameNumber );
 }
 
-void PopH264::TDecoder::OnEndOfStream()
+void PopH264::TDecoder::OnDecodedEndOfStream()
+{
+	SoyPixels Null;
+	mOnDecodedFrame(Null,0);
+}
+
+void PopH264::TDecoder::PushEndOfStream()
 {
 	//	send an explicit end of stream nalu
 	//	todo: overload this for implementation specific flushes

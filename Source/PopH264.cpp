@@ -100,11 +100,12 @@ __export int32_t PopH264_PushData(int32_t Instance,uint8_t* Data,int32_t DataSiz
 	return SafeCall(Function, __func__, -1 );
 }
 
-std::string GetMetaJson(const SoyPixelsMeta& Meta)
+
+json11::Json::object GetMetaJson(const SoyPixelsMeta& Meta)
 {
 	using namespace json11;
 	Json::array PlaneArray;
-
+	
 	auto AddPlaneJson = [&](SoyPixelsMeta& Plane)
 	{
 		auto Width = static_cast<int>(Plane.GetWidth());
@@ -121,7 +122,7 @@ std::string GetMetaJson(const SoyPixelsMeta& Meta)
 		};
 		PlaneArray.push_back(PlaneMeta);
 	};
-
+	
 	BufferArray<SoyPixelsMeta, 4> PlaneMetas;
 	Meta.GetPlanes(GetArrayBridge(PlaneMetas));
 	for (auto p = 0; p < PlaneMetas.GetSize(); p++)
@@ -129,22 +130,38 @@ std::string GetMetaJson(const SoyPixelsMeta& Meta)
 		auto& PlaneMeta = PlaneMetas[p];
 		AddPlaneJson(PlaneMeta);
 	}
-
+	
 	//	make final object
 	//	todo: add frame numbers etc here
-	Json MetaJson = Json::object{
+	auto MetaJson = Json::object{
 		{ "Planes",PlaneArray }
 	};
-	auto MetaJsonString = MetaJson.dump();
+	return MetaJson;
+}
+
+std::string GetMetaJson(const PopH264::TFrameMeta& Meta)
+{
+	//	start with pixels meta
+	auto Json = GetMetaJson(Meta.mPixelsMeta);
+	
+	if ( Meta.mEndOfStream )
+		Json["EndOfStream"] = true;
+	
+	Json["FrameNumber"] = Meta.mFrameNumber;
+	Json["QueuedFrames"] = static_cast<int>(Meta.mFramesQueued);
+	
+	json11::Json TheJson = Json;
+	std::string MetaJsonString = TheJson.dump();
 	return MetaJsonString;
 }
+
 
 __export void PopH264_PeekFrame(int32_t Instance, char* JsonBuffer, int32_t JsonBufferSize)
 {
 	auto Function = [&]()
 	{
 		auto& Device = PopH264::DecoderInstanceManager.GetInstance(Instance);
-		auto& Meta = Device.GetMeta();
+		auto Meta = Device.GetMeta();
 
 		auto Json = GetMetaJson(Meta);
 		Soy::StringToBuffer(Json, JsonBuffer, JsonBufferSize);
@@ -160,13 +177,13 @@ __export void PopH264_GetMeta(int32_t Instance, int32_t* pMetaValues, int32_t Me
 	{
 		auto& Device = PopH264::DecoderInstanceManager.GetInstance(Instance);
 		
-		auto& Meta = Device.GetMeta();
+		auto Meta = Device.GetMeta();
 		
 		size_t MetaValuesCounter = 0;
 		auto MetaValues = GetRemoteArray(pMetaValues, MetaValuesCount, MetaValuesCounter);
 		
 		BufferArray<SoyPixelsMeta, 3> PlaneMetas;
-		Meta.GetPlanes(GetArrayBridge(PlaneMetas));
+		Meta.mPixelsMeta.GetPlanes(GetArrayBridge(PlaneMetas));
 		MetaValues.PushBack(PlaneMetas.GetSize());
 		
 		for ( auto p=0;	p<PlaneMetas.GetSize();	p++ )

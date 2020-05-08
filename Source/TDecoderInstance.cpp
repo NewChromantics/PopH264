@@ -127,7 +127,7 @@ void PopH264::TDecoderInstance::PushData(const uint8_t* Data,size_t DataSize,siz
 	//	if user passes null, we want to end stream/flush
 	if ( Data == nullptr )
 	{
-		mDecoder->OnEndOfStream();
+		mDecoder->PushEndOfStream();
 		return;
 	}
 	
@@ -176,7 +176,8 @@ void PopH264::TDecoderInstance::PopFrame(int32_t& FrameNumber,ArrayBridge<uint8_
 	
 	//	emulating TPixelBuffer interface
 	BufferArray<SoyPixelsImpl*, 10> Textures;
-	Textures.PushBack( Frame.mPixels.get() );
+	if ( Frame.mPixels )
+		Textures.PushBack( Frame.mPixels.get() );
 	
 	BufferArray<std::shared_ptr<SoyPixelsImpl>, 10> Planes;
 	
@@ -214,16 +215,55 @@ bool PopH264::TDecoderInstance::PopFrame(TFrame& Frame)
 	return true;
 }
 
+
+PopH264::TFrameMeta PopH264::TDecoderInstance::GetMeta()
+{
+	TFrameMeta Meta;
+
+	//	set the cached pixel meta in case we have no frames
+	Meta.mPixelsMeta = this->mMeta;
+
+	{
+		std::lock_guard<std::mutex> Lock(mFramesLock);
+		if ( !mFrames.IsEmpty() )
+		{
+			auto& Frame0 = mFrames[0];
+			Meta.mEndOfStream = Frame0.mEndOfStream;
+			Meta.mFrameNumber = Frame0.mFrameNumber;
+			Meta.mFramesQueued = mFrames.GetSize();
+			if ( Frame0.mPixels )
+				Meta.mPixelsMeta = Frame0.mPixels->GetMeta();
+		}
+	}
+	return Meta;
+}
+
 void PopH264::TDecoderInstance::PushFrame(const SoyPixelsImpl& Frame,size_t FrameNumber)
 {
 	TFrame NewFrame;
 	NewFrame.mFrameNumber = FrameNumber;
-	NewFrame.mPixels.reset( new SoyPixels( Frame ) );
-	
+
+	//	if we get an invalid pixels we're assuming it's the EndOfStream packet
+	if ( !Frame.GetMeta().IsValid() && FrameNumber == 0 )
+	{
+		std::Debug << __PRETTY_FUNCTION__ << " detected EndOfStream frame" << std::endl;
+		NewFrame.mEndOfStream = true;
+	}
+	else
+	{
+		//	todo: get rid of the copy here, maybe swap for a lockable TPixelBuffer so it can be pooled
+		NewFrame.mPixels.reset( new SoyPixels( Frame ) );
+	}
+
 	{
 		std::lock_guard<std::mutex> Lock(mFramesLock);
 		mFrames.PushBack(NewFrame);
-		mMeta = Frame.GetMeta();
+		
+		//	gr: don't overwrite cached meta with an invalid one!
+		//		but do update it, in case something has changed
+		auto FrameMeta = Frame.GetMeta();
+		if ( FrameMeta.IsValid() )
+			mMeta = FrameMeta;
 		//std::Debug << __PRETTY_FUNCTION__ << mFrames.GetSize() << " frames pending" << std::endl;
 	}
 	if ( mOnNewFrame )

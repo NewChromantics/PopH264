@@ -57,6 +57,10 @@ public static class PopH264
 	{
 		public List<PlaneMeta>	Planes;
 		public int				PlaneCount { get { return Planes!=null ? Planes.Count : 0; } }
+
+		public bool				EndOfStream;
+		public int 				FrameNumber;
+		public int				FramesQueued;
 	};
 	
 	static public string GetString(byte[] Ascii)
@@ -72,6 +76,7 @@ public static class PopH264
 	{
 		public byte[] Bytes;
 		public int FrameNumber;
+		public bool EndOfStream { get { return Bytes == null; } }	//	marker/command to tell decoder stream has ended
 	};
 
 	public enum DecoderMode
@@ -94,6 +99,7 @@ public static class PopH264
 		System.Threading.Thread InputThread;
 		List<FrameInput> InputQueue;
 		int? InputThreadResult = 0;
+		public bool HadEndOfStream = false;
 
 		public Decoder(DecoderMode DecoderMode,bool ThreadedDecoding)
 		{
@@ -201,7 +207,8 @@ public static class PopH264
 					Frame = InputQueue[0];
 					InputQueue.RemoveRange(0, 1);
 				}
-				InputThreadResult = PopH264_PushData(Instance.Value, Frame.Bytes, Frame.Bytes.Length, Frame.FrameNumber );
+				var Length = (Frame.Bytes == null) ? 0 : Frame.Bytes.Length;
+				InputThreadResult = PopH264_PushData(Instance.Value, Frame.Bytes, Length, Frame.FrameNumber );
 			}
 		}
 
@@ -240,7 +247,8 @@ public static class PopH264
 
 			if ( !ThreadedDecoding )
 			{
-				return PopH264_PushData(Instance.Value, Frame.Bytes, Frame.Bytes.Length, Frame.FrameNumber);
+				var Length = (Frame.Bytes==null) ? 0 : Frame.Bytes.Length;
+				return PopH264_PushData(Instance.Value, Frame.Bytes, Length, Frame.FrameNumber);
 			}
 
 			if (InputThread == null )
@@ -277,6 +285,10 @@ public static class PopH264
 			var Json = GetString(JsonBuffer);
 			var Meta = JsonUtility.FromJson<FrameMeta>(Json);
 			var PlaneCount = Meta.PlaneCount;
+
+			if (Meta.EndOfStream)
+				HadEndOfStream = true;
+
 			//Debug.Log("Meta " + Json);
 			if (PlaneCount <= 0)
 			{

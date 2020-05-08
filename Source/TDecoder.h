@@ -20,11 +20,12 @@ public:
 	void			Decode(ArrayBridge<uint8_t>&& PacketData,size_t FrameNumber);
 
 	//	gr: this has a callback because of flushing old packets. Need to overhaul the framenumber<->packet relationship
-	void			OnEndOfStream();
+	void			PushEndOfStream();
 	
 protected:
 	void			OnDecodedFrame(const SoyPixelsImpl& Pixels);
 	void			OnDecodedFrame(const SoyPixelsImpl& Pixels,size_t FrameNumber);
+	void			OnDecodedEndOfStream();
 	virtual bool	DecodeNextPacket()=0;	//	returns true if more data to proccess
 	
 	bool			HasPendingData()	{	return !mPendingData.IsEmpty();	}
