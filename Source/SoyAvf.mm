@@ -392,7 +392,7 @@ CVPixelBufferRef Avf::PixelsToPixelBuffer(const SoyPixelsImpl& Image)
 
 		CVPixelBufferReleasePlanarBytesCallback Callback = [](void* CallbackReference,const void* DataPtr,size_t DataSize,size_t PlaneCount,const void* PlaneAddresses[])
 		{
-			std::Debug << "Pixel Buffer released" << std::endl;
+			//std::Debug << "Pixel Buffer released" << std::endl;
 		};
 		void* CallbackReference = nullptr;
 		
