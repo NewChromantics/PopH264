@@ -72,6 +72,13 @@ public class FileReader : FileReaderBase
 #endif
 	}
 
+	//	gr: this is currently specific to files (assume other readers can't), but maybe wants a generic interface anyway
+	//		OnDataChanged shouldn't really re-set/end everything anyway
+	public void ResetStream()
+	{
+		OnDataChanged();
+	}
+
 	override public System.Func<long, long, byte[]> GetReadFileFunction()
 	{
 		if (!System.IO.File.Exists(Filename))
