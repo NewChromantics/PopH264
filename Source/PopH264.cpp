@@ -391,3 +391,17 @@ __export int32_t PopH264_GetTestData(const char* Name,uint8_t* Buffer,int32_t Bu
 	};
 	return SafeCall(Function, __func__, -1);
 }
+
+
+
+__export void UnityPluginLoad(/*IUnityInterfaces*/void*)
+{
+	//	if this DLL is being used in unity, we dont get any debug output in xcode, so enable NSLog
+	Debug::EnablePrint_Platform = true;
+	std::Debug << __PRETTY_FUNCTION__ << std::endl;
+}
+
+__export void UnityPluginUnload()
+{
+	std::Debug << __PRETTY_FUNCTION__ << std::endl;
+}
