@@ -141,7 +141,8 @@ public class VideoPacketDecoder : MonoBehaviour
 		Decoder = null;
 
 		PendingInputFrames = null;
-		
+		PendingOutputFrameTimes = null;
+
 		StartTime = null;
 	}
 
@@ -253,12 +254,14 @@ public class VideoPacketDecoder : MonoBehaviour
 		{
 			if (Decoder.HadEndOfStream)
 			{
-				Debug.Log("EndOfStream detected");
+				if ( VerboseDebug )
+					Debug.Log("EndOfStream detected");
 				if (!OnFinishedCalled)
 				{
 					Debug.Log("OnFinished call");
-					OnFinished.Invoke();
+					//	set this flag before calling, as the call may cause a reset
 					OnFinishedCalled = true;
+					OnFinished.Invoke();
 				}
 			}
 			return false;

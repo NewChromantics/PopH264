@@ -52,12 +52,24 @@ public class FileReader : FileReaderBase
 #else
 	byte[] FileBytes;
 #endif
+	bool FirstUpdate = true;
+
+	void OnEnable()
+	{
+		//	reset if re-enabled
+		FirstUpdate = true;
+	}
 
 	//	gr: move this to Base and trigger when we get more data in
-	void Start()
+	void Update()
 	{
+		if (!FirstUpdate)
+			return;
+
 		if (EnableOnPacket)
 			OnDataChanged();
+
+		FirstUpdate = false;
 	}
 
 	public override long GetKnownFileSize()
@@ -76,7 +88,7 @@ public class FileReader : FileReaderBase
 	//		OnDataChanged shouldn't really re-set/end everything anyway
 	public void ResetStream()
 	{
-		OnDataChanged();
+		FirstUpdate = true;
 	}
 
 	override public System.Func<long, long, byte[]> GetReadFileFunction()
