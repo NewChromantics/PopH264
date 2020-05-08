@@ -158,7 +158,7 @@ void EncoderYuv8_88Test()
 	//	todo: decode it again
 	while(true)
 	{
-		std::this_thread::sleep_for(std::chrono::milliseconds(100));
+		std::this_thread::sleep_for(std::chrono::milliseconds(10));
 		uint8_t PacketBuffer[1024*50];
 		auto FrameSize = PopH264_EncoderPopData(Handle, PacketBuffer, std::size(PacketBuffer) );
 		if ( FrameSize < 0 )
