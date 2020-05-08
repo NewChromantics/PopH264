@@ -458,6 +458,12 @@ void Avf::TDecoder::AllocDecoder()
 	if ( mDecompressor )
 		return;
 	
+	if ( mNaluSps.IsEmpty() || mNaluPps.IsEmpty() )
+	{
+		std::Debug << __PRETTY_FUNCTION__ << " waiting for " << (mNaluSps.IsEmpty()?"SPS":"") << " " << (mNaluPps.IsEmpty()?"PPS":"") << std::endl;
+		return;
+	}
+	
 	//	gr: does decompressor need to wait for SPS&PPS?
 	mDecompressor.reset( new TDecompressor( GetArrayBridge(mNaluSps), GetArrayBridge(mNaluPps), OnPacket ) );
 }
