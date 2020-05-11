@@ -134,7 +134,7 @@ void EncoderYuv8_88Test()
 	Debug << "PopH264_CreateEncoder handle=" << Handle << " error=" << ErrorBuffer;
 	DebugPrint(Debug.str());
 
-	SoyPixels Yuv( SoyPixelsMeta(640,480,SoyPixelsFormat::Yuv_8_88_Full));
+	SoyPixels Yuv( SoyPixelsMeta(640,480,SoyPixelsFormat::Yuv_8_88));
 	auto Size = Yuv.GetPixelsArray().GetDataSize();
 	const char* TestMetaJson =
 	R"V0G0N(

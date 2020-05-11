@@ -281,7 +281,7 @@ void Broadway::TDecoder::OnPicture(const H264SwDecPicture& Picture,const H264SwD
 {
 	//		headers just say
 	//	u32 *pOutputPicture;    /* Pointer to the picture, YUV format       */
-	auto Format = SoyPixelsFormat::Yuv_8_8_8_Full;
+	auto Format = SoyPixelsFormat::Yuv_8_8_8;
 	SoyPixelsMeta PixelMeta( Meta.picWidth, Meta.picHeight, Format );
 	//std::Debug << "Decoded picture " << PixelMeta << std::endl;
 	

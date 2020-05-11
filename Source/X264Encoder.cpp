@@ -132,7 +132,7 @@ int X264::GetColourSpace(SoyPixelsFormat::Type Format)
 {
 	switch (Format)
 	{
-		case SoyPixelsFormat::Yuv_8_8_8_Ntsc:	return X264_CSP_I420;
+		case SoyPixelsFormat::Yuv_8_8_8:	return X264_CSP_I420;
 			//case SoyPixelsFormat::Greyscale:		return X264_CSP_I400;
 			//case SoyPixelsFormat::Yuv_8_88_Ntsc:	return X264_CSP_NV12;
 			//case SoyPixelsFormat::Yvu_8_88_Ntsc:	return X264_CSP_NV21;

@@ -151,14 +151,14 @@ void PopH264::TEncoderInstance::PushFrame(const std::string& Meta,const uint8_t*
 
 	if ( LumaData && ChromaUData && ChromaVData )
 	{
-		SoyPixelsMeta YuvMeta(Width, Height, SoyPixelsFormat::Yuv_8_8_8_Ntsc);
+		SoyPixelsMeta YuvMeta(Width, Height, SoyPixelsFormat::Yuv_8_8_8);
 		BufferArray<SoyPixelsMeta, 3> YuvMetas;
 		YuvMeta.GetPlanes(GetArrayBridge(YuvMetas));
 		auto WidthChroma = YuvMetas[1].GetWidth();
 		auto HeightChroma = YuvMetas[1].GetHeight();
 
 		//	yuv_8_8_8
-		SoyPixelsRemote PixelsY( const_cast<uint8_t*>(LumaData), Width, Height, LumaSize, SoyPixelsFormat::Luma_Ntsc );
+		SoyPixelsRemote PixelsY( const_cast<uint8_t*>(LumaData), Width, Height, LumaSize, SoyPixelsFormat::Luma );
 		SoyPixelsRemote PixelsU( const_cast<uint8_t*>(ChromaUData), WidthChroma, HeightChroma, ChromaUSize, SoyPixelsFormat::ChromaU_8 );
 		SoyPixelsRemote PixelsV( const_cast<uint8_t*>(ChromaVData), WidthChroma, HeightChroma, ChromaVSize, SoyPixelsFormat::ChromaV_8 );
 		
