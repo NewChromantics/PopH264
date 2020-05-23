@@ -46,3 +46,5 @@ PopH264.visualstudio/PopH264_TestApp/x64/
 PopH264.visualstudio/PopH264_TestApp_x64_Debug/
 
 PopH264.visualstudio/PopH264_x64_Debug/
+
+*.Android/libs/**/*.so
