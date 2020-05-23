@@ -4,7 +4,9 @@
 #include "json11.hpp"
 #include "PopH264.h"
 
+#if !defined(TARGET_ANDROID)
 #define ENABLE_X264
+#endif
 
 #if defined(TARGET_IOS) || defined(TARGET_OSX)
 #define ENABLE_AVF

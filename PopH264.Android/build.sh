@@ -18,12 +18,19 @@ if [ "$ACTION" == "" ]; then
 fi
 
 
+if [ "$BUILD_TARGET_NAME" == "" ]; then
+	echo "Android/build.sh: BUILD_TARGET_NAME not specified, expecting PopXyz"
+	exit 1;
+fi
+
+
 if [ -z "$ANDROID_API" ]; then
 	ANDROID_API="23"
 fi
 
 
 MAXCONCURRENTBUILDS=8
+BUILD_PROJECT_FOLDER=$BUILD_TARGET_NAME.Android
 
 echo "Android targets..."
 #android list targets
@@ -46,7 +53,7 @@ fi
 function BuildAbi()
 {
 	ANDROID_ABI=$1
-	$ANDROID_NDK/ndk-build -j$MAXCONCURRENTBUILDS NDK_DEBUG=0 NDK_PROJECT_PATH=$SOURCE_ROOT/PopH264.Android/
+	$ANDROID_NDK/ndk-build -j$MAXCONCURRENTBUILDS NDK_DEBUG=0 NDK_PROJECT_PATH=$SOURCE_ROOT/$BUILD_PROJECT_FOLDER/
 
 	RESULT=$?
 
@@ -54,7 +61,7 @@ function BuildAbi()
 		exit $RESULT
 	fi
 
-	SRC_PATH="PopH264.Android/libs/$ANDROID_ABI/libPopH264.so"
+	SRC_PATH="$BUILD_PROJECT_FOLDER/libs/$ANDROID_ABI/lib$BUILD_TARGET_NAME.so"
 	DEST_PATH="$UNITY_ASSET_PLUGIN_PATH/$ANDROID_ABI"
 	echo "Copying $SRC_PATH to $DEST_PATH"
 

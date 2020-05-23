@@ -29,7 +29,7 @@ APP_CPPFLAGS += $(GCC_PREPROCESSOR_DEFINITIONS_LIST)$(SPACE)
 # gr: incompatible with unity's build
 #APP_CPPFLAGS += -std=c++11 -pthread -frtti -fexceptions -D__cplusplus11
 # gr: including c++11 is okay, but SOME CODE (not sure what yet), causes "dll not found"..."
-APP_CPPFLAGS += -std=c++11
+APP_CPPFLAGS += -std=c++17
 APP_CPPFLAGS += -fexceptions
 
 # downgrade some GCC errors to warnings
@@ -38,7 +38,9 @@ APP_CPPFLAGS += -fpermissive
 #for <thread> and <mutex> we don't want to use gcc 4.6'
 #	http://stackoverflow.com/questions/23911019/setting-up-c11-stdthread-for-ndk-with-adt-eclipse
 #APP_STL := stlport_static
-APP_STL := gnustl_static
+#APP_STL := gnustl_static
+# now only c++_static or c++_shared from ndk 21.1.6352462
+APP_STL := c++_shared
 
 # okay with unity 5.0.2
 APP_USE_CPP0X := true

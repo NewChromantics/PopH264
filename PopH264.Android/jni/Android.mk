@@ -60,7 +60,7 @@ LOCAL_C_INCLUDES += \
 $(LOCAL_PATH)/$(SRC)/Source/Broadway/Decoder	\
 $(LOCAL_PATH)/$(SRC)/Source/Broadway/Decoder/inc	\
 $(LOCAL_PATH)/$(SOY_PATH)/src	\
-
+$(LOCAL_PATH)/$(SRC)/Source/Json11	\
 
 # use warning as echo
 #$(warning $(LOCAL_C_INCLUDES))
@@ -79,9 +79,14 @@ LOCAL_LDLIBS  	+= -llog			# logging
 # todo: generate from input from xcode
 LOCAL_SRC_FILES  := \
 $(SRC)/Source/PopH264.cpp \
+$(SRC)/Source/PopH264TestData.cpp \
 $(SRC)/Source/TDecoder.cpp \
+$(SRC)/Source/TDecoderInstance.cpp \
+$(SRC)/Source/TEncoder.cpp \
+$(SRC)/Source/TEncoderInstance.cpp \
 $(SRC)/Source/BroadwayDecoder.cpp \
 $(SRC)/Source/BroadwayAll.c \
+$(SRC)/Source/Json11/json11.cpp \
 
 
 # soy lib files
@@ -94,10 +99,14 @@ $(SOY_PATH)/src/memheap.cpp \
 $(SOY_PATH)/src/SoyArray.cpp \
 $(SOY_PATH)/src/SoyTime.cpp \
 $(SOY_PATH)/src/SoyString.cpp \
+$(SOY_PATH)/src/SoyH264.cpp \
+$(SOY_PATH)/src/SoyPng.cpp \
+$(SOY_PATH)/src/SoyImage.cpp \
+$(SOY_PATH)/src/SoyStreamBuffer.cpp \
+$(SOY_PATH)/src/SoyFourcc.cpp \
 
 #$(SOY_PATH)/src/SoyOpengl.cpp \
 #$(SOY_PATH)/src/SoyOpenglContext.cpp \
-#$(SOY_PATH)/src/SoyPng.cpp \
 #$(SOY_PATH)/src/SoyThread.cpp \
 #$(SOY_PATH)/src/SoyEvent.cpp \
 #$(SOY_PATH)/src/SoyShader.cpp \

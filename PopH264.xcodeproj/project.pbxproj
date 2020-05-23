@@ -316,6 +316,7 @@
 		BFEF6A1A246992CE000A1F88 /* SoyAvf.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SoyAvf.h; path = Source/SoyLib/src/SoyAvf.h; sourceTree = "<group>"; };
 		BFEF6A2024699955000A1F88 /* SoyVector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SoyVector.h; path = Source/SoyLib/src/SoyVector.h; sourceTree = "<group>"; };
 		BFEF6A2124699955000A1F88 /* SoyVector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SoyVector.cpp; path = Source/SoyLib/src/SoyVector.cpp; sourceTree = "<group>"; };
+		BFEF6A45247994EA000A1F88 /* SoyTypes_Android.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SoyTypes_Android.h; path = Source/SoyLib/src/SoyTypes_Android.h; sourceTree = "<group>"; };
 		BFF1C6E322E377D100AFDFD5 /* PopH264.Android */ = {isa = PBXFileReference; lastKnownFileType = folder; path = PopH264.Android; sourceTree = "<group>"; };
 		BFF1C6E622E3A1D600AFDFD5 /* SoyFilesystem.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SoyFilesystem.h; path = Source/SoyLib/src/SoyFilesystem.h; sourceTree = "<group>"; };
 		BFF1C6E822E3C65800AFDFD5 /* BroadwayAll.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = BroadwayAll.c; path = Source/BroadwayAll.c; sourceTree = "<group>"; };
@@ -564,6 +565,7 @@
 				BF8AB6BC21F228D0008E7E76 /* SoyTime.cpp */,
 				BF8AB6BE21F228D0008E7E76 /* SoyTime.h */,
 				BF8AB6BD21F228D0008E7E76 /* SoyTime.mm */,
+				BFEF6A45247994EA000A1F88 /* SoyTypes_Android.h */,
 				BF53E83222EE024E008253CD /* SoyTypes_Lumin.h */,
 				BF8AB6BA21F228B8008E7E76 /* SoyTypes.cpp */,
 				BFFC941A245DC0B900AEE711 /* SoyTypes_CoreFoundation.h */,
@@ -1263,6 +1265,8 @@
 		BFF1C6DF22E3769B00AFDFD5 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ANDROID_NDK = /Volumes/Data256/AndroidSdk29/ndk/21.1.6352462;
+				BUILD_TARGET_NAME = PopH264;
 				UNITY_ASSET_PLUGIN_PATH = "$(UNITY_OUTPUT_PATH)/Android";
 			};
 			name = Debug;
@@ -1270,6 +1274,8 @@
 		BFF1C6E022E3769B00AFDFD5 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ANDROID_NDK = /Volumes/Data256/AndroidSdk29/ndk/21.1.6352462;
+				BUILD_TARGET_NAME = PopH264;
 				UNITY_ASSET_PLUGIN_PATH = "$(UNITY_OUTPUT_PATH)/Android";
 			};
 			name = Release;
