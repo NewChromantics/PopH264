@@ -32,28 +32,17 @@ fi
 MAXCONCURRENTBUILDS=8
 BUILD_PROJECT_FOLDER=$BUILD_TARGET_NAME.Android
 
-echo "Android targets..."
-#android list targets
-
-echo "Update android project"
-#android update project -t android-$ANDROID_API -p . -s
-
 # set android NDK dir
 if [ -z "$ANDROID_NDK" ]; then
 	echo "ANDROID_NDK env var not set"
 	exit 1
 fi
 
-# set android NDK dir
-if [ -z "$UNITY_ASSET_PLUGIN_PATH" ]; then
-	echo "UNITY_ASSET_PLUGIN_PATH env var not set"
-	exit 1
-fi
-
 function BuildAbi()
 {
 	ANDROID_ABI=$1
-	$ANDROID_NDK/ndk-build -j$MAXCONCURRENTBUILDS NDK_DEBUG=0 NDK_PROJECT_PATH=$SOURCE_ROOT/$BUILD_PROJECT_FOLDER/
+	echo "ndk-build $ANDROID_ABI..."
+	$ANDROID_NDK/ndk-build -j$MAXCONCURRENTBUILDS NDK_DEBUG=0 NDK_PROJECT_PATH=$SOURCE_ROOT/$BUILD_PROJECT_FOLDER
 
 	RESULT=$?
 
@@ -62,14 +51,20 @@ function BuildAbi()
 	fi
 
 	SRC_PATH="$BUILD_PROJECT_FOLDER/libs/$ANDROID_ABI/lib$BUILD_TARGET_NAME.so"
-	DEST_PATH="$UNITY_ASSET_PLUGIN_PATH/$ANDROID_ABI"
-	echo "Copying $SRC_PATH to $DEST_PATH"
 
-	mkdir -p $DEST_PATH && cp $SRC_PATH $DEST_PATH
+	# set android NDK dir
+	if [ -z "$UNITY_ASSET_PLUGIN_PATH" ]; then
+		echo "UNITY_ASSET_PLUGIN_PATH not set, skipping post-build copy of $SRC_PATH"
+	else
+		DEST_PATH="$UNITY_ASSET_PLUGIN_PATH/$ANDROID_ABI"
+		echo "Copying $SRC_PATH to $DEST_PATH"
 
-	RESULT=$?
-	if [[ $RESULT -ne 0 ]]; then
-		exit $RESULT
+		mkdir -p $DEST_PATH && cp $SRC_PATH $DEST_PATH
+
+		RESULT=$?
+		if [[ $RESULT -ne 0 ]]; then
+			exit $RESULT
+		fi
 	fi
 }
 

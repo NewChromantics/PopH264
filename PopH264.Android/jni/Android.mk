@@ -3,10 +3,10 @@ LOCAL_PATH := $(call my-dir)
 
 # extra ../ as jni is always prepended
 SRC := ../..
-
+#$(warning $(LOCAL_PATH))	#	debug
 
 # gr: get this from env var
-APP_MODULE := PopH264
+APP_MODULE := $(BUILD_TARGET_NAME)
 
 # full speed arm instead of thumb
 LOCAL_ARM_MODE  := arm
