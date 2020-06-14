@@ -17,9 +17,9 @@ jobs:
     runs-on: [self-hosted, windows]
     
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
       with:
-        submodules: true
+        submodules: 'recursive'
         
     - name: Add msbuild to PATH
       uses: microsoft/setup-msbuild@v1.0.0
