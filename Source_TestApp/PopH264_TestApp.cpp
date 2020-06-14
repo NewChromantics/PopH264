@@ -41,7 +41,7 @@ void DecoderTest(const char* TestDataName,CompareFunc_t* Compare)
 	if ( TestDataSize > std::size(TestData) )
 		throw std::runtime_error("Buffer for test data not big enough");
 	
-	auto Mode = 1;
+	auto Mode = 0;
 	auto Handle = PopH264_CreateInstance(Mode);
 
 	auto Result = PopH264_PushData( Handle, TestData, TestDataSize, 0 );
@@ -142,7 +142,7 @@ void EncoderYuv8_88Test()
 		"Width":640,
 		"Height":480,
 		"LumaSize":460800,
-		"Format":"Yuv_8_88_Full"
+		"Format":"Yuv_8_88"
 	}
 	)V0G0N";
 	PopH264_EncoderPushFrame(Handle, TestMetaJson, Yuv.GetPixelsArray().GetArray(), nullptr, nullptr, ErrorBuffer, std::size(ErrorBuffer));
