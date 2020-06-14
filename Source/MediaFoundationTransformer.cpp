@@ -298,16 +298,15 @@ Soy::TFourcc MediaFoundation::GetFourcc(SoyPixelsFormat::Type Format)
 	//	https://www.fourcc.org/yuv.php
 	switch (Format)
 	{
-		//case SoyPixelsFormat::Yvu_8_8_8_Full:	return Soy::TFourcc("IYUV"); //	same as I420
-	case SoyPixelsFormat::Yuv_8_8_8_Full:
-	case SoyPixelsFormat::Yuv_8_8_8_Ntsc:
+	//case SoyPixelsFormat::Yvu_8_8_8:	return Soy::TFourcc("IYUV"); //	same as I420
+
+	case SoyPixelsFormat::Yuv_8_8_8:
 		return Soy::TFourcc("YV12");
 
-	case SoyPixelsFormat::Yuv_8_88_Full:
-	case SoyPixelsFormat::Yuv_8_88_Ntsc:
+	case SoyPixelsFormat::Yuv_8_88:
 		return Soy::TFourcc("NV12");
 
-	case SoyPixelsFormat::Yvu_8_88_Ntsc:
+	case SoyPixelsFormat::Yvu_8_88:
 		return Soy::TFourcc("NV21");	//	also 420O
 	}
 

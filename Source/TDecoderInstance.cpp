@@ -17,7 +17,7 @@
 #define ENABLE_BROADWAY
 
 #if defined(TARGET_WINDOWS)
-#define ENABLE_INTELMEDIA
+//#define ENABLE_INTELMEDIA
 #define ENABLE_MEDIAFOUNDATION
 #endif
 

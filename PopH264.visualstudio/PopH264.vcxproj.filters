@@ -210,9 +210,6 @@
     <ClCompile Include="..\Source\IntelMediaDecoder.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\SoyH264.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
     <ClCompile Include="..\Source\TDecoderInstance.cpp">
       <Filter>Source</Filter>
     </ClCompile>
@@ -495,9 +492,6 @@
       <Filter>Source</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\SoyAvf.h">
-      <Filter>Source</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\SoyH264.h">
       <Filter>Source</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\TDecoderInstance.h">

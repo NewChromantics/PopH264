@@ -1,6 +1,6 @@
 #include "PopH264TestData.h"
 #include "SoyFilesystem.h"
-
+#include <algorithm>
 
 //	ffmpeg -i PopH264Test_GreyscaleGradient.png -pix_fmt yuvj420p -bf 0 -codec:v libx264 -profile:v baseline -level 3.0 -preset slow -f rawvideo PopH264Test_GreyscaleGradient.h264
 //	xxd -i -a ./PopH264Test_GreyscaleGradient.h264
