@@ -1220,7 +1220,7 @@ bool MediaFoundation::TTransformer::PopFrame(ArrayBridge<uint8_t>&& Data,SoyTime
 
 		//	gr: we can run ProcessOutput again here and we'll get a frame!
 		//		the code is a little messy for now, so just notify caller should call again
-		return true
+		return true;
 	}
 	else
 	{
