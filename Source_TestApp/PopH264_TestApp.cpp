@@ -48,16 +48,12 @@ void DecoderTest(const char* TestDataName,CompareFunc_t* Compare)
 	if ( Result < 0 )
 		throw std::runtime_error("DecoderTest: PushData error");
 	
-	PopH264_PushData(Handle, TestData, TestDataSize, 0);
-	PopH264_PushData(Handle, TestData, TestDataSize, 0);
-	PopH264_PushData(Handle, TestData, TestDataSize, 0);
-
+	//	gr: did we need to push twice to catch a bug in broadway?
+	//PopH264_PushData(Handle, TestData, TestDataSize, 0);
+	
 	//	flush
 	PopH264_PushData(Handle, nullptr, 0, 0);
-	PopH264_PushData(Handle, nullptr, 0, 0);
-	PopH264_PushData(Handle, nullptr, 0, 0);
-	PopH264_PushData(Handle, nullptr, 0, 0);
-	PopH264_PushData(Handle,nullptr,0,0);
+//	PopH264_PushData(Handle, nullptr, 0, 0);
 	
 	//	wait for it to decode
 	for ( auto i=0;	i<100;	i++ )

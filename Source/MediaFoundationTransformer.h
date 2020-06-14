@@ -54,7 +54,9 @@ public:
 public:
 	//	this returns false if the data was not pushed (where we need to unpop the data, as to not lose it)
 	bool			PushFrame(const ArrayBridge<uint8_t>&& Data);
-	void			PopFrame(ArrayBridge<uint8_t>&& Data,SoyTime& Format);
+
+	//	returns true if we should call again (ie, there are more frames to get)
+	bool			PopFrame(ArrayBridge<uint8_t>&& Data,SoyTime& Format);
 	
 	void			ProcessCommand(MFT_MESSAGE_TYPE Command);
 
