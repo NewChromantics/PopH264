@@ -95,9 +95,19 @@ bool MediaFoundation::TDecoder::DecodeNextPacket()
 	{
 		//	flush ditches pending inputs!
 		//mTransformer->ProcessCommand(MFT_MESSAGE_COMMAND_FLUSH);
-		//mTransformer->ProcessCommand(MFT_MESSAGE_COMMAND_DRAIN);
-		mTransformer->ProcessCommand(MFT_MESSAGE_NOTIFY_END_STREAMING);
+
+		//	"Requests a Media Foundation transform (MFT) to that streaming is about to end."
+		//mTransformer->ProcessCommand(MFT_MESSAGE_NOTIFY_END_STREAMING);
+
+		//	gr: to flush, we just need _DRAIN
+		//		with Picked Transform Microsoft H264 Video Decoder MFT
+
+		//	notify there will be no more input
 		mTransformer->ProcessCommand(MFT_MESSAGE_NOTIFY_END_OF_STREAM);
+		
+		//	drain means we're going to drain all outputs until Needs_more_input
+		mTransformer->ProcessCommand(MFT_MESSAGE_COMMAND_DRAIN);
+		
 		//mTransformer->ProcessCommand(MFT_MESSAGE_COMMAND_FLUSH_OUTPUT_STREAM);
 	}
 

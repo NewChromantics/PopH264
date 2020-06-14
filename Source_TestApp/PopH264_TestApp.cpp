@@ -41,7 +41,7 @@ void DecoderTest(const char* TestDataName,CompareFunc_t* Compare)
 	if ( TestDataSize > std::size(TestData) )
 		throw std::runtime_error("Buffer for test data not big enough");
 	
-	auto Mode = 0;
+	auto Mode = POPH264_DECODERMODE_HARDWARE;
 	auto Handle = PopH264_CreateInstance(Mode);
 
 	auto Result = PopH264_PushData( Handle, TestData, TestDataSize, 0 );
