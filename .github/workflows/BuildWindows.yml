@@ -3,9 +3,9 @@ name: Build Windows
 env:
   BuildSolution: PopH264.visualstudio\PopH264.sln
   BuildPlatform: x64
-  BuildConfiguration: Master
+  BuildConfiguration: Release
 # would be nice to extract this from visual studio
-  BuildDirectory: Build\Master_x64
+  BuildDirectory: Build\Release_x64
 
 on: 
   push:
