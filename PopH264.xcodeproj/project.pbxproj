@@ -49,6 +49,7 @@
 		BF32257B244609C700C74D4D /* libx264.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BF32257A244609C700C74D4D /* libx264.a */; };
 		BF32257D244609D100C74D4D /* libx264.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BF32257C244609D100C74D4D /* libx264.a */; };
 		BF322580244610DD00C74D4D /* PopH264_Ios.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = BF151FD92384786600A70EBF /* PopH264_Ios.framework */; };
+		BF44AAB2249FB65500C9D982 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BF44AAB1249FB65500C9D982 /* AVFoundation.framework */; };
 		BF459CE221F7D60500CED59D /* PopH264Framework.h in Headers */ = {isa = PBXBuildFile; fileRef = BF459CDE21F7D60500CED59D /* PopH264Framework.h */; };
 		BF459CE921F7D70000CED59D /* PopH264.h in Headers */ = {isa = PBXBuildFile; fileRef = BF8AB63721F20C41008E7E76 /* PopH264.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		BF459CF421F7DB1B00CED59D /* PopH264.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB63821F20C41008E7E76 /* PopH264.cpp */; };
@@ -186,6 +187,7 @@
 		BF3225772445F8DD00C74D4D /* TEncoder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TEncoder.cpp; path = Source/TEncoder.cpp; sourceTree = "<group>"; };
 		BF32257A244609C700C74D4D /* libx264.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libx264.a; path = Source/X264/osx/libx264.a; sourceTree = "<group>"; };
 		BF32257C244609D100C74D4D /* libx264.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libx264.a; path = Source/X264/Ios/lib/libx264.a; sourceTree = "<group>"; };
+		BF44AAB1249FB65500C9D982 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS12.1.sdk/System/Library/Frameworks/AVFoundation.framework; sourceTree = DEVELOPER_DIR; };
 		BF459C7F21F7C97400CED59D /* TDecoderInstance.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TDecoderInstance.h; path = Source/TDecoderInstance.h; sourceTree = "<group>"; };
 		BF459CD521F7D5C700CED59D /* PopH264_Osx.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = PopH264_Osx.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		BF459CDD21F7D60500CED59D /* FrameworkInfo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = FrameworkInfo.plist; path = Source/FrameworkInfo.plist; sourceTree = "<group>"; };
@@ -341,6 +343,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BF44AAB2249FB65500C9D982 /* AVFoundation.framework in Frameworks */,
 				BFDB2BB62449F569009EC370 /* VideoToolbox.framework in Frameworks */,
 				BFDB2BB42449F54F009EC370 /* CoreVideo.framework in Frameworks */,
 				BF151FF02384789700A70EBF /* CoreMedia.framework in Frameworks */,
@@ -392,6 +395,7 @@
 		BF459CEC21F7D73B00CED59D /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				BF44AAB1249FB65500C9D982 /* AVFoundation.framework */,
 				BFFBE9752458390900E9BE1B /* AppKit.framework */,
 				BFDB2BB52449F569009EC370 /* VideoToolbox.framework */,
 				BFDB2BB32449F54F009EC370 /* CoreVideo.framework */,
