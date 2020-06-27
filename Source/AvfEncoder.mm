@@ -22,7 +22,7 @@
 #include "PopH264.h"	//	param keys
 
 
-#define EXECUTE_ON_DISPATCH_QUEUE
+//#define EXECUTE_ON_DISPATCH_QUEUE
 
 
 Avf::TEncoderParams::TEncoderParams(json11::Json& Options)
