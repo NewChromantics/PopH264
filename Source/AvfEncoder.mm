@@ -21,6 +21,10 @@
 
 #include "PopH264.h"	//	param keys
 
+
+#define EXECUTE_ON_DISPATCH_QUEUE
+
+
 Avf::TEncoderParams::TEncoderParams(json11::Json& Options)
 {
 	auto SetInt = [&](const char* Name,size_t& ValueUnsigned)
@@ -102,7 +106,9 @@ Avf::TCompressor::TCompressor(TEncoderParams& Params,const SoyPixelsMeta& Meta,s
 	
 	//h264Encoder = [H264HwEncoderImpl alloc];
 	//	[h264Encoder initWithConfiguration];
-	//auto Lambda = ^
+#if defined(EXECUTE_ON_DISPATCH_QUEUE)
+	auto Lambda = ^
+#endif
 	{
 		CFMutableDictionaryRef sessionAttributes = CFDictionaryCreateMutable( NULL, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks );
 		
@@ -268,7 +274,9 @@ Avf::TCompressor::TCompressor(TEncoderParams& Params,const SoyPixelsMeta& Meta,s
 		auto status = VTCompressionSessionPrepareToEncodeFrames(mSession);
 		Avf::IsOkay(status,ProfileDebug + "VTCompressionSessionPrepareToEncodeFrames");
 	};
-	//dispatch_sync(mQueue, Lambda);
+#if defined(EXECUTE_ON_DISPATCH_QUEUE)
+	dispatch_sync(mQueue, Lambda);
+#endif
 }
 
 Avf::TCompressor::~TCompressor()
@@ -512,7 +520,9 @@ void Avf::TCompressor::Encode(CVPixelBufferRef PixelBuffer,size_t FrameNumber,bo
 {
 	//	this throws with uncaught exceptions if in a dispatch queue,
 	//	does it need to be? it was syncronous anyway
-	//auto Lambda = ^
+#if defined(EXECUTE_ON_DISPATCH_QUEUE)
+	auto Lambda = ^
+#endif
 	{
 		//	we're using this to pass a frame number, but really we should be giving a real time to aid the encoder
 		CMTime presentationTimeStamp = CMTimeMake(FrameNumber, 1);
@@ -546,7 +556,9 @@ void Avf::TCompressor::Encode(CVPixelBufferRef PixelBuffer,size_t FrameNumber,bo
 			std::Debug << "VTCompressionSessionEncodeFrame returned FrameDropped=" << FrameDropped << " EncodingAsync=" << EncodingAsync << std::endl;
 		}
 	};
-	//dispatch_sync(mQueue,Lambda);
+#if defined(EXECUTE_ON_DISPATCH_QUEUE)
+	dispatch_sync(mQueue,Lambda);
+#endif
 }
 	
 
