@@ -154,11 +154,26 @@ void PopH264::TEncoderInstance::PushFrame(const std::string& Meta,const uint8_t*
 	if ( LumaData && ChromaUData && ChromaVData )
 	{
 		SoyPixelsMeta YuvMeta(Width, Height, SoyPixelsFormat::Yuv_8_8_8);
+
 		BufferArray<SoyPixelsMeta, 3> YuvMetas;
 		YuvMeta.GetPlanes(GetArrayBridge(YuvMetas));
 		auto WidthChroma = YuvMetas[1].GetWidth();
 		auto HeightChroma = YuvMetas[1].GetHeight();
 
+		//	look out for striped data and make a single pixel buffer
+		{
+			auto* StripedLumaData = LumaData;
+			auto* StripedChromaUData = LumaData + YuvMetas[0].GetDataSize();
+			auto* StripedChromaVData = StripedChromaUData + YuvMetas[1].GetDataSize();
+			if ( StripedLumaData==LumaData && StripedChromaUData==ChromaUData && StripedChromaVData==ChromaVData )
+			{
+				auto TotalSize = LumaSize + ChromaUSize + ChromaVSize;
+				SoyPixelsRemote PixelsStriped( const_cast<uint8_t*>(LumaData), TotalSize, YuvMeta );
+				mEncoder->Encode( PixelsStriped, Meta, Keyframe );
+				return;
+			}
+		}
+		
 		//	yuv_8_8_8
 		SoyPixelsRemote PixelsY( const_cast<uint8_t*>(LumaData), Width, Height, LumaSize, SoyPixelsFormat::Luma );
 		SoyPixelsRemote PixelsU( const_cast<uint8_t*>(ChromaUData), WidthChroma, HeightChroma, ChromaUSize, SoyPixelsFormat::ChromaU_8 );
