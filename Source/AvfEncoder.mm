@@ -102,7 +102,7 @@ Avf::TCompressor::TCompressor(TEncoderParams& Params,const SoyPixelsMeta& Meta,s
 	
 	//h264Encoder = [H264HwEncoderImpl alloc];
 	//	[h264Encoder initWithConfiguration];
-	auto Lambda = ^
+	//auto Lambda = ^
 	{
 		CFMutableDictionaryRef sessionAttributes = CFDictionaryCreateMutable( NULL, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks );
 		
@@ -268,7 +268,7 @@ Avf::TCompressor::TCompressor(TEncoderParams& Params,const SoyPixelsMeta& Meta,s
 		auto status = VTCompressionSessionPrepareToEncodeFrames(mSession);
 		Avf::IsOkay(status,ProfileDebug + "VTCompressionSessionPrepareToEncodeFrames");
 	};
-	dispatch_sync(mQueue, Lambda);
+	//dispatch_sync(mQueue, Lambda);
 }
 
 Avf::TCompressor::~TCompressor()
