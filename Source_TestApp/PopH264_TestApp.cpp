@@ -41,23 +41,19 @@ void DecoderTest(const char* TestDataName,CompareFunc_t* Compare)
 	if ( TestDataSize > std::size(TestData) )
 		throw std::runtime_error("Buffer for test data not big enough");
 	
-	auto Mode = 1;
+	auto Mode = POPH264_DECODERMODE_HARDWARE;
 	auto Handle = PopH264_CreateInstance(Mode);
 
 	auto Result = PopH264_PushData( Handle, TestData, TestDataSize, 0 );
 	if ( Result < 0 )
 		throw std::runtime_error("DecoderTest: PushData error");
 	
-	PopH264_PushData(Handle, TestData, TestDataSize, 0);
-	PopH264_PushData(Handle, TestData, TestDataSize, 0);
-	PopH264_PushData(Handle, TestData, TestDataSize, 0);
-
+	//	gr: did we need to push twice to catch a bug in broadway?
+	//PopH264_PushData(Handle, TestData, TestDataSize, 0);
+	
 	//	flush
 	PopH264_PushData(Handle, nullptr, 0, 0);
-	PopH264_PushData(Handle, nullptr, 0, 0);
-	PopH264_PushData(Handle, nullptr, 0, 0);
-	PopH264_PushData(Handle, nullptr, 0, 0);
-	PopH264_PushData(Handle,nullptr,0,0);
+//	PopH264_PushData(Handle, nullptr, 0, 0);
 	
 	//	wait for it to decode
 	for ( auto i=0;	i<100;	i++ )
@@ -142,7 +138,7 @@ void EncoderYuv8_88Test()
 		"Width":640,
 		"Height":480,
 		"LumaSize":460800,
-		"Format":"Yuv_8_88_Full"
+		"Format":"Yuv_8_88"
 	}
 	)V0G0N";
 	PopH264_EncoderPushFrame(Handle, TestMetaJson, Yuv.GetPixelsArray().GetArray(), nullptr, nullptr, ErrorBuffer, std::size(ErrorBuffer));

@@ -298,16 +298,15 @@ Soy::TFourcc MediaFoundation::GetFourcc(SoyPixelsFormat::Type Format)
 	//	https://www.fourcc.org/yuv.php
 	switch (Format)
 	{
-		//case SoyPixelsFormat::Yvu_8_8_8_Full:	return Soy::TFourcc("IYUV"); //	same as I420
-	case SoyPixelsFormat::Yuv_8_8_8_Full:
-	case SoyPixelsFormat::Yuv_8_8_8_Ntsc:
+	//case SoyPixelsFormat::Yvu_8_8_8:	return Soy::TFourcc("IYUV"); //	same as I420
+
+	case SoyPixelsFormat::Yuv_8_8_8:
 		return Soy::TFourcc("YV12");
 
-	case SoyPixelsFormat::Yuv_8_88_Full:
-	case SoyPixelsFormat::Yuv_8_88_Ntsc:
+	case SoyPixelsFormat::Yuv_8_88:
 		return Soy::TFourcc("NV12");
 
-	case SoyPixelsFormat::Yvu_8_88_Ntsc:
+	case SoyPixelsFormat::Yvu_8_88:
 		return Soy::TFourcc("NV21");	//	also 420O
 	}
 
@@ -1152,7 +1151,7 @@ IMFMediaType& MediaFoundation::TTransformer::GetOutputMediaType()
 	return *mOutputMediaType.mObject;
 }
 
-void MediaFoundation::TTransformer::PopFrame(ArrayBridge<uint8_t>&& Data,SoyTime& Time)
+bool MediaFoundation::TTransformer::PopFrame(ArrayBridge<uint8_t>&& Data,SoyTime& Time)
 {
 	if (!mTransformer)
 		throw Soy::AssertException("Transformer is null");
@@ -1175,6 +1174,7 @@ void MediaFoundation::TTransformer::PopFrame(ArrayBridge<uint8_t>&& Data,SoyTime
 	{
 		//return;
 	}
+	std::Debug << "FrameReady: " << FrameReady << std::endl;
 
 	MFT_OUTPUT_STREAM_INFO OutputInfo;
 	auto Result = Transformer.GetOutputStreamInfo(mOutputStreamId, &OutputInfo);
@@ -1196,7 +1196,7 @@ void MediaFoundation::TTransformer::PopFrame(ArrayBridge<uint8_t>&& Data,SoyTime
 	//	handle some special returns
 	if (Result == MF_E_TRANSFORM_NEED_MORE_INPUT)
 	{
-		return;
+		return false;
 	}
 	else if (Result == E_UNEXPECTED)
 	{
@@ -1204,7 +1204,7 @@ void MediaFoundation::TTransformer::PopFrame(ArrayBridge<uint8_t>&& Data,SoyTime
 		//			If the client calls ProcessOutput at any other time, the method returns E_UNEXPECTED.
 		//	therefore, if we get this result, there just isnt one ready?
 		std::Debug << "Unexpected ProcessOutput - this is BAD if not async" << std::endl;
-		return;
+		return false;
 	}
 	else if (Result == MF_E_TRANSFORM_STREAM_CHANGE)
 	{
@@ -1217,6 +1217,10 @@ void MediaFoundation::TTransformer::PopFrame(ArrayBridge<uint8_t>&& Data,SoyTime
 		//	only for pixel streams!
 		auto PixelMeta = GetOutputPixelMeta();
 		std::Debug << "Streams changed: " << PixelMeta << std::endl;
+
+		//	gr: we can run ProcessOutput again here and we'll get a frame!
+		//		the code is a little messy for now, so just notify caller should call again
+		return true;
 	}
 	else
 	{
@@ -1246,4 +1250,6 @@ void MediaFoundation::TTransformer::PopFrame(ArrayBridge<uint8_t>&& Data,SoyTime
 		std::Debug <<  e.what() << std::endl;
 	}
 
+	//	assume there might be more packets
+	return true;
 }

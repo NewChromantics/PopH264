@@ -11,7 +11,7 @@ on:
 
 jobs:
   buildosx:
-    runs-on: macOS-10.14
+    runs-on: [self-hosted, macOS]
     
     steps:
     - uses: actions/checkout@v1

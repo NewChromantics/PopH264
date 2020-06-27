@@ -72,6 +72,8 @@ bool MediaFoundation::TDecoder::DecodeNextPacket()
 	auto NaluType = H264::GetPacketType(GetArrayBridge(Nalu));
 	std::Debug << "MediaFoundation decode " << magic_enum::enum_name(NaluType) << " x" << Nalu.GetSize() << std::endl;
 
+	bool PushData = true;
+
 	if (NaluType == H264NaluContent::SequenceParameterSet)
 	{
 		static bool SpsSet = false;
@@ -93,39 +95,59 @@ bool MediaFoundation::TDecoder::DecodeNextPacket()
 
 	if (NaluType == H264NaluContent::EndOfStream)
 	{
+		PushData = false;
 		//	flush ditches pending inputs!
 		//mTransformer->ProcessCommand(MFT_MESSAGE_COMMAND_FLUSH);
-		//mTransformer->ProcessCommand(MFT_MESSAGE_COMMAND_DRAIN);
-		mTransformer->ProcessCommand(MFT_MESSAGE_NOTIFY_END_STREAMING);
+
+		//	"Requests a Media Foundation transform (MFT) to that streaming is about to end."
+		//mTransformer->ProcessCommand(MFT_MESSAGE_NOTIFY_END_STREAMING);
+
+		//	gr: to flush, we just need _DRAIN
+		//		with Picked Transform Microsoft H264 Video Decoder MFT
+
+		//	notify there will be no more input
 		mTransformer->ProcessCommand(MFT_MESSAGE_NOTIFY_END_OF_STREAM);
+		
+		//	drain means we're going to drain all outputs until Needs_more_input
+		mTransformer->ProcessCommand(MFT_MESSAGE_COMMAND_DRAIN);
+		
 		//mTransformer->ProcessCommand(MFT_MESSAGE_COMMAND_FLUSH_OUTPUT_STREAM);
 	}
 
-	if (!mTransformer->PushFrame(GetArrayBridge(Nalu)))
+	if (PushData)
 	{
-		//	data was rejected
-		UnpopNalu(GetArrayBridge(Nalu));
+		if (!mTransformer->PushFrame(GetArrayBridge(Nalu)))
+		{
+			//	data was rejected
+			UnpopNalu(GetArrayBridge(Nalu));
+		}
 	}
 
 	//	try and pop frames
 	//	todo: other thread
 	{
-		Array<uint8_t> OutFrame;
-		SoyTime Time;
-		mTransformer->PopFrame(GetArrayBridge(OutFrame), Time);
-
-		//	no frame
-		if (OutFrame.IsEmpty())
+		bool PopAgain = true;
+		int LoopSafety = 10;
+		while (PopAgain && --LoopSafety > 0)
 		{
-			//	try and decode more nalu though
-			return true;
-		}
+			Array<uint8_t> OutFrame;
+			SoyTime Time;
+			PopAgain = mTransformer->PopFrame(GetArrayBridge(OutFrame), Time);
 
-		auto PixelMeta = mTransformer->GetOutputPixelMeta();
-		SoyPixelsRemote Pixels(OutFrame.GetArray(), OutFrame.GetDataSize(), PixelMeta);
-		auto FrameNumber = Time.mTime;
-		OnDecodedFrame(Pixels, FrameNumber);
+			//	no frame
+			if (OutFrame.IsEmpty())
+			{
+				//	try and decode more nalu though!
+				continue;
+			}
+
+			auto PixelMeta = mTransformer->GetOutputPixelMeta();
+			SoyPixelsRemote Pixels(OutFrame.GetArray(), OutFrame.GetDataSize(), PixelMeta);
+			auto FrameNumber = Time.mTime;
+			OnDecodedFrame(Pixels, FrameNumber);
+		}
 	}
 
+	//	even if we didn't get a frame, try to decode again as we processed a packet
 	return true;
 }
