@@ -606,9 +606,9 @@ void Avf::TEncoder::Encode(const SoyPixelsImpl& Pixels,const std::string& Meta,b
 {
 	//	this should be fast as it sends to encoder, but synchronous
 	Soy::TScopeTimerPrint Timer(__PRETTY_FUNCTION__, 13);
-	
+
 	AllocEncoder( Pixels.GetMeta() );
-	
+
 	auto PixelBuffer = Avf::PixelsToPixelBuffer(Pixels);
 	auto FrameNumber = PushFrameMeta(Meta);
 	
