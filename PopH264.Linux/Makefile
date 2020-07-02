@@ -16,8 +16,6 @@ $(SRC)/Source/TDecoder.cpp \
 $(SRC)/Source/TDecoderInstance.cpp \
 $(SRC)/Source/TEncoder.cpp \
 $(SRC)/Source/TEncoderInstance.cpp \
-$(SRC)/Source/BroadwayDecoder.cpp \
-$(SRC)/Source/BroadwayAll.c \
 $(SRC)/Source/Json11/json11.cpp
 
 # soy lib files
@@ -36,13 +34,13 @@ $(SOY_PATH)/src/SoyImage.cpp \
 $(SOY_PATH)/src/SoyStreamBuffer.cpp \
 $(SOY_PATH)/src/SoyFourcc.cpp \
 
-CFLAGS = -c -DTARGET_LINUX $(LOCAL_C_INCLUDES) -std=gnu++17
+CFLAGS = -c -Wall -DTARGET_LINUX $(LOCAL_C_INCLUDES) -std=gnu++17
 LDFLAGS = -static
 
 OBJECTS=$(LOCAL_SRC_FILES:.cpp=.o)
 EXECUTABLE=pop
 
-all: $(LOCAL_SRC_FILES) $(EXECUTABLE) 
+all: $(LOCAL_SRC_FILES) $(EXECUTABLE)
 
 $(EXECUTABLE): $(OBJECTS)
 	$(CC) $(LDFLAGS) $(OBJECTS) -o $@
@@ -52,4 +50,4 @@ $(EXECUTABLE): $(OBJECTS)
 
 .PHONY: clean
 clean:
-	rm -f $(OBJECTS) 
+	rm -f $(OBJECTS)

@@ -6,17 +6,10 @@ The idea is to make a use a docker container containing a MakeFile and have it s
 
 The gcc compiler for the pi is too old for the version needed so the Dockerfile builds an image pulling in a compiler from [abhiTronix/raspberry-pi-cross-compilers](https://github.com/abhiTronix/raspberry-pi-cross-compilers) using wget and sets it up following the [installation instructions](https://github.com/abhiTronix/raspberry-pi-cross-compilers/wiki/Cross-Compiler:-Installation-Instructions)
 
-A volume is shared of using PopH264 and a makefile is run manually
-tsdk: this could be set up to run automatically later
+PopH264 is shared with the docker container and the make command re: PopH264.Linux is run automatically
+tsdk: The command is running but not working for some reason
 
-The docker image is currently broken on
-
-```bash
-tar: /cross-gcc-10.1.0-pi_3+.tar.gz: Cannot open: No such file or directory
-tar: Error is not recoverable: exiting now
-```
-
-`docker run -it -v ~/PopH264:/build <DockerImage>`
+`docker run -v <PATHTOFOLDER>/PopH264:/build <Docker Image>`
 
 The makefile takes all the source files => object files => static lib
 
@@ -44,9 +37,22 @@ make: *** [Makefile:48: pop] Error 1
 Makefile has a clean command-line argument which removes all the object files... at the moment this is manually run using
 `make clean`
 
+#### Note
+
+If \$(SRC)/Source/BroadwayAll.c is in the LOCAL_SRC_FILES list be careful as there already exists a BroadwayAll.o and this command deletes it and leaves you scratchin your head with this error:
+
+```bash
+# make
+make: *** No rule to make target '../Source/BroadwayAll.c', needed by 'all'.  Stop.
+```
+
 ## Notes
 
-Creating Object files was breaking in the build with
+None of the changes to the any file other than those in this folder have been pushed to the main branch
+
+### A
+
+Creating Object files was breaking the build with
 
 ```bash
 In file included from ../Source/TEncoderInstance.cpp:21:
@@ -71,6 +77,25 @@ This was stopped by commenting the following lines (7-9) in TEncoderInstance.cpp
 // #define ENABLE_X264
 // #endi
 ```
+
+### B
+
+Broadway is removed from the build by deleting
+
+```bash
+$(SRC)/Source/BroadwayDecoder.cpp \
+$(SRC)/Source/BroadwayAll.c \
+```
+
+from the Makefile and adding
+
+```c++
+#if defined(TARGET_LINUX)
+#undef ENABLE_BROADWAY
+#endif
+```
+
+to TDecoderInstance.cpp
 
 ### Addendum
 
