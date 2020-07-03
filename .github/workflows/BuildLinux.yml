@@ -7,42 +7,28 @@ on:
 
 jobs:
   testEnvironment:
+    name: Test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - name: Checkout
+        uses: actions/checkout@v2
         with:
           submodules: true
       - name: finding filesystem
         run: |
           echo $GITHUB_WORKSPACE
           ls $GITHUB_WORKSPACE
-  buildlinux:
-    runs-on: ubuntu-latest
-    container:
-      image: gcc
-      volumes:
-        - $GITHUB_WORKSPACE:/build
-    steps:
-      - uses: actions/checkout@v1
-        with:
-          submodules: true
-      - name: Build a Linux executable
-        run: |
-          ls /build
-
+        
+#   buildlinux:
+#     runs-on: ubuntu-latest
+#     container:
+#       image: gcc
+#       volumes:
+#         - $GITHUB_WORKSPACE:/build
 #     steps:
-#       # To use this repository's private action,
-#       # you must check out the repository
-#       - name: Checkout
-#         uses: actions/checkout@v2
+#       - uses: actions/checkout@v2
 #         with:
 #           submodules: true
-#       - name: Build environment
-#         uses: ./.github/actions/ # Uses an action in the root directory
-#         id: linux-build
-#       - name: Tests
+#       - name: Build a Linux executable
 #         run: |
-#           ls /
-#           echo $TEST
-#           g++ -v
-#       # TODO: Get some confirmation of the results of the action
+#           ls /build
