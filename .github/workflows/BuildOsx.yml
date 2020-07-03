@@ -33,6 +33,7 @@ jobs:
     - name: Import codesign certificate
       uses: apple-actions/import-codesign-certs@v1
       with:
+        keychain: signing_temp_PopH264
         p12-file-base64: ${{ secrets.NEWCHROMANTICS_APPLE_DEV_CERTIFICATE_P12 }}
         p12-password: ${{ secrets.NEWCHROMANTICS_APPLE_DEV_CERTIFICATE_PASSWORD }}
   
