@@ -7,34 +7,15 @@ on:
 
 jobs:
   linuxBuild:
-    name: Testing
     runs-on: ubuntu-latest
+    # This container can be modified to pull in the compiler for different architectures
+    # https://hub.docker.com/_/gcc?tab=tags
     container: gcc
     steps:
-    - name: checkout repo
-      uses: actions/checkout@v2
-      with:
-        submodules: recursive
-    - name: test previous steps
-      run: |
-        ls $GITHUB_WORKSPACE
-        ls $GITHUB_WORKSPACE/Source/SoyLib/src/
-        make -C $GITHUB_WORKSPACE/PopH264.Linux/
-
-#   buildlinux:
-#     name: Run Make File
-#     container: 
-#       image: gcc
-#       volumes: 
-#         - /home/runner/work/PopH264:/build
-
-#     container: 
-#       image: gcc
-#         volumes:
-#           - /home/runner/work/PopH264:/build
-#       steps:
-#         - name: Build a Linux executable
-#           run: |
-#             ls /
-#             ls /build
-#             make -C /build/PopH264.Linux
+      - name: checkout repo
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - name: compile project
+        run: |
+          make -C $GITHUB_WORKSPACE/PopH264.Linux/
