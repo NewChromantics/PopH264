@@ -1,22 +1,24 @@
 name: Build Linux
 
-env:
-
 on: 
   push:
     branches:
       - ActionTest
-      
+
 jobs:
   buildlinux:
-    runs:
-      using: 'docker'
-      image: '../../../PopH264.Linux/Dockerfile'
-    
+    runs-on: ubuntu-latest
+    name: A job to build a Linux executable
     steps:
-      - uses: actions/checkout@v2
-      with:
-        submodules: true
-        
-      - name: Docker Test
+      # To use this repository's private action,
+      # you must check out the repository
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          submodules: true
+      - name: Build step
+        uses: ../actions/ # Uses an action in the root directory
+        id: linux-build
+      # TODO: Get some confirmation of the results of the action 
+      - name: Get the results
         run: echo "Hello World"
