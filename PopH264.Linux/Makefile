@@ -1,5 +1,8 @@
+# Raspberry Pi
+# CC = arm-linux-gnueabihf-g++
 
-CC = arm-linux-gnueabihf-g++
+# Standard
+CC = g++
 SRC = ..
 SOY_PATH = $(SRC)/Source/SoyLib
 
