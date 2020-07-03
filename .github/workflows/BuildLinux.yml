@@ -11,12 +11,13 @@ jobs:
     container:
       image: gcc
       volumes:
-        - PopH264:/build
+        - my_docker_volume:/volume_mount
     steps:
       - name: Build a Linux executable
         run: |
-          ls /build
-          echo $HOME
+          ls /
+          find / -name 'BuildLinux.yml'
+          g++ -v
 
 #     steps:
 #       # To use this repository's private action,
