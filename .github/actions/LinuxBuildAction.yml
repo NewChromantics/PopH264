@@ -1,4 +1,0 @@
-name: "Build Linux"
-runs:
-  using: "docker"
-  image: "Dockerfile"
