@@ -20,7 +20,9 @@ jobs:
           submodules: true
       - name: finding filesystem
         run: |
-          ls build
+          ls /
+          ls /build
+          make -C /build/PopH264.Linux
         
 #   buildlinux:
 #     runs-on: ubuntu-latest
