@@ -17,7 +17,7 @@ jobs:
         with:
           submodules: true
       - name: Build step
-        uses: ../actions/ # Uses an action in the root directory
+        uses: ./.github/actions/ # Uses an action in the root directory
         id: linux-build
       # TODO: Get some confirmation of the results of the action 
       - name: Get the results
