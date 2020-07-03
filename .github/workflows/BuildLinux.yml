@@ -6,17 +6,21 @@ on:
       - ActionTest
 
 jobs:
+  testEnvironment:
+    runs-on: ubuntu-latest
+    steps:
+      - name: finding filesystem
+        run: ls $GITHUB_WORKSPACE
   buildlinux:
     runs-on: ubuntu-latest
     container:
       image: gcc
       volumes:
-        - my_docker_volume:/volume_mount
+        - $GITHUB_WORKSPACE:/build
     steps:
       - name: Build a Linux executable
         run: |
           ls /volume_mount
-          tree
 
 #     steps:
 #       # To use this repository's private action,
