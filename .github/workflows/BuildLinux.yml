@@ -19,9 +19,9 @@ jobs:
       - name: Build environment
         uses: ./.github/actions/ # Uses an action in the root directory
         id: linux-build
-      # TODO: Get some confirmation of the results of the action
       - name: Tests
         run: |
-          echo "Hello World"
-          ls
+          ls /
+          echo $TEST
           g++ -v
+      # TODO: Get some confirmation of the results of the action
