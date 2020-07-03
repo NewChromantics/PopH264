@@ -15,9 +15,8 @@ jobs:
     steps:
       - name: Build a Linux executable
         run: |
-          ls /
-          find / -name 'BuildLinux.yml'
-          g++ -v
+          ls /volume_mount
+          tree
 
 #     steps:
 #       # To use this repository's private action,
