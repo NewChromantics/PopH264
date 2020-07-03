@@ -12,11 +12,11 @@ jobs:
     container: gcc
     steps:
     - name: checkout repo
-    - uses: actions/checkout@v2
+      uses: actions/checkout@v2
       with:
         submodules: true
     - name: test previous steps
-    - run: |
+      run: |
         ls $GITHUB_WORKSPACE
         g++ -v
 
