@@ -1,0 +1,22 @@
+name: Build Linux
+
+env:
+
+on: 
+  push:
+    branches:
+      - ActionTest
+      
+jobs:
+  buildlinux:
+    runs:
+      using: 'docker'
+      image: '../../../PopH264.Linux/Dockerfile'
+    
+    steps:
+      - uses: actions/checkout@v2
+      with:
+        submodules: true
+        
+      - name: Docker Test
+        run: echo "Hello World"
