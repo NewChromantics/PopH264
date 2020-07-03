@@ -9,15 +9,23 @@ jobs:
   testEnvironment:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v1
+        with:
+          submodules: true
       - name: finding filesystem
-        run: ls /github/workspace
+        run: |
+          echo $GITHUB_WORKSPACE
+          ls $GITHUB_WORKSPACE
   buildlinux:
     runs-on: ubuntu-latest
     container:
       image: gcc
       volumes:
-        - /github/workspace:/build
+        - $GITHUB_WORKSPACE:/build
     steps:
+      - uses: actions/checkout@v1
+        with:
+          submodules: true
       - name: Build a Linux executable
         run: |
           ls /build
