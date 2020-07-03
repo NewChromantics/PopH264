@@ -7,6 +7,7 @@ on:
 
 jobs:
   linuxBuild:
+    name: Testing
     runs-on: ubunutu-latest
     container: gcc
     steps:
@@ -15,7 +16,7 @@ jobs:
       with:
         submodules: true
     - name: test previous steps
-      run: |
+    - run: |
         ls $GITHUB_WORKSPACE
         g++ -v
 
