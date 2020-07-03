@@ -5,6 +5,4 @@ RUN apt-get -y update && \
 
 COPY / /build
 
-ENTRYPOINT ["ls"]
-
-# ENTRYPOINT ["make", "-C", "/build/PopH264.Linux/"]
+ENTRYPOINT ["make", "-C", "PopH264.Linux/"]
