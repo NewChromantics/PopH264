@@ -1,9 +1,10 @@
+
 CC = arm-linux-gnueabihf-g++
 SRC = ..
-
 SOY_PATH = $(SRC)/Source/SoyLib
 
 LOCAL_C_INCLUDES = \
+-I$(SRC)/Source	\
 -I$(SRC)/Source/Broadway/Decoder	\
 -I$(SRC)/Source/Broadway/Decoder/inc	\
 -I$(SOY_PATH)/src	\
@@ -34,20 +35,31 @@ $(SOY_PATH)/src/SoyImage.cpp \
 $(SOY_PATH)/src/SoyStreamBuffer.cpp \
 $(SOY_PATH)/src/SoyFourcc.cpp \
 
-CFLAGS = -c -Wall -DTARGET_LINUX $(LOCAL_C_INCLUDES) -std=gnu++17
+LOCAL_BUILD_FILES =	\
+$(SRC)/Source_TestApp/PopH264_TestApp.cpp	\
+$(SRC)/Source_TestApp/PopH264_TestAssetGenerator.cpp	\
+$(SRC)/Source/SoyLib/src/SoyFilesystem.cpp
+
+CFLAGS = -c -DTARGET_LINUX $(LOCAL_C_INCLUDES) -std=gnu++17
 LDFLAGS = -static
 
-OBJECTS=$(LOCAL_SRC_FILES:.cpp=.o)
+OBJECTS=$(LOCAL_SRC_FILES:.cpp=.o) $(LOCAL_BUILD_FILES:.cpp=.o)
+LIB_OBJECTS=$(LOCAL_SRC_FILES:.cpp=.o)
+BUILD_OBJECTS=$(LOCAL_BUILD_FILES:.cpp=.o)
+
 EXECUTABLE=pop
 
-all: $(LOCAL_SRC_FILES) $(EXECUTABLE)
+all: $(EXECUTABLE) clean
 
-$(EXECUTABLE): $(OBJECTS)
-	$(CC) $(LDFLAGS) $(OBJECTS) -o $@
+$(EXECUTABLE): $(BUILD_OBJECTS) PopH264.a
+	$(CC) $(LDFLAGS) $^ -o $@
+
+PopH264.a: $(OBJECTS)
+	ar rcs $@ $(LIB_OBJECTS)
 
 .cpp.o:
 	$(CC) $(CFLAGS) $< -o $@
 
-.PHONY: clean
 clean:
-	rm -f $(OBJECTS)
+	mv $(OBJECTS) ./objects
+	echo Build complete
