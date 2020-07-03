@@ -10,17 +10,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: finding filesystem
-        run: ls $GITHUB_WORKSPACE
+        run: ls /github/workspace
   buildlinux:
     runs-on: ubuntu-latest
     container:
       image: gcc
       volumes:
-        - $GITHUB_WORKSPACE:/build
+        - /github/workspace:/build
     steps:
       - name: Build a Linux executable
         run: |
-          ls /volume_mount
+          ls /build
 
 #     steps:
 #       # To use this repository's private action,
