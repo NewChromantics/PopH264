@@ -15,7 +15,7 @@ jobs:
     steps:
       - name: Build a Linux executable
         run: |
-          ls /
+          ls /build
           echo $HOME
 
 #     steps:
