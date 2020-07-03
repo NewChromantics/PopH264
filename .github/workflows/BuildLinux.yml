@@ -6,34 +6,33 @@ on:
       - ActionTest
 
 jobs:
-  testEnvironment:
-    name: Test
-    runs-on: ubuntu-latest
-    container: 
-      image: gcc
-      volumes: 
-        - /home/runner/work/PopH264:/build
+  linuxBuild:
+    runs-on: ubunutu-latest
+    container: gcc
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          submodules: true
-      - name: finding filesystem
-        run: |
-          ls /
-          ls /build
-          make -C /build/PopH264.Linux
-        
+    - name: checkout repo
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+    - name: test previous steps
+      run: |
+        ls $GITHUB_WORKSPACE
+        g++ -v
+
 #   buildlinux:
-#     runs-on: ubuntu-latest
-#     container:
+#     name: Run Make File
+#     container: 
 #       image: gcc
-#       volumes:
-#         - $GITHUB_WORKSPACE:/build
-#     steps:
-#       - uses: actions/checkout@v2
-#         with:
-#           submodules: true
-#       - name: Build a Linux executable
-#         run: |
-#           ls /build
+#       volumes: 
+#         - /home/runner/work/PopH264:/build
+
+#     container: 
+#       image: gcc
+#         volumes:
+#           - /home/runner/work/PopH264:/build
+#       steps:
+#         - name: Build a Linux executable
+#           run: |
+#             ls /
+#             ls /build
+#             make -C /build/PopH264.Linux
