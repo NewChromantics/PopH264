@@ -13,7 +13,7 @@ jobs:
       # To use this repository's private action,
       # you must check out the repository
       - name: Checkout
-        uses:  NewChromantics/PopH264/.github/actions/LinuxBuildAction
+        uses: actions/checkout@v2
         with:
           submodules: true
       - name: Build step
