@@ -8,20 +8,29 @@ on:
 jobs:
   buildlinux:
     runs-on: ubuntu-latest
-    name: Build a Linux executable
+    container:
+      image: gcc
+      volumes:
+        - PopH264:/build
     steps:
-      # To use this repository's private action,
-      # you must check out the repository
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          submodules: true
-      - name: Build environment
-        uses: ./.github/actions/ # Uses an action in the root directory
-        id: linux-build
-      - name: Tests
+      - name: Build a Linux executable
         run: |
           ls /
-          echo $TEST
-          g++ -v
-      # TODO: Get some confirmation of the results of the action
+          echo $HOME
+
+#     steps:
+#       # To use this repository's private action,
+#       # you must check out the repository
+#       - name: Checkout
+#         uses: actions/checkout@v2
+#         with:
+#           submodules: true
+#       - name: Build environment
+#         uses: ./.github/actions/ # Uses an action in the root directory
+#         id: linux-build
+#       - name: Tests
+#         run: |
+#           ls /
+#           echo $TEST
+#           g++ -v
+#       # TODO: Get some confirmation of the results of the action
