@@ -18,7 +18,7 @@ jobs:
     - name: test previous steps
       run: |
         ls $GITHUB_WORKSPACE
-        g++ -v
+        make -C PopH264.Linux/
 
 #   buildlinux:
 #     name: Run Make File
