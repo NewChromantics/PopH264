@@ -14,10 +14,11 @@ jobs:
     - name: checkout repo
       uses: actions/checkout@v2
       with:
-        submodules: recursive
+        submodules: true
     - name: test previous steps
       run: |
         ls $GITHUB_WORKSPACE
+        ls $GITHUB_WORKSPACE/Source/SoyLib/src/
         make -C $GITHUB_WORKSPACE/PopH264.Linux/
 
 #   buildlinux:
