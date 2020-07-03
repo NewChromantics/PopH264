@@ -12,7 +12,7 @@ jobs:
     container: 
       image: gcc
       volumes: 
-        - $GITHUB_WORKSPACE:/build
+        - /home/runner/work/PopH264:/build
     steps:
       - name: Checkout
         uses: actions/checkout@v2
