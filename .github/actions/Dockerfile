@@ -3,6 +3,6 @@ FROM ubuntu
 RUN apt-get -y update && \
     apt-get install g++ make -y
 
-COPY / /build
+# COPY / /build
 
-ENTRYPOINT ["make", "-C", "PopH264.Linux/"]
+# ENTRYPOINT ["make", "-C", "PopH264.Linux/"]

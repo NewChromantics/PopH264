@@ -1,6 +1,6 @@
 name: Build Linux
 
-on: 
+on:
   push:
     branches:
       - ActionTest
@@ -8,7 +8,7 @@ on:
 jobs:
   buildlinux:
     runs-on: ubuntu-latest
-    name: A job to build a Linux executable
+    name: Build a Linux executable
     steps:
       # To use this repository's private action,
       # you must check out the repository
@@ -16,9 +16,12 @@ jobs:
         uses: actions/checkout@v2
         with:
           submodules: true
-      - name: Build step
+      - name: Build environment
         uses: ./.github/actions/ # Uses an action in the root directory
         id: linux-build
-      # TODO: Get some confirmation of the results of the action 
-      - name: Get the results
-        run: echo "Hello World"
+      # TODO: Get some confirmation of the results of the action
+      - name: Tests
+        run: |
+          echo "Hello World"
+          ls
+          g++ -v
