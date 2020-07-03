@@ -2,7 +2,7 @@ name: Build Osx
 
 env:
   BuildProject: PopH264.xcodeproj
-  BuildScheme: PopH264Framework
+  BuildScheme: PopH264_Osx
 
 on: 
   push:
