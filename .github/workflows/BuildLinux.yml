@@ -8,7 +8,7 @@ on:
 jobs:
   linuxBuild:
     name: Testing
-    runs-on: ubunutu-latest
+    runs-on: ubuntu-latest
     container: gcc
     steps:
     - name: checkout repo
