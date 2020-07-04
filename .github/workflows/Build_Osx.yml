@@ -16,7 +16,7 @@ jobs:
     steps:
     - uses: actions/checkout@v1
       with:
-        submodules: true
+        submodules: 'recursive'
     # https://coderwall.com/p/rv2lgw/use-xcodebuild-to-build-workspace-vs-project
     # https://github.community/t5/GitHub-Actions/steps-output/td-p/30947
     - name: GetTargetBuildDir
