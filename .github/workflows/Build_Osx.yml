@@ -29,13 +29,12 @@ jobs:
       # create a P12 certificate, from xcode accounts, manage certificates
       # copy a base64 encoded certificate into secrets
       #   cat Certificate.p12 | base64 | pbcopy
-    - run: echo "NEWCHROMANTICS_APPLE_DEV_CERTIFICATE_PASSWORD = ${{ secrets.NEWCHROMANTICS_APPLE_DEV_CERTIFICATE_PASSWORD }}"
     - name: Import codesign certificate
       uses: apple-actions/import-codesign-certs@v1
       with:
         # on second run, we get a "keychain exists" error
-        create-keychain: false
-        p12-file-base64: ${{ secrets.NEWCHROMANTICS_APPLE_DEV_CERTIFICATE_P12 }}
+        create-keychain: true
+        p12-file-base64: ${{ secrets.NEWCHROMANTICS_GRAHAMREEVES_MAC_P12 }}
         #p12-password: ${{ secrets.NEWCHROMANTICS_APPLE_DEV_CERTIFICATE_PASSWORD }}
         p12-password: Basement123
   
