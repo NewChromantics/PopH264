@@ -36,7 +36,8 @@ jobs:
         # on second run, we get a "keychain exists" error
         create-keychain: false
         p12-file-base64: ${{ secrets.NEWCHROMANTICS_APPLE_DEV_CERTIFICATE_P12 }}
-        p12-password: ${{ secrets.NEWCHROMANTICS_APPLE_DEV_CERTIFICATE_PASSWORD }}
+        #p12-password: ${{ secrets.NEWCHROMANTICS_APPLE_DEV_CERTIFICATE_PASSWORD }}
+        p12-password: Basement123
   
     - name: compile
       env: 
