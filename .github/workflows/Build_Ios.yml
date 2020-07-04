@@ -29,14 +29,14 @@ jobs:
       # create a P12 certificate, from xcode accounts, manage certificates
       # copy a base64 encoded certificate into secrets
       #   cat Certificate.p12 | base64 | pbcopy
-    - run: echo "NEWCHROMANTICS_APPLE_DEV_CERTIFICATE_PASSWORD = ${{ secrets.NEWCHROMANTICS_APPLE_DEV_CERTIFICATE_PASSWORD }}"
-    - name: Import codesign certificate
-      uses: apple-actions/import-codesign-certs@v1
-      with:
+    #- run: echo "NEWCHROMANTICS_APPLE_DEV_CERTIFICATE_PASSWORD = ${{ secrets.NEWCHROMANTICS_APPLE_DEV_CERTIFICATE_PASSWORD }}"
+    #- name: Import codesign certificate
+      #uses: apple-actions/import-codesign-certs@v1
+      #with:
         # turned off keychain generation as it errors on 2nd run
-        create-keychain: false
-        p12-file-base64: ${{ secrets.NEWCHROMANTICS_APPLE_DEV_CERTIFICATE_P12 }}
-        p12-password: ${{ secrets.NEWCHROMANTICS_APPLE_DEV_CERTIFICATE_PASSWORD }}
+      #  create-keychain: false
+      #  p12-file-base64: ${{ secrets.NEWCHROMANTICS_APPLE_DEV_CERTIFICATE_P12 }}
+      #  p12-password: ${{ secrets.NEWCHROMANTICS_APPLE_DEV_CERTIFICATE_PASSWORD }}
   
     - name: compile
       env: 
