@@ -2,6 +2,7 @@
 #include <sstream>
 #include "PopH264.h"
 #include "SoyPixels.h"
+#include "SoyH264.h"
 
 #if !defined(TARGET_WINDOWS) && defined(_MSC_VER)
 #define TARGET_WINDOWS
@@ -33,16 +34,40 @@ void DebugPrint(const std::string& Message)
 
 typedef void CompareFunc_t(const char* MetaJson,uint8_t* Plane0,uint8_t* Plane1,uint8_t* Plane2);
 
+int GetFirstNonHeaderH264PacketOffset(const uint8_t* Data, size_t DataSize)
+{
+	int Start = 0;
+	while( Start < DataSize )
+	{
+		auto RemainingData = GetRemoteArray(&Data[Start], DataSize - Start);
+		size_t NaluSize;
+		size_t HeaderSize;
+		auto PacketStart = FindNaluStartIndex(GetArrayBridge(RemainingData), NaluSize, HeaderSize);
+		auto PacketDataStart = PacketStart + NaluSize;
+		H264::DecodeNaluByte(SoyMediaFormat::Type Format, const ArrayBridge<uint8>&& Data, H264NaluContent::Type& Content, H264NaluPriority::Type& Priority);	//	throws on error (eg. reservered-zero not zero)
 
-void DecoderTest(const char* TestDataName,CompareFunc_t* Compare)
+
+
+	//	
+}
+
+void DecoderTest(const char* TestDataName,CompareFunc_t* Compare,int DecoderMode)
 {
 	uint8_t TestData[7*1024];
 	auto TestDataSize = PopH264_GetTestData(TestDataName,TestData,std::size(TestData));
 	if ( TestDataSize > std::size(TestData) )
 		throw std::runtime_error("Buffer for test data not big enough");
 	
-	auto Mode = POPH264_DECODERMODE_HARDWARE;
-	auto Handle = PopH264_CreateInstance(Mode);
+	auto Handle = PopH264_CreateInstance(DecoderMode);
+
+	//	gr; to test robusness, cut out SPS & PPS and send data, then send the complete data
+	//		we should still decode.
+	{
+		auto NonSpsPacketOffset = GetFirstNonHeaderH264PacketOffset(TestData, TestDataSize);
+		auto Result = PopH264_PushData(Handle, TestData, TestDataSize, 0);
+		if (Result < 0)
+			throw std::runtime_error("DecoderTest: PushData without header error");
+	}
 
 	auto Result = PopH264_PushData( Handle, TestData, TestDataSize, 0 );
 	if ( Result < 0 )
@@ -179,7 +204,8 @@ int main()
 
 	try
 	{
-		DecoderTest("RainbowGradient.h264",CompareRainbow);
+		DecoderTest("RainbowGradient.h264", CompareRainbow, POPH264_DECODERMODE_SOFTWARE);
+		DecoderTest("RainbowGradient.h264", CompareRainbow, POPH264_DECODERMODE_HARDWARE);
 	}
 	catch (std::exception& e)
 	{
@@ -191,7 +217,8 @@ int main()
 	try
 	{
 #if defined(TEST_ASSETS)
-		DecoderTest("GreyscaleGradient.h264",CompareGreyscale);
+		DecoderTest("GreyscaleGradient.h264", CompareGreyscale, POPH264_DECODERMODE_SOFTWARE);
+		DecoderTest("GreyscaleGradient.h264", CompareGreyscale, POPH264_DECODERMODE_HARDWARE);
 #endif
 	}
 	catch (std::exception& e)

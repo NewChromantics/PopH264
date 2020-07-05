@@ -46,6 +46,9 @@
     <ClCompile Include="..\Source\SoyLib\src\SoyAssert.cpp">
       <Filter>Source Files\SoyLib</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source\SoyLib\src\SoyH264.cpp">
+      <Filter>Source Files\SoyLib</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\SoyLib\src\SoyFilesystem.h">
@@ -67,6 +70,9 @@
       <Filter>Source Files\SoyLib</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\SoyLib\src\SoyAssert.h">
+      <Filter>Source Files\SoyLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\SoyLib\src\SoyH264.h">
       <Filter>Source Files\SoyLib</Filter>
     </ClInclude>
   </ItemGroup>

@@ -35,6 +35,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\Source\SoyLib\src\SoyH264.cpp" />
     <ClCompile Include="..\Source\SoyLib\src\SoyPixels.cpp" />
     <ClCompile Include="..\Source\SoyLib\src\SoyString.cpp" />
     <ClCompile Include="..\Source\SoyLib\src\SoyTime.cpp" />
@@ -63,6 +64,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClInclude>
+    <ClInclude Include="..\Source\SoyLib\src\SoyH264.h" />
     <ClInclude Include="..\Source\SoyLib\src\SoyPixels.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
