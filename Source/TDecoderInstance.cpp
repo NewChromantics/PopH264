@@ -14,7 +14,9 @@
 #define ENABLE_AVF
 #endif
 
+#if !defined(TARGET_LINUX)
 #define ENABLE_BROADWAY
+#endif
 
 #if defined(TARGET_WINDOWS)
 //#define ENABLE_INTELMEDIA

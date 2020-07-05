@@ -1,0 +1,21 @@
+name: Build Linux
+
+on:
+  push:
+    branches:
+      - ActionTest
+
+jobs:
+  linuxBuild:
+    runs-on: ubuntu-latest
+    # This container can be modified to pull in the compiler for different architectures
+    # https://hub.docker.com/_/gcc?tab=tags
+    container: gcc
+    steps:
+      - name: checkout repo
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - name: compile project
+        run: |
+          make -C $GITHUB_WORKSPACE/PopH264.Linux/

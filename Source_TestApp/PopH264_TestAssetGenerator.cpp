@@ -1,6 +1,6 @@
 #include "SoyPixels.h"
 #include "SoyPng.h"
-#include "SoyFileSystem.h"
+#include "SoyFilesystem.h"
 #include "json11.hpp"
 
 extern void DebugPrint(const std::string& Message);
