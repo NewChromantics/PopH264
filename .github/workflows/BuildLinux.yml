@@ -6,7 +6,7 @@ on:
       - ActionTest
 
 jobs:
-  linuxBuild:
+  Build:
     runs-on: ubuntu-latest
     # This container can be modified to pull in the compiler for different architectures
     # https://hub.docker.com/_/gcc?tab=tags
