@@ -10,7 +10,7 @@ on:
       - master
 
 jobs:
-  buildosx:
+  Build:
     runs-on: [self-hosted, macOS]
     
     steps:
