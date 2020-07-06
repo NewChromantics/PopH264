@@ -25,4 +25,4 @@ jobs:
         uses: actions/upload-artifact@v1
         with:
           name: arm64
-          path: PopH264.Linux/arm64
+          path: PopH264.Linux/libs/arm64
