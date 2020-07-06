@@ -1,22 +1,22 @@
-name: Build Osx
+name: Build Ios
 
 env:
   BuildProject: PopH264.xcodeproj
-  BuildScheme: PopH264Framework
+  BuildScheme: PopH264_Ios
 
 on: 
   push:
     branches:
-      - ActionTest
+      - master
 
 jobs:
-  buildosx:
+  Build:
     runs-on: [self-hosted, macOS]
     
     steps:
     - uses: actions/checkout@v1
       with:
-        submodules: true
+        submodules: 'recursive'
     # https://coderwall.com/p/rv2lgw/use-xcodebuild-to-build-workspace-vs-project
     # https://github.community/t5/GitHub-Actions/steps-output/td-p/30947
     - name: GetTargetBuildDir
@@ -24,7 +24,20 @@ jobs:
       run: |
         echo "Setting target build dir"
         echo "##[set-output name=TargetBuildDir;]$(xcodebuild -workspace $BuildProject/project.xcworkspace -scheme $BuildScheme -showBuildSettings | grep TARGET_BUILD_DIR | sed -e 's/.*TARGET_BUILD_DIR = //')"
-
+      
+      # https://github.com/marketplace/actions/import-code-signing-certificates
+      # create a P12 certificate, from xcode accounts, manage certificates
+      # copy a base64 encoded certificate into secrets
+      #   cat Certificate.p12 | base64 | pbcopy
+    #- run: echo "NEWCHROMANTICS_APPLE_DEV_CERTIFICATE_PASSWORD = ${{ secrets.NEWCHROMANTICS_APPLE_DEV_CERTIFICATE_PASSWORD }}"
+    #- name: Import codesign certificate
+      #uses: apple-actions/import-codesign-certs@v1
+      #with:
+        # turned off keychain generation as it errors on 2nd run
+      #  create-keychain: false
+      #  p12-file-base64: ${{ secrets.NEWCHROMANTICS_APPLE_DEV_CERTIFICATE_P12 }}
+      #  p12-password: ${{ secrets.NEWCHROMANTICS_APPLE_DEV_CERTIFICATE_PASSWORD }}
+  
     - name: compile
       env: 
           TargetBuildDir: ${{steps.GetTargetBuildDir.outputs.TargetBuildDir}}
@@ -45,10 +58,9 @@ jobs:
     - uses: actions/upload-artifact@v1
       with:
         name: PopH264_Osx.framework
-        path: ${{steps.GetTargetBuildDir.outputs.TargetBuildDir}}/PopH264_Osx.framework
+        path: ${{steps.GetTargetBuildDir.outputs.TargetBuildDir}}/PopH264_Ios.framework
     - uses: actions/upload-artifact@v1
       with:
         name: PopH264.h
         path: Source/PopH264.h
         
-#PopH264.visualstudio\Debug\PopH264.dll

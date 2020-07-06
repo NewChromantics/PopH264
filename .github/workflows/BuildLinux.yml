@@ -6,7 +6,7 @@ on:
       - ActionTest
 
 jobs:
-  linuxBuild:
+  Build:
     env:
       archTarget: arm64
     runs-on: ubuntu-latest

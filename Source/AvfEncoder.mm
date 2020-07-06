@@ -399,7 +399,7 @@ void Avf::TCompressor::OnCompressed(OSStatus status, VTEncodeInfoFlags infoFlags
 	//	if flags & dropped, report
 	if ( status != 0 || infoFlags != 0 )
 	{
-		std::Debug << __PRETTY_FUNCTION__ << "( status=" << status << " infoFlags=" << infoFlags << ")" << std::endl;
+		//std::Debug << __PRETTY_FUNCTION__ << "( status=" << status << " infoFlags=" << infoFlags << ")" << std::endl;
 	}
 	
 	CMFormatDescriptionRef FormatDescription = CMSampleBufferGetFormatDescription(SampleBuffer);
