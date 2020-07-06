@@ -7,15 +7,22 @@ on:
 
 jobs:
   linuxBuild:
+    env:
+      archTarget: arm64
     runs-on: ubuntu-latest
     # This container can be modified to pull in the compiler for different architectures
     # https://hub.docker.com/_/gcc?tab=tags
     container: gcc
     steps:
-      - name: checkout repo
+      - name: Checkout repo
         uses: actions/checkout@v2
         with:
           submodules: recursive
-      - name: compile project
+      - name: Compile project
         run: |
-          make -C $GITHUB_WORKSPACE/PopH264.Linux/
+          make lib -C $GITHUB_WORKSPACE/PopH264.Linux/
+      - name: Archive build
+        uses: actions/upload-artifact@v1
+        with:
+          name: $archTarget
+          path: PopH264.Linux/$archTarget
