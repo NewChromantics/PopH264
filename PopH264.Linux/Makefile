@@ -51,8 +51,13 @@ LIB_OBJECTS=$(LOCAL_SRC_FILES:.cpp=.o)
 BUILD_OBJECTS=$(LOCAL_BUILD_FILES:.cpp=.o)
 
 EXECUTABLE=pop
+ARCHITECTURE=${archTarget}
 
-all: $(EXECUTABLE) clean
+exec: $(EXECUTABLE) clean cleanExec
+.PHONY: exec
+
+lib: PopH264.a clean
+.PHONY: lib
 
 $(EXECUTABLE): $(BUILD_OBJECTS) PopH264.a
 	$(CC) $(LDFLAGS) $^ -o $@
@@ -64,5 +69,10 @@ PopH264.a: $(OBJECTS)
 	$(CC) $(CFLAGS) $< -o $@
 
 clean:
-	mv $(OBJECTS) ./objects
+	mkdir -p ./libs/$(ARCHITECTURE)/objects/
+	mv $(OBJECTS) ./libs/$(ARCHITECTURE)/objects
+	mv PopH264.a ./libs/$(ARCHITECTURE)/
 	echo Build complete
+
+cleanExec:
+	mv $(EXECUTABLE) ./libs/$(ARCHITECTURE)/
