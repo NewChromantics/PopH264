@@ -38,41 +38,44 @@ $(SOY_PATH)/src/SoyImage.cpp \
 $(SOY_PATH)/src/SoyStreamBuffer.cpp \
 $(SOY_PATH)/src/SoyFourcc.cpp \
 
-LOCAL_BUILD_FILES =	\
+TESTAPP_SRC_FILES =	\
 $(SRC)/Source_TestApp/PopH264_TestApp.cpp	\
 $(SRC)/Source_TestApp/PopH264_TestAssetGenerator.cpp	\
 $(SRC)/Source/SoyLib/src/SoyFilesystem.cpp
 
-CFLAGS = -c -DTARGET_LINUX $(LOCAL_C_INCLUDES) -std=gnu++17
-LDFLAGS = -static
+CFLAGS = -c -DTARGET_LINUX $(LOCAL_C_INCLUDES) -std=gnu++17 -fPIC
+LDFLAGS = '-Wl,-rpath,$$ORIGIN'
 
-OBJECTS=$(LOCAL_SRC_FILES:.cpp=.o) $(LOCAL_BUILD_FILES:.cpp=.o)
 LIB_OBJECTS=$(LOCAL_SRC_FILES:.cpp=.o)
-BUILD_OBJECTS=$(LOCAL_BUILD_FILES:.cpp=.o)
+TESTAPP_OBJECTS=$(TESTAPP_SRC_FILES:.cpp=.o)
 
-EXECUTABLE=pop
 ARCHITECTURE=${archTarget}
+OUT_LIBRARY=PopH264.so
+OUT_EXECUTABLE=PopH264Test
 
-exec: $(EXECUTABLE) clean cleanExec
+exec: $(OUT_EXECUTABLE) 
 .PHONY: exec
 
-lib: PopH264.a clean
+lib: $(OUT_LIBRARY) 
 .PHONY: lib
 
-$(EXECUTABLE): $(BUILD_OBJECTS) PopH264.a
+$(OUT_EXECUTABLE): $(TESTAPP_OBJECTS) $(OUT_LIBRARY)
+	echo "Building test app $(OUT_EXECUTABLE)"
 	$(CC) $(LDFLAGS) $^ -o $@
 
-PopH264.a: $(OBJECTS)
-	ar rcs $@ $(LIB_OBJECTS)
+$(OUT_LIBRARY): $(LIB_OBJECTS)
+	echo "Building library $(OUT_LIBRARY)"
+	$(CC) -shared -o $@ $(LIB_OBJECTS)
+	# ar rcs $@ $(LIB_OBJECTS)
 
 .cpp.o:
 	$(CC) $(CFLAGS) $< -o $@
 
 clean:
-	mkdir -p ./libs/$(ARCHITECTURE)/objects/
-	mv $(OBJECTS) ./libs/$(ARCHITECTURE)/objects
-	mv PopH264.a ./libs/$(ARCHITECTURE)/
-	echo Build complete
-
-cleanExec:
-	mv $(EXECUTABLE) ./libs/$(ARCHITECTURE)/
+	# clean build files, anything .o
+	echo "Cleaning files"
+	rm -f $(TESTAPP_OBJECTS)
+	rm -f $(LIB_OBJECTS)	
+	#find ../ -type f -name '*.o' -delete
+	rm -f $(OUT_LIBRARY)
+	rm -f $(OUT_EXECUTABLE)
