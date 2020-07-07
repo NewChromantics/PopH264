@@ -2,7 +2,7 @@
 # CC = arm-linux-gnueabihf-g++
 
 # Standard
-CC = g++
+CC = ${compiler}
 SRC = ..
 SOY_PATH = $(SRC)/Source/SoyLib
 
@@ -49,11 +49,15 @@ LDFLAGS = '-Wl,-rpath,$$ORIGIN'
 LIB_OBJECTS=$(LOCAL_SRC_FILES:.cpp=.o)
 TESTAPP_OBJECTS=$(TESTAPP_SRC_FILES:.cpp=.o)
 
-ARCHITECTURE=${archTarget}
+# ARCHITECTURE=${archTarget}
 OUT_LIBRARY=PopH264.so
-OUT_EXECUTABLE=PopH264Test
+OUT_EXECUTABLE=PopH264Test${archTarget}
 
-exec: $(OUT_EXECUTABLE) 
+GithubWorkflow: $(OUT_EXECUTABLE)
+	echo "::set-output name=executable:$(OUT_EXECUTABLE)"
+.PHONY: GithubWorkflow
+
+exec: $(OUT_EXECUTABLE)
 .PHONY: exec
 
 lib: $(OUT_LIBRARY) 

@@ -1,0 +1,21 @@
+# action.yml
+name: "Hello World"
+description: "Greet someone and record the time"
+inputs:
+  architecture: # id of input
+    description: "Target Architecture"
+    required: true
+  compiler: # id of input
+    required: true
+    default: "g++"
+  dockerImage:
+    description: "Docker hub image"
+    required: true
+outputs:
+  executable: # id of output
+    description: "Compiled executable"
+runs:
+  using: "docker"
+  image: ${{ inputs.dockerImage }}
+  args:
+    - ${{ inputs.architecture }}

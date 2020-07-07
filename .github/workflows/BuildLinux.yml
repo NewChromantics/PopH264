@@ -20,9 +20,9 @@ jobs:
           submodules: recursive
       - name: Compile project
         run: |
-          make lib -C $GITHUB_WORKSPACE/PopH264.Linux/
+          make GithubWorkflow -C $GITHUB_WORKSPACE/PopH264.Linux/
       - name: Archive build
         uses: actions/upload-artifact@v1
         with:
-          name: ${{ env.archTarget }}
-          path: PopH264.Linux/libs/${{ env.archTarget }}
+          name: PopH264Test${{ env.archTarget }}
+          path: PopH264.Linux/PopH264Test${{ env.archTarget }}
