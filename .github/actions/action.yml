@@ -10,6 +10,9 @@ inputs:
   dockerImage:
     description: "Docker hub image"
     required: true
+  workspace:
+    description: "Github Workspace path"
+    required: true
 outputs:
   executable: # id of output
     description: "Compiled executable"
@@ -18,4 +21,4 @@ runs:
   image: "docker://gcc"
   args:
     - ${{ inputs.architecture }}
-  entrypoint: make GithubWorkflow -C $GITHUB_WORKSPACE/PopH264.Linux/
+  entrypoint: make GithubWorkflow -C ${{ inputs.workspace }}/PopH264.Linux/

@@ -10,7 +10,6 @@ jobs:
     runs-on: ubuntu-latest
     # This container can be modified to pull in the compiler for different architectures
     # https://hub.docker.com/_/gcc?tab=tags
-    container: gcc
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
@@ -23,6 +22,7 @@ jobs:
           architecture: arm64
           compiler: g++
           dockerImage: gcc
+          workspace: $GITHUB_WORKSPACE
       - name: Archive the build
         uses: actions/upload-artifact@v1
         with:
