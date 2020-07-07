@@ -29,7 +29,7 @@ jobs:
         uses: actions/upload-artifact@v1
         with:
           name: PopH264Test${{ env.archTarget }}
-          path: PopH264.Linux/PopH264Test${{ env.archTarget }}
+          path: PopH264.Linux/PopH264TestApp${{ env.archTarget }}
 
   Build_Armv8:
     env:
@@ -54,4 +54,4 @@ jobs:
         uses: actions/upload-artifact@v1
         with:
           name: PopH264Test${{ env.archTarget }}
-          path: PopH264.Linux/PopH264Test${{ env.archTarget }}.so
+          path: PopH264.Linux/PopH264TestApp${{ env.archTarget }}
