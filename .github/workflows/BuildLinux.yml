@@ -6,7 +6,7 @@ on:
       - ActionTest
 
 jobs:
-  Build:
+  Build_Arm64:
     env:
       archTarget: arm64
       compiler: g++
@@ -22,12 +22,18 @@ jobs:
       - name: Compile project
         run: |
           make GithubWorkflow -C $GITHUB_WORKSPACE/PopH264.Linux/
-      - name: Archive build
+      - name: Archive Library
+        uses: actions/upload-artifact@v1
+        with:
+          name: PopH264${{ env.archTarget }}.so
+          path: PopH264.Linux/PopH264Test${{ env.archTarget }}
+      - name: Archive App
         uses: actions/upload-artifact@v1
         with:
           name: PopH264Test${{ env.archTarget }}
-          path: PopH264.Linux/PopH264Test${{ env.archTarget }}
-  Test:
+          path: PopH264.Linux/PopH264Test${{ env.archTarget }
+
+  Build_Armv8:
     env:
       archTarget: armv8
       compiler: arm-linux-gnueabihf-g++
@@ -43,8 +49,13 @@ jobs:
       - name: Compile project
         run: |
           make GithubWorkflow -C $GITHUB_WORKSPACE/PopH264.Linux/
+      - name: Archive Library
+        uses: actions/upload-artifact@v1
+        with:
+          name: PopH264${{ env.archTarget }}.so
+          path: PopH264.Linux/PopH264Test${{ env.archTarget }}.so
       - name: Archive build
         uses: actions/upload-artifact@v1
         with:
           name: PopH264Test${{ env.archTarget }}
-          path: PopH264.Linux/PopH264Test${{ env.archTarget }}
+          path: PopH264.Linux/PopH264Test${{ env.archTarget }}.so

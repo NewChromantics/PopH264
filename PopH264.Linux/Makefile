@@ -50,11 +50,12 @@ LIB_OBJECTS=$(LOCAL_SRC_FILES:.cpp=.o)
 TESTAPP_OBJECTS=$(TESTAPP_SRC_FILES:.cpp=.o)
 
 # ARCHITECTURE=${archTarget}
-OUT_LIBRARY=PopH264.so
+OUT_LIBRARY=PopH264${archTarget}.so
 OUT_EXECUTABLE=PopH264Test${archTarget}
 
-GithubWorkflow: $(OUT_EXECUTABLE)
+GithubWorkflow: $(OUT_EXECUTABLE) $(OUT_LIBRARY) 
 	echo "::set-output name=executable:$(OUT_EXECUTABLE)"
+	echo "::set-output name=library:$(OUT_LIBRARY)"
 .PHONY: GithubWorkflow
 
 exec: $(OUT_EXECUTABLE)
