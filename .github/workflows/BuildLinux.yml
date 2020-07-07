@@ -9,6 +9,7 @@ jobs:
   Build:
     env:
       archTarget: arm64
+      compiler: g++
     runs-on: ubuntu-latest
     # This container can be modified to pull in the compiler for different architectures
     # https://hub.docker.com/_/gcc?tab=tags
@@ -29,10 +30,11 @@ jobs:
   Test:
     env:
       archTarget: armv8
+      compiler: arm-linux-gnueabihf-g++
     runs-on: ubuntu-latest
     # This container can be modified to pull in the compiler for different architectures
     # https://hub.docker.com/_/gcc?tab=tags
-    container: tsdkelly/crosscompilepi
+    container: tsdkelly/crosscompilepi:v1
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
