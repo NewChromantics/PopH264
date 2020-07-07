@@ -24,11 +24,11 @@ jobs:
         uses: actions/upload-artifact@v1
         with:
           name: PopH264${{ env.archTarget }}.so
-          path: PopH264.Linux/PopH264Test${{ env.archTarget }}
+          path: PopH264.Linux/PopH264${{ env.archTarget }}.so
       - name: Archive App
         uses: actions/upload-artifact@v1
         with:
-          name: PopH264Test${{ env.archTarget }}
+          name: PopH264TestApp${{ env.archTarget }}
           path: PopH264.Linux/PopH264TestApp${{ env.archTarget }}
 
   Build_Armv8:
@@ -49,9 +49,9 @@ jobs:
         uses: actions/upload-artifact@v1
         with:
           name: PopH264${{ env.archTarget }}.so
-          path: PopH264.Linux/PopH264Test${{ env.archTarget }}.so
+          path: PopH264.Linux/PopH264${{ env.archTarget }}.so
       - name: Archive build
         uses: actions/upload-artifact@v1
         with:
-          name: PopH264Test${{ env.archTarget }}
+          name: PopH264TestApp${{ env.archTarget }}
           path: PopH264.Linux/PopH264TestApp${{ env.archTarget }}
