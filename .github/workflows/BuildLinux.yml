@@ -5,10 +5,17 @@ on:
     branches:
       - ActionTest
 
+      - name: Hello world action step
+        uses: ./ # Uses an action in the root directory
+        id: hello
+        with:
+          who-to-greet: "Mona the Octocat"
+      # Use the output from the `hello` step
+      - name: Get the output time
+        run: echo "The time was ${{ steps.hello.outputs.time }}"
+
 jobs:
   Build:
-    env:
-      archTarget: arm64
     runs-on: ubuntu-latest
     # This container can be modified to pull in the compiler for different architectures
     # https://hub.docker.com/_/gcc?tab=tags
@@ -18,11 +25,15 @@ jobs:
         uses: actions/checkout@v2
         with:
           submodules: recursive
-      - name: Compile project
-        run: |
-          make GithubWorkflow -C $GITHUB_WORKSPACE/PopH264.Linux/
-      - name: Archive build
+      - name: Compile for arm64
+        uses: ./.github/actions/LinuxBuildAction
+        id: arm64
+        with:
+          architecture: arm64
+          compiler: g++
+          dockerImage: gcc
+      - name: Archive the build
         uses: actions/upload-artifact@v1
         with:
           name: PopH264Test${{ env.archTarget }}
-          path: PopH264.Linux/PopH264Test${{ env.archTarget }}
+          path: ${{ steps.arm64.outputs.executable }}

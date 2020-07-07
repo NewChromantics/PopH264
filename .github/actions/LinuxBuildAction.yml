@@ -19,3 +19,4 @@ runs:
   image: ${{ inputs.dockerImage }}
   args:
     - ${{ inputs.architecture }}
+  entrypoint: make GithubWorkflow -C $GITHUB_WORKSPACE/PopH264.Linux/
