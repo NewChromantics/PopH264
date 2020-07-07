@@ -21,4 +21,4 @@ runs:
   image: "docker://gcc"
   args:
     - ${{ inputs.architecture }}
-  entrypoint: make GithubWorkflow -C ${{ inputs.workspace }}/PopH264.Linux/
+  entrypoint: make GithubWorkflow -C /home/runner/work/PopH264/PopH264/PopH264.Linux/

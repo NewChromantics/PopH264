@@ -22,7 +22,6 @@ jobs:
           architecture: arm64
           compiler: g++
           dockerImage: gcc
-          workspace: $GITHUB_WORKSPACE
       - name: Archive the build
         uses: actions/upload-artifact@v1
         with:
