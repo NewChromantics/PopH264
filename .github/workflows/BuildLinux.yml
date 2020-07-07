@@ -11,8 +11,6 @@ jobs:
       archTarget: arm64
       compiler: g++
     runs-on: ubuntu-latest
-    # This container can be modified to pull in the compiler for different architectures
-    # https://hub.docker.com/_/gcc?tab=tags
     container: gcc
     steps:
       - name: Checkout repo
@@ -31,15 +29,13 @@ jobs:
         uses: actions/upload-artifact@v1
         with:
           name: PopH264Test${{ env.archTarget }}
-          path: PopH264.Linux/PopH264Test${{ env.archTarget }
+          path: PopH264.Linux/PopH264Test${{ env.archTarget }}
 
   Build_Armv8:
     env:
       archTarget: armv8
       compiler: arm-linux-gnueabihf-g++
     runs-on: ubuntu-latest
-    # This container can be modified to pull in the compiler for different architectures
-    # https://hub.docker.com/_/gcc?tab=tags
     container: tsdkelly/crosscompilepi:v1
     steps:
       - name: Checkout repo
