@@ -7,23 +7,42 @@ on:
 
 jobs:
   Build:
+    env:
+      archTarget: arm64
     runs-on: ubuntu-latest
     # This container can be modified to pull in the compiler for different architectures
     # https://hub.docker.com/_/gcc?tab=tags
+    container: gcc
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
         with:
           submodules: recursive
-      - name: Compile for arm64
-        uses: ./.github/actions/
-        id: arm64
-        with:
-          architecture: arm64
-          compiler: g++
-          dockerImage: gcc
-      - name: Archive the build
+      - name: Compile project
+        run: |
+          make GithubWorkflow -C $GITHUB_WORKSPACE/PopH264.Linux/
+      - name: Archive build
         uses: actions/upload-artifact@v1
         with:
           name: PopH264Test${{ env.archTarget }}
-          path: ${{ steps.arm64.outputs.executable }}
+          path: PopH264.Linux/PopH264Test${{ env.archTarget }}
+  Test:
+    env:
+      archTarget: armv8
+    runs-on: ubuntu-latest
+    # This container can be modified to pull in the compiler for different architectures
+    # https://hub.docker.com/_/gcc?tab=tags
+    container: tsdkelly/crosscompilepi
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - name: Compile project
+        run: |
+          make GithubWorkflow -C $GITHUB_WORKSPACE/PopH264.Linux/
+      - name: Archive build
+        uses: actions/upload-artifact@v1
+        with:
+          name: PopH264Test${{ env.archTarget }}
+          path: PopH264.Linux/PopH264Test${{ env.archTarget }}
