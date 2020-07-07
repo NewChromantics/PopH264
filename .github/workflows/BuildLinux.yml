@@ -17,7 +17,7 @@ jobs:
         with:
           submodules: recursive
       - name: Compile for arm64
-        uses: ./.github/actions/LinuxBuildAction
+        uses: ./.github/actions/
         id: arm64
         with:
           architecture: arm64
