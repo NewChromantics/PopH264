@@ -15,7 +15,7 @@ outputs:
     description: "Compiled executable"
 runs:
   using: "docker"
-  image: "docker://"${{ inputs.dockerImage }}
+  image: "docker://gcc"
   args:
     - ${{ inputs.architecture }}
   entrypoint: make GithubWorkflow -C $GITHUB_WORKSPACE/PopH264.Linux/
