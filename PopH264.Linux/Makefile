@@ -20,7 +20,8 @@ $(SRC)/Source/TDecoder.cpp \
 $(SRC)/Source/TDecoderInstance.cpp \
 $(SRC)/Source/TEncoder.cpp \
 $(SRC)/Source/TEncoderInstance.cpp \
-$(SRC)/Source/Json11/json11.cpp
+$(SRC)/Source/Json11/json11.cpp \
+$(SRC)/Source/X264Encoder.cpp
 
 # soy lib files
 LOCAL_SRC_FILES  += \
@@ -44,7 +45,8 @@ $(SRC)/Source_TestApp/PopH264_TestAssetGenerator.cpp	\
 $(SRC)/Source/SoyLib/src/SoyFilesystem.cpp
 
 CFLAGS = -c -DTARGET_LINUX $(LOCAL_C_INCLUDES) -std=gnu++17 -fPIC
-LDFLAGS = '-Wl,-rpath,$$ORIGIN'
+LDFLAGS = -lx264 
+LDFLAGS += '-Wl,-rpath,$$ORIGIN'
 
 LIB_OBJECTS=$(LOCAL_SRC_FILES:.cpp=.o)
 TESTAPP_OBJECTS=$(TESTAPP_SRC_FILES:.cpp=.o)

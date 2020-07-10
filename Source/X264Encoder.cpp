@@ -256,6 +256,8 @@ void X264::TEncoder::Encode(const SoyPixelsImpl& Luma,const SoyPixelsImpl& Chrom
 	//	maybe add a safety iteration check
 	//	gr: need this on OSX (latest x264) but on windows (old build) every subsequent frame fails
 	//	gr: this was backwards? brew (old 2917) DID need to flush?
+#if !defined(TARGET_LINUX)
+{
 	if (X264_REV < 2969)
 	{
 		//	gr: flushing on OSX (X264_REV 2917) causing
@@ -266,6 +268,8 @@ void X264::TEncoder::Encode(const SoyPixelsImpl& Luma,const SoyPixelsImpl& Chrom
 		}
 #endif
 	}
+}
+#endif
 }
 
 
