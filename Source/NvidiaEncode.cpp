@@ -1,4 +1,17 @@
-#include "nvidia/samples/01_video_encode/video_encode.h"
+//	fake some linux stuff so we can compile on other platforms
+#if !defined(TARGET_LINUX)
+#include <stdint.h>
+typedef int8_t __s8;
+typedef uint8_t __u8;
+typedef int16_t __s16;
+typedef uint16_t __u16;
+typedef int32_t __s32;
+typedef uint32_t __u32;
+typedef int64_t __s64;
+typedef uint64_t __u64;
+#endif
+
+//#include "nvidia/samples/01_video_encode/video_encode.h"
 #include "SoyPixels.h"
 #include "NvidiaEncode.h"
 
@@ -22,6 +35,88 @@ void Nvidia::IsOkay(int Result, const char* Context)
 	throw Soy::AssertException(Error);
 }
 
+Nvidia::TEncoder::TEncoder(TEncoderParams& Params,std::function<void(PopH264::TPacket&)> OnOutPacket)
+{
+	//	the nvvideoencoder is a wrapper for a V4L2 device
+	//	which is a standard linux file i/o stream
+	//	alloc an encoder in blocking mode
+	//	so the non-blocking mode is an IO mode
+	//	gr: what is enc0 ? device name?
+	//ctx.enc = NvVideoEncoder::createVideoEncoder("enc0", O_NONBLOCK);
+	mEncoder = NvVideoEncoder::createVideoEncoder("enc0")
+	if ( !mEncoder )
+		throw Soy::AssertException("Failed to allocate nvidia encoder");
+}
+
+namespace V4lPixelFormat
+{
+	enum Type : uint32_t
+	{
+		YUV420M = V4L2_PIX_FMT_YUV420M,
+	}
+}
+V4lPixelFormat::Type GetPixelFormat(SoyPixelsFormat::Type Format)
+{
+	switch(Format)
+	{
+		case SoyPixelsFormat::Yuv_844:
+			return V4lPixelFormat::YUV420M;
+			
+		default:break;
+	}
+	
+	std::stringstream Error;
+	Error << "No conversion from " << Format << " to v4l";
+	throw Soy::AssertException(Error);
+}
+
+
+void Nvidia::TEncoder::InitInputFormat()
+{
+	//	gr: nvidia demo calls this the output plane
+	
+	auto& Encoder = *mEncoder;
+	//	the input is a "capture" plane
+	SoyPixelsMeta PixelMeta(100,100,SoyPixelsFormat::Yuv_844);
+	auto PixelFormat = GetPixelFormat( PixelMeta.GetFormat() );
+	auto Format = V4L2_PIX_FMT_YUV444M;
+	auto MaxSize = InputFormat.GetDataSize();
+	auto Result = Encoder.setOutputPlaneFormat(Format, Width, Height, MaxSize );
+	IsOkay(Result,"InitInpuFormat failed setOutputPlaneFormat");
+}
+
+void Nvidia::TEncoder::InitOutputFormat()
+{
+	//	nvidia demo calls this the capture plane
+	auto& Encoder = *mEncoder;
+	auto Profile = V4L2_MPEG_VIDEO_H264_PROFILE_HIGH_444_PREDICTIVE;
+	auto Format = V4L2_PIX_FMT_H264;
+	auto Width = 100;
+	auto Height = 100;
+	auto BufferSize = 1024 * 1024 * 2;
+	auto Result = Encoder.setCapturePlaneFormat( OutputFormat, Width, Height, BufferSize );
+	IsOkay(Result,"InitOutputFormat failed setCapturePlaneFormat");
+
+	//	set other params
+	Result = Encoder.setBitrate(ctx.bitrate);
+	IsOkay(Result,"Failed to set bitrate");
+
+	setProfile
+	auto Level = V4L2_MPEG_VIDEO_H264_LEVEL_5_1;
+	Result = Encoder.setLevel(Level);
+	IsOkay(Result,"Failed to set level");
+
+	
+	//	setup memory read mode
+	ret = ctx.enc->output_plane.setupPlane(V4L2_MEMORY_USERPTR, 10, false, true);
+	ret = ctx.enc->output_plane.setupPlane(V4L2_MEMORY_MMAP, 10, true, false);
+			  ret = setup_output_dmabuf(&ctx,10);
+			  
+	
+}
+
+
+	
 /**
   * Set encoder context defaults values.
   *
