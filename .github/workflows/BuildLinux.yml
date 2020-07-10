@@ -6,16 +6,52 @@ on:
       - ActionTest
 
 jobs:
-  Build:
+  Build_Arm64:
+    env:
+      archTarget: arm64
+      compiler: g++
     runs-on: ubuntu-latest
-    # This container can be modified to pull in the compiler for different architectures
-    # https://hub.docker.com/_/gcc?tab=tags
     container: gcc
     steps:
-      - name: checkout repo
+      - name: Checkout repo
         uses: actions/checkout@v2
         with:
           submodules: recursive
-      - name: compile project
+      - name: Compile project
         run: |
-          make -C $GITHUB_WORKSPACE/PopH264.Linux/
+          make GithubWorkflow -C $GITHUB_WORKSPACE/PopH264.Linux/
+      - name: Archive Library
+        uses: actions/upload-artifact@v1
+        with:
+          name: PopH264${{ env.archTarget }}.so
+          path: PopH264.Linux/PopH264${{ env.archTarget }}.so
+      - name: Archive App
+        uses: actions/upload-artifact@v1
+        with:
+          name: PopH264TestApp${{ env.archTarget }}
+          path: PopH264.Linux/PopH264TestApp${{ env.archTarget }}
+
+  Build_Armv8:
+    env:
+      archTarget: armv8
+      compiler: arm-linux-gnueabihf-g++
+    runs-on: ubuntu-latest
+    container: tsdkelly/crosscompilepi:v1
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - name: Compile project
+        run: |
+          make GithubWorkflow -C $GITHUB_WORKSPACE/PopH264.Linux/
+      - name: Archive Library
+        uses: actions/upload-artifact@v1
+        with:
+          name: PopH264${{ env.archTarget }}.so
+          path: PopH264.Linux/PopH264${{ env.archTarget }}.so
+      - name: Archive build
+        uses: actions/upload-artifact@v1
+        with:
+          name: PopH264TestApp${{ env.archTarget }}
+          path: PopH264.Linux/PopH264TestApp${{ env.archTarget }}

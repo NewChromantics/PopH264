@@ -1,0 +1,24 @@
+# action.yml
+name: "Build Executables"
+inputs:
+  architecture: # id of input
+    description: "Target Architecture"
+    required: true
+  compiler: # id of input
+    required: true
+    default: "g++"
+  dockerImage:
+    description: "Docker hub image"
+    required: true
+  workspace:
+    description: "Github Workspace path"
+    required: true
+outputs:
+  executable: # id of output
+    description: "Compiled executable"
+runs:
+  using: "docker"
+  image: "docker://gcc"
+  args:
+    - ${{ inputs.architecture }}
+  entrypoint: make GithubWorkflow -C /home/runner/work/PopH264/PopH264/PopH264.Linux/
