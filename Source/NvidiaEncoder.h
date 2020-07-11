@@ -21,6 +21,16 @@ namespace Nvidia
 class NvVideoEncoder;
 class NvV4l2ElementPlane;
 
+
+
+class Nvidia::TEncoderParams
+{
+public:
+	TEncoderParams(){}
+	TEncoderParams(json11::Json& Options);
+};
+
+
 class Nvidia::TEncoder : public PopH264::TEncoder
 {
 public:
