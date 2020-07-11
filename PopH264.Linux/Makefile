@@ -72,6 +72,29 @@ TESTAPP_OBJECTS=$(TESTAPP_SRC_FILES:.cpp=.o)
 OUT_LIBRARY=PopH264${archTarget}.so
 OUT_EXECUTABLE=PopH264TestApp${archTarget}
 
+
+
+# from nvidia samples Rules.mk
+# ARM ABI of the target platform
+TEGRA_ARMABI ?= aarch64-linux-gnu
+TARGET_ROOTFS =
+CUDA_PATH := /usr/local/cuda
+
+LIB_LINK_FLAGS += -Wl,-rpath-link=$(TARGET_ROOTFS)/lib/$(TEGRA_ARMABI)
+LIB_LINK_FLAGS += -Wl,-rpath-link=$(TARGET_ROOTFS)/usr/lib/$(TEGRA_ARMABI)
+LIB_LINK_FLAGS += -Wl,-rpath-link=$(TARGET_ROOTFS)/usr/lib/$(TEGRA_ARMABI)/tegra
+LIB_LINK_FLAGS += -Wl,-rpath-link=$(TARGET_ROOTFS)/$(CUDA_PATH)/lib64
+
+LIBRARY_LINK_LIBS += \
+	-lpthread -lv4l2 -lEGL -lGLESv2 -lX11 \
+	-lnvbuf_utils -lnvjpeg -lnvosd -ldrm \
+	-lcuda -lcudart \
+	-lnvinfer -lnvparsers \
+	-L"$(TARGET_ROOTFS)/$(CUDA_PATH)/lib64" \
+	-L"$(TARGET_ROOTFS)/usr/lib/$(TEGRA_ARMABI)" \
+	-L"$(TARGET_ROOTFS)/usr/lib/$(TEGRA_ARMABI)/tegra"
+
+
 GithubWorkflow: $(OUT_EXECUTABLE) $(OUT_LIBRARY) 
 	echo "::set-output name=executable:$(OUT_EXECUTABLE)"
 	echo "::set-output name=library:$(OUT_LIBRARY)"
