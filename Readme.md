@@ -8,6 +8,6 @@ Build Status
 Linux
 ----------------
 - Install X264
-  - `sudo apt-get install x264`
+  - `sudo apt-get install libx264-dev`
 - Compile
-  - `make ARCH=arm64` (jetson,pi4 = arm64)
+  - `make archType=arm64` (jetson,pi4 = arm64)
