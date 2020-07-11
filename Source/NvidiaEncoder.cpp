@@ -347,8 +347,8 @@ void Nvidia::TEncoder::InitH264Callback()
 	auto& H264Plane = GetH264Plane();
 	
 	auto* This = this;
-	H264Plane.startDQThread(This);
 	H264Plane.setDQThreadCallback(EncoderCallback);
+	H264Plane.startDQThread(This);
 
 	//	queue empty buffers for encoder to use
 	for ( auto i=0;	i<H264Plane.getNumBuffers();	i++ )
@@ -389,8 +389,8 @@ void Nvidia::TEncoder::InitYuvCallback()
 
 	//	setup callback
 	auto* This = this;
-	YuvPlane.startDQThread(This);
 	YuvPlane.setDQThreadCallback(Callback);
+	YuvPlane.startDQThread(This);
 
 	
 	/*
