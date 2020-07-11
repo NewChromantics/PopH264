@@ -1,4 +1,4 @@
-#include "SoyPixels.h"
+#include <SoyPixels.h>
 
 
 //	fake some linux stuff so we can compile on other platforms
@@ -144,16 +144,16 @@ Nvidia::TEncoder::TEncoder(TEncoderParams& Params,std::function<void(PopH264::TP
 	//	so the non-blocking mode is an IO mode
 	//	gr: what is enc0 ? device name?
 	//ctx.enc = NvVideoEncoder::createVideoEncoder("enc0", O_NONBLOCK);
+	std::Debug << "Creating video encoder" << std::endl;
 	mEncoder = NvVideoEncoder::createVideoEncoder("enc0");
 	if ( !mEncoder )
 		throw Soy::AssertException("Failed to allocate nvidia encoder");
 	
-	
+	/*
 	auto& Encoder = *mEncoder;
 	auto Result = Encoder.subscribeEvent(V4L2_EVENT_EOS,0,0);
 	IsOkay(Result,"Failed to subscribe to EOS event");
-	
-
+	*/
 }
 
 void Nvidia::TEncoder::InitEncoder(SoyPixelsMeta PixelMeta)
@@ -219,6 +219,7 @@ void Nvidia::TEncoder::InitDmaBuffers(size_t BufferCount)
 
 void Nvidia::TEncoder::InitYuvFormat(SoyPixelsMeta PixelMeta)
 {
+	std::Debug << __PRETTY_FUNCTION__ << std::endl;
 	//	output plane = yuv input plane
 	auto& YuvPlane = GetYuvPlane();
 	auto& Encoder = *mEncoder;
@@ -281,6 +282,8 @@ NvV4l2ElementPlane& Nvidia::TEncoder::GetH264Plane()
 //	nvidia needs to know w/h
 void Nvidia::TEncoder::InitH264Format(SoyPixelsMeta InputMeta)
 {
+	std::Debug << __PRETTY_FUNCTION__ << std::endl;
+
 	//	capture plane = h264 output plane
 	auto& H264Plane = GetH264Plane();
 	auto& Encoder = *mEncoder;
@@ -308,6 +311,8 @@ void Nvidia::TEncoder::InitH264Format(SoyPixelsMeta InputMeta)
 
 void Nvidia::TEncoder::InitH264Callback()
 {
+	std::Debug << __PRETTY_FUNCTION__ << std::endl;
+
 	//	CFunc callback
 	//	encoder_capture_plane_dq_callback
 	auto EncoderCallback = [](struct v4l2_buffer *v4l2_buf, NvBuffer * buffer,
@@ -348,6 +353,7 @@ void Nvidia::TEncoder::InitH264Callback()
 
 void Nvidia::TEncoder::InitYuvCallback()
 {
+	std::Debug << __PRETTY_FUNCTION__ << std::endl;
 	auto& YuvPlane = GetYuvPlane();
 	
 	//	CFunc callback
@@ -491,6 +497,7 @@ void Nvidia::TEncoder::OnFrameEncoded(struct v4l2_buffer *v4l2_buf, NvBuffer * b
 
 void Nvidia::TEncoder::Start()
 {
+	std::Debug << __PRETTY_FUNCTION__ << std::endl;
 	auto& Encoder = *mEncoder;
 	auto UseCommand = true;
 	
@@ -515,6 +522,7 @@ void Nvidia::TEncoder::Start()
 
 void Nvidia::TEncoder::Sync()
 {
+	std::Debug << __PRETTY_FUNCTION__ << std::endl;
 	auto& mMemoryMode = mNative.mMemoryMode;
 	/*
 	if(mMemoryMode == V4L2_MEMORY_DMABUF || mMemoryMode == V4L2_MEMORY_MMAP)
@@ -639,11 +647,13 @@ void Nvidia::TEncoder::FinishEncoding()
 
 void Nvidia::TEncoder::Encode(const SoyPixelsImpl& Luma, const SoyPixelsImpl& ChromaU, const SoyPixelsImpl& ChromaV, const std::string& Meta, bool Keyframe)
 {
+	std::Debug << __PRETTY_FUNCTION__ << std::endl;
 	Soy_AssertTodo();
 }
 
 void Nvidia::TEncoder::Encode(const SoyPixelsImpl& Pixels,const std::string& Meta,bool Keyframe)
 {
+	std::Debug << __PRETTY_FUNCTION__ << std::endl;
 	InitEncoder( Pixels.GetMeta() );
 	
 	auto& Encoder = *mEncoder;
