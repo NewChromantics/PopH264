@@ -51,7 +51,7 @@ $(SRC)/Source_TestApp/PopH264_TestApp.cpp	\
 $(SRC)/Source_TestApp/PopH264_TestAssetGenerator.cpp	\
 $(SRC)/Source/SoyLib/src/SoyFilesystem.cpp
 
-CFLAGS = -c -DTARGET_LINUX $(LOCAL_C_INCLUDES) -std=gnu++17 -fPIC
+CFLAGS = -c -DTARGET_LINUX -std=gnu++17 -fPIC
 LDFLAGS = -pthread
 LDFLAGS += '-Wl,-rpath,$$ORIGIN'
 
@@ -106,7 +106,7 @@ $(SRC)/Source/nvidia/samples/common/classes/NvUtils.cpp	\
 
 
 
-LOCAL_C_INCLUDES = \
+LOCAL_C_INCLUDES += \
 -I$(SRC)/Source/nvidia/include/
 
 
@@ -133,7 +133,7 @@ $(OUT_LIBRARY): $(LIB_OBJECTS)
 	ldd $(OUT_LIBRARY)
 
 .cpp.o:
-	$(CC) $(CFLAGS) $< -o $@
+	$(CC) $(CFLAGS) $(LOCAL_C_INCLUDES) $< -o $@
 
 clean:
 	# clean build files, anything .o
