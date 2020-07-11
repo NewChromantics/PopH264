@@ -54,7 +54,7 @@
 #ifndef __V4L2_COMMON__
 #define __V4L2_COMMON__
 
-#include <linux/types.h>
+//#include <linux/types.h>
 
 /*
  *

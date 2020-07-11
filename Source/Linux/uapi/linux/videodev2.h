@@ -56,7 +56,7 @@
  */
 #ifndef _UAPI__LINUX_VIDEODEV2_H
 #define _UAPI__LINUX_VIDEODEV2_H
-
+/*
 #ifndef __KERNEL__
 #include <sys/time.h>
 #endif
@@ -65,7 +65,7 @@
 #include <linux/types.h>
 #include <linux/v4l2-common.h>
 #include <linux/v4l2-controls.h>
-
+*/
 /*
  * Common stuff for both V4L1 and V4L2
  * Moved from videodev.h
@@ -1159,7 +1159,7 @@ struct v4l2_framebuffer {
 #define V4L2_FBUF_FLAG_LOCAL_INV_ALPHA	0x0020
 #define V4L2_FBUF_FLAG_SRC_CHROMAKEY	0x0040
 
-struct v4l2_clip {
+typedef struct v4l2_clip {
 	struct v4l2_rect        c;
 	struct v4l2_clip	__user *next;
 };

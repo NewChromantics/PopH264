@@ -2,7 +2,7 @@
 #ifndef _UAPI_LINUX_TYPES_H
 #define _UAPI_LINUX_TYPES_H
 
-#include <asm/types.h>
+//#include <asm/types.h>
 
 #ifndef __ASSEMBLY__
 #ifndef	__KERNEL__
@@ -11,7 +11,7 @@
 #endif /* __EXPORTED_HEADERS__ */
 #endif
 
-#include <linux/posix_types.h>
+//#include <linux/posix_types.h>
 
 
 /*

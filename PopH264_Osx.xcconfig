@@ -14,7 +14,7 @@ NVIDIA_PATH = $(SRCROOT)/Source/nvidia
 BROADWAY_PATH = $(SRCROOT)/Source/Broadway/Decoder
 LINUX_PATH = $(SRCROOT)/Source/Linux
 
-HEADER_SEARCH_PATHS = $(HEADER_SEARCH_PATHS) $(inherited) $(BROADWAY_PATH)/inc $(MAGIC_LEAP_SDK_PATH)/include $(NVIDIA_PATH)/include $(LINUX_PATH)/include
+HEADER_SEARCH_PATHS = $(HEADER_SEARCH_PATHS) $(inherited) $(BROADWAY_PATH)/inc $(MAGIC_LEAP_SDK_PATH)/include $(NVIDIA_PATH)/include $(LINUX_PATH)/linux/include $(LINUX_PATH)/ $(LINUX_PATH)/uapi
 LIBRARY_SEARCH_PATHS = $(LIBRARY_SEARCH_PATHS) $(inherited) $(MAGIC_LEAP_SDK_PATH)/lib/osx
 
 OTHER_CFLAGS = -Wno-ambiguous-macro

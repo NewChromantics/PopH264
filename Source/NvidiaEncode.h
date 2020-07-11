@@ -16,9 +16,10 @@ namespace Nvidia
 	class TEncoderParams;
 
 	class TFrameMeta;
-	class TContext;
+	class TNative;
 }
 class NvVideoEncoder;
+class NvV4l2ElementPlane;
 
 class Nvidia::TEncoder : public PopH264::TEncoder
 {
@@ -28,15 +29,30 @@ public:
 public:
 	TEncoder(TEncoderParams& Params,std::function<void(PopH264::TPacket&)> OnOutPacket);
 
-	// Three plane system :=[ ]
 	virtual void		Encode(const SoyPixelsImpl& Luma, const SoyPixelsImpl& ChromaU, const SoyPixelsImpl& ChromaV, const std::string& Meta, bool Keyframe) override;
+	virtual void		Encode(const SoyPixelsImpl& Pixels,const std::string& Meta,bool Keyframe) override;
 	virtual void		FinishEncoding() override;
 
 private:
-	//void			Encode(const SoyPixelsImpl& Luma, const SoyPixelsImpl& ChromaU, const SoyPixelsImpl& ChromaV, context_t& ctx);
-	void			AllocEncoder(const SoyPixelsMeta& Meta);
-	void			Encode();
-	//int 			setCapturePlaneFormat(uint32_t pixfmt, uint32_t width, uint32_t height, uint32_t sizeimage)
+	void			InitEncoder(SoyPixelsMeta PixelMeta);		//	once we have some meta, set everything up
+	void			InitH264Format(SoyPixelsMeta PixelMeta);
+	void			InitYuvFormat(SoyPixelsMeta InputMeta);
+	void			InitDmaBuffers(size_t BufferCount);
+	void			InitH264Callback();
+	void			InitYuvCallback();
+	void			Sync();
+	void			Start();
+	void			ReadNextFrame();
+	void			WaitForEnd();
+	void			Shutdown();
+	
+	//	nvidia has awkward names for these so we have a helper func
+	NvV4l2ElementPlane&	GetYuvPlane();
+	NvV4l2ElementPlane&	GetH264Plane();
 
-	NvVideoEncoder*	mEncoder = nullptr;
+	
+	NvVideoEncoder*				mEncoder = nullptr;
+	std::shared_ptr<TNative>	mpNative;	//	native
+	TNative&					mNative = *mpNative;
+	bool						mInitialised = false;
 };
