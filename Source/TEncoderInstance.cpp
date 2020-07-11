@@ -16,6 +16,10 @@
 #define ENABLE_MEDIAFOUNDATION
 #endif
 
+#if defined(TARGET_LINUX) //|| defined(TARGET_OSX)
+#define ENABLE_NVIDIA
+#endif
+
 
 #if defined(ENABLE_X264)
 #include "X264Encoder.h"
@@ -29,6 +33,9 @@
 #include "MediaFoundationEncoder.h"
 #endif
 
+#if defined(ENABLE_NVIDIA)
+#include "NvidiaEncoder.h"
+#endif
 
 PopH264::TEncoderInstance::TEncoderInstance(const std::string& OptionsJsonString)
 {
@@ -72,6 +79,17 @@ PopH264::TEncoderInstance::TEncoderInstance(const std::string& OptionsJsonString
 		}
 	}
 #endif
+	
+	
+#if defined(ENABLE_NVIDIA)
+	if ( EncoderName.empty() || EncoderName == Nvidia::TEncoder::Name )
+	{
+		Nvidia::TEncoderParams Params(Options);
+		mEncoder.reset( new Nvidia::TEncoder(Params,OnOutputPacket) );
+		return;
+	}
+#endif
+	
 	
 #if defined(ENABLE_X264)
 	if ( EncoderName.empty() || EncoderName == X264::TEncoder::Name )

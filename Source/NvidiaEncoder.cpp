@@ -30,7 +30,7 @@ typedef uint32_t __le32;
 #endif
 
 //#include "nvidia/samples/01_video_encode/video_encode.h"
-#include "NvidiaEncode.h"
+#include "NvidiaEncoder.h"
 #include "nvidia/include/NvVideoEncoder.h"
 
 namespace Nvidia
@@ -75,6 +75,46 @@ public:
 };
 
 
+Nvidia::TEncoderParams::TEncoderParams(json11::Json& Options)
+{
+	/*
+	auto SetInt = [&](const char* Name,size_t& ValueUnsigned)
+	{
+		auto& Handle = Options[Name];
+		if ( !Handle.is_number() )
+			return false;
+		auto Value = Handle.int_value();
+		if ( Value < 0 )
+		{
+			std::stringstream Error;
+			Error << "Value for " << Name << " is " << Value << ", not expecting negative";
+			throw Soy::AssertException(Error);
+		}
+		ValueUnsigned = Value;
+		return true;
+	};
+	auto SetBool = [&](const char* Name, bool& Value)
+	{
+		auto& Handle = Options[Name];
+		if (!Handle.is_bool())
+			return false;
+		Value = Handle.bool_value();
+		return true;
+	};
+	SetInt(POPH264_ENCODER_KEY_QUALITY, mPreset);
+	SetInt(POPH264_ENCODER_KEY_PROFILELEVEL, mProfileLevel);
+	SetInt(POPH264_ENCODER_KEY_ENCODERTHREADS, mEncoderThreads);
+	SetInt(POPH264_ENCODER_KEY_LOOKAHEADTHREADS, mLookaheadThreads);
+	SetBool(POPH264_ENCODER_KEY_BSLICEDTHREADS, mBSlicedThreads);
+	SetBool(POPH264_ENCODER_KEY_VERBOSEDEBUG, mEnableLog);
+	SetBool(POPH264_ENCODER_KEY_DETERMINISTIC, mDeterministic);
+	SetBool(POPH264_ENCODER_KEY_CPUOPTIMISATIONS, mCpuOptimisations);
+	
+	//	0 is auto on AVF, so handle that
+	if (mProfileLevel == 0)
+		mProfileLevel = 30;
+	*/
+}
 
 V4lPixelFormat::Type GetPixelFormat(SoyPixelsFormat::Type Format)
 {

@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		BF096B1324B9183E00D985E5 /* NvidiaEncode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF096B1124B9158A00D985E5 /* NvidiaEncode.cpp */; };
+		BF096B1324B9183E00D985E5 /* NvidiaEncoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF096B1124B9158A00D985E5 /* NvidiaEncoder.cpp */; };
 		BF0CCB2424A78D8D00596877 /* SoyMediaFormat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF0CCB2224A78D8D00596877 /* SoyMediaFormat.cpp */; };
 		BF0CCB2524A78D8D00596877 /* SoyMediaFormat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF0CCB2224A78D8D00596877 /* SoyMediaFormat.cpp */; };
 		BF151FE12384787200A70EBF /* BroadwayAll.c in Sources */ = {isa = PBXBuildFile; fileRef = BFF1C6E822E3C65800AFDFD5 /* BroadwayAll.c */; };
@@ -152,8 +152,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		BF096B1124B9158A00D985E5 /* NvidiaEncode.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = NvidiaEncode.cpp; path = Source/NvidiaEncode.cpp; sourceTree = "<group>"; };
-		BF096B1224B9158A00D985E5 /* NvidiaEncode.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = NvidiaEncode.h; path = Source/NvidiaEncode.h; sourceTree = "<group>"; };
+		BF096B1124B9158A00D985E5 /* NvidiaEncoder.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = NvidiaEncoder.cpp; path = Source/NvidiaEncoder.cpp; sourceTree = "<group>"; };
+		BF096B1224B9158A00D985E5 /* NvidiaEncoder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = NvidiaEncoder.h; path = Source/NvidiaEncoder.h; sourceTree = "<group>"; };
 		BF096B1424B918A400D985E5 /* nvidia */ = {isa = PBXFileReference; lastKnownFileType = folder; name = nvidia; path = Source/nvidia; sourceTree = "<group>"; };
 		BF096B1524B91F4E00D985E5 /* Linux */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Linux; path = Source/Linux; sourceTree = "<group>"; };
 		BF0A19C21EA428F4007EBC95 /* Unity */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Unity; sourceTree = "<group>"; };
@@ -613,8 +613,8 @@
 			children = (
 				BF096B1524B91F4E00D985E5 /* Linux */,
 				BF096B1424B918A400D985E5 /* nvidia */,
-				BF096B1124B9158A00D985E5 /* NvidiaEncode.cpp */,
-				BF096B1224B9158A00D985E5 /* NvidiaEncode.h */,
+				BF096B1124B9158A00D985E5 /* NvidiaEncoder.cpp */,
+				BF096B1224B9158A00D985E5 /* NvidiaEncoder.h */,
 				BFFBE97A245DB65000E9BE1B /* AvfDecoder.h */,
 				BFFBE97B245DB65000E9BE1B /* AvfDecoder.mm */,
 				BFC471802447523000A2DA70 /* AvfEncoder.h */,
@@ -922,7 +922,7 @@
 				BFC471A1244781CC00A2DA70 /* SoyString.mm in Sources */,
 				BFF1C6EA22E3C65800AFDFD5 /* BroadwayAll.c in Sources */,
 				BF18269424226126006FEB93 /* json11.cpp in Sources */,
-				BF096B1324B9183E00D985E5 /* NvidiaEncode.cpp in Sources */,
+				BF096B1324B9183E00D985E5 /* NvidiaEncoder.cpp in Sources */,
 				BF587C7A244B57A2000745B9 /* SoyTypes.mm in Sources */,
 				BF53E82F22EDCABB008253CD /* TDecoder.cpp in Sources */,
 				BF459CF921F7DB4400CED59D /* SoyTime.mm in Sources */,
