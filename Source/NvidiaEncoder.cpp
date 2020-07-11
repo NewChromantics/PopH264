@@ -71,7 +71,7 @@ public:
 	void	OnFrameEncoded(struct v4l2_buffer *v4l2_buf, NvBuffer * buffer,NvBuffer * shared_buffer);
 	
 public:
-	v4l2_memory	mMemoryMode = V4L2_MEMORY_DMABUF;
+	v4l2_memory	mMemoryMode = V4L2_MEMORY_USERPTR;
 };
 
 
@@ -166,7 +166,6 @@ void Nvidia::TEncoder::InitEncoder(SoyPixelsMeta PixelMeta)
 	InitYuvFormat(PixelMeta);
 	InitH264Callback();
 	InitYuvCallback();
-	InitEncodingParams();
 	
 	mInitialised = true;
 }
@@ -228,7 +227,7 @@ void Nvidia::TEncoder::InitYuvFormat(SoyPixelsMeta PixelMeta)
 	//	the input is a "capture" plane
 	//SoyPixelsMeta PixelMeta(100,100,SoyPixelsFormat::Yuv_844);
 	//auto PixelFormat = GetPixelFormat( PixelMeta.GetFormat() );
-	auto Format = V4L2_PIX_FMT_YUV444M;
+	auto Format = V4L2_PIX_FMT_YUV420M;
 	auto Width = PixelMeta.GetWidth();
 	auto Height = PixelMeta.GetHeight();
 	//auto MaxSize = InputFormat.GetDataSize();
@@ -236,19 +235,24 @@ void Nvidia::TEncoder::InitYuvFormat(SoyPixelsMeta PixelMeta)
 	IsOkay(Result,"InitInputFormat failed setOutputPlaneFormat");
 
 	
+	InitEncodingParams();
+
 	//	setup memory read mode
 	auto& mMemoryMode = mNative.mMemoryMode;
 	switch( mMemoryMode )
 	{
 		case V4L2_MEMORY_MMAP:
+			std::Debug << "Init memory mode V4L2_MEMORY_MMAP" << std::endl;
 			Result = YuvPlane.setupPlane(V4L2_MEMORY_MMAP, 10, true, false);
 			break;
 			
 		case V4L2_MEMORY_USERPTR:
+			std::Debug << "Init memory mode V4L2_MEMORY_USERPTR" << std::endl;
 			Result = YuvPlane.setupPlane(V4L2_MEMORY_USERPTR, 10, false, true);
 			break;
 			
 		case V4L2_MEMORY_DMABUF:
+			std::Debug << "Init memory mode V4L2_MEMORY_DMABUF" << std::endl;
 			InitDmaBuffers(10);
 			Result = 0;
 			break;
@@ -261,7 +265,6 @@ void Nvidia::TEncoder::InitYuvFormat(SoyPixelsMeta PixelMeta)
 		}
 	}
 	IsOkay(Result,"Setting up memory mode");
-	
 }
 
 
@@ -282,6 +285,7 @@ NvV4l2ElementPlane& Nvidia::TEncoder::GetH264Plane()
 
 void Nvidia::TEncoder::InitEncodingParams()
 {
+	std::Debug << __PRETTY_FUNCTION__ << std::endl;
 	auto& Encoder = *mEncoder;
 
 	auto Profile = V4L2_MPEG_VIDEO_H264_PROFILE_BASELINE;
