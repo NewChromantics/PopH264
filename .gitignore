@@ -50,3 +50,7 @@ PopH264.visualstudio/PopH264_x64_Debug/
 # vscode files
 .vscode
 .devcontainer
+
+
+# linux build temp files
+*.o

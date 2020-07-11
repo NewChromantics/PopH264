@@ -27,7 +27,8 @@ $(SRC)/Source/TDecoderInstance.cpp \
 $(SRC)/Source/TEncoder.cpp \
 $(SRC)/Source/TEncoderInstance.cpp \
 $(SRC)/Source/Json11/json11.cpp \
-$(SRC)/Source/X264Encoder.cpp
+$(SRC)/Source/X264Encoder.cpp	\
+$(SRC)/Source/NvidiaEncoder.cpp
 
 # soy lib files
 LOCAL_SRC_FILES  += \
