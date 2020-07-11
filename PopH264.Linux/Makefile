@@ -97,6 +97,7 @@ LIBRARY_LINK_LIBS += \
 LOCAL_SRC_FILES += \
 $(SRC)/Source/nvidia/samples/common/classes/NvV4l2Element.cpp	\
 $(SRC)/Source/nvidia/samples/common/classes/NvV4l2ElementPlane.cpp	\
+$(SRC)/Source/nvidia/samples/common/classes/NvVideoEncoder.cpp	\
 $(SRC)/Source/nvidia/samples/common/classes/NvElement.cpp	\
 $(SRC)/Source/nvidia/samples/common/classes/NvBuffer.cpp	\
 $(SRC)/Source/nvidia/samples/common/classes/NvElementProfiler.cpp	\

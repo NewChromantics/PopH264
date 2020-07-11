@@ -631,6 +631,12 @@ void Nvidia::TEncoder::Shutdown()
  */
 }
 
+
+void Nvidia::TEncoder::FinishEncoding()
+{
+	
+}
+
 void Nvidia::TEncoder::Encode(const SoyPixelsImpl& Luma, const SoyPixelsImpl& ChromaU, const SoyPixelsImpl& ChromaV, const std::string& Meta, bool Keyframe)
 {
 	Soy_AssertTodo();
