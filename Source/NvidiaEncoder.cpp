@@ -293,12 +293,15 @@ void Nvidia::TEncoder::InitEncodingParams()
 	auto Level = V4L2_MPEG_VIDEO_H264_LEVEL_3_0;
 	
 	//	set other params
+	std::Debug << "SetProfile(" << Profile << ")" << std::endl;
 	auto Result = Encoder.setProfile(Profile);
 	IsOkay(Result,"Failed to set level");
 
+	std::Debug << "setBitrate(" << BitRate << ")" << std::endl;
 	Result = Encoder.setBitrate(BitRate);
 	IsOkay(Result,"Failed to set bitrate");
 	
+	std::Debug << "setLevel(" << Level << ")" << std::endl;
 	Result = Encoder.setLevel(Level);
 	IsOkay(Result,"Failed to set level");
 }
