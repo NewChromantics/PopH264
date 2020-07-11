@@ -94,6 +94,11 @@ LIBRARY_LINK_LIBS += \
 	-L"$(TARGET_ROOTFS)/usr/lib/$(TEGRA_ARMABI)" \
 	-L"$(TARGET_ROOTFS)/usr/lib/$(TEGRA_ARMABI)/tegra"
 
+LOCAL_SRC_FILES += \
+$(SRC)/Source/nvidia/samples/common/classes/NvV4l2Element.cpp	\
+$(SRC)/Source/nvidia/samples/common/classes/NvV4l2ElementPlane.cpp	\
+$(SRC)/Source/nvidia/samples/common/classes/NvVideoEncoder.cpp	\
+
 
 GithubWorkflow: $(OUT_EXECUTABLE) $(OUT_LIBRARY) 
 	echo "::set-output name=executable:$(OUT_EXECUTABLE)"
