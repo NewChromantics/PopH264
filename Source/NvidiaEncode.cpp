@@ -13,7 +13,10 @@ typedef uint64_t __u64;
 
 //#include "nvidia/samples/01_video_encode/video_encode.h"
 #include "SoyPixels.h"
+//#include <linux/videodev2.h>
+#include "Linux/include/linux/videodev2.h"
 #include "NvidiaEncode.h"
+
 
 namespace Nvidia
 {
@@ -35,26 +38,27 @@ void Nvidia::IsOkay(int Result, const char* Context)
 	throw Soy::AssertException(Error);
 }
 
-Nvidia::TEncoder::TEncoder(TEncoderParams& Params,std::function<void(PopH264::TPacket&)> OnOutPacket)
-{
-	//	the nvvideoencoder is a wrapper for a V4L2 device
-	//	which is a standard linux file i/o stream
-	//	alloc an encoder in blocking mode
-	//	so the non-blocking mode is an IO mode
-	//	gr: what is enc0 ? device name?
-	//ctx.enc = NvVideoEncoder::createVideoEncoder("enc0", O_NONBLOCK);
-	mEncoder = NvVideoEncoder::createVideoEncoder("enc0")
-	if ( !mEncoder )
-		throw Soy::AssertException("Failed to allocate nvidia encoder");
-}
+
+auto x = V4L2_PIX_FMT_YUV420M;
 
 namespace V4lPixelFormat
 {
 	enum Type : uint32_t
 	{
-		YUV420M = V4L2_PIX_FMT_YUV420M,
-	}
+		YUV420M = x,
+	};
 }
+
+v4l2_memory x;
+namespace V4lMemoryMode
+{
+	enum Type : uint32_t
+	{
+		DMABUF = V4L2_MEMORY_DMABUF,
+	};
+}
+
+
 V4lPixelFormat::Type GetPixelFormat(SoyPixelsFormat::Type Format)
 {
 	switch(Format)
@@ -71,6 +75,28 @@ V4lPixelFormat::Type GetPixelFormat(SoyPixelsFormat::Type Format)
 }
 
 
+
+Nvidia::TEncoder::TEncoder(TEncoderParams& Params,std::function<void(PopH264::TPacket&)> OnOutPacket)
+{
+	//	the nvvideoencoder is a wrapper for a V4L2 device
+	//	which is a standard linux file i/o stream
+	//	alloc an encoder in blocking mode
+	//	so the non-blocking mode is an IO mode
+	//	gr: what is enc0 ? device name?
+	//ctx.enc = NvVideoEncoder::createVideoEncoder("enc0", O_NONBLOCK);
+	mEncoder = NvVideoEncoder::createVideoEncoder("enc0")
+	if ( !mEncoder )
+		throw Soy::AssertException("Failed to allocate nvidia encoder");
+	
+	
+	auto& Encoder = *mEncoder;
+	auto Result = Encoder.subscribeEvent(V4L2_EVENT_EOS,0,0);
+	IsOkay(Result,"Failed to subscribe to EOS event");
+	
+
+}
+
+
 void Nvidia::TEncoder::InitInputFormat()
 {
 	//	gr: nvidia demo calls this the output plane
@@ -83,7 +109,112 @@ void Nvidia::TEncoder::InitInputFormat()
 	auto MaxSize = InputFormat.GetDataSize();
 	auto Result = Encoder.setOutputPlaneFormat(Format, Width, Height, MaxSize );
 	IsOkay(Result,"InitInpuFormat failed setOutputPlaneFormat");
+
+	//	setup memory read mode
+	ret = ctx.enc->output_plane.setupPlane(V4L2_MEMORY_USERPTR, 10, false, true);
+	ret = ctx.enc->output_plane.setupPlane(V4L2_MEMORY_MMAP, 10, true, false);
+	ret = setup_output_dmabuf(&ctx,10);
+	
 }
+
+void Nvidia::TEncoder::OnFrameEncoded(struct v4l2_buffer *v4l2_buf, NvBuffer * buffer,NvBuffer * shared_buffer)
+{
+	auto& Encoder = *mEncoder;
+
+	//	gr: number of frames ready?
+	uint32_t frame_num = Encoder.capture_plane.getTotalDequeuedBuffers() - 1;
+	uint32_t ReconRef_Y_CRC = 0;
+	uint32_t ReconRef_U_CRC = 0;
+	uint32_t ReconRef_V_CRC = 0;
+	static uint32_t num_encoded_frames = 1;
+	struct v4l2_event ev;
+	int ret = 0;
+	
+	if (!v4l2_buf)
+	{
+		std::Debug << __PRETTY_FUNCTION__ << " error while dequeing output buffer (v4l2_buf=null)" << std::endl;
+		return;
+	}
+	
+	if ( mUsingCommands )
+	{
+		if(v4l2_buf->flags & V4L2_BUF_FLAG_LAST)
+		{
+			std::Debug << __PRETTY_FUNCTION__ << "V4L2_BUF_FLAG_LAST" << std::endl;
+			/*
+			memset(&ev,0,sizeof(struct v4l2_event));
+			ret = ctx->enc->dqEvent(ev,1000);
+			if (ret < 0)
+				cout << "Error in dqEvent" << endl;
+			if(ev.type == V4L2_EVENT_EOS)
+				return false;
+			*/
+		}
+	}
+	
+	//	end of string
+	if (buffer->planes[0].bytesused == 0)
+	{
+		std::Debug << "Got 0 size buffer in capture" << std::endl;
+		return;
+	}
+	
+	//	Computing CRC with each frame
+	/*
+	if(ctx->pBitStreamCrc)
+		CalculateCrc (ctx->pBitStreamCrc, buffer->planes[0].data, buffer->planes[0].bytesused);
+	*/
+
+	//	push/read the encoded buffer
+	OnFrame(buffer);
+
+	//	get frame meta
+	/*
+	{
+		v4l2_ctrl_videoenc_outputbuf_metadata enc_metadata;
+		auto Result = Encoder.getMetadata(v4l2_buf->index, enc_metadata);
+		if ( Result == 0 )
+		{
+				cout << "Frame " << frame_num <<
+				": isKeyFrame=" << (int) enc_metadata.KeyFrame <<
+				" AvgQP=" << enc_metadata.AvgQP <<
+				" MinQP=" << enc_metadata.FrameMinQP <<
+				" MaxQP=" << enc_metadata.FrameMaxQP <<
+				" EncodedBits=" << enc_metadata.EncodedFrameBits <<
+				endl;
+			}
+		}
+	}
+	*/
+
+	//	Get motion vector parameters of the frames from encoder
+	/*
+	{
+		v4l2_ctrl_videoenc_outputbuf_metadata_MV enc_mv_metadata;
+		if (ctx->enc->getMotionVectors(v4l2_buf->index, enc_mv_metadata) == 0)
+		{
+			uint32_t numMVs = enc_mv_metadata.bufSize / sizeof(MVInfo);
+			MVInfo *pInfo = enc_mv_metadata.pMVInfo;
+			
+			cout << "Frame " << frame_num << ": Num MVs=" << numMVs << endl;
+			
+			for (uint32_t i = 0; i < numMVs; i++, pInfo++)
+			{
+				cout << i << ": mv_x=" << pInfo->mv_x <<
+				" mv_y=" << pInfo->mv_y <<
+				" weight=" << pInfo->weight <<
+				endl;
+			}
+		}
+	}
+	*/
+	
+	//	put the output/h264 buffer back so it can be used
+	auto Result = Encoder.capture_plane.qBuffer(*v4l2_buf, nullptr);
+	IsOkay(Result,"Post-new-buffer re-enqueuing buffer for encoder");
+}
+
+
 
 void Nvidia::TEncoder::InitOutputFormat()
 {
@@ -107,14 +238,250 @@ void Nvidia::TEncoder::InitOutputFormat()
 	IsOkay(Result,"Failed to set level");
 
 	
-	//	setup memory read mode
-	ret = ctx.enc->output_plane.setupPlane(V4L2_MEMORY_USERPTR, 10, false, true);
-	ret = ctx.enc->output_plane.setupPlane(V4L2_MEMORY_MMAP, 10, true, false);
-			  ret = setup_output_dmabuf(&ctx,10);
-			  
+	//	setup memory mode
+	switch(ctx.output_memory_type)
+	{
+		case V4L2_MEMORY_MMAP:
+			ret = ctx.enc->output_plane.setupPlane(V4L2_MEMORY_MMAP, 10, true, false);
+			TEST_ERROR(ret < 0, "Could not setup output plane", cleanup);
+			break;
+			
+		case V4L2_MEMORY_USERPTR:
+			ret = ctx.enc->output_plane.setupPlane(V4L2_MEMORY_USERPTR, 10, false, true);
+			TEST_ERROR(ret < 0, "Could not setup output plane", cleanup);
+			break;
+			
+		case V4L2_MEMORY_DMABUF:
+			ret = setup_output_dmabuf(&ctx,10);
+			TEST_ERROR(ret < 0, "Could not setup plane", cleanup);
+			break;
+		default :
+			TEST_ERROR(true, "Not a valid plane", cleanup);
+	}
+	
+	
+	//	CFunc callback
+	//	encoder_capture_plane_dq_callback
+	auto EncoderCallback = [](struct v4l2_buffer *v4l2_buf, NvBuffer * buffer,
+									  NvBuffer * shared_buffer, void * This)
+	{
+		This->OnFrameEncoded( v4l2_buf, buffer, shared_buffer );
+	};
+	
+	//	setup capture_plane/h264 callback
+	Encoder.capture_plane.setDQThreadCallback(EncoderCallback);
+	
+	/* startDQThread starts a thread internally which calls the
+	 encoder_capture_plane_dq_callback whenever a buffer is dequeued
+	 on the plane */
+	auto* This = this;
+	ctx.enc->capture_plane.startDQThread(This);
+	
+	//	Enqueue all the empty capture plane buffers.
+	//	gr: which are the H264 output buffers
+	for (uint32_t i = 0; i <Encoder.capture_plane.getNumBuffers(); i++)
+	{
+		struct v4l2_buffer v4l2_buf;
+		struct v4l2_plane planes[MAX_PLANES];
+		
+		memset(&v4l2_buf, 0, sizeof(v4l2_buf));
+		memset(planes, 0, MAX_PLANES * sizeof(struct v4l2_plane));
+		
+		v4l2_buf.index = i;
+		v4l2_buf.m.planes = planes;
+		
+		auto Result = Encoder.capture_plane.qBuffer(v4l2_buf, nullptr);
+		IsOkay(Result,"Failed to queue H264/capture_plane buffer");
+	}
+
+}
+
+void Nvidia::TEncoder::Start()
+{
+	auto& Encoder = *mEncoder;
+	auto UseCommand = true;
+	
+	if ( UseCommand )
+	{
+		//	Send v4l2 command for encoder start
+		auto Result = Encoder.setEncoderCommand(V4L2_ENC_CMD_START, 0);
+		IsOkay(Result,"Failed to send V4L2_ENC_CMD_START");
+	}
+	else
+	{
+		//	start streaming
+		auto Result = Encoder.output_plane.setStreamStatus(true);
+		IsOkay(Result,"output_plane enable streaming");
+		
+		Result = Encoder.capture_plane.setStreamStatus(true);
+		IsOkay(Result,"capture_plane enable streaming");
+	}
+
+}
+
+void Nvidia::TEncoder::EncodeFrame()
+{
+	auto& Encoder = *mEncoder;
+
+	int BufferIndex = 0;
+	
+	//	pick a buffer
+	//for (uint32_t i = 0; i < ctx.enc->output_plane.getNumBuffers(); i++)
+	struct v4l2_buffer v4l2_buf;
+	struct v4l2_plane planes[MAX_PLANES];
+	NvBuffer *buffer = Encoder.output_plane.getNthBuffer(BufferIndex);
+	
+	memset(&v4l2_buf, 0, sizeof(v4l2_buf));
+	memset(planes, 0, MAX_PLANES * sizeof(struct v4l2_plane));
+	
+	v4l2_buf.index = BufferIndex;
+	v4l2_buf.m.planes = planes;
+
+	if ( mMemoryMode == V4L2_MEMORY_DMABUF)
+	{
+		v4l2_buf.type = V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE;
+		v4l2_buf.memory = V4L2_MEMORY_DMABUF;
+		//	Map output plane buffer for memory type DMABUF.
+		auto Result = Encoder.output_plane.mapOutputBuffers(v4l2_buf, ctx.output_plane_fd[i]);
+		IsOkay(Result,"Error while mapping buffer at output plane");
+	}
+	
+	//	fill buffer with yuv
+	for (i = 0; i < buffer.n_planes; i++)
+	{
+		NvBuffer::NvBufferPlane &plane = buffer.planes[i];
+		std::streamsize bytes_to_read =
+		plane.fmt.bytesperpixel * plane.fmt.width;
+		data = (char *) plane.data;
+		plane.bytesused = 0;
+		for (j = 0; j < plane.fmt.height; j++)
+		{
+			stream->read(data, bytes_to_read);
+			if (stream->gcount() < bytes_to_read)
+				return -1;
+			data += plane.fmt.stride;
+		}
+		plane.bytesused = plane.fmt.stride * plane.fmt.height;
+	}
+	
+	Sync();
+	
+	//	queue buffer for "output plane" (input)
+	Result = Encoder.output_plane.qBuffer(v4l2_buf, nullptr);
+	IsOkay(Result,"Error while queueing buffer at output plane");
+}
+
+void Nvidia::TEncoder::Sync()
+{
+	if(ctx.output_memory_type == V4L2_MEMORY_DMABUF || ctx.output_memory_type == V4L2_MEMORY_MMAP)
+	{
+		for (uint32_t j = 0 ; j < buffer->n_planes; j++)
+		{
+			ret = NvBufferMemSyncForDevice (buffer->planes[j].fd, j, (void **)&buffer->planes[j].data);
+			if (ret < 0)
+			{
+				cerr << "Error while NvBufferMemSyncForDevice at output plane for V4L2_MEMORY_DMABUF" << endl;
+				abort(&ctx);
+				goto cleanup;
+			}
+		}
+	}
+	
+	if(ctx.output_memory_type == V4L2_MEMORY_DMABUF)
+	{
+		for (uint32_t j = 0 ; j < buffer->n_planes ; j++)
+		{
+			v4l2_buf.m.planes[j].bytesused = buffer->planes[j].bytesused;
+		}
+	}
+}
+
+void NVidia::TEncoder::ReadNextFrame()
+{
+	auto& Encoder = *mEncoder;
 	
 }
 
+
+void NVidia::TEncoder::WaitForEnd()
+{
+	auto& Encoder = *mEncoder;
+	
+	//	if blocking mode
+	//	Wait till capture plane DQ Thread finishes
+	//	i.e. all the capture plane buffers are dequeued.
+	bool EndOfStream = false;
+	auto Result = encoder_proc_blocking(ctx, EndOfStream);
+	IsOkay(Result,"encoder_proc_blocking");
+	Encoder.capture_plane.waitForDQThread(-1);
+}
+
+/*
+int
+read_video_frame(std::ifstream * stream, NvBuffer & buffer)
+{
+	uint32_t i, j;
+	char *data;
+	
+	for (i = 0; i < buffer.n_planes; i++)
+	{
+		NvBuffer::NvBufferPlane &plane = buffer.planes[i];
+		std::streamsize bytes_to_read =
+		plane.fmt.bytesperpixel * plane.fmt.width;
+		data = (char *) plane.data;
+		plane.bytesused = 0;
+		for (j = 0; j < plane.fmt.height; j++)
+		{
+			stream->read(data, bytes_to_read);
+			if (stream->gcount() < bytes_to_read)
+				return -1;
+			data += plane.fmt.stride;
+		}
+		plane.bytesused = plane.fmt.stride * plane.fmt.height;
+	}
+	return 0;
+}
+
+int
+write_video_frame(std::ofstream * stream, NvBuffer &buffer)
+{
+	uint32_t i, j;
+	char *data;
+	
+	for (i = 0; i < buffer.n_planes; i++)
+	{
+		NvBuffer::NvBufferPlane &plane = buffer.planes[i];
+		size_t bytes_to_write =
+		plane.fmt.bytesperpixel * plane.fmt.width;
+		
+		data = (char *) plane.data;
+		for (j = 0; j < plane.fmt.height; j++)
+		{
+			stream->write(data, bytes_to_write);
+			if (!stream->good())
+				return -1;
+			data += plane.fmt.stride;
+		}
+	}
+	return 0;
+}
+*/
+void Nvidia::TEncoder::Shutdown()
+{
+	if(ctx.b_use_enc_cmd)
+	{
+		//	Send v4l2 command for encoder stop
+		ret = ctx.enc->setEncoderCommand(V4L2_ENC_CMD_STOP, 1);
+		eos = true;
+		break;
+	}
+	else
+	{
+		eos = true;
+		v4l2_buf.m.planes[0].m.userptr = 0;
+		v4l2_buf.m.planes[0].bytesused = v4l2_buf.m.planes[1].bytesused = v4l2_buf.m.planes[2].bytesused = 0;
+	}
+}
 
 	
 /**
