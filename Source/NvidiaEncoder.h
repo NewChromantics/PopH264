@@ -63,7 +63,6 @@ private:
 
 	
 	NvVideoEncoder*				mEncoder = nullptr;
-	std::shared_ptr<TNative>	mpNative;	//	native
-	TNative&					mNative = *mpNative;
+	std::shared_ptr<TNative>	mNative;
 	bool						mInitialised = false;
 };

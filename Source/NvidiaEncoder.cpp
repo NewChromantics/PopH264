@@ -136,7 +136,7 @@ V4lPixelFormat::Type GetPixelFormat(SoyPixelsFormat::Type Format)
 Nvidia::TEncoder::TEncoder(TEncoderParams& Params,std::function<void(PopH264::TPacket&)> OnOutPacket) :
 	PopH264::TEncoder( OnOutPacket )
 {
-	mpNative.reset(new TNative);
+	mNative.reset(new TNative);
 	
 	//	the nvvideoencoder is a wrapper for a V4L2 device
 	//	which is a standard linux file i/o stream
@@ -238,7 +238,7 @@ void Nvidia::TEncoder::InitYuvFormat(SoyPixelsMeta PixelMeta)
 	InitEncodingParams();
 
 	//	setup memory read mode
-	auto& mMemoryMode = mNative.mMemoryMode;
+	auto& mMemoryMode = mNative->mMemoryMode;
 	switch( mMemoryMode )
 	{
 		case V4L2_MEMORY_MMAP:
@@ -541,7 +541,7 @@ void Nvidia::TEncoder::Start()
 void Nvidia::TEncoder::Sync()
 {
 	std::Debug << __PRETTY_FUNCTION__ << std::endl;
-	auto& mMemoryMode = mNative.mMemoryMode;
+	auto& mMemoryMode = mNative->mMemoryMode;
 	/*
 	if(mMemoryMode == V4L2_MEMORY_DMABUF || mMemoryMode == V4L2_MEMORY_MMAP)
 	{
@@ -695,7 +695,7 @@ void Nvidia::TEncoder::Encode(const SoyPixelsImpl& Pixels,const std::string& Met
 	v4l2_buf.index = BufferIndex;
 	v4l2_buf.m.planes = planes;
 	
-	auto& mMemoryMode = mNative.mMemoryMode;
+	auto& mMemoryMode = mNative->mMemoryMode;
 	
 	if ( mMemoryMode == V4L2_MEMORY_DMABUF)
 	{
