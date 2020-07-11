@@ -97,7 +97,10 @@ LIBRARY_LINK_LIBS += \
 LOCAL_SRC_FILES += \
 $(SRC)/Source/nvidia/samples/common/classes/NvV4l2Element.cpp	\
 $(SRC)/Source/nvidia/samples/common/classes/NvV4l2ElementPlane.cpp	\
-$(SRC)/Source/nvidia/samples/common/classes/NvVideoEncoder.cpp	\
+$(SRC)/Source/nvidia/samples/common/classes/NvVideoEncoder.cpp	
+
+LOCAL_C_INCLUDES = \
+-I$(SRC)/Source/nvidia/samples/common/classes/
 
 
 GithubWorkflow: $(OUT_EXECUTABLE) $(OUT_LIBRARY) 
