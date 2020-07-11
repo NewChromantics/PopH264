@@ -1,4 +1,4 @@
-#include <SoyPixels.h>
+#include "SoyPixels.h"
 
 
 //	fake some linux stuff so we can compile on other platforms
@@ -163,9 +163,10 @@ void Nvidia::TEncoder::InitEncoder(SoyPixelsMeta PixelMeta)
 	
 	//	"capture" plane needs to be set before "output"
 	InitH264Format(PixelMeta);
-	InitH264Callback();
 	InitYuvFormat(PixelMeta);
+	InitH264Callback();
 	InitYuvCallback();
+	InitEncodingParams();
 	
 	mInitialised = true;
 }
@@ -279,6 +280,26 @@ NvV4l2ElementPlane& Nvidia::TEncoder::GetH264Plane()
 }
 
 
+void Nvidia::TEncoder::InitEncodingParams()
+{
+	auto& Encoder = *mEncoder;
+
+	auto Profile = V4L2_MPEG_VIDEO_H264_PROFILE_BASELINE;
+	auto BitRate = 8 * 1000 * 500;
+	auto Level = V4L2_MPEG_VIDEO_H264_LEVEL_3_0;
+	
+	//	set other params
+	auto Result = Encoder.setProfile(Profile);
+	IsOkay(Result,"Failed to set level");
+
+	Result = Encoder.setBitrate(BitRate);
+	IsOkay(Result,"Failed to set bitrate");
+	
+	Result = Encoder.setLevel(Level);
+	IsOkay(Result,"Failed to set level");
+}
+
+
 //	nvidia needs to know w/h
 void Nvidia::TEncoder::InitH264Format(SoyPixelsMeta InputMeta)
 {
@@ -287,25 +308,15 @@ void Nvidia::TEncoder::InitH264Format(SoyPixelsMeta InputMeta)
 	//	capture plane = h264 output plane
 	auto& H264Plane = GetH264Plane();
 	auto& Encoder = *mEncoder;
-
-	auto Profile = V4L2_MPEG_VIDEO_H264_PROFILE_HIGH_444_PREDICTIVE;
-	auto BitRate = 8 * 1000 * 500;
-	auto Level = V4L2_MPEG_VIDEO_H264_LEVEL_3_0;
-	auto Format = V4L2_PIX_FMT_H264;
 	
 	//	needs to be specified
 	auto Width = InputMeta.GetWidth();
 	auto Height = InputMeta.GetHeight();
 	auto BufferSize = 1024 * 1024 * 2;
+	auto Format = V4L2_PIX_FMT_H264;
+
 	auto Result = Encoder.setCapturePlaneFormat( Format, Width, Height, BufferSize );
 	IsOkay(Result,"InitOutputFormat failed setCapturePlaneFormat");
-	
-	//	set other params
-	Result = Encoder.setBitrate(BitRate);
-	IsOkay(Result,"Failed to set bitrate");
-	
-	Result = Encoder.setLevel(Level);
-	IsOkay(Result,"Failed to set level");
 }
 
 

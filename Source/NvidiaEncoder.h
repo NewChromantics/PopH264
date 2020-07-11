@@ -50,6 +50,7 @@ private:
 	void			InitDmaBuffers(size_t BufferCount);
 	void			InitH264Callback();
 	void			InitYuvCallback();
+	void			InitEncodingParams();
 	void			Sync();
 	void			Start();
 	void			ReadNextFrame();
