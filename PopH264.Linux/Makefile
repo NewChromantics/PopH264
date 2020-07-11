@@ -100,7 +100,7 @@ $(SRC)/Source/nvidia/samples/common/classes/NvV4l2ElementPlane.cpp	\
 $(SRC)/Source/nvidia/samples/common/classes/NvVideoEncoder.cpp	
 
 LOCAL_C_INCLUDES = \
--I$(SRC)/Source/nvidia/samples/common/classes/
+-I$(SRC)/Source/nvidia/include/
 
 
 GithubWorkflow: $(OUT_EXECUTABLE) $(OUT_LIBRARY) 
