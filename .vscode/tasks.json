@@ -4,7 +4,7 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"label": "make Makefile",
+			"label": "Build",
 			"type": "shell",
 			"command": "(cd PopH264.Linux && make archType=arm64)",
 			"problemMatcher": [],
