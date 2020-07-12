@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		BF096B1324B9183E00D985E5 /* NvidiaEncoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF096B1124B9158A00D985E5 /* NvidiaEncoder.cpp */; };
 		BF0CCB2424A78D8D00596877 /* SoyMediaFormat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF0CCB2224A78D8D00596877 /* SoyMediaFormat.cpp */; };
 		BF0CCB2524A78D8D00596877 /* SoyMediaFormat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF0CCB2224A78D8D00596877 /* SoyMediaFormat.cpp */; };
 		BF151FE12384787200A70EBF /* BroadwayAll.c in Sources */ = {isa = PBXBuildFile; fileRef = BFF1C6E822E3C65800AFDFD5 /* BroadwayAll.c */; };
@@ -35,7 +34,6 @@
 		BF18269A24226502006FEB93 /* SoyImage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF18269624226502006FEB93 /* SoyImage.cpp */; };
 		BF1826A02422656E006FEB93 /* SoyStreamBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF18269D2422656E006FEB93 /* SoyStreamBuffer.cpp */; };
 		BF1826A12422656E006FEB93 /* SoyStreamBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF18269D2422656E006FEB93 /* SoyStreamBuffer.cpp */; };
-		BF1826A22422656E006FEB93 /* SoyStreamBuffer.h in Headers */ = {isa = PBXBuildFile; fileRef = BF18269E2422656E006FEB93 /* SoyStreamBuffer.h */; };
 		BF1826A32422656E006FEB93 /* SoyStreamBuffer.h in Headers */ = {isa = PBXBuildFile; fileRef = BF18269E2422656E006FEB93 /* SoyStreamBuffer.h */; };
 		BF1826AA24228C43006FEB93 /* SoyPng.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF1826A624228C43006FEB93 /* SoyPng.cpp */; };
 		BF1826AB24228C43006FEB93 /* SoyPng.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF1826A624228C43006FEB93 /* SoyPng.cpp */; };
@@ -77,7 +75,6 @@
 		BFC4717F244751BF00A2DA70 /* PopH264_Osx.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BF459CD521F7D5C700CED59D /* PopH264_Osx.framework */; };
 		BFC471842447523100A2DA70 /* AvfEncoder.mm in Sources */ = {isa = PBXBuildFile; fileRef = BFC471812447523000A2DA70 /* AvfEncoder.mm */; };
 		BFC471852447523100A2DA70 /* AvfEncoder.mm in Sources */ = {isa = PBXBuildFile; fileRef = BFC471812447523000A2DA70 /* AvfEncoder.mm */; };
-		BFC4718A2447625000A2DA70 /* AvfPixelBuffer.h in Headers */ = {isa = PBXBuildFile; fileRef = BFC471862447624F00A2DA70 /* AvfPixelBuffer.h */; };
 		BFC4718B2447625000A2DA70 /* AvfPixelBuffer.h in Headers */ = {isa = PBXBuildFile; fileRef = BFC471862447624F00A2DA70 /* AvfPixelBuffer.h */; };
 		BFC471902447625000A2DA70 /* AvfPixelBuffer.mm in Sources */ = {isa = PBXBuildFile; fileRef = BFC471892447625000A2DA70 /* AvfPixelBuffer.mm */; };
 		BFC471912447625000A2DA70 /* AvfPixelBuffer.mm in Sources */ = {isa = PBXBuildFile; fileRef = BFC471892447625000A2DA70 /* AvfPixelBuffer.mm */; };
@@ -697,10 +694,8 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BF1826A22422656E006FEB93 /* SoyStreamBuffer.h in Headers */,
 				BF459CE921F7D70000CED59D /* PopH264.h in Headers */,
 				BF459CE221F7D60500CED59D /* PopH264Framework.h in Headers */,
-				BFC4718A2447625000A2DA70 /* AvfPixelBuffer.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -922,7 +917,6 @@
 				BFC471A1244781CC00A2DA70 /* SoyString.mm in Sources */,
 				BFF1C6EA22E3C65800AFDFD5 /* BroadwayAll.c in Sources */,
 				BF18269424226126006FEB93 /* json11.cpp in Sources */,
-				BF096B1324B9183E00D985E5 /* NvidiaEncoder.cpp in Sources */,
 				BF587C7A244B57A2000745B9 /* SoyTypes.mm in Sources */,
 				BF53E82F22EDCABB008253CD /* TDecoder.cpp in Sources */,
 				BF459CF921F7DB4400CED59D /* SoyTime.mm in Sources */,
