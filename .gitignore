@@ -48,7 +48,8 @@ PopH264.visualstudio/PopH264_TestApp_x64_Debug/
 PopH264.visualstudio/PopH264_x64_Debug/
 
 # vscode files
-.vscode
+# gr: now including .vscode for the project config .jsons
+#.vscode
 .devcontainer
 
 
