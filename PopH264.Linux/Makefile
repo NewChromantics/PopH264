@@ -51,7 +51,10 @@ $(SRC)/Source_TestApp/PopH264_TestApp.cpp	\
 $(SRC)/Source_TestApp/PopH264_TestAssetGenerator.cpp	\
 $(SRC)/Source/SoyLib/src/SoyFilesystem.cpp
 
-CFLAGS = -c -DTARGET_LINUX -std=gnu++17 -fPIC
+# -g stops symbol stripping
+# -f[lag] PIC position independent code (for dyanmically loaded code)
+# -rpath $ORIGIN makes the shared object runtimepath be same place as executable
+CFLAGS = -c -DTARGET_LINUX -std=gnu++17 -fPIC -g
 LDFLAGS = -pthread
 LDFLAGS += '-Wl,-rpath,$$ORIGIN'
 
