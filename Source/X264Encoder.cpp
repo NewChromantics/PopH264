@@ -199,8 +199,19 @@ void X264::TEncoder::AllocEncoder(const SoyPixelsMeta& Meta)
 
 void X264::TEncoder::Encode(const SoyPixelsImpl& Pixels, const std::string& Meta, bool Keyframe)
 {
-	//	convert to 3 plane format
-	Soy_AssertTodo();
+	//	x264 needs 3 planes, convert
+	if ( Pixels.GetFormat() != SoyPixelsFormat::Yuv_8_8_8 )
+	{
+		SoyPixels Yuv;
+		Yuv.Copy(Pixels);
+		Yuv.SetFormat(SoyPixelsFormat::Yuv_8_8_8);
+		Encode(Yuv,Meta,Keyframe);
+		return;
+	}
+	
+	BufferArray<std::shared_ptr<SoyPixelsImpl>,4> Planes;
+	Pixels.SplitPlanes(GetArrayBridge(Planes));
+	Encode( *Planes[0], *Planes[1], *Planes[2], Meta, Keyframe );
 }
 
 void X264::TEncoder::Encode(const SoyPixelsImpl& Luma,const SoyPixelsImpl& ChromaU,const SoyPixelsImpl& ChromaV,const std::string& Meta,bool Keyframe)
