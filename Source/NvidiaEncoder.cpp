@@ -346,11 +346,13 @@ void Nvidia::TEncoder::InitH264Callback()
 	
 	auto& H264Plane = GetH264Plane();
 	
+	std::Debug << "starting H264 dequeue thread" << std::endl;
 	auto* This = this;
 	H264Plane.setDQThreadCallback(EncoderCallback);
 	H264Plane.startDQThread(This);
 
 	//	queue empty buffers for encoder to use
+	std::Debug << "Queuing empty H264 buffers x" << H264Plane.getNumBuffers() << std::endl;
 	for ( auto i=0;	i<H264Plane.getNumBuffers();	i++ )
 	{
 		struct v4l2_buffer v4l2_buf;
@@ -571,6 +573,18 @@ void Nvidia::TEncoder::ReadNextFrame()
 {
 	auto& Encoder = *mEncoder;
 	
+	//	dequeue all the planes from the capture
+	/*
+	 //	dequeue a buffer to write to
+	 struct v4l2_buffer v4l2_buf;
+	 struct v4l2_plane planes[MAX_PLANES];
+	 NvBuffer *buffer = nullptr;
+	 memset(&v4l2_buf, 0, sizeof(v4l2_buf));
+	 memset(planes, 0, sizeof(planes));
+	 v4l2_buf.m.planes = planes;
+	 auto Result = YuvPlane.dqBuffer(v4l2_buf, &buffer, NULL, 10);
+	 IsOkay(Result,"Failed to dequeue YUV buffer");
+	 */
 }
 
 
@@ -677,10 +691,8 @@ void Nvidia::TEncoder::Encode(const SoyPixelsImpl& Pixels,const std::string& Met
 	auto& Encoder = *mEncoder;
 	auto& YuvPlane = GetYuvPlane();
 
-	//	gr: get a valid DEQUEUED buffer, so we should have a list from the encoder
-	//		of dequeued input planes
-	int BufferIndex = 0;
-	
+	auto BufferIndex = 0;
+	std::Debug << "Getting YUV buffer " << BufferIndex << "..." << std::endl;
 	//	pick a buffer
 	//for (uint32_t i = 0; i < ctx.enc->output_plane.getNumBuffers(); i++)
 	struct v4l2_buffer v4l2_buf;
@@ -691,7 +703,6 @@ void Nvidia::TEncoder::Encode(const SoyPixelsImpl& Pixels,const std::string& Met
 	
 	memset(&v4l2_buf, 0, sizeof(v4l2_buf));
 	memset(planes, 0, MAX_PLANES * sizeof(struct v4l2_plane));
-	
 	v4l2_buf.index = BufferIndex;
 	v4l2_buf.m.planes = planes;
 	
@@ -711,6 +722,7 @@ void Nvidia::TEncoder::Encode(const SoyPixelsImpl& Pixels,const std::string& Met
 	
 	//	fill buffer with yuv
 	auto& Buffer = *pBuffer;
+	std::Debug << "Filling YUV buffer x" << Buffer.n_planes << "planes..." << std::endl;
 	for ( auto p=0;	p<Buffer.n_planes; p++)
 	{
 		NvBuffer::NvBufferPlane& Plane = Buffer.planes[p];
@@ -730,9 +742,12 @@ void Nvidia::TEncoder::Encode(const SoyPixelsImpl& Pixels,const std::string& Met
 		*/
 	}
 	
+	//	if DMA or MMAP need to sync
 	Sync();
-	
-	//	queue buffer for "output plane" (input)
+	//	DMA also needs to set bytes used
+
+	std::Debug << "Queuing YUV buffer" << std::endl;
+	//	final queue
 	auto Result = YuvPlane.qBuffer(v4l2_buf, nullptr);
 	IsOkay(Result,"Error while queueing buffer at output plane");
 }
