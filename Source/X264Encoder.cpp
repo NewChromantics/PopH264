@@ -276,6 +276,9 @@ void X264::TEncoder::Encode(const SoyPixelsImpl& Luma,const SoyPixelsImpl& Chrom
 
 void X264::TEncoder::FinishEncoding()
 {
+	if ( !mHandle )
+		return;
+	
 	//	when we're done with frames, we need to make the encoder flush out any more packets
 	int Safety = 1000;
 	while (--Safety > 0)
