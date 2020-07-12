@@ -25,6 +25,9 @@ typedef void PopH264_Callback(void* Meta);
 
 __export int32_t			PopH264_GetVersion();
 
+//	cleanup all resources (on some platforms this may need to be called to prevent a crash on exit/dll unload)
+__export void				PopH264_Shutdown();
+
 //	get embedded h264 data. Returns size of the data (which may be larger than the buffer)
 //	if Buffer is null, this will just return the size
 //	returns -1 on error
