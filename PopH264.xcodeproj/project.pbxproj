@@ -122,13 +122,13 @@
 /* Begin PBXCopyFilesBuildPhase section */
 		BFBC07FB238834E40070BCB4 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
+			buildActionMask = 8;
 			dstPath = "$(SRCROOT)/Unity/PopH264/Assets/PopH264";
 			dstSubfolderSpec = 0;
 			files = (
 				BFBC07FC238834EC0070BCB4 /* PopH264_Osx.framework in CopyFiles */,
 			);
-			runOnlyForDeploymentPostprocessing = 0;
+			runOnlyForDeploymentPostprocessing = 1;
 		};
 		BFBC07FD238834F10070BCB4 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
