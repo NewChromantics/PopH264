@@ -105,7 +105,7 @@ PopH264::TEncoderInstance::TEncoderInstance(const std::string& OptionsJsonString
 		return;
 	
 	std::stringstream Error;
-	Error << "No encoder supported (requested " << EncoderName << ")";
+	Error << "No encoder supported (requested \"" << EncoderName << "\") empty=" << EncoderName.empty();
 	throw Soy::AssertException(Error);
 }
 
