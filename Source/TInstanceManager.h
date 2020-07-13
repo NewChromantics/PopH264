@@ -17,10 +17,13 @@ private:
 	};
 	
 public:
+	~TInstanceManager()	{	FreeInstances();	}
 	INSTANCETYPE&		GetInstance(uint32_t Instance);
 	uint32_t			AssignInstance(std::shared_ptr<INSTANCETYPE> Object);
 	void				FreeInstance(uint32_t Instance);
 	uint32_t			CreateInstance(const INSTANCEPARAMS& Params);
+	size_t				GetInstanceCount() const	{	return mInstances.GetSize();	}
+	void				FreeInstances();
 	
 private:
 	std::mutex			mInstancesLock;
@@ -99,3 +102,9 @@ void TInstanceManager<INSTANCETYPE,INSTANCEPARAMS>::FreeInstance(uint32_t Instan
 }
 
 
+template<typename INSTANCETYPE,typename INSTANCEPARAMS>
+void TInstanceManager<INSTANCETYPE,INSTANCEPARAMS>::FreeInstances()
+{
+	std::lock_guard<std::mutex> Lock(mInstancesLock);
+	mInstances.Clear(true);
+}

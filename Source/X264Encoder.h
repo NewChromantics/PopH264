@@ -11,6 +11,8 @@
 #include "X264/osx/x264.h"
 #elif defined(TARGET_IOS)
 #include "X264/Ios/include/x264.h"
+#elif defined(TARGET_LINUX)
+#include <x264.h>
 #endif
 
 

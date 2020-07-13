@@ -199,8 +199,19 @@ void X264::TEncoder::AllocEncoder(const SoyPixelsMeta& Meta)
 
 void X264::TEncoder::Encode(const SoyPixelsImpl& Pixels, const std::string& Meta, bool Keyframe)
 {
-	//	convert to 3 plane format
-	Soy_AssertTodo();
+	//	x264 needs 3 planes, convert
+	if ( Pixels.GetFormat() != SoyPixelsFormat::Yuv_8_8_8 )
+	{
+		SoyPixels Yuv;
+		Yuv.Copy(Pixels);
+		Yuv.SetFormat(SoyPixelsFormat::Yuv_8_8_8);
+		Encode(Yuv,Meta,Keyframe);
+		return;
+	}
+	
+	BufferArray<std::shared_ptr<SoyPixelsImpl>,4> Planes;
+	Pixels.SplitPlanes(GetArrayBridge(Planes));
+	Encode( *Planes[0], *Planes[1], *Planes[2], Meta, Keyframe );
 }
 
 void X264::TEncoder::Encode(const SoyPixelsImpl& Luma,const SoyPixelsImpl& ChromaU,const SoyPixelsImpl& ChromaV,const std::string& Meta,bool Keyframe)
@@ -256,6 +267,8 @@ void X264::TEncoder::Encode(const SoyPixelsImpl& Luma,const SoyPixelsImpl& Chrom
 	//	maybe add a safety iteration check
 	//	gr: need this on OSX (latest x264) but on windows (old build) every subsequent frame fails
 	//	gr: this was backwards? brew (old 2917) DID need to flush?
+#if !defined(TARGET_LINUX)
+{
 	if (X264_REV < 2969)
 	{
 		//	gr: flushing on OSX (X264_REV 2917) causing
@@ -267,11 +280,16 @@ void X264::TEncoder::Encode(const SoyPixelsImpl& Luma,const SoyPixelsImpl& Chrom
 #endif
 	}
 }
+#endif
+}
 
 
 
 void X264::TEncoder::FinishEncoding()
 {
+	if ( !mHandle )
+		return;
+	
 	//	when we're done with frames, we need to make the encoder flush out any more packets
 	int Safety = 1000;
 	while (--Safety > 0)

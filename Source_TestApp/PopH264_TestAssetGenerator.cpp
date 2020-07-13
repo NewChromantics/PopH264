@@ -79,7 +79,15 @@ void MakeGreyscalePng(const char* Filename)
 	Array<uint8_t> PngData;
 	TPng::GetPng( Pixels, GetArrayBridge(PngData), 0 );
 	Soy::ArrayToFile( GetArrayBridge(PngData), Filename);
-	Platform::ShowFileExplorer(Filename);
+
+	try
+	{
+		Platform::ShowFileExplorer(Filename);
+	}
+	catch(std::exception& e)
+	{
+		DebugPrint(e.what());
+	}
 }
 
 void GetRainbowRgb(int y,uint8_t& r,uint8_t& g,uint8_t& b)
@@ -334,5 +342,12 @@ void MakeRainbowPng(const char* Filename)
 	Array<uint8_t> PngData;
 	TPng::GetPng( Pixels, GetArrayBridge(PngData), 0 );
 	Soy::ArrayToFile( GetArrayBridge(PngData), Filename);
-	Platform::ShowFileExplorer(Filename);
+	try
+	{
+		Platform::ShowFileExplorer(Filename);
+	}
+	catch(std::exception& e)
+	{
+		DebugPrint(e.what());
+	}
 }

@@ -2,7 +2,13 @@
 # CC = arm-linux-gnueabihf-g++
 
 # Standard
+# X ?= if X env var isn't set, use this default
+compiler ?= g++
 CC = ${compiler}
+
+# archTarget is the target architecture
+# archTarget ?= arm7a
+
 SRC = ..
 SOY_PATH = $(SRC)/Source/SoyLib
 
@@ -20,7 +26,9 @@ $(SRC)/Source/TDecoder.cpp \
 $(SRC)/Source/TDecoderInstance.cpp \
 $(SRC)/Source/TEncoder.cpp \
 $(SRC)/Source/TEncoderInstance.cpp \
-$(SRC)/Source/Json11/json11.cpp
+$(SRC)/Source/Json11/json11.cpp \
+$(SRC)/Source/X264Encoder.cpp	\
+$(SRC)/Source/NvidiaEncoder.cpp
 
 # soy lib files
 LOCAL_SRC_FILES  += \
@@ -43,15 +51,67 @@ $(SRC)/Source_TestApp/PopH264_TestApp.cpp	\
 $(SRC)/Source_TestApp/PopH264_TestAssetGenerator.cpp	\
 $(SRC)/Source/SoyLib/src/SoyFilesystem.cpp
 
-CFLAGS = -c -DTARGET_LINUX $(LOCAL_C_INCLUDES) -std=gnu++17 -fPIC
-LDFLAGS = '-Wl,-rpath,$$ORIGIN'
+# -g stops symbol stripping
+# -f[lag] PIC position independent code (for dyanmically loaded code)
+# -rpath $ORIGIN makes the shared object runtimepath be same place as executable
+CFLAGS = -c -DTARGET_LINUX -std=gnu++17 -fPIC -g
+LDFLAGS = -pthread
+LDFLAGS += '-Wl,-rpath,$$ORIGIN'
+
+LIB_LINK_FLAGS = $(LDFLAGS) -shared 
+TEST_APP_LINK_FLAGS = $(LDFLAGS)
+
+LIBRARY_LINK_DIRS = \
+-L/usr/lib
+
+LIBRARY_LINK_LIBS = \
+-lx264
 
 LIB_OBJECTS=$(LOCAL_SRC_FILES:.cpp=.o)
 TESTAPP_OBJECTS=$(TESTAPP_SRC_FILES:.cpp=.o)
 
 # ARCHITECTURE=${archTarget}
+# env var MACHTYPE is this systems arch type, eg; aarch64-unknown-linux-gnu
 OUT_LIBRARY=PopH264${archTarget}.so
 OUT_EXECUTABLE=PopH264TestApp${archTarget}
+
+
+
+# from nvidia samples Rules.mk
+# ARM ABI of the target platform
+TEGRA_ARMABI ?= aarch64-linux-gnu
+TARGET_ROOTFS =
+CUDA_PATH := /usr/local/cuda
+
+LIB_LINK_FLAGS += -Wl,-rpath-link=$(TARGET_ROOTFS)/lib/$(TEGRA_ARMABI)
+LIB_LINK_FLAGS += -Wl,-rpath-link=$(TARGET_ROOTFS)/usr/lib/$(TEGRA_ARMABI)
+LIB_LINK_FLAGS += -Wl,-rpath-link=$(TARGET_ROOTFS)/usr/lib/$(TEGRA_ARMABI)/tegra
+LIB_LINK_FLAGS += -Wl,-rpath-link=$(TARGET_ROOTFS)/$(CUDA_PATH)/lib64
+
+LIBRARY_LINK_LIBS += \
+	-lpthread -lv4l2 -lEGL -lGLESv2 -lX11 \
+	-lnvbuf_utils -lnvjpeg -lnvosd -ldrm \
+	-lcuda -lcudart \
+	-lnvinfer -lnvparsers \
+	-L"$(TARGET_ROOTFS)/$(CUDA_PATH)/lib64" \
+	-L"$(TARGET_ROOTFS)/usr/lib/$(TEGRA_ARMABI)" \
+	-L"$(TARGET_ROOTFS)/usr/lib/$(TEGRA_ARMABI)/tegra"
+
+LOCAL_SRC_FILES += \
+$(SRC)/Source/nvidia/samples/common/classes/NvV4l2Element.cpp	\
+$(SRC)/Source/nvidia/samples/common/classes/NvV4l2ElementPlane.cpp	\
+$(SRC)/Source/nvidia/samples/common/classes/NvVideoEncoder.cpp	\
+$(SRC)/Source/nvidia/samples/common/classes/NvElement.cpp	\
+$(SRC)/Source/nvidia/samples/common/classes/NvBuffer.cpp	\
+$(SRC)/Source/nvidia/samples/common/classes/NvElementProfiler.cpp	\
+$(SRC)/Source/nvidia/samples/common/classes/NvLogging.cpp	\
+$(SRC)/Source/nvidia/samples/common/classes/NvUtils.cpp	\
+
+
+
+LOCAL_C_INCLUDES += \
+-I$(SRC)/Source/nvidia/include/
+
 
 GithubWorkflow: $(OUT_EXECUTABLE) $(OUT_LIBRARY) 
 	echo "::set-output name=executable:$(OUT_EXECUTABLE)"
@@ -66,15 +126,17 @@ lib: $(OUT_LIBRARY)
 
 $(OUT_EXECUTABLE): $(TESTAPP_OBJECTS) $(OUT_LIBRARY)
 	echo "Building test app $(OUT_EXECUTABLE)"
-	$(CC) $(LDFLAGS) $^ -o $@
+	$(CC) $(TEST_APP_LINK_FLAGS) $(TESTAPP_OBJECTS) -o $@ PopH264.so
 
 $(OUT_LIBRARY): $(LIB_OBJECTS)
 	echo "Building library $(OUT_LIBRARY)"
-	$(CC) -shared -o $@ $(LIB_OBJECTS)
+	$(CC) $(LIB_LINK_FLAGS) -o $@ $(LIB_OBJECTS) $(LIBRARY_LINK_DIRS) $(LIBRARY_LINK_LIBS)
 	# ar rcs $@ $(LIB_OBJECTS)
+	echo "Listing dependencies"
+	ldd $(OUT_LIBRARY)
 
 .cpp.o:
-	$(CC) $(CFLAGS) $< -o $@
+	$(CC) $(CFLAGS) $(LOCAL_C_INCLUDES) $< -o $@
 
 clean:
 	# clean build files, anything .o

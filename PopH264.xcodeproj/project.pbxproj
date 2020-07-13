@@ -34,7 +34,6 @@
 		BF18269A24226502006FEB93 /* SoyImage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF18269624226502006FEB93 /* SoyImage.cpp */; };
 		BF1826A02422656E006FEB93 /* SoyStreamBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF18269D2422656E006FEB93 /* SoyStreamBuffer.cpp */; };
 		BF1826A12422656E006FEB93 /* SoyStreamBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF18269D2422656E006FEB93 /* SoyStreamBuffer.cpp */; };
-		BF1826A22422656E006FEB93 /* SoyStreamBuffer.h in Headers */ = {isa = PBXBuildFile; fileRef = BF18269E2422656E006FEB93 /* SoyStreamBuffer.h */; };
 		BF1826A32422656E006FEB93 /* SoyStreamBuffer.h in Headers */ = {isa = PBXBuildFile; fileRef = BF18269E2422656E006FEB93 /* SoyStreamBuffer.h */; };
 		BF1826AA24228C43006FEB93 /* SoyPng.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF1826A624228C43006FEB93 /* SoyPng.cpp */; };
 		BF1826AB24228C43006FEB93 /* SoyPng.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF1826A624228C43006FEB93 /* SoyPng.cpp */; };
@@ -76,7 +75,6 @@
 		BFC4717F244751BF00A2DA70 /* PopH264_Osx.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BF459CD521F7D5C700CED59D /* PopH264_Osx.framework */; };
 		BFC471842447523100A2DA70 /* AvfEncoder.mm in Sources */ = {isa = PBXBuildFile; fileRef = BFC471812447523000A2DA70 /* AvfEncoder.mm */; };
 		BFC471852447523100A2DA70 /* AvfEncoder.mm in Sources */ = {isa = PBXBuildFile; fileRef = BFC471812447523000A2DA70 /* AvfEncoder.mm */; };
-		BFC4718A2447625000A2DA70 /* AvfPixelBuffer.h in Headers */ = {isa = PBXBuildFile; fileRef = BFC471862447624F00A2DA70 /* AvfPixelBuffer.h */; };
 		BFC4718B2447625000A2DA70 /* AvfPixelBuffer.h in Headers */ = {isa = PBXBuildFile; fileRef = BFC471862447624F00A2DA70 /* AvfPixelBuffer.h */; };
 		BFC471902447625000A2DA70 /* AvfPixelBuffer.mm in Sources */ = {isa = PBXBuildFile; fileRef = BFC471892447625000A2DA70 /* AvfPixelBuffer.mm */; };
 		BFC471912447625000A2DA70 /* AvfPixelBuffer.mm in Sources */ = {isa = PBXBuildFile; fileRef = BFC471892447625000A2DA70 /* AvfPixelBuffer.mm */; };
@@ -121,13 +119,13 @@
 /* Begin PBXCopyFilesBuildPhase section */
 		BFBC07FB238834E40070BCB4 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
+			buildActionMask = 8;
 			dstPath = "$(SRCROOT)/Unity/PopH264/Assets/PopH264";
 			dstSubfolderSpec = 0;
 			files = (
 				BFBC07FC238834EC0070BCB4 /* PopH264_Osx.framework in CopyFiles */,
 			);
-			runOnlyForDeploymentPostprocessing = 0;
+			runOnlyForDeploymentPostprocessing = 1;
 		};
 		BFBC07FD238834F10070BCB4 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
@@ -151,6 +149,10 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		BF096B1124B9158A00D985E5 /* NvidiaEncoder.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = NvidiaEncoder.cpp; path = Source/NvidiaEncoder.cpp; sourceTree = "<group>"; };
+		BF096B1224B9158A00D985E5 /* NvidiaEncoder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = NvidiaEncoder.h; path = Source/NvidiaEncoder.h; sourceTree = "<group>"; };
+		BF096B1424B918A400D985E5 /* nvidia */ = {isa = PBXFileReference; lastKnownFileType = folder; name = nvidia; path = Source/nvidia; sourceTree = "<group>"; };
+		BF096B1524B91F4E00D985E5 /* Linux */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Linux; path = Source/Linux; sourceTree = "<group>"; };
 		BF0A19C21EA428F4007EBC95 /* Unity */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Unity; sourceTree = "<group>"; };
 		BF0CCB2224A78D8D00596877 /* SoyMediaFormat.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SoyMediaFormat.cpp; path = Source/SoyLib/src/SoyMediaFormat.cpp; sourceTree = "<group>"; };
 		BF0CCB2324A78D8D00596877 /* SoyMediaFormat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SoyMediaFormat.h; path = Source/SoyLib/src/SoyMediaFormat.h; sourceTree = "<group>"; };
@@ -606,6 +608,10 @@
 		BFD6076D1EA16ED20035C814 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				BF096B1524B91F4E00D985E5 /* Linux */,
+				BF096B1424B918A400D985E5 /* nvidia */,
+				BF096B1124B9158A00D985E5 /* NvidiaEncoder.cpp */,
+				BF096B1224B9158A00D985E5 /* NvidiaEncoder.h */,
 				BFFBE97A245DB65000E9BE1B /* AvfDecoder.h */,
 				BFFBE97B245DB65000E9BE1B /* AvfDecoder.mm */,
 				BFC471802447523000A2DA70 /* AvfEncoder.h */,
@@ -688,10 +694,8 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BF1826A22422656E006FEB93 /* SoyStreamBuffer.h in Headers */,
 				BF459CE921F7D70000CED59D /* PopH264.h in Headers */,
 				BF459CE221F7D60500CED59D /* PopH264Framework.h in Headers */,
-				BFC4718A2447625000A2DA70 /* AvfPixelBuffer.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

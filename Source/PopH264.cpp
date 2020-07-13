@@ -18,7 +18,8 @@ namespace PopH264
 	//	1.2.7	Added MediaFoundation decoder to windows
 	//	1.2.8	Added Test data
 	//	1.2.9	Added PopH264_EncoderEndOfStream
-	const Soy::TVersion	Version(1,2,9);
+	//	1.2.10	Added PopH264_Shutdown
+	const Soy::TVersion	Version(1,2,10);
 }
 
 
@@ -27,6 +28,8 @@ namespace PopH264
 {
 	TInstanceManager<TEncoderInstance,std::string>	EncoderInstanceManager;
 	TInstanceManager<TDecoderInstance,uint32_t>		DecoderInstanceManager;
+	
+	void		Shutdown(bool DllExit);
 }
 
 
@@ -47,10 +50,23 @@ BOOL APIENTRY DllMain(HMODULE /* hModule */, DWORD ul_reason_for_call, LPVOID /*
 		case DLL_PROCESS_DETACH:
 			break;
 	}
+	
+	//	hail mary cleanup for globals
+	if ( ul_reason_for_call == DLL_PROCESS_DETACH)
+	{
+		PopH264::Shutdown(true);
+	}
+	
 	return TRUE;
 }
 #endif
 
+#if !defined(TARGET_WINDOWS)
+void __attribute__((destructor)) DllExit() 
+{
+	PopH264::Shutdown(true);
+}
+#endif
 
 template<typename RETURN,typename FUNC>
 RETURN SafeCall(FUNC Function,const char* FunctionName,RETURN ErrorReturn)
@@ -212,6 +228,16 @@ __export int32_t PopH264_GetVersion()
 	return SafeCall( Function, __func__, -1 );
 }
 
+
+__export void PopH264_Shutdown()
+{
+	auto Function = [&]()
+	{
+		PopH264::Shutdown(false);
+		return 0;
+	};
+	SafeCall( Function, __func__, 0 );
+}
 
 
 __export int32_t PopH264_CreateInstance(int32_t Mode)
@@ -421,4 +447,15 @@ __export void UnityPluginLoad(/*IUnityInterfaces*/void*)
 __export void UnityPluginUnload()
 {
 	std::Debug << __PRETTY_FUNCTION__ << std::endl;
+	PopH264_Shutdown();
 }
+
+
+void PopH264::Shutdown(bool FromDllExit)
+{
+	PopH264::EncoderInstanceManager.FreeInstances();
+	PopH264::DecoderInstanceManager.FreeInstances();
+}
+
+
+
