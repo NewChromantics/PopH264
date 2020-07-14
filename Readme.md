@@ -11,3 +11,5 @@ Linux
   - `sudo apt-get install libx264-dev`
 - Compile
   - `make archType=arm64` (jetson,pi4 = arm64)
+
+[Start Self Hosted Runner as a Service](https://docs.github.com/en/actions/hosting-your-own-runners/configuring-the-self-hosted-runner-application-as-a-service)
