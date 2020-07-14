@@ -16,7 +16,8 @@
 #define ENABLE_MEDIAFOUNDATION
 #endif
 
-#if defined(TARGET_LINUX) //|| defined(TARGET_OSX)
+//tsdk: special DTARGET for Nvidia for now
+#if defined(TARGET_NVIDIA) //|| defined(TARGET_OSX)
 #define ENABLE_NVIDIA
 #endif
 
