@@ -1,7 +1,3 @@
-# Raspberry Pi
-# CC = arm-linux-gnueabihf-g++
-
-# Standard
 # X ?= if X env var isn't set, use this default
 compiler ?= g++
 CC = ${compiler}
@@ -27,8 +23,7 @@ $(SRC)/Source/TDecoderInstance.cpp \
 $(SRC)/Source/TEncoder.cpp \
 $(SRC)/Source/TEncoderInstance.cpp \
 $(SRC)/Source/Json11/json11.cpp \
-$(SRC)/Source/X264Encoder.cpp	\
-$(SRC)/Source/NvidiaEncoder.cpp
+$(SRC)/Source/X264Encoder.cpp
 
 # soy lib files
 LOCAL_SRC_FILES  += \
@@ -54,15 +49,12 @@ $(SRC)/Source/SoyLib/src/SoyFilesystem.cpp
 # -g stops symbol stripping
 # -f[lag] PIC position independent code (for dyanmically loaded code)
 # -rpath $ORIGIN makes the shared object runtimepath be same place as executable
-CFLAGS = -c -DTARGET_LINUX -std=gnu++17 -fPIC -g
+CFLAGS = -c -DTARGET_LINUX $(LOCAL_C_INCLUDES) -std=gnu++17 -fPIC -g
 LDFLAGS = -pthread
 LDFLAGS += '-Wl,-rpath,$$ORIGIN'
 
-LIB_LINK_FLAGS = $(LDFLAGS) -shared 
+LIB_LINK_FLAGS = $(LDFLAGS) -shared
 TEST_APP_LINK_FLAGS = $(LDFLAGS)
-
-LIBRARY_LINK_DIRS = \
--L/usr/lib
 
 LIBRARY_LINK_LIBS = \
 -lx264
@@ -74,44 +66,6 @@ TESTAPP_OBJECTS=$(TESTAPP_SRC_FILES:.cpp=.o)
 # env var MACHTYPE is this systems arch type, eg; aarch64-unknown-linux-gnu
 OUT_LIBRARY=PopH264${archTarget}.so
 OUT_EXECUTABLE=PopH264TestApp${archTarget}
-
-
-
-# from nvidia samples Rules.mk
-# ARM ABI of the target platform
-TEGRA_ARMABI ?= aarch64-linux-gnu
-TARGET_ROOTFS =
-CUDA_PATH := /usr/local/cuda
-
-LIB_LINK_FLAGS += -Wl,-rpath-link=$(TARGET_ROOTFS)/lib/$(TEGRA_ARMABI)
-LIB_LINK_FLAGS += -Wl,-rpath-link=$(TARGET_ROOTFS)/usr/lib/$(TEGRA_ARMABI)
-LIB_LINK_FLAGS += -Wl,-rpath-link=$(TARGET_ROOTFS)/usr/lib/$(TEGRA_ARMABI)/tegra
-LIB_LINK_FLAGS += -Wl,-rpath-link=$(TARGET_ROOTFS)/$(CUDA_PATH)/lib64
-
-LIBRARY_LINK_LIBS += \
-	-lpthread -lv4l2 -lEGL -lGLESv2 -lX11 \
-	-lnvbuf_utils -lnvjpeg -lnvosd -ldrm \
-	-lcuda -lcudart \
-	-lnvinfer -lnvparsers \
-	-L"$(TARGET_ROOTFS)/$(CUDA_PATH)/lib64" \
-	-L"$(TARGET_ROOTFS)/usr/lib/$(TEGRA_ARMABI)" \
-	-L"$(TARGET_ROOTFS)/usr/lib/$(TEGRA_ARMABI)/tegra"
-
-LOCAL_SRC_FILES += \
-$(SRC)/Source/nvidia/samples/common/classes/NvV4l2Element.cpp	\
-$(SRC)/Source/nvidia/samples/common/classes/NvV4l2ElementPlane.cpp	\
-$(SRC)/Source/nvidia/samples/common/classes/NvVideoEncoder.cpp	\
-$(SRC)/Source/nvidia/samples/common/classes/NvElement.cpp	\
-$(SRC)/Source/nvidia/samples/common/classes/NvBuffer.cpp	\
-$(SRC)/Source/nvidia/samples/common/classes/NvElementProfiler.cpp	\
-$(SRC)/Source/nvidia/samples/common/classes/NvLogging.cpp	\
-$(SRC)/Source/nvidia/samples/common/classes/NvUtils.cpp	\
-
-
-
-LOCAL_C_INCLUDES += \
--I$(SRC)/Source/nvidia/include/
-
 
 GithubWorkflow: $(OUT_EXECUTABLE) $(OUT_LIBRARY) 
 	echo "::set-output name=executable:$(OUT_EXECUTABLE)"
@@ -130,7 +84,7 @@ $(OUT_EXECUTABLE): $(TESTAPP_OBJECTS) $(OUT_LIBRARY)
 
 $(OUT_LIBRARY): $(LIB_OBJECTS)
 	echo "Building library $(OUT_LIBRARY)"
-	$(CC) $(LIB_LINK_FLAGS) -o $@ $(LIB_OBJECTS) $(LIBRARY_LINK_DIRS) $(LIBRARY_LINK_LIBS)
+	$(CC) $(LIB_LINK_FLAGS) -o $@ $(LIB_OBJECTS) $(LIBRARY_LINK_LIBS)
 	# ar rcs $@ $(LIB_OBJECTS)
 	echo "Listing dependencies"
 	ldd $(OUT_LIBRARY)
