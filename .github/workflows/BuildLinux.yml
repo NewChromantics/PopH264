@@ -11,7 +11,7 @@ jobs:
       archTarget: arm64
       compiler: g++
     runs-on: ubuntu-latest
-    container: gcc
+    container: tsdkelly/crosscompilepi:v2
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
@@ -36,7 +36,7 @@ jobs:
       archTarget: armv8
       compiler: arm-linux-gnueabihf-g++
     runs-on: ubuntu-latest
-    container: tsdkelly/crosscompilepi:v1
+    container: tsdkelly/crosscompilepi:v2
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2

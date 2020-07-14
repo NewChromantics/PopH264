@@ -61,6 +61,9 @@ LDFLAGS += '-Wl,-rpath,$$ORIGIN'
 LIB_LINK_FLAGS = $(LDFLAGS) -shared 
 TEST_APP_LINK_FLAGS = $(LDFLAGS)
 
+LIBRARY_C_INCLUDES = \
+-I/usr/include
+
 LIBRARY_LINK_DIRS = \
 -L/usr/lib
 
@@ -136,7 +139,7 @@ $(OUT_LIBRARY): $(LIB_OBJECTS)
 	ldd $(OUT_LIBRARY)
 
 .cpp.o:
-	$(CC) $(CFLAGS) $(LOCAL_C_INCLUDES) $< -o $@
+	$(CC) $(CFLAGS) $(LOCAL_C_INCLUDES) $(LIBRARY_C_INCLUDES) $< -o $@
 
 clean:
 	# clean build files, anything .o
