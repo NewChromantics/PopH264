@@ -9,8 +9,7 @@ jobs:
   Build_Nvidia:
     env:
       archTarget: arm64
-      compiler: g++
-    runs-on: [self-hosted, jetson2]
+    runs-on: [self-hosted, linux, ARM64]
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
@@ -33,7 +32,6 @@ jobs:
   Build_x86:
     env:
       archTarget: x86
-      compiler: g++
     runs-on: ubuntu-latest
     container: tsdkelly/gcc_x264:latest
     steps:
