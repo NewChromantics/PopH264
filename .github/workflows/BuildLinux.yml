@@ -6,12 +6,36 @@ on:
       - ActionTest
 
 jobs:
-  Build_Arm64:
+  Build_Nvidia:
     env:
       archTarget: arm64
       compiler: g++
+    runs-on: [self-hosted, jetson2]
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - name: Compile project
+        run: |
+          make -f MakefileNvidia GithubWorkflow -C $GITHUB_WORKSPACE/PopH264.Linux/
+      - name: Archive Library
+        uses: actions/upload-artifact@v1
+        with:
+          name: PopH264${{ env.archTarget }}.so
+          path: PopH264.Linux/PopH264${{ env.archTarget }}.so
+      - name: Archive App
+        uses: actions/upload-artifact@v1
+        with:
+          name: PopH264TestApp${{ env.archTarget }}
+          path: PopH264.Linux/PopH264TestApp${{ env.archTarget }}
+
+  Build_x86:
+    env:
+      archTarget: x86
+      compiler: g++
     runs-on: ubuntu-latest
-    container: gcc
+    container: tsdkelly/gcc_x264:latest
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
@@ -31,27 +55,27 @@ jobs:
           name: PopH264TestApp${{ env.archTarget }}
           path: PopH264.Linux/PopH264TestApp${{ env.archTarget }}
 
-  Build_Armv8:
-    env:
-      archTarget: armv8
-      compiler: arm-linux-gnueabihf-g++
-    runs-on: ubuntu-latest
-    container: tsdkelly/crosscompilepi:v1
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v2
-        with:
-          submodules: recursive
-      - name: Compile project
-        run: |
-          make GithubWorkflow -C $GITHUB_WORKSPACE/PopH264.Linux/
-      - name: Archive Library
-        uses: actions/upload-artifact@v1
-        with:
-          name: PopH264${{ env.archTarget }}.so
-          path: PopH264.Linux/PopH264${{ env.archTarget }}.so
-      - name: Archive build
-        uses: actions/upload-artifact@v1
-        with:
-          name: PopH264TestApp${{ env.archTarget }}
-          path: PopH264.Linux/PopH264TestApp${{ env.archTarget }}
+  # Build_Armv8:
+  #   env:
+  #     archTarget: armv8
+  #     compiler: arm-linux-gnueabihf-g++
+  #   runs-on: ubuntu-latest
+  #   container: tsdkelly/crosscompilepi:v1
+  #   steps:
+  #     - name: Checkout repo
+  #       uses: actions/checkout@v2
+  #       with:
+  #         submodules: recursive
+  #     - name: Compile project
+  #       run: |
+  #         make GithubWorkflow -C $GITHUB_WORKSPACE/PopH264.Linux/
+  #     - name: Archive Library
+  #       uses: actions/upload-artifact@v1
+  #       with:
+  #         name: PopH264${{ env.archTarget }}.so
+  #         path: PopH264.Linux/PopH264${{ env.archTarget }}.so
+  #     - name: Archive build
+  #       uses: actions/upload-artifact@v1
+  #       with:
+  #         name: PopH264TestApp${{ env.archTarget }}
+  #         path: PopH264.Linux/PopH264TestApp${{ env.archTarget }}
