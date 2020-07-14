@@ -320,6 +320,7 @@
 		BFDB2BAC2448B4CF009EC370 /* SoyH264.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SoyH264.h; path = Source/SoyLib/src/SoyH264.h; sourceTree = "<group>"; };
 		BFDB2BB32449F54F009EC370 /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS12.1.sdk/System/Library/Frameworks/CoreVideo.framework; sourceTree = DEVELOPER_DIR; };
 		BFDB2BB52449F569009EC370 /* VideoToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = VideoToolbox.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS12.1.sdk/System/Library/Frameworks/VideoToolbox.framework; sourceTree = DEVELOPER_DIR; };
+		BFDBAB8624BCC4AB00E8BCE1 /* PopH264.Linux */ = {isa = PBXFileReference; lastKnownFileType = folder; path = PopH264.Linux; sourceTree = "<group>"; };
 		BFEF6A19246992CE000A1F88 /* SoyAvf.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = SoyAvf.mm; path = Source/SoyLib/src/SoyAvf.mm; sourceTree = "<group>"; };
 		BFEF6A1A246992CE000A1F88 /* SoyAvf.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SoyAvf.h; path = Source/SoyLib/src/SoyAvf.h; sourceTree = "<group>"; };
 		BFEF6A2024699955000A1F88 /* SoyVector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SoyVector.h; path = Source/SoyLib/src/SoyVector.h; sourceTree = "<group>"; };
@@ -425,6 +426,7 @@
 		BF4A6A0B1EA16D7C00613A64 = {
 			isa = PBXGroup;
 			children = (
+				BFDBAB8624BCC4AB00E8BCE1 /* PopH264.Linux */,
 				BFBC07F423882FB90070BCB4 /* libml_mediaerror.dylib */,
 				BF15207C2385930B00A70EBF /* libml_media_ccparser.dylib */,
 				BF15207A2385910800A70EBF /* libml_mediacodeclist.dylib */,
