@@ -11,7 +11,6 @@ jobs:
       archTarget: arm64
       compiler: g++
     runs-on: [self-hosted, jetson2]
-    container: gcc
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
