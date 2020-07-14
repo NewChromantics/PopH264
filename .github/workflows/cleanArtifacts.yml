@@ -1,14 +1,13 @@
-name: clean artifacts
-
+name: 'Delete old artifacts'
 on:
   schedule:
-    - cron: '*/3 * * * *'
+    - cron: '11 * * * *' # every hour
 
 jobs:
-  clean:
+  delete-artifacts:
     runs-on: ubuntu-latest
     steps:
-      - name: cleanup
-        uses: glassechidna/artifact-cleaner@master
+      - uses: kolpav/purge-artifacts-action@v1
         with:
-          minimumAge: 86400 # all artifacts at least one day old
+          token: ${{ secrets.GITHUB_TOKEN }}
+          expire-in: 0 # Setting this to 0 will delete all artifacts
