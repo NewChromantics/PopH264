@@ -7,119 +7,119 @@ on:
 name: Create Release
 
 jobs:
-  Build_Windows:
-    runs-on: [self-hosted, windows]
-    env:
-      BuildSolution: PopH264.visualstudio\PopH264.sln
-      BuildPlatform: x64
-      BuildConfiguration: Release
-      BuildDirectory: Build\Release_x64
-    steps:
-    - uses: actions/checkout@v2
-      with:
-        submodules: 'recursive'
+#   Build_Windows:
+#     runs-on: [self-hosted, windows]
+#     env:
+#       BuildSolution: PopH264.visualstudio\PopH264.sln
+#       BuildPlatform: x64
+#       BuildConfiguration: Release
+#       BuildDirectory: Build\Release_x64
+#     steps:
+#     - uses: actions/checkout@v2
+#       with:
+#         submodules: 'recursive'
         
-    - name: Add msbuild to PATH
-      uses: microsoft/setup-msbuild@v1.0.0
+#     - name: Add msbuild to PATH
+#       uses: microsoft/setup-msbuild@v1.0.0
       
-    - name: compile
-# https://github.community/t5/GitHub-Actions/How-to-build-project-targeting-Net35-with-GitHub-Actions/td-p/36191
-# set <--- list env vars
-      run: |
-          set
-          MSBuild %BuildSolution% /property:Configuration=%BuildConfiguration% /property:Platform=%BuildPlatform%
-      shell: cmd
+#     - name: compile
+# # https://github.community/t5/GitHub-Actions/How-to-build-project-targeting-Net35-with-GitHub-Actions/td-p/36191
+# # set <--- list env vars
+#       run: |
+#           set
+#           MSBuild %BuildSolution% /property:Configuration=%BuildConfiguration% /property:Platform=%BuildPlatform%
+#       shell: cmd
       
-    - name: List artifacts
-      run: |
-        ls .
-        ls $Env:BuildDirectory
+#     - name: List artifacts
+#       run: |
+#         ls .
+#         ls $Env:BuildDirectory
     
-    # do not use env here: ##[error]Path does not exist d:\a\PopH264\PopH264\$Env:GITHUB_WORKSPACE\PopH264.visualstudio\Debug
-    - uses: actions/upload-artifact@v1
-      with:
-        name: PopH264
-        path: ${{env.BuildDirectory}} 
+#     # do not use env here: ##[error]Path does not exist d:\a\PopH264\PopH264\$Env:GITHUB_WORKSPACE\PopH264.visualstudio\Debug
+#     - uses: actions/upload-artifact@v1
+#       with:
+#         name: PopH264
+#         path: ${{env.BuildDirectory}} 
   
-  Build_IOS:
-    runs-on: [self-hosted, macOS]
-    env:
-      BuildProject: PopH264.xcodeproj
-      BuildScheme: PopH264_Ios
-    steps:
-      - uses: actions/checkout@v1
-        with:
-          submodules: "recursive"
-      - name: GetTargetBuildDir
-        id: GetTargetBuildDir
-        run: |
-          echo "Setting target build dir"
-          echo "##[set-output name=TargetBuildDir;]$(xcodebuild -workspace $BuildProject/project.xcworkspace -scheme $BuildScheme -showBuildSettings | grep TARGET_BUILD_DIR | sed -e 's/.*TARGET_BUILD_DIR = //')"
+#   Build_IOS:
+#     runs-on: [self-hosted, macOS]
+#     env:
+#       BuildProject: PopH264.xcodeproj
+#       BuildScheme: PopH264_Ios
+#     steps:
+#       - uses: actions/checkout@v1
+#         with:
+#           submodules: "recursive"
+#       - name: GetTargetBuildDir
+#         id: GetTargetBuildDir
+#         run: |
+#           echo "Setting target build dir"
+#           echo "##[set-output name=TargetBuildDir;]$(xcodebuild -workspace $BuildProject/project.xcworkspace -scheme $BuildScheme -showBuildSettings | grep TARGET_BUILD_DIR | sed -e 's/.*TARGET_BUILD_DIR = //')"
 
-      - name: compile
-        env:
-          TargetBuildDir: ${{steps.GetTargetBuildDir.outputs.TargetBuildDir}}
-        run: |
-          xcodebuild -workspace $BuildProject/project.xcworkspace -scheme $BuildScheme -showBuildSettings
-          xcodebuild -workspace $BuildProject/project.xcworkspace -list
-          xcodebuild -workspace $BuildProject/project.xcworkspace -scheme $BuildScheme
-      - name: List artifacts
-        env:
-          BuildDirectory: ${{steps.GetTargetBuildDir.outputs.TargetBuildDir}}
+#       - name: compile
+#         env:
+#           TargetBuildDir: ${{steps.GetTargetBuildDir.outputs.TargetBuildDir}}
+#         run: |
+#           xcodebuild -workspace $BuildProject/project.xcworkspace -scheme $BuildScheme -showBuildSettings
+#           xcodebuild -workspace $BuildProject/project.xcworkspace -list
+#           xcodebuild -workspace $BuildProject/project.xcworkspace -scheme $BuildScheme
+#       - name: List artifacts
+#         env:
+#           BuildDirectory: ${{steps.GetTargetBuildDir.outputs.TargetBuildDir}}
 
-        run: |
-          echo "Build Directory ($BuildDirectory) contents"
-          ls $BuildDirectory
-      # do not use env here: ##[error]Path does not exist d:\a\PopH264\PopH264\$Env:GITHUB_WORKSPACE\PopH264.visualstudio\Debug
-      - uses: actions/upload-artifact@v1
-        with:
-          name: PopH264_Osx.framework
-          path: ${{steps.GetTargetBuildDir.outputs.TargetBuildDir}}/PopH264_Ios.framework
-      - uses: actions/upload-artifact@v1
-        with:
-          name: PopH264.h
-          path: Source/PopH264.h
+#         run: |
+#           echo "Build Directory ($BuildDirectory) contents"
+#           ls $BuildDirectory
+#       # do not use env here: ##[error]Path does not exist d:\a\PopH264\PopH264\$Env:GITHUB_WORKSPACE\PopH264.visualstudio\Debug
+#       - uses: actions/upload-artifact@v1
+#         with:
+#           name: PopH264_Osx.framework
+#           path: ${{steps.GetTargetBuildDir.outputs.TargetBuildDir}}/PopH264_Ios.framework
+#       - uses: actions/upload-artifact@v1
+#         with:
+#           name: PopH264.h
+#           path: Source/PopH264.h
           
-  Build_OSX:
-    runs-on: [self-hosted, macOS]
-    env:
-      BuildProject: PopH264.xcodeproj
-      BuildScheme: PopH264_Osx
+#   Build_OSX:
+#     runs-on: [self-hosted, macOS]
+#     env:
+#       BuildProject: PopH264.xcodeproj
+#       BuildScheme: PopH264_Osx
 
-    steps:
-    - uses: actions/checkout@v1
-      with:
-        submodules: 'recursive'
-    - name: GetTargetBuildDir
-      id: GetTargetBuildDir
-      run: |
-        echo "Setting target build dir"
-        echo "##[set-output name=TargetBuildDir;]$(xcodebuild -workspace $BuildProject/project.xcworkspace -scheme $BuildScheme -showBuildSettings | grep TARGET_BUILD_DIR | sed -e 's/.*TARGET_BUILD_DIR = //')"
+#     steps:
+#     - uses: actions/checkout@v1
+#       with:
+#         submodules: 'recursive'
+#     - name: GetTargetBuildDir
+#       id: GetTargetBuildDir
+#       run: |
+#         echo "Setting target build dir"
+#         echo "##[set-output name=TargetBuildDir;]$(xcodebuild -workspace $BuildProject/project.xcworkspace -scheme $BuildScheme -showBuildSettings | grep TARGET_BUILD_DIR | sed -e 's/.*TARGET_BUILD_DIR = //')"
     
-    - name: compile
-      env: 
-          TargetBuildDir: ${{steps.GetTargetBuildDir.outputs.TargetBuildDir}}
-      run: |
-          xcodebuild -workspace $BuildProject/project.xcworkspace -scheme $BuildScheme -showBuildSettings
-          xcodebuild -workspace $BuildProject/project.xcworkspace -list
-          xcodebuild -workspace $BuildProject/project.xcworkspace -scheme $BuildScheme
+#     - name: compile
+#       env: 
+#           TargetBuildDir: ${{steps.GetTargetBuildDir.outputs.TargetBuildDir}}
+#       run: |
+#           xcodebuild -workspace $BuildProject/project.xcworkspace -scheme $BuildScheme -showBuildSettings
+#           xcodebuild -workspace $BuildProject/project.xcworkspace -list
+#           xcodebuild -workspace $BuildProject/project.xcworkspace -scheme $BuildScheme
       
-    - name: List artifacts
-      env: 
-          BuildDirectory: ${{steps.GetTargetBuildDir.outputs.TargetBuildDir}}
+#     - name: List artifacts
+#       env: 
+#           BuildDirectory: ${{steps.GetTargetBuildDir.outputs.TargetBuildDir}}
 
-      run: |
-        echo "Build Directory ($BuildDirectory) contents"
-        ls $BuildDirectory
+#       run: |
+#         echo "Build Directory ($BuildDirectory) contents"
+#         ls $BuildDirectory
     
-    - uses: actions/upload-artifact@v1
-      with:
-        name: PopH264_Osx.framework
-        path: ${{steps.GetTargetBuildDir.outputs.TargetBuildDir}}/PopH264_Osx.framework
-    - uses: actions/upload-artifact@v1
-      with:
-        name: PopH264.h
-        path: Source/PopH264.h
+#     - uses: actions/upload-artifact@v1
+#       with:
+#         name: PopH264_Osx.framework
+#         path: ${{steps.GetTargetBuildDir.outputs.TargetBuildDir}}/PopH264_Osx.framework
+#     - uses: actions/upload-artifact@v1
+#       with:
+#         name: PopH264.h
+#         path: Source/PopH264.h
         
   Build_Nvidia:
     env:
@@ -164,6 +164,7 @@ jobs:
 
   Release:
     name: Release
+    needs: [Build_x86, Build_Nvidia]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
