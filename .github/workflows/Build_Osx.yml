@@ -4,10 +4,14 @@ env:
   BuildProject: PopH264.xcodeproj
   BuildScheme: PopH264_Osx
 
-on: 
+on:
   push:
     branches:
-      - ActionTest
+      - master
+      - '*Test*'
+    paths:
+      - '**.yml'
+      - '**Makefile'
 
 jobs:
   Build:
