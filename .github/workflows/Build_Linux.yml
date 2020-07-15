@@ -3,7 +3,11 @@ name: Build Linux
 on:
   push:
     branches:
-      - ActionTest
+      - master
+      - '*Test*'
+    paths:
+      - '**.yml'
+      - '**Makefile'
 
 jobs:
   Build_Nvidia:
