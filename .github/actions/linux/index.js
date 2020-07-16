@@ -10,6 +10,7 @@ const architecture = core.getInput("architecture");
 async function run() {
   try {
     process.env.BUILDSOLUTION = architecture;
+    if(makefile === 'Makefile') {
     await exec.exec("sudo", [
       `add-apt-repository -y ppa:ubuntu-toolchain-r/test`,
     ]);
@@ -23,6 +24,7 @@ async function run() {
     await exec.exec("sudo", [
       `update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-10 10`,
     ]);
+  }
 
     await exec.exec("make", [
       `-f ${makefile}`, `GithubWorkflow`, `-C PopH264.Linux/`,
