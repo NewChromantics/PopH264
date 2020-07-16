@@ -48,7 +48,7 @@ async function run() {
 
     const rootDirectory = buildDirectory[1];
 
-    console.log(await exec.exec('ls', [rootDirectory]))
+    console.log(await exec.exec('ls', [buildDirectory[1]]))
 
     console.log(rootDirectory);
 
