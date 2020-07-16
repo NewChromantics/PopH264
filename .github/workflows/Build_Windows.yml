@@ -12,9 +12,6 @@ on:
     branches:
       - master
       - '*Test*'
-    paths:
-      - '**.yml'
-      - '**Makefile'
 
 jobs:
   Build:
