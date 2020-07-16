@@ -1,5 +1,5 @@
-Write-Host %BUILDSOLUTION%
+Write-Host $BUILDSOLUTION
 
-set MSBuild %BUILDSOLUTION% /property:Configuration=%BUILDCONFIGURATION% /property:Platform=%BUILDPLATFORM%
+set MSBuild $BUILDSOLUTION /property:Configuration=$BUILDCONFIGURATION /property:Platform=$BUILDPLATFORM
 
 ls .
