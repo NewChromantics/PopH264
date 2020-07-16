@@ -6,7 +6,7 @@ on:
       - ActionTest
 
 jobs:
-  build:
+  Build:
     name: ${{ matrix.config.os }}-${{ matrix.config.type }}
     runs-on: ${{ matrix.config.os }}
     strategy:
@@ -16,48 +16,48 @@ jobs:
             type: linux
             architecture: x86_64
             makefile: Makefile
-          
+
           - os: ARM64
             type: linux
             architecture: arm64
             makefile: MakefileNvidia
-            
+
           # - os: windows
           #   type: windows
-            
+
           - os: macOS
             type: Ios
-          
+
           - os: macOS
             type: Osx
-                    
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
         with:
           submodules: recursive
-          
+
       - name: Configure Windows
         if: matrix.config.os == 'windows'
         uses: microsoft/setup-msbuild@v1.0.0
 
       - name: Windows
         if: matrix.config.os == 'windows'
-        uses:  ./.github/actions/windows
+        uses: ./.github/actions/windows
         with:
           BuildSolution: PopH264.visualstudio\PopH264.sln
           BuildPlatform: x64
           BuildConfiguration: Release
           # would be nice to extract this from visual studio
           BuildDirectory: Build\Release_x6
-      
+
       - name: Ios
         if: matrix.config.type == 'Ios'
-        uses:  ./.github/actions/ios
+        uses: ./.github/actions/ios
         with:
           BuildProject: PopH264.xcodeproj
           BuildScheme: PopH264_Ios
-      
+
       - name: Osx
         if: matrix.config.type == 'Osx'
         uses: ./.github/actions/ios
@@ -67,14 +67,27 @@ jobs:
 
       - name: Linux
         if: matrix.config.type == 'linux'
-        uses:  ./.github/actions/linux
+        uses: ./.github/actions/linux
         with:
           architecture: ${{ matrix.config.architecture }}
           makefile: ${{ matrix.config.makefile }}
 
-      # - name: Create Artifact
-      #   uses: actions/upload-artifact@v2
-      #   with:
-      #     name: PopH264
-      #     path: |
-      #       ./build
+  Release:
+    name: Release
+    needs: [Build]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        
+      - name: Download
+        uses: actions/download-artifact@v2
+        with:
+          path: build
+
+      - name: Release
+        uses: fnkr/github-action-ghr@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GHR_COMPRESS: xz
+          GHR_PATH: build/
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
