@@ -38,9 +38,9 @@ async function run() {
       `PopH264-${architecture}.so`,
       `PopH264TestApp-${architecture}`,
     ];
-    console.log( await exec.exec("ls", [buildDirectory]) )
-
+    
     const buildDirectory = "PopH264.Linux/";
+    console.log( await exec.exec("ls", [buildDirectory]) )
 
     const options = {
       continueOnError: false,
