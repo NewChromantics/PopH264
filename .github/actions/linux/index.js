@@ -14,17 +14,17 @@ async function run() {
     process.env.BUILDSOLUTION = architecture;
     if(makefile === 'Makefile') {
     await exec.exec("sudo", [
-      `add-apt-repository -y ppa:ubuntu-toolchain-r/test`,
+      `add-apt-repository`, `-y`, `ppa:ubuntu-toolchain-r/test`,
     ]);
     await exec.exec("sh", [`sudo apt-get update`]);
     await exec.exec("sudo", [
-      `apt-get install libx264-dev gcc-10 g++-10 -y`,
+      `apt-get`, `install`, `libx264-dev`, `gcc-10`, `g++-10`, `-y`,
     ]);
     await exec.exec("sudo", [
-      `update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 10`,
+      `update-alternatives`, `--install`, `/usr/bin/gcc`, `gcc`, `/usr/bin/gcc-10`, `10`,
     ]);
     await exec.exec("sudo", [
-      `update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-10 10`,
+      `update-alternatives`, `--install`, `/usr/bin/g++`, `g++`, `/usr/bin/g++-10`, `f10`,
     ]);
   }
 

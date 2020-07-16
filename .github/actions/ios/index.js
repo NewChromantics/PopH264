@@ -11,7 +11,7 @@ async function run() {
   try {
     let regex = /TARGET_BUILD_DIR = [^\n]+\n/;
     const buildsettings = await exec.exec("xcodebuild", [
-      `-workspace`, `${BuildProject}/project.xcworkspace`, `-scheme`, `${BuildScheme}`, `-showBuildSetting`,
+      `-workspace`, `${BuildProject}/project.xcworkspace`, `-scheme`, `${BuildScheme}`, `-showBuildSettings`,
     ]);
     console.log(buildsettings);
     const buildDirectory = regex.exec(buildsettings);
