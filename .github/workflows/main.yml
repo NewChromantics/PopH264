@@ -52,6 +52,9 @@ jobs:
       
       - name: Ios
         uses:  ./.github/actions/ios
+        with:
+          BuildProject: PopH264.xcodeproj
+          BuildScheme: PopH264_Ios
 
         
 #       - name: Create Artifact
