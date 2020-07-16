@@ -9,6 +9,8 @@ const architecture = core.getInput("architecture");
 
 async function run() {
   try {
+
+    console.log( await exec.exec("ls") )
     process.env.BUILDSOLUTION = architecture;
     if(makefile === 'Makefile') {
     await exec.exec("sudo", [
@@ -27,7 +29,7 @@ async function run() {
   }
 
     await exec.exec("make", [
-      `-f ${makefile}`, `GithubWorkflow`, `-C PopH264.Linux/`,
+      `-f ${makefile}`, `GithubWorkflow`, `-C ./PopH264.Linux/`,
     ]);
 
     const files = [
