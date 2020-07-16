@@ -4,10 +4,10 @@ on:
   push:
     branches:
       - master
-      - '*Test*'
+      # - '*Test*'
     paths:
-      - '**.yml'
-      - '**Makefile'
+      # - '**.yml'
+      # - '**Makefile'
 
 jobs:
   build:

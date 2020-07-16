@@ -1,0 +1,9 @@
+name: 'Pop build Ios'
+inputs:
+  BuildProject: PopH264.xcodeproj
+    required: true
+  BuildScheme: PopH264_Ios
+    required: true
+runs:
+  using: 'node12'
+  main: 'index.js'
