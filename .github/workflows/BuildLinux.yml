@@ -25,17 +25,6 @@ jobs:
             container: ""
             Makefile: MakefileNvidia
             
-#         os: [ARM64, ubuntu-latest]
-#         include:
-#           # include variables for the matrix leg matching the os
-#           - os: ARM64
-#             name: arm64
-#             container: ""
-#             Makefile: MakefileNvidia
-#           - os: ubuntu-latest
-#             name: x86_64
-#             container: tsdkelly/gcc_x264:latest
-#             Makefile: Makefile
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
