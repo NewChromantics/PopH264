@@ -19,9 +19,9 @@ async function run() {
     outputOptions.listeners = {
       stdout: (data) => {
         buildDirectory += data.toString();
-        buildDirectory = regex.exec(buildDirectory)
-        console.log(myOutput.indexOf("TARGET_BUILD_DIR ="))
+        console.log(buildDirectory.indexOf("TARGET_BUILD_DIR ="))
         console.log(regex.exec(buildDirectory))
+        buildDirectory = regex.exec(buildDirectory)
       },
       stderr: (data) => {
         myError += data.toString();
