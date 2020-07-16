@@ -77,4 +77,4 @@ jobs:
         with:
           name: PopH264
           path: |
-            /build
+            ./build
