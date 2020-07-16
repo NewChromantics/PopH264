@@ -7,9 +7,9 @@ on:
 
 jobs:
   build:
-    name: ${ { matrix.config.name } }
-    runs-on: ${ { matrix.config.os } }
-    container: ${{ matrix.config.container }}
+    name: ${ { matrix.name } }
+    runs-on: ${ { matrix.os } }
+    container: ${{ matrix.container }}
     strategy:
       matrix:
         os: [ARM64, ubuntu-latest]
@@ -34,7 +34,7 @@ jobs:
       - name: Create Artifact
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ matrix.config.name}}
+          name: ${{ matrix.name}}
           path: |
-            PopH264.Linux/PopH264${{ matrix.config.name }}.so
-            PopH264.Linux/PopH264TestApp${{ matrix.config.name }}
+            PopH264.Linux/PopH264${{ matrix.name }}.so
+            PopH264.Linux/PopH264TestApp${{ matrix.name }}
