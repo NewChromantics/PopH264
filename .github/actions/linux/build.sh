@@ -12,5 +12,5 @@ make -f $MAKEFILE GithubWorkflow -C PopH264.Linux/
 
 ls PopH264.Linux
 
-mkdir -p /build/PopH264$ARCHITECTURE
-mv PopH264.Linux/PopH264$ARCHITECTURE.so PopH264.Linux/PopH264TestApp$ARCHITECTURE /build
+mkdir -p ./build/PopH264$ARCHITECTURE
+mv PopH264.Linux/PopH264$ARCHITECTURE.so PopH264.Linux/PopH264TestApp$ARCHITECTURE ./build/PopH264$ARCHITECTURE

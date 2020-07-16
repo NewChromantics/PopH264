@@ -10,5 +10,5 @@ echo "Build Directory ${BUILDPROJECT} contents"
 
 ls
 
-mkdir -p /build/${BUILDSCHEME}
-mv -r $BUILDPROJECT /build/${BUILDSCHEME}
+mkdir -p ./build/${BUILDSCHEME}
+mv -r $BUILDPROJECT ./build/${BUILDSCHEME}
