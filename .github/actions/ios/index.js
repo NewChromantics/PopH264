@@ -40,7 +40,6 @@ async function run() {
       outputOptions
     );
 
-    console.log(buildDirectory);
     await exec.exec("xcodebuild", [
       `-workspace`,
       `${BuildProject}/project.xcworkspace`,
@@ -49,16 +48,18 @@ async function run() {
     ]);
 
     const files = [
-      `${buildDirectory}/PopH264_Ios.framework`,
-      `${buildDirectory}/PopH264_Ios.framework.dSYM`,
+      `${buildDirectory[1]}/PopH264_Ios.framework`,
+      `${buildDirectory[1]}/PopH264_Ios.framework.dSYM`,
     ];
 
     const rootDirectory = buildDirectory[1];
 
+    console.log(await exec.exec('ls', [rootDirectory]))
+
     console.log(buildDirectory[1]);
 
     const options = {
-      continueOnError: false,
+      continueOnError: true,
     };
     const uploadResponse = await artifactClient.uploadArtifact(
       artifactName,
