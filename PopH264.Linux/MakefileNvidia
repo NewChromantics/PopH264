@@ -6,7 +6,7 @@
 compiler ?= g++
 CC = ${compiler}
 
-# archTarget is the target architecture
+# archTarget is the target ARCHITECTURE
 # archTarget ?= arm7a
 
 SRC = ..
