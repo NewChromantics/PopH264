@@ -72,9 +72,9 @@ jobs:
           architecture: ${{ matrix.config.architecture }}
           makefile: ${{ matrix.config.makefile }}
 
-      - name: Create Artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: PopH264
-          path: |
-            ./build
+      # - name: Create Artifact
+      #   uses: actions/upload-artifact@v2
+      #   with:
+      #     name: PopH264
+      #     path: |
+      #       ./build
