@@ -51,7 +51,7 @@ jobs:
 #         uses: microsoft/setup-msbuild@v1.0.0
       
       - name: Ios
-        uses:  NewChromantics/PopGithubActions/@v1Ios/ios
+        uses:  ./.github/actions/ios
 
         
 #       - name: Create Artifact
