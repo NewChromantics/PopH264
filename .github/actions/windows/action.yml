@@ -1,4 +1,4 @@
-name: 'Pop build Ios'
+name: 'Pop Windows build'
 inputs:
   BuildSolution: 
     required: true

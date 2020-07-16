@@ -1,8 +1,8 @@
-name: 'Pop Ios build'
+name: 'Pop Linux build' 
 inputs:
-  BuildProject: 
+  architecture: 
     required: true
-  BuildScheme: 
+  makefile: 
     required: true
 runs:
   using: 'node12'
