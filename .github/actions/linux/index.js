@@ -16,7 +16,7 @@ async function run() {
     await exec.exec("sudo", [
       `add-apt-repository`, `-y`, `ppa:ubuntu-toolchain-r/test`,
     ]);
-    await exec.exec("sh", [`sudo apt-get update`]);
+    await exec.exec("sudo", [`apt-get`, `update`]);
     await exec.exec("sudo", [
       `apt-get`, `install`, `libx264-dev`, `gcc-10`, `g++-10`, `-y`,
     ]);
