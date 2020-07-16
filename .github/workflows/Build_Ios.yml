@@ -8,7 +8,10 @@ on:
   push:
     branches:
       - master
-      - ActionTest
+      - '*Test*'
+    paths:
+      - '**.yml'
+      - '**Makefile'
 
 jobs:
   Build:

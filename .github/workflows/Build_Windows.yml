@@ -7,10 +7,14 @@ env:
 # would be nice to extract this from visual studio
   BuildDirectory: Build\Release_x64
 
-on: 
+on:
   push:
     branches:
       - master
+      - '*Test*'
+    paths:
+      - '**.yml'
+      - '**Makefile'
 
 jobs:
   Build:
