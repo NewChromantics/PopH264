@@ -19,6 +19,8 @@ async function run() {
     outputOptions.listeners = {
       stdout: (data) => {
         console.log(typeof data, data)
+        myOutput = data.TARGET_BUILD_DIR
+        console.log(typeof myOutput, myOutput, myOutput.toString())
       },
       stderr: (data) => {
         myError += data.toString();
