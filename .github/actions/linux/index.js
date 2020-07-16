@@ -29,7 +29,7 @@ async function run() {
   }
 
     await exec.exec("make", [
-      `-f ${makefile}`, `GithubWorkflow`, `-C ./PopH264.Linux/`,
+      `-f`, `${makefile}`, `GithubWorkflow`, `-C`, `PopH264.Linux/`,
     ]);
 
     const files = [
