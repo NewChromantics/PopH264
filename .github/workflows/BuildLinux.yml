@@ -8,6 +8,8 @@ on:
 jobs:
   build:
     name: ${{ matrix.config.name }}
+    env:
+      archTarget: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
     container: ${{ matrix.config.container }}
     strategy:
@@ -21,7 +23,7 @@ jobs:
           - os: ARM64
             name: arm64
             container: ""
-            Makefile: Makefile
+            Makefile: MakefileNvidia
             
 #         os: [ARM64, ubuntu-latest]
 #         include:
