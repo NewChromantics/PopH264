@@ -8,6 +8,8 @@ const BuildScheme = core.getInput("BuildScheme");
 const BuildProject = core.getInput("BuildProject");
 
 const regex = /TARGET_BUILD_DIR = [^\n]+\n/;
+let myOutput = '';
+let myError = '';
 
 async function run() {
   try {
