@@ -10,7 +10,7 @@ const artifactClient = artifact.create();
 const artifactName = BuildScheme;
 
 const regex = /TARGET_BUILD_DIR = ([\/-\w]+)\n/;
-let myOutput = "";
+let buildDirectory = "";
 let myError = "";
 
 async function run() {
@@ -18,9 +18,10 @@ async function run() {
     const outputOptions = {};
     outputOptions.listeners = {
       stdout: (data) => {
-        myOutput = data.toString();
+        buildDirectory += data.toString();
+        buildDirectory = regex.exec(buildDirectory)
         console.log(myOutput.indexOf("TARGET_BUILD_DIR ="))
-        console.log(regex.exec(myOutput))
+        console.log(regex.exec(buildDirectory))
       },
       stderr: (data) => {
         myError += data.toString();
@@ -39,8 +40,6 @@ async function run() {
       outputOptions
     );
 
-    console.log(buildsettings);
-    const buildDirectory = regex.exec(buildsettings);
     console.log(buildDirectory);
     await exec.exec("xcodebuild", [
       `-workspace`,
