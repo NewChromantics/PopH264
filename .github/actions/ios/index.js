@@ -34,11 +34,6 @@ async function run() {
         `-scheme`,
         `${BuildScheme}`,
         `-showBuildSettings`,
-        `|`,
-        `grep TARGET_BUILD_DIR`,
-        `|`,
-        `sed`,
-        `-e s/.*TARGET_BUILD_DIR = //`,
       ],
       outputOptions
     );
