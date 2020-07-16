@@ -1,8 +1,7 @@
 #!/bin/bash -e
 
-sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
 sudo apt-get update
-sudo apt-get install libx264-dev gcc-10.1 g++10.1 -y
+sudo apt-get install libx264-dev gcc g++ -y
 
 g++ -v
 
