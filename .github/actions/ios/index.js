@@ -9,7 +9,7 @@ const BuildProject = core.getInput("BuildProject");
 const artifactClient = artifact.create();
 const artifactName = BuildScheme;
 
-const regex = /(TARGET_BUILD_DIR)/;
+const regex = /TARGET_BUILD_DIR = ([\/-\w]+)\n/;
 let myOutput = "";
 let myError = "";
 
