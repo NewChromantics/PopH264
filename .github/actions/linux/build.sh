@@ -8,6 +8,9 @@ sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-10 10
 
 g++ -v
 
-ls
-
 make -f $MAKEFILE GithubWorkflow -C PopH264.Linux/
+
+ls PopH264.Linux
+
+mkdir -p /build/PopH264$ARCHITECTURE
+mv PopH264.Linux/PopH264$ARCHITECTURE.so PopH264.Linux/PopH264TestApp$ARCHITECTURE /build

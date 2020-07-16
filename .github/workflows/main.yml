@@ -22,8 +22,8 @@ jobs:
             architecture: arm64
             makefile: MakefileNvidia
             
-          - os: windows
-            type: windows
+          # - os: windows
+          #   type: windows
             
           - os: macOS
             type: Ios
@@ -72,7 +72,6 @@ jobs:
           architecture: ${{ matrix.config.architecture }}
           makefile: ${{ matrix.config.makefile }}
 
-        
       - name: Create Artifact
         uses: actions/upload-artifact@v2
         with:

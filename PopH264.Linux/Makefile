@@ -60,12 +60,12 @@ LIB_OBJECTS=$(LOCAL_SRC_FILES:.cpp=.o)
 TESTAPP_OBJECTS=$(TESTAPP_SRC_FILES:.cpp=.o)
 
 # env var MACHTYPE is this systems arch type, eg; aarch64-unknown-linux-gnu
-OUT_LIBRARY=PopH264${architecture}.so
-OUT_EXECUTABLE=PopH264TestApp${architecture}
+OUT_LIBRARY=PopH264${ARCHITECTURE}.so
+OUT_EXECUTABLE=PopH264TestApp${ARCHITECTURE}
 
 GithubWorkflow: $(OUT_EXECUTABLE) $(OUT_LIBRARY)
-	mkdir /build/PopH264${architecture}
-	mv $(OUT_EXECUTABLE) $(OUT_LIBRARY) /build/PopH264${architecture}
+	echo "::set-output name=executable:$(OUT_EXECUTABLE)"
+	echo "::set-output name=library:$(OUT_LIBRARY)"
 .PHONY: GithubWorkflow
 
 exec: $(OUT_EXECUTABLE)
