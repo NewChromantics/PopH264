@@ -27,6 +27,9 @@ jobs:
             
           - os: macOS
             type: Ios
+          
+          - os: macOS
+            type: Osx
                     
     steps:
       - name: Checkout repo
@@ -54,6 +57,13 @@ jobs:
         with:
           BuildProject: PopH264.xcodeproj
           BuildScheme: PopH264_Ios
+      
+      - name: Osx
+        if: matrix.config.type == 'Osx'
+          uses:  ./.github/actions/ios
+          with:
+            BuildProject: PopH264.xcodeproj
+            BuildScheme: PopH264_Osx
 
       - name: Linux
         if: matrix.config.type == 'linux'
