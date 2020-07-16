@@ -27,7 +27,7 @@ async function run() {
       },
     };
 
-    const buildsettings = await exec.exec(
+    await exec.exec(
       "xcodebuild",
       [
         `-workspace`,
@@ -38,6 +38,12 @@ async function run() {
       ],
       outputOptions
     );
+
+    await exec.exec("xcodebuild", [
+      `-workspace`,
+      `${BuildProject}/project.xcworkspace`,
+      `-list`,
+    ]);
 
     await exec.exec("xcodebuild", [
       `-workspace`,
