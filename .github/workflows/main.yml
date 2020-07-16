@@ -60,10 +60,10 @@ jobs:
       
       - name: Osx
         if: matrix.config.type == 'Osx'
-          uses:  ./.github/actions/ios
-          with:
-            BuildProject: PopH264.xcodeproj
-            BuildScheme: PopH264_Osx
+        uses: ./.github/actions/ios
+        with:
+          BuildProject: PopH264.xcodeproj
+          BuildScheme: PopH264_Osx
 
       - name: Linux
         if: matrix.config.type == 'linux'
