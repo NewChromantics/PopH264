@@ -8,7 +8,7 @@ async function run() {
     process.env.BUILDCONFIGURATION = core.getInput("BuildConfiguration");
     process.env.BUILDDIRECTORY = core.getInput("BuildDirectory");
 
-    await exec.exec(`powershell.exe ${__dirname}/helloworld.ps1`);
+    await exec.exec(`powershell.exe ${__dirname}/build.ps1`);
   } catch (error) {
     core.setFailed(error.message);
   }
