@@ -1,0 +1,22 @@
+{
+  "name": "PopH264",
+  "version": "1.0.0",
+  "description": "Build Status ========================== ![Build Windows](https://github.com/SoylentGraham/PopH264/workflows/Build%20Windows/badge.svg) ![Build Osx](https://github.com/SoylentGraham/PopH264/workflows/Build%20Osx/badge.svg) ![Build Ios](https://github.com/SoylentGraham/PopH264/workflows/Build%20Ios/badge.svg) ![Build Linux](https://github.com/SoylentGraham/PopH264/workflows/Build%20Linux/badge.svg) ![Create Release](https://github.com/NewChromantics/PopH264/workflows/Create%20Release/badge.svg)",
+  "main": "index.js",
+  "dependencies": {},
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NewChromantics/PopH264.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/NewChromantics/PopH264/issues"
+  },
+  "homepage": "https://github.com/NewChromantics/PopH264#readme"
+}
