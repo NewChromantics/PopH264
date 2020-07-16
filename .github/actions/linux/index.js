@@ -40,7 +40,6 @@ async function run() {
     ];
     
     const rootDirectory = ".";
-    console.log( await exec.exec("ls", [buildDirectory]) )
 
     const options = {
       continueOnError: false,
