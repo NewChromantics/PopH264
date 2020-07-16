@@ -10,30 +10,39 @@ const artifactClient = artifact.create();
 const artifactName = BuildScheme;
 
 const regex = /TARGET_BUILD_DIR = [^\n]+\n/;
-let myOutput = '';
-let myError = '';
+let myOutput = "";
+let myError = "";
 
 async function run() {
   try {
     const outputOptions = {};
     outputOptions.listeners = {
       stdout: (data) => {
-        console.log(typeof data, data)
-        myOutput = data.TARGET_BUILD_DIR
-        console.log(typeof myOutput, myOutput, myOutput.toString())
+        myOutput = data.toString();
+        console.log(typeof myOutput, myOutput);
       },
       stderr: (data) => {
         myError += data.toString();
       },
     };
 
-    const buildsettings = await exec.exec("xcodebuild", [
-      `-workspace`,
-      `${BuildProject}/project.xcworkspace`,
-      `-scheme`,
-      `${BuildScheme}`,
-      `-showBuildSettings`,
-    ], outputOptions);
+    const buildsettings = await exec.exec(
+      "xcodebuild",
+      [
+        `-workspace`,
+        `${BuildProject}/project.xcworkspace`,
+        `-scheme`,
+        `${BuildScheme}`,
+        `-showBuildSettings`,
+        `|`,
+        `grep TARGET_BUILD_DIR`,
+        `|`,
+        `sed`,
+        `-e`,
+        `s/.*TARGET_BUILD_DIR = //`,
+      ],
+      outputOptions
+    );
 
     console.log(buildsettings);
     const buildDirectory = regex.exec(buildsettings);
