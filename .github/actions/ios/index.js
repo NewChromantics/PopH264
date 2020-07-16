@@ -38,8 +38,7 @@ async function run() {
         `grep TARGET_BUILD_DIR`,
         `|`,
         `sed`,
-        `-e`,
-        `s/.*TARGET_BUILD_DIR = //`,
+        `-e s/.*TARGET_BUILD_DIR = //`,
       ],
       outputOptions
     );
