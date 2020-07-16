@@ -1,0 +1,9 @@
+name: 'Pop build Ios'
+inputs:
+  architecture: 
+    required: true
+  makefile: 
+    required: true
+runs:
+  using: 'node12'
+  main: 'index.js'

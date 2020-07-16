@@ -2,9 +2,6 @@
 compiler ?= g++
 CC = ${compiler}
 
-# archTarget is the target architecture
-# archTarget ?= arm7a
-
 SRC = ..
 SOY_PATH = $(SRC)/Source/SoyLib
 
@@ -62,10 +59,9 @@ LIBRARY_LINK_LIBS = \
 LIB_OBJECTS=$(LOCAL_SRC_FILES:.cpp=.o)
 TESTAPP_OBJECTS=$(TESTAPP_SRC_FILES:.cpp=.o)
 
-# ARCHITECTURE=${archTarget}
 # env var MACHTYPE is this systems arch type, eg; aarch64-unknown-linux-gnu
-OUT_LIBRARY=PopH264${archTarget}.so
-OUT_EXECUTABLE=PopH264TestApp${archTarget}
+OUT_LIBRARY=PopH264${architecture}.so
+OUT_EXECUTABLE=PopH264TestApp${architecture}
 
 GithubWorkflow: $(OUT_EXECUTABLE) $(OUT_LIBRARY) 
 	echo "::set-output name=executable:$(OUT_EXECUTABLE)"

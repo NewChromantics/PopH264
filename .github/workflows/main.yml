@@ -7,30 +7,23 @@ on:
 
 jobs:
   build:
-    name: ${{ matrix.config.name }}
-    env:
-      archTarget: ${{ matrix.config.name }}
+    name: ${{ matrix.config.os }}-${{ matrix.config.type }}
     runs-on: ${{ matrix.config.os }}
-    container: ${{ matrix.config.container }}
     strategy:
       matrix:
         config:
-#           - os: ubuntu-latest
-#             type: linux
-#             name: x86_64
-#             # Would a better way here be to pull in the standard gcc and run apt get of the packages needed?
-#             # Removing the need for empty container vars
-#             container: tsdkelly/gcc_x264:latest
-#             Makefile: Makefile
+          - os: ubuntu-latest
+            type: linux
+            architecture: x86_64
+            makefile: Makefile
           
-#           - os: ARM64
-#             type: linux
-#             name: arm64
-#             container: ""
-#             Makefile: MakefileNvidia
+          - os: ARM64
+            type: linux
+            architecture: arm64
+            makefile: MakefileNvidia
             
 #           - os: windows
-#             container: ""
+#             type: windows
 #             BuildSolution: PopH264.visualstudio\PopH264.sln
 #             BuildPlatform: x64
 #             BuildConfiguration: Release
@@ -51,10 +44,18 @@ jobs:
 #         uses: microsoft/setup-msbuild@v1.0.0
       
       - name: Ios
+        if: matrix.config.type == 'Ios'
         uses:  ./.github/actions/ios
         with:
           BuildProject: PopH264.xcodeproj
           BuildScheme: PopH264_Ios
+
+      - name: Linux
+        if: matrix.config.type == 'linux'
+        uses:  ./.github/actions/linux
+        with:
+          architecture: ${{ matrix.config.architecture }}
+          makefile: ${{ matrix.config.makefile }}
 
         
 #       - name: Create Artifact
