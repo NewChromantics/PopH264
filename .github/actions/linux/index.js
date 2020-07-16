@@ -35,11 +35,11 @@ async function run() {
     ]);
 
     const files = [
-      `PopH264-${architecture}.so`,
-      `PopH264TestApp-${architecture}`,
+      `PopH264.Linux/PopH264-${architecture}.so`,
+      `PopH264.Linux/PopH264TestApp-${architecture}`,
     ];
     
-    const buildDirectory = "PopH264.Linux/";
+    const rootDirectory = ".";
     console.log( await exec.exec("ls", [buildDirectory]) )
 
     const options = {
@@ -48,7 +48,7 @@ async function run() {
     const uploadResponse = await artifactClient.uploadArtifact(
       artifactName,
       files,
-      buildDirectory,
+      rootDirectory,
       options
     );
   } catch (error) {

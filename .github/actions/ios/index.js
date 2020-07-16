@@ -19,9 +19,9 @@ async function run() {
     outputOptions.listeners = {
       stdout: (data) => {
         buildDirectory += data.toString();
-        console.log(buildDirectory.indexOf("TARGET_BUILD_DIR ="))
-        console.log(regex.exec(buildDirectory))
-        buildDirectory = regex.exec(buildDirectory)
+        console.log(buildDirectory.indexOf("TARGET_BUILD_DIR ="));
+        console.log(regex.exec(buildDirectory));
+        buildDirectory = regex.exec(buildDirectory);
       },
       stderr: (data) => {
         myError += data.toString();
@@ -48,7 +48,14 @@ async function run() {
       `${BuildScheme}`,
     ]);
 
-    const files = ["PopH264_Ios.framework", "PopH264_Ios.framework.dSYM"];
+    const files = [
+      `${buildDirectory}/PopH264_Ios.framework`,
+      `${buildDirectory}/PopH264_Ios.framework.dSYM`,
+    ];
+
+    const rootDirectory = ".";
+
+    console.log(buildDirectory);
 
     const options = {
       continueOnError: false,
@@ -56,7 +63,7 @@ async function run() {
     const uploadResponse = await artifactClient.uploadArtifact(
       artifactName,
       files,
-      buildDirectory,
+      rootDirectory,
       options
     );
   } catch (error) {
