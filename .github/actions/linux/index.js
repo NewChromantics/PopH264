@@ -13,7 +13,7 @@ async function run() {
   try {
 
     console.log( await exec.exec("ls") )
-    process.env.BUILDSOLUTION = architecture;
+    process.env.ARCHITECTURE = architecture;
     if(makefile === 'Makefile') {
     await exec.exec("sudo", [
       `add-apt-repository`, `-y`, `ppa:ubuntu-toolchain-r/test`,
@@ -31,7 +31,7 @@ async function run() {
   }
 
     await exec.exec("make", [
-      `-f`, `${makefile}`, `GithubWorkflow`, `-C`, `PopH264.Linux/`,
+      `-f`, `${makefile}`, `exec`, `-C`, `PopH264.Linux/`,
     ]);
 
     const files = [

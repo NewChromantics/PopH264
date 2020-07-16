@@ -68,8 +68,6 @@ TESTAPP_OBJECTS=$(TESTAPP_SRC_FILES:.cpp=.o)
 OUT_LIBRARY=PopH264${ARCHITECTURE}.so
 OUT_EXECUTABLE=PopH264TestApp${ARCHITECTURE}
 
-
-
 # from nvidia samples Rules.mk
 # ARM ABI of the target platform
 TEGRA_ARMABI ?= aarch64-linux-gnu
@@ -104,12 +102,6 @@ $(SRC)/Source/nvidia/samples/common/classes/NvUtils.cpp	\
 
 LOCAL_C_INCLUDES += \
 -I$(SRC)/Source/nvidia/include/
-
-
-GithubWorkflow: $(OUT_EXECUTABLE) $(OUT_LIBRARY) 
-	echo "::set-output name=executable:$(OUT_EXECUTABLE)"
-	echo "::set-output name=library:$(OUT_LIBRARY)"
-.PHONY: GithubWorkflow
 
 exec: $(OUT_EXECUTABLE)
 .PHONY: exec
