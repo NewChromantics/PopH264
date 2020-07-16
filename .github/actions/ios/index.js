@@ -3,9 +3,11 @@ const github = require("@actions/github");
 const exec = require("@actions/exec");
 const artifact = require("@actions/artifact");
 
-const artifactClient = artifact.create();
 const BuildScheme = core.getInput("BuildScheme");
 const BuildProject = core.getInput("BuildProject");
+
+const artifactClient = artifact.create();
+const artifactName = BuildScheme;
 
 const regex = /TARGET_BUILD_DIR = [^\n]+\n/;
 let myOutput = '';
@@ -17,7 +19,9 @@ async function run() {
     outputOptions.listeners = {
       stdout: (data) => {
         myOutput += data.toString();
+        console.log(`output ${myOutput.type} before regex = ${myOutput}`)
         myOutput = regex.exec(myOutput)
+        console.log(`output ${myOutput.type} from buildsettings = ${myOutput}`);
       },
       stderr: (data) => {
         myError += data.toString();

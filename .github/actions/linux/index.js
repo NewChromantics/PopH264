@@ -3,9 +3,11 @@ const github = require("@actions/github");
 const exec = require("@actions/exec");
 const artifact = require("@actions/artifact");
 
-const artifactClient = artifact.create();
 const makefile = core.getInput("makefile");
 const architecture = core.getInput("architecture");
+
+const artifactClient = artifact.create();
+const artifactName = `linux-${architecture}`;
 
 async function run() {
   try {
