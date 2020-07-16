@@ -8,6 +8,7 @@ xcodebuild -workspace $BUILDPROJECT/project.xcworkspace -scheme $BUILDSCHEME
 
 echo "Build Directory ${BUILDPROJECT} contents"
 
-ls $BUILDPROJECT
-cd $BUILDPROJECT
-pwd
+ls
+
+mkdir /build/${BUILDSCHEME}
+mv -r $BUILDPROJECT /build/${BUILDSCHEME}

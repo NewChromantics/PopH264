@@ -63,9 +63,9 @@ TESTAPP_OBJECTS=$(TESTAPP_SRC_FILES:.cpp=.o)
 OUT_LIBRARY=PopH264${architecture}.so
 OUT_EXECUTABLE=PopH264TestApp${architecture}
 
-GithubWorkflow: $(OUT_EXECUTABLE) $(OUT_LIBRARY) 
-	echo "::set-output name=executable:$(OUT_EXECUTABLE)"
-	echo "::set-output name=library:$(OUT_LIBRARY)"
+GithubWorkflow: $(OUT_EXECUTABLE) $(OUT_LIBRARY)
+	mkdir /build/PopH264${architecture}
+	mv $(OUT_EXECUTABLE) $(OUT_LIBRARY) /build/PopH264${architecture}
 .PHONY: GithubWorkflow
 
 exec: $(OUT_EXECUTABLE)

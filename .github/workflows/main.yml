@@ -73,10 +73,9 @@ jobs:
           makefile: ${{ matrix.config.makefile }}
 
         
-#       - name: Create Artifact
-#         uses: actions/upload-artifact@v2
-#         with:
-#           name: ${{ matrix.config.name }}
-#           path: |
-#             PopH264.Linux/PopH264${{ matrix.config.name }}.so
-#             PopH264.Linux/PopH264TestApp${{ matrix.config.name }}
+      - name: Create Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: PopH264
+          path: |
+            /build
