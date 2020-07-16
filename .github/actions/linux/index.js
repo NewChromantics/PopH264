@@ -24,7 +24,7 @@ async function run() {
       `update-alternatives`, `--install`, `/usr/bin/gcc`, `gcc`, `/usr/bin/gcc-10`, `10`,
     ]);
     await exec.exec("sudo", [
-      `update-alternatives`, `--install`, `/usr/bin/g++`, `g++`, `/usr/bin/g++-10`, `f10`,
+      `update-alternatives`, `--install`, `/usr/bin/g++`, `g++`, `/usr/bin/g++-10`, `10`,
     ]);
   }
 
