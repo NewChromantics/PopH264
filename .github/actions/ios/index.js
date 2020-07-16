@@ -53,7 +53,7 @@ async function run() {
       `${buildDirectory}/PopH264_Ios.framework.dSYM`,
     ];
 
-    const rootDirectory = ".";
+    const rootDirectory = buildDirectory[1];
 
     console.log(buildDirectory[1]);
 
