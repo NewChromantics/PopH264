@@ -1,0 +1,13 @@
+name: 'Pop build Ios'
+inputs:
+  BuildSolution: 
+    required: true
+  BuildPlatform: 
+    required: true
+  BuildConfiguration: 
+    required: true
+  BuildDirectory: 
+    required: true
+runs:
+  using: 'node12'
+  main: 'index.js'

@@ -22,16 +22,11 @@ jobs:
             architecture: arm64
             makefile: MakefileNvidia
             
-#           - os: windows
-#             type: windows
-#             BuildSolution: PopH264.visualstudio\PopH264.sln
-#             BuildPlatform: x64
-#             BuildConfiguration: Release
-#             BuildDirectory: Build\Release_x64
+          - os: windows
+            type: windows
             
           - os: macOS
             type: Ios
-            
                     
     steps:
       - name: Checkout repo
@@ -39,9 +34,19 @@ jobs:
         with:
           submodules: recursive
           
-#       - name: Configure Windows
-#         if: matrix.config.os == 'windows'
-#         uses: microsoft/setup-msbuild@v1.0.0
+      - name: Configure Windows
+        if: matrix.config.os == 'windows'
+        uses: microsoft/setup-msbuild@v1.0.0
+
+      - name: Windows
+        if: matrix.config.os == 'windows'
+        uses:  ./.github/actions/windows
+        with:
+          BuildSolution: PopH264.visualstudio\PopH264.sln
+          BuildPlatform: x64
+          BuildConfiguration: Release
+          # would be nice to extract this from visual studio
+          BuildDirectory: Build\Release_x6
       
       - name: Ios
         if: matrix.config.type == 'Ios'
