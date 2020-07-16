@@ -18,10 +18,7 @@ async function run() {
     const outputOptions = {};
     outputOptions.listeners = {
       stdout: (data) => {
-        myOutput += data.toString();
-        console.log(`output ${typeof myOutput} before regex = ${myOutput}`)
-        myOutput = regex.exec(myOutput)
-        console.log(`output ${typeof myOutput} from buildsettings = ${myOutput}`);
+        console.log(typeof data, data)
       },
       stderr: (data) => {
         myError += data.toString();
