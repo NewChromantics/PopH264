@@ -9,7 +9,7 @@ const BuildProject = core.getInput("BuildProject");
 const artifactClient = artifact.create();
 const artifactName = BuildScheme;
 
-const regex = /TARGET_BUILD_DIR = [^\n]+\n/;
+const regex = /TARGET_BUILD_DIR/;
 let myOutput = "";
 let myError = "";
 
@@ -19,7 +19,8 @@ async function run() {
     outputOptions.listeners = {
       stdout: (data) => {
         myOutput = data.toString();
-        console.log(typeof myOutput, myOutput);
+        console.log(myOutput.indexOf("TARGET_BUILD_DIR ="))
+        console.log(regex.exec(myOutput))
       },
       stderr: (data) => {
         myError += data.toString();
