@@ -11,8 +11,8 @@ const regex = /TARGET_BUILD_DIR = [^\n]+\n/;
 
 async function run() {
   try {
-    const options = {};
-    options.listeners = {
+    const outputOptions = {};
+    outputOptions.listeners = {
       stdout: (data) => {
         myOutput += data.toString();
         myOutput = regex.exec(myOutput)
@@ -28,8 +28,8 @@ async function run() {
       `-scheme`,
       `${BuildScheme}`,
       `-showBuildSettings`,
-    ], options);
-    
+    ], outputOptions);
+
     console.log(buildsettings);
     const buildDirectory = regex.exec(buildsettings);
     console.log(buildDirectory);
