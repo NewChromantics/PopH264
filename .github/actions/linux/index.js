@@ -35,11 +35,10 @@ async function run() {
     ]);
 
     const files = [
-      `PopH264${architecture}.so`,
-      `PopH264TestApp${architecture}`,
+      `PopH264-${architecture}.so`,
+      `PopH264TestApp-${architecture}`,
     ];
-
-    const buildDirectory = "./PopH264.Linux";
+    const buildDirectory = "PopH264.Linux/";
 
     const options = {
       continueOnError: false,
