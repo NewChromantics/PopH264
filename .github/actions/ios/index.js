@@ -55,7 +55,7 @@ async function run() {
 
     const rootDirectory = ".";
 
-    console.log(buildDirectory);
+    console.log(buildDirectory[1]);
 
     const options = {
       continueOnError: false,
