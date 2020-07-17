@@ -313,9 +313,7 @@
     <Link />
     <Link />
     <PostBuildEvent />
-    <Link>
-      <Profile>true</Profile>
-    </Link>
+    <Link />
     <PostBuildEvent />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -326,9 +324,7 @@
     <Link />
     <Link />
     <PostBuildEvent />
-    <Link>
-      <Profile>true</Profile>
-    </Link>
+    <Link />
     <PostBuildEvent />
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
