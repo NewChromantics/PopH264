@@ -4,7 +4,8 @@ const exec = require("@actions/exec");
 const artifact = require("@actions/artifact");
 
 const BuildScheme = core.getInput("BuildScheme");
-const BuildProject = core.getInput("BuildProject");
+
+const BuildProject = `${core.getInput("BuildProject")}.xcodeproj`
 
 const artifactClient = artifact.create();
 const artifactName = BuildScheme;

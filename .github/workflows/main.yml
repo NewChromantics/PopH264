@@ -15,22 +15,22 @@ jobs:
     strategy:
       matrix:
         config:
-          - os: ubuntu-latest
-            type: linux
-            architecture: x86_64
+          # - os: ubuntu-latest
+          #   type: linux
+          #   architecture: x86_64
 
-          - os: ARM64
-            type: linux
-            architecture: nvidia
+          # - os: ARM64
+          #   type: linux
+          #   architecture: nvidia
 
           # - os: windows
           #   type: windows
 
-    #           - os: macOS
-    #             type: Ios
+          - os: macOS
+            buildScheme: PopH264_Ios
 
     # - os: macOS
-    #   type: Osx
+    # buildScheme: PopH264_Osx
 
     steps:
       - name: Checkout repo
@@ -52,19 +52,12 @@ jobs:
           # would be nice to extract this from visual studio
           BuildDirectory: Build\Release_x6
 
-      - name: Ios
-        if: matrix.config.type == 'Ios'
+      - name: Apple
+        if: matrix.config.os == 'macOS'
         uses: ./.github/actions/ios
         with:
-          BuildProject: PopH264.xcodeproj
-          BuildScheme: PopH264_Ios
-
-      - name: Osx
-        if: matrix.config.type == 'Osx'
-        uses: ./.github/actions/ios
-        with:
-          BuildProject: PopH264.xcodeproj
-          BuildScheme: PopH264_Osx
+          BuildScheme: ${{ matrix.config.buildScheme }}
+          project: ${{ env.project }}
 
       - name: Linux
         if: matrix.config.type == 'linux'

@@ -1,8 +1,8 @@
 name: 'Pop Ios build'
 inputs:
-  BuildProject: 
-    required: true
   BuildScheme: 
+    required: true
+  project:
     required: true
 runs:
   using: 'node12'
