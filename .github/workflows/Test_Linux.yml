@@ -1,4 +1,4 @@
-name: Test Ios
+name: Test Linux
 
 on:
   push:
