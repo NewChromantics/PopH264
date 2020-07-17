@@ -20,7 +20,6 @@ jobs:
           - os: ARM64
             type: linux
             architecture: nvidia
-            project: $GITHUB_REPOSITORY
 
           # - os: windows
           #   type: windows
@@ -67,9 +66,10 @@ jobs:
 
       - name: Linux
         if: matrix.config.type == 'linux'
-        uses: ./.github/actions/linux
+        uses: thomasSDK/PopLinuxAction@v1
         with:
           architecture: ${{ matrix.config.architecture }}
+          project: $GITHUB_REPOSITORY
 
   publish-gpr:
     needs: Build
