@@ -1,21 +1,16 @@
 name: Build Windows
 
-env:
-  BuildSolution: PopH264.visualstudio\PopH264.sln
-  BuildPlatform: x64
-  BuildConfiguration: Release
-# would be nice to extract this from visual studio
-  BuildDirectory: Build\Release_x64
-
 on:
   push:
     branches:
       - master
-      # - '*Test*'
+      - '*Test*'
 
 jobs:
   Build:
     runs-on: [self-hosted, windows]
+    env:
+      project: PopH264
     
     steps:
     - uses: actions/checkout@v2
@@ -25,21 +20,11 @@ jobs:
     - name: Add msbuild to PATH
       uses: microsoft/setup-msbuild@v1.0.0
       
-    - name: compile
-# https://github.community/t5/GitHub-Actions/How-to-build-project-targeting-Net35-with-GitHub-Actions/td-p/36191
-# set <--- list env vars
-      run: |
-          set
-          MSBuild %BuildSolution% /property:Configuration=%BuildConfiguration% /property:Platform=%BuildPlatform%
-      shell: cmd
-      
-    - name: List artifacts
-      run: |
-        ls .
-        ls $Env:BuildDirectory
-    
-    # do not use env here: ##[error]Path does not exist d:\a\PopH264\PopH264\$Env:GITHUB_WORKSPACE\PopH264.visualstudio\Debug
-    - uses: actions/upload-artifact@v1
+    - name: Windows
+      uses: thomasSDK/PopWindowsAction@v1
       with:
-        name: PopH264
-        path: ${{env.BuildDirectory}}     
+        BuildPlatform: x64
+        BuildConfiguration: Release
+        # would be nice to extract this from visual studio
+        BuildDirectory: Build\Release_x6
+        project: ${{ env.project }}

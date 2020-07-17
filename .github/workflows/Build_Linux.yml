@@ -4,40 +4,30 @@ on:
   push:
     branches:
       - master
-      # - '*Test*'
+      - '*Test*'
 
 jobs:
-  build:
-    name: ${{ matrix.config.name }}
+  Test:
     env:
-      archTarget: ${{ matrix.config.name }}
+      project: PopH264
     runs-on: ${{ matrix.config.os }}
-    container: ${{ matrix.config.container }}
     strategy:
       matrix:
         config:
           - os: ubuntu-latest
-            name: x86_64
-            container: tsdkelly/gcc_x264:latest
-            Makefile: Makefile
-          
+            type: linux
+            architecture: x86_64
+
           - os: ARM64
-            name: arm64
-            container: ""
-            Makefile: MakefileNvidia
-            
+            type: linux
+            architecture: nvidia
+
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v1
         with:
-          submodules: recursive
-      - name: Compile project
-        run: |
-          make -f ${{ matrix.config.Makefile }} GithubWorkflow -C $GITHUB_WORKSPACE/PopH264.Linux/
-      - name: Create Artifact
-        uses: actions/upload-artifact@v2
+          submodules: "recursive"
+      - name: Linux
+        uses: thomasSDK/PopLinuxAction@v1
         with:
-          name: ${{ matrix.config.name }}
-          path: |
-            PopH264.Linux/PopH264${{ matrix.config.name }}.so
-            PopH264.Linux/PopH264TestApp${{ matrix.config.name }}
+          architecture: ${{ matrix.config.architecture }}
+          project: ${{ env.project }}

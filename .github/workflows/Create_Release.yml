@@ -1,13 +1,17 @@
-name: Main
+name: Create Release
 
 on:
   push:
     branches:
       - master
-      - ActionTest
+    # file paths to consider in the event. Optional; defaults to all.
+    paths:
+      - 'package.json'
 
 jobs:
   Build:
+    env:
+      project: PopH264
     name: ${{ matrix.config.os }}-${{ matrix.config.type }}
     runs-on: ${{ matrix.config.os }}
     strategy:
@@ -20,16 +24,17 @@ jobs:
           - os: ARM64
             type: linux
             architecture: nvidia
-            project: $GITHUB_REPOSITORY
 
           # - os: windows
           #   type: windows
 
-    #           - os: macOS
-    #             type: Ios
+          - os: macOS
+            type: ios
+            buildScheme: ${{ env.project }_Ios
 
-    # - os: macOS
-    #   type: Osx
+          # - os: macOS
+          #   type: osx
+          #   buildScheme: ${{ env.project }_Osx
 
     steps:
       - name: Checkout repo
@@ -43,33 +48,32 @@ jobs:
 
       - name: Windows
         if: matrix.config.os == 'windows'
-        uses: ./.github/actions/windows
+        uses: thomasSDK/PopWindowsAction@v1
         with:
-          BuildSolution: PopH264.visualstudio\PopH264.sln
           BuildPlatform: x64
           BuildConfiguration: Release
           # would be nice to extract this from visual studio
-          BuildDirectory: Build\Release_x6
+          BuildDirectory: Build/Release_x6
+          project: ${{ env.project }}
 
-      - name: Ios
-        if: matrix.config.type == 'Ios'
-        uses: ./.github/actions/ios
+      - name: Apple
+        if: matrix.config.os == 'macOS'
+        uses: thomasSDK/PopAppleAction@v1
         with:
-          BuildProject: PopH264.xcodeproj
-          BuildScheme: PopH264_Ios
-
-      - name: Osx
-        if: matrix.config.type == 'Osx'
-        uses: ./.github/actions/ios
-        with:
-          BuildProject: PopH264.xcodeproj
-          BuildScheme: PopH264_Osx
+          BuildScheme: ${{ matrix.config.buildScheme }}
+          project: ${{ env.project }}
 
       - name: Linux
         if: matrix.config.type == 'linux'
-        uses: ./.github/actions/linux
+        uses: thomasSDK/PopLinuxAction@v1
         with:
           architecture: ${{ matrix.config.architecture }}
+          project: ${{ env.project }}
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.config.os }}-${{ matrix.config.type }}
+          path: build
 
   publish-gpr:
     needs: Build
@@ -88,10 +92,9 @@ jobs:
       - run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
-      # - name: Release
-      #   uses: fnkr/github-action-ghr@v1
-      #   if: startsWith(github.ref, 'refs/tags/')
-      #   env:
-      #     GHR_COMPRESS: xz
-      #     GHR_PATH: build/
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Release
+        uses: fnkr/github-action-ghr@v1
+        env:
+          GHR_COMPRESS: xz
+          GHR_PATH: Build/
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

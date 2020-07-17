@@ -8,7 +8,7 @@ CC = ${compiler}
 # archTarget is the target architecture
 # if unspecified, this becomes Linux_Linux/ pick something better :)
 archTarget ?= Linux
-BUILD_DIR = ../Build/Linux_$(archTarget)
+BUILD_DIR = ../build/Linux_$(archTarget)
 
 SRC = ..
 SOY_PATH = $(SRC)/Source/SoyLib
@@ -122,6 +122,7 @@ lib: $(OUT_LIBRARY)
 
 # Copy other output files
 $(OUT_HEADER): $(OUT_HEADER_SRC)
+	mkdir -p $(BUILD_DIR)
 	$(info Copying $(OUT_HEADER))
 	cp $(OUT_HEADER_SRC) $(OUT_HEADER)
 
@@ -137,7 +138,6 @@ $(OUT_LIBRARY): $(LIB_OBJECTS) $(OUT_HEADER)
 	ldd $(OUT_LIBRARY)
 
 .cpp.o:
-	mkdir -p $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(LOCAL_C_INCLUDES) $(LIBRARY_C_INCLUDES) $< -o $@
 
 clean:
