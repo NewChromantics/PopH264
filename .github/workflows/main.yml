@@ -68,6 +68,11 @@ jobs:
           architecture: ${{ matrix.config.architecture }}
           project: ${{ env.project }}
 
+      - uses: actions/upload-artifact@v2
+        with:
+          name: ${{ ${{ matrix.config.os }}-${{ matrix.config.type }} }}
+          path: build
+
   publish-gpr:
     if: startsWith(github.ref, 'refs/tags/')
     needs: Build
