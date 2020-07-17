@@ -8,6 +8,8 @@ inputs:
     required: true
   BuildDirectory: 
     required: true
+  Project:
+    required: true
 runs:
   using: 'node12'
   main: 'index.js'

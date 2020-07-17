@@ -48,11 +48,12 @@ jobs:
         if: matrix.config.os == 'windows'
         uses: ./.github/actions/windows
         with:
-          BuildSolution: PopH264.visualstudio\PopH264.sln
+          BuildSolution: PopH264.visualstudio/PopH264.sln
           BuildPlatform: x64
           BuildConfiguration: Release
           # would be nice to extract this from visual studio
-          BuildDirectory: Build\Release_x6
+          BuildDirectory: Build/Release_x6
+          project: ${{ env.project }}
 
       - name: Apple
         if: matrix.config.os == 'macOS'

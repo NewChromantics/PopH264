@@ -1,18 +1,22 @@
 const core = require("@actions/core");
 const exec = require("@actions/exec");
 
+const BUILDPLATFORM = core.getInput("BuildPlatform");
+const BUILDCONFIGURATION = core.getInput("BuildConfiguration");
+const BUILDDIRECTORY = core.getInput("BuildDirectory");
+const PROJECT = core.getInput("Project")
+
+const BuildSolution = `${PROJECT}.visualstudio/${PROJECT}.sln`
+
 async function run() {
   try {
-    const BUILDSOLUTION = core.getInput("BuildSolution");
-    const BUILDPLATFORM = core.getInput("BuildPlatform");
-    const BUILDCONFIGURATION = core.getInput("BuildConfiguration");
-    const BUILDDIRECTORY = core.getInput("BuildDirectory");
+
 
     await exec.exec(`powershell.exe ${__dirname}/build.ps1`);
 
-    await exec.exec('Write-Host', [BUILDSOLUTION])
+    await exec.exec('Write-Host', [BuildSolution])
     await exec.exec('set')
-    await exec.exec('MSBuild',[BUILDSOLUTION, `property:Configuration=${BUILDCONFIGURATION}`, `property:Platform=${BUILDPLATFORM}`])
+    await exec.exec('MSBuild',[BuildSolution, `property:Configuration=${BUILDCONFIGURATION}`, `property:Platform=${BUILDPLATFORM}`])
     await exec.exec('ls', [BUILDDIRECTORY])
 
   } catch (error) {
