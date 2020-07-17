@@ -2,10 +2,10 @@ name: Create Release
 
 on:
   push:
-    branches:
-      - master
     tags:
       - v*
+  watch:
+    types: [started]
 
 jobs:
   Build:
