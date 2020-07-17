@@ -12,15 +12,15 @@ jobs:
     strategy:
       matrix:
         config:
-          - os: ubuntu-latest
-            type: linux
-            architecture: x86_64
-            makefile: Makefile
+          # - os: ubuntu-latest
+          #   type: linux
+          #   architecture: x86_64
+          #   makefile: Makefile
 
-          - os: ARM64
-            type: linux
-            architecture: arm64
-            makefile: MakefileNvidia
+          # - os: ARM64
+          #   type: linux
+          #   architecture: arm64
+          #   makefile: MakefileNvidia
 
           # - os: windows
           #   type: windows
