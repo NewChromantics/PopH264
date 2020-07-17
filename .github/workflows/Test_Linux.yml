@@ -30,4 +30,4 @@ jobs:
         uses: thomasSDK/PopLinuxAction@v1
         with:
           architecture: ${{ matrix.config.architecture }}
-          project: ${{ env.project }
+          project: ${{ env.project }}
