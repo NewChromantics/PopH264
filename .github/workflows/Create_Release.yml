@@ -52,7 +52,7 @@ jobs:
           BuildPlatform: x64
           BuildConfiguration: Release
           # would be nice to extract this from visual studio
-          BuildDirectory: Build/Release_x6
+          BuildDirectory: Build\Release_x6
           project: ${{ env.project }}
 
       - name: Apple
