@@ -50,8 +50,8 @@ async function run() {
     await exec.exec("make", [`exec`, `-C`, `PopH264.Linux/`]);
 
     const files = [
-      `PopH264.Linux/PopH264-${architecture}.so`,
-      `PopH264.Linux/PopH264TestApp-${architecture}`,
+      `PopH264.Linux/PopH264.so`,
+      `PopH264.Linux/PopH264TestApp`,
     ];
 
     const rootDirectory = ".";
