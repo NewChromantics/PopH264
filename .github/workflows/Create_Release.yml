@@ -2,8 +2,8 @@ name: Create Release
 
 on:
   push:
-    tags:
-      - v*
+    paths:
+    - '**.json'
   watch:
     types: [started]
 
@@ -29,11 +29,11 @@ jobs:
 
           - os: macOS
             type: ios
-            buildScheme: ${{ env.project }}_Ios
+            buildScheme: PopH264_Ios
 
           # - os: macOS
           #   type: osx
-          #   buildScheme: ${{ env.project }}_Osx
+          #   buildScheme: PopH264_Osx
 
     steps:
       - name: Checkout repo
