@@ -1,0 +1,22 @@
+name: Test Ios
+
+on:
+  push:
+    branches:
+      - master
+      - '*Test*'
+
+jobs:
+  Test:
+    env:
+      project: PopH264
+    runs-on: [self-hosted, macOS]
+
+    steps:
+      - uses: actions/checkout@v1
+        with:
+          submodules: "recursive"
+      - uses: thomasSDK/PopAppleAction@v1
+        with:
+          BuildScheme: ${{ env.project }_Ios
+          project: ${{ env.project }

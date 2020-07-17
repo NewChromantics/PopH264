@@ -1,0 +1,33 @@
+name: Test Ios
+
+on:
+  push:
+    branches:
+      - master
+      - '*Test*'
+
+jobs:
+  Test:
+    env:
+      project: PopH264
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      matrix:
+        config:
+          - os: ubuntu-latest
+            type: linux
+            architecture: x86_64
+
+          - os: ARM64
+            type: linux
+            architecture: nvidia
+
+    steps:
+      - uses: actions/checkout@v1
+        with:
+          submodules: "recursive"
+      - name: Linux
+        uses: thomasSDK/PopLinuxAction@v1
+        with:
+          architecture: ${{ matrix.config.architecture }}
+          project: ${{ env.project }

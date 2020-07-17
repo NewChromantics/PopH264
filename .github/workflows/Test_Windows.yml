@@ -1,0 +1,30 @@
+name: Test Windows
+
+on:
+  push:
+    branches:
+      - master
+      - '*Test*'
+
+jobs:
+  Build:
+    runs-on: [self-hosted, windows]
+    env:
+      project: PopH264
+    
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: 'recursive'
+        
+    - name: Add msbuild to PATH
+      uses: microsoft/setup-msbuild@v1.0.0
+      
+    - name: Windows
+      uses: thomasSDK/PopWindowsAction@v1
+      with:
+        BuildPlatform: x64
+        BuildConfiguration: Release
+        # would be nice to extract this from visual studio
+        BuildDirectory: Build/Release_x6
+        project: ${{ env.project }}

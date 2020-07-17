@@ -4,7 +4,11 @@ on:
   push:
     branches:
       - master
-      - ActionTest
+    tags:
+      - v*
+    # file paths to consider in the event. Optional; defaults to all.
+    paths:
+      - 'package.json'
 
 jobs:
   Build:
@@ -28,11 +32,11 @@ jobs:
 
           - os: macOS
             type: ios
-            buildScheme: PopH264_Ios
+            buildScheme: ${{ env.project }_Ios
 
           - os: macOS
             type: osx
-            buildScheme: PopH264_Osx
+            buildScheme: ${{ env.project }_Osx
 
     steps:
       - name: Checkout repo
