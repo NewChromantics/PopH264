@@ -56,7 +56,7 @@ jobs:
 
       - name: Apple
         if: matrix.config.os == 'macOS'
-        uses: ./.github/actions/ios
+        uses: thomasSDK/PopAppleAction@v1
         with:
           BuildScheme: ${{ matrix.config.buildScheme }}
           project: ${{ env.project }}
