@@ -19,9 +19,9 @@ jobs:
           #   type: linux
           #   architecture: x86_64
 
-          # - os: ARM64
-          #   type: linux
-          #   architecture: nvidia
+          - os: ARM64
+            type: linux
+            architecture: nvidia
 
           # - os: windows
           #   type: windows
@@ -56,7 +56,7 @@ jobs:
 
       - name: Apple
         if: matrix.config.os == 'macOS'
-        uses: ./.github/actions/ios
+        uses: thomasSDK/PopAppleAction@v1
         with:
           BuildScheme: ${{ matrix.config.buildScheme }}
           project: ${{ env.project }}
@@ -85,10 +85,10 @@ jobs:
       - run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
-      # - name: Release
-      #   uses: fnkr/github-action-ghr@v1
-      #   if: startsWith(github.ref, 'refs/tags/')
-      #   env:
-      #     GHR_COMPRESS: xz
-      #     GHR_PATH: build/
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Release
+        uses: fnkr/github-action-ghr@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GHR_COMPRESS: xz
+          GHR_PATH: Build/
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
