@@ -5,7 +5,7 @@
   "description": "H264 decode / encode",
   "main": "index.js",
   "files": [
-    "PopH264.Linux"
+    "Build"
   ],
   "dependencies": {
     "@actions/artifact": "^0.3.2",
