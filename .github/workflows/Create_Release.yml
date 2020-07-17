@@ -29,11 +29,11 @@ jobs:
 
           - os: macOS
             type: ios
-            buildScheme: ${{ env.project }_Ios
+            buildScheme: ${{ env.project }}_Ios
 
           # - os: macOS
           #   type: osx
-          #   buildScheme: ${{ env.project }_Osx
+          #   buildScheme: ${{ env.project }}_Osx
 
     steps:
       - name: Checkout repo
