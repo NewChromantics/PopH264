@@ -20,6 +20,7 @@ jobs:
           - os: ARM64
             type: linux
             architecture: nvidia
+            module: $GITHUB_REPOSITORY
 
           # - os: windows
           #   type: windows
@@ -74,6 +75,7 @@ jobs:
     needs: Build
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
       - name: Download
         uses: actions/download-artifact@v2
         with:
