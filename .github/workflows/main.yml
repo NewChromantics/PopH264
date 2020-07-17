@@ -20,7 +20,7 @@ jobs:
           - os: ARM64
             type: linux
             architecture: nvidia
-            module: $GITHUB_REPOSITORY
+            project: $GITHUB_REPOSITORY
 
           # - os: windows
           #   type: windows

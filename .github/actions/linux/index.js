@@ -8,12 +8,12 @@ const architecture = core.getInput("architecture");
 const artifactClient = artifact.create();
 const artifactName = `linux-${architecture}`;
 
-const module = core.getInput("architecture").slice(14)
+const project = core.getInput("project").slice(14)
 
 async function run() {
   try {
     console.log(await exec.exec("ls"));
-    console.log(module)
+    console.log(project)
     process.env.archTarget = architecture;
     console.log('echo', ['$GITHUB_REPOSITORY'])
     // For Gihub hosted runners need to update gcc and get libx264
