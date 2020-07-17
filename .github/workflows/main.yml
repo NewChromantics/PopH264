@@ -1,4 +1,4 @@
-name: Main
+name: Create Release
 
 on:
   push:
@@ -32,9 +32,9 @@ jobs:
             type: ios
             buildScheme: ${{ env.project }_Ios
 
-          - os: macOS
-            type: osx
-            buildScheme: ${{ env.project }_Osx
+          # - os: macOS
+          #   type: osx
+          #   buildScheme: ${{ env.project }_Osx
 
     steps:
       - name: Checkout repo
