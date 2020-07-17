@@ -1,5 +1,5 @@
 {
-  "name": "poph264",
+  "name": "@NewChromantics/PopH264",
   "publishConfig": { "registry": "https://npm.pkg.github.com/" },
   "version": "1.0.1",
   "description": "H264 decode / encode",
