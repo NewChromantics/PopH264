@@ -3,6 +3,7 @@ name: Main
 on:
   push:
     branches:
+      - master
       - ActionTest
 
 jobs:
