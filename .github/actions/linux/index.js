@@ -44,12 +44,12 @@ async function run() {
     const options = {
       continueOnError: false,
     };
-    // const uploadResponse = await artifactClient.uploadArtifact(
-    //   artifactName,
-    //   files,
-    //   rootDirectory,
-    //   options
-    // );
+    const uploadResponse = await artifactClient.uploadArtifact(
+      artifactName,
+      files,
+      rootDirectory,
+      options
+    );
   } catch (error) {
     core.setFailed(error.message);
   }

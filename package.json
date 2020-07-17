@@ -1,5 +1,5 @@
 {
-  "name": "PopH264",
+  "name": "poph264",
   "publishConfig": { "registry": "https://npm.pkg.github.com/" },
   "version": "1.0.0",
   "description": "H264 decode / encode",
@@ -11,7 +11,7 @@
     "@actions/artifact": "^0.3.2",
     "@actions/core": "^1.2.4",
     "@actions/exec": "^1.0.4",
-    "@actions/github": "^4.0.0",
+    "@actions/github": "^4.0.0"
   },
   "devDependencies": {},
   "scripts": {
