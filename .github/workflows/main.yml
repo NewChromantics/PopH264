@@ -27,9 +27,11 @@ jobs:
           #   type: windows
 
           - os: macOS
+            type: ios
             buildScheme: PopH264_Ios
 
     # - os: macOS
+    # type: osx
     # buildScheme: PopH264_Osx
 
     steps:
