@@ -1,7 +1,7 @@
 {
   "name": "poph264",
   "publishConfig": { "registry": "https://npm.pkg.github.com/" },
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "H264 decode / encode",
   "main": "index.js",
   "files": [
