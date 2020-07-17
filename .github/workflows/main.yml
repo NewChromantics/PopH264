@@ -15,9 +15,9 @@ jobs:
     strategy:
       matrix:
         config:
-          # - os: ubuntu-latest
-          #   type: linux
-          #   architecture: x86_64
+          - os: ubuntu-latest
+            type: linux
+            architecture: x86_64
 
           - os: ARM64
             type: linux
@@ -30,9 +30,9 @@ jobs:
             type: ios
             buildScheme: PopH264_Ios
 
-    # - os: macOS
-    # type: osx
-    # buildScheme: PopH264_Osx
+          - os: macOS
+            type: osx
+            buildScheme: PopH264_Osx
 
     steps:
       - name: Checkout repo
