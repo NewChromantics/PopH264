@@ -1,5 +1,5 @@
-LIBRARY_NAME = PopEngine
-TESTAPP_NAME = PopEngineTestApp
+LIBRARY_NAME = PopH264
+TESTAPP_NAME = PopH264TestApp
 
 # X ?= if X env var isn't set, use this default
 compiler ?= g++
