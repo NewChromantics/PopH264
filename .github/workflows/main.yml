@@ -8,6 +8,8 @@ on:
 
 jobs:
   Build:
+    env:
+      project: PopH264
     name: ${{ matrix.config.os }}-${{ matrix.config.type }}
     runs-on: ${{ matrix.config.os }}
     strategy:
@@ -69,7 +71,7 @@ jobs:
         uses: thomasSDK/PopLinuxAction@v1
         with:
           architecture: ${{ matrix.config.architecture }}
-          project: $GITHUB_REPOSITORY
+          project: ${{ env.project }}
 
   publish-gpr:
     needs: Build
