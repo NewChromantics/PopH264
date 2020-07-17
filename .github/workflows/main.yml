@@ -19,9 +19,9 @@ jobs:
           #   type: linux
           #   architecture: x86_64
 
-          # - os: ARM64
-          #   type: linux
-          #   architecture: nvidia
+          - os: ARM64
+            type: linux
+            architecture: nvidia
 
           # - os: windows
           #   type: windows
@@ -70,7 +70,7 @@ jobs:
 
       - uses: actions/upload-artifact@v2
         with:
-          name: ${{ ${{ matrix.config.os }}-${{ matrix.config.type }} }}
+          name: ${{ matrix.config.os }}-${{ matrix.config.type }}
           path: build
 
   publish-gpr:
