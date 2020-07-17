@@ -11,7 +11,7 @@ const artifactName = `linux-${architecture}`;
 async function run() {
   try {
     console.log(await exec.exec("ls"));
-    process.env.ARCHITECTURE = architecture;
+    process.env.archTarget = architecture;
 
     // For Gihub hosted runners need to update gcc and get libx264
     if (architecture === "x86_64") {
