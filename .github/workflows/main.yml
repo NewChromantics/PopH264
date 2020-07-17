@@ -15,24 +15,24 @@ jobs:
     strategy:
       matrix:
         config:
-          # - os: ubuntu-latest
-          #   type: linux
-          #   architecture: x86_64
+          - os: ubuntu-latest
+            type: linux
+            architecture: x86_64
 
-          # - os: ARM64
-          #   type: linux
-          #   architecture: nvidia
+          - os: ARM64
+            type: linux
+            architecture: nvidia
 
-          - os: windows
-            type: windows
+          # - os: windows
+          #   type: windows
 
-          # - os: macOS
-          #   type: ios
-          #   buildScheme: PopH264_Ios
+          - os: macOS
+            type: ios
+            buildScheme: PopH264_Ios
 
-          # - os: macOS
-          #   type: osx
-          #   buildScheme: PopH264_Osx
+          - os: macOS
+            type: osx
+            buildScheme: PopH264_Osx
 
     steps:
       - name: Checkout repo
@@ -46,9 +46,8 @@ jobs:
 
       - name: Windows
         if: matrix.config.os == 'windows'
-        uses: ./.github/actions/windows
+        uses: thomasSDK/PopWindowsAction@v1
         with:
-          BuildSolution: PopH264.visualstudio/PopH264.sln
           BuildPlatform: x64
           BuildConfiguration: Release
           # would be nice to extract this from visual studio

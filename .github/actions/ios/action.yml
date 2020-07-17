@@ -1,9 +1,0 @@
-name: 'Pop Ios build'
-inputs:
-  BuildScheme: 
-    required: true
-  project:
-    required: true
-runs:
-  using: 'node12'
-  main: 'index.js'
