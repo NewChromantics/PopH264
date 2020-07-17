@@ -1,4 +1,4 @@
-name: Test Osx
+name: Build Osx
 
 on:
   push:
