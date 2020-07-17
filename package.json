@@ -1,13 +1,17 @@
 {
   "name": "PopH264",
+  "publishConfig": { "registry": "https://npm.pkg.github.com/" },
   "version": "1.0.0",
-  "description": "Build Status ========================== ![Build Windows](https://github.com/SoylentGraham/PopH264/workflows/Build%20Windows/badge.svg) ![Build Osx](https://github.com/SoylentGraham/PopH264/workflows/Build%20Osx/badge.svg) ![Build Ios](https://github.com/SoylentGraham/PopH264/workflows/Build%20Ios/badge.svg) ![Build Linux](https://github.com/SoylentGraham/PopH264/workflows/Build%20Linux/badge.svg) ![Create Release](https://github.com/NewChromantics/PopH264/workflows/Create%20Release/badge.svg)",
+  "description": "H264 decode / encode",
   "main": "index.js",
+  "files": [
+    "PopH264.Linux"
+  ],
   "dependencies": {
     "@actions/artifact": "^0.3.2",
     "@actions/core": "^1.2.4",
     "@actions/exec": "^1.0.4",
-    "@actions/github": "^4.0.0"
+    "@actions/github": "^4.0.0",
   },
   "devDependencies": {},
   "scripts": {
