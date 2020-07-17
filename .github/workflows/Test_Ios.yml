@@ -19,4 +19,4 @@ jobs:
       - uses: thomasSDK/PopAppleAction@v1
         with:
           BuildScheme: ${{ env.project }}_Ios
-          project: ${{ env.project }
+          project: ${{ env.project }}
