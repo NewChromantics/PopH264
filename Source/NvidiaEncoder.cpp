@@ -222,6 +222,7 @@ void Nvidia::TEncoder::InitYuvFormat(SoyPixelsMeta PixelMeta)
 	std::Debug << __PRETTY_FUNCTION__ << std::endl;
 	//	output plane = yuv input plane
 	auto& YuvPlane = GetYuvPlane();
+	auto& H264Plane = GetH264Plane();
 	auto& Encoder = *mEncoder;
 
 	//	the input is a "capture" plane
@@ -237,6 +238,14 @@ void Nvidia::TEncoder::InitYuvFormat(SoyPixelsMeta PixelMeta)
 	
 	InitEncodingParams();
 
+	//	gr: demo did this regardless of memory mode
+	Result = YuvPlane.setupPlane(V4L2_MEMORY_MMAP, 10, true, false);
+	IsOkay(Result,"YuvPlane.setupPlane(V4L2_MEMORY_MMAP");
+	Result = H264Plane.setupPlane(V4L2_MEMORY_MMAP, 6, true, false);
+	IsOkay(Result,"H264Plane.setupPlane(V4L2_MEMORY_MMAP");
+
+
+/*
 	//	setup memory read mode
 	auto& mMemoryMode = mNative->mMemoryMode;
 	switch( mMemoryMode )
@@ -265,6 +274,7 @@ void Nvidia::TEncoder::InitYuvFormat(SoyPixelsMeta PixelMeta)
 		}
 	}
 	IsOkay(Result,"Setting up memory mode");
+	*/
 }
 
 
@@ -288,9 +298,12 @@ void Nvidia::TEncoder::InitEncodingParams()
 	std::Debug << __PRETTY_FUNCTION__ << std::endl;
 	auto& Encoder = *mEncoder;
 
-	auto Profile = V4L2_MPEG_VIDEO_H264_PROFILE_BASELINE;
-	auto BitRate = 8 * 1000 * 500;
-	auto Level = V4L2_MPEG_VIDEO_H264_LEVEL_3_0;
+	//	use demo settings
+	//auto Profile = V4L2_MPEG_VIDEO_H264_PROFILE_BASELINE;
+	//auto Level = V4L2_MPEG_VIDEO_H264_LEVEL_3_0;
+	auto Profile = V4L2_MPEG_VIDEO_H264_PROFILE_HIGH;
+	auto BitRate = 4 * 1024 * 1024;
+	auto Level = V4L2_MPEG_VIDEO_H264_LEVEL_5_0;
 	
 	//	set other params
 	std::Debug << "SetProfile(" << Profile << ")" << std::endl;
@@ -304,6 +317,12 @@ void Nvidia::TEncoder::InitEncodingParams()
 	std::Debug << "setLevel(" << Level << ")" << std::endl;
 	Result = Encoder.setLevel(Level);
 	IsOkay(Result,"Failed to set level");
+
+	auto FpsNom = 30;
+	auto FpsDenom = 1;
+	std::Debug << "setFrameRate(" << FpsNom << ","<<FpsDenom<<")" << std::endl;
+	Result = Encoder.setFrameRate(FpsNom,FpsDenom);
+	IsOkay(Result,"Failed to setFrameRate");
 }
 
 
@@ -338,7 +357,7 @@ void Nvidia::TEncoder::InitH264Callback()
 	{
 		auto* ThisEncoder = reinterpret_cast<Nvidia::TEncoder*>(This);
 		//ThisEncoder->mNative.OnFrameEncoded( v4l2_buf, buffer, shared_buffer );
-		std::Debug << "H264 plane dequeue (frame encoded)" << std::endl;
+		std::Debug << "H264 plane dequeue (frame encoded) index=" << v4l2_buf->index << std::endl;
 		
 		//	gr: what are we returning!
 		return true;
@@ -519,7 +538,7 @@ void Nvidia::TEncoder::Start()
 {
 	std::Debug << __PRETTY_FUNCTION__ << std::endl;
 	auto& Encoder = *mEncoder;
-	auto UseCommand = true;
+	auto UseCommand = false;
 	
 	if ( UseCommand )
 	{
