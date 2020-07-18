@@ -91,7 +91,7 @@ jobs:
       # copy files we want in the release/package into the package dir
       - name: Copy files for packaging
         run: |
-	cp Readme.md ${{ env.project }}.Package/
+         cp Readme.md ${{ env.project }}.Package/
 
       # make a release
       - name: Make github release
