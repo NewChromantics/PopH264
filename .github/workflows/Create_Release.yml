@@ -3,7 +3,7 @@ name: Create Release
 on:
   push:
    branches:
-    - ActionTest
+    - ReleaseTest
     #gr: testing, but cannot have path AND branch
     #paths:
     #- '**.json'
