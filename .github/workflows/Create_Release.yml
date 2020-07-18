@@ -2,8 +2,11 @@ name: Create Release
 
 on:
   push:
-    paths:
-    - '**.json'
+	branches:
+		- ActionTest
+	#gr: testing, but cannot have path AND branch
+	#paths:
+	#- '**.json'
   watch:
     types: [started]
 
@@ -78,22 +81,36 @@ jobs:
     needs: Build
     runs-on: ubuntu-latest
     steps:
+		# Download artifacts into Packaging dir
       - uses: actions/checkout@v2
-      - name: Download
+      - name: Download build artifacts
         uses: actions/download-artifact@v2
         with:
-          path: Build
+          path: ${{ env.project }}.Package/
+
+		# copy files we want in the release/package into the package dir
+	  - run: |
+		cp Readme.md ${{ env.project }}.Package/
+
+		# make a release
+      - name: Release
+		uses: fnkr/github-action-ghr@v1
+		env:
+			GHR_COMPRESS: xz
+			GHR_PATH: ${{ env.project }}.Package/
+			GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+		# setup node for npm packaging
       - uses: actions/setup-node@v1
         with:
           node-version: 12
           registry-url: https://npm.pkg.github.com/
-      - run: npm ci
-      - run: npm publish
+
+		# copy files we want to
+		# download github-publish dependencies (ci), then publish from package dir
+      - run: |
+			cd ${{ env.project }}.Package/
+			npm ci
+			npm publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
-      - name: Release
-        uses: fnkr/github-action-ghr@v1
-        env:
-          GHR_COMPRESS: xz
-          GHR_PATH: Build/
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
