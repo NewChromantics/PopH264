@@ -47,11 +47,11 @@ jobs:
           submodules: recursive
 
       - name: Configure Windows
-        if: matrix.config.os == 'windows' && false
+        if: matrix.config.os == 'windows'
         uses: microsoft/setup-msbuild@v1.0.0
 
       - name: Windows
-        if: matrix.config.os == 'windows' && false
+        if: matrix.config.os == 'windows'
         uses: thomasSDK/PopWindowsAction@v1
         with:
           BuildPlatform: x64
@@ -61,21 +61,20 @@ jobs:
           project: ${{ env.project }}
 
       - name: Apple
-        if: matrix.config.os == 'macOS' && false
+        if: matrix.config.os == 'macOS'
         uses: thomasSDK/PopAppleAction@v1
         with:
           BuildScheme: ${{ matrix.config.buildScheme }}
           project: ${{ env.project }}
 
       - name: Linux
-        if: matrix.config.type == 'linux' && false
+        if: matrix.config.type == 'linux'
         uses: thomasSDK/PopLinuxAction@v1
         with:
           architecture: ${{ matrix.config.architecture }}
           project: ${{ env.project }}
 
       - uses: actions/upload-artifact@v2
-        if: false==true
         with:
           name: ${{ matrix.config.os }}-${{ matrix.config.type }}
           path: build
@@ -118,11 +117,16 @@ jobs:
           node-version: 12
           registry-url: https://npm.pkg.github.com/
 
+      # set dry-run if this isn't a tag so npm publish will run, but not do anything (and not fail)
+      - name: Set npm publish as dry-run
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: echo "::set-env name=NPM_PACKAGE_DRY_RUN::--dry-run"
+
       # copy files we want to
       # download github-publish dependencies (ci), then publish from package dir
       - run: |
          npm ci
-         npm publish
+         npm publish $NPM_PACKAGE_DRY_RUN
         working-directory: ${{ env.project }}.Package/
         env:
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
