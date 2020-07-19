@@ -1,5 +1,5 @@
-LIBRARY_NAME = PopH264
-TESTAPP_NAME = PopH264TestApp
+LIB_NAME = PopH264
+APP_NAME = PopH264TestApp
 
 # X ?= if X env var isn't set, use this default
 compiler ?= g++
@@ -8,30 +8,31 @@ CC = ${compiler}
 # archTarget is the target architecture
 # if unspecified, this becomes Linux_Linux/ pick something better :)
 archTarget ?= Linux
-BUILD_DIR = ../build/Linux_$(archTarget)
+BUILD_DIR = ../Build/Linux_$(archTarget)
 
-SRC = ..
-SOY_PATH = $(SRC)/Source/SoyLib
+PROJECT_PATH = ..
+SRC_PATH = $(PROJECT_PATH)/Source
+SOY_PATH = $(PROJECT_PATH)/Source/SoyLib
 
-LOCAL_C_INCLUDES = \
--I$(SRC)/Source	\
--I$(SRC)/Source/Broadway/Decoder	\
--I$(SRC)/Source/Broadway/Decoder/inc	\
+LIB_INCLUDES = \
+-I$(SRC_PATH)	\
+-I$(SRC_PATH)/Broadway/Decoder	\
+-I$(SRC_PATH)/Broadway/Decoder/inc	\
 -I$(SOY_PATH)/src	\
--I$(SRC)/Source/Json11	\
+-I$(SRC_PATH)/Json11	\
 
-LOCAL_SRC_FILES  = \
-$(SRC)/Source/PopH264.cpp \
-$(SRC)/Source/PopH264TestData.cpp \
-$(SRC)/Source/TDecoder.cpp \
-$(SRC)/Source/TDecoderInstance.cpp \
-$(SRC)/Source/TEncoder.cpp \
-$(SRC)/Source/TEncoderInstance.cpp \
-$(SRC)/Source/Json11/json11.cpp \
-$(SRC)/Source/X264Encoder.cpp
+LIB_SRC_FILES  = \
+$(SRC_PATH)/PopH264.cpp \
+$(SRC_PATH)/PopH264TestData.cpp \
+$(SRC_PATH)/TDecoder.cpp \
+$(SRC_PATH)/TDecoderInstance.cpp \
+$(SRC_PATH)/TEncoder.cpp \
+$(SRC_PATH)/TEncoderInstance.cpp \
+$(SRC_PATH)/Json11/json11.cpp \
+$(SRC_PATH)/X264Encoder.cpp
 
 # soy lib files
-LOCAL_SRC_FILES  += \
+LIB_SRC_FILES  += \
 $(SOY_PATH)/src/SoyTypes.cpp \
 $(SOY_PATH)/src/SoyAssert.cpp \
 $(SOY_PATH)/src/SoyDebug.cpp \
@@ -46,23 +47,27 @@ $(SOY_PATH)/src/SoyImage.cpp \
 $(SOY_PATH)/src/SoyStreamBuffer.cpp \
 $(SOY_PATH)/src/SoyFourcc.cpp \
 
-TESTAPP_SRC_FILES =	\
-$(SRC)/Source_TestApp/PopH264_TestApp.cpp	\
-$(SRC)/Source_TestApp/PopH264_TestAssetGenerator.cpp	\
-$(SRC)/Source/SoyLib/src/SoyFilesystem.cpp
+APP_SRC_FILES =	\
+$(PROJECT_PATH)/Source_TestApp/PopH264_TestApp.cpp	\
+$(PROJECT_PATH)/Source_TestApp/PopH264_TestAssetGenerator.cpp	\
+$(SOY_PATH)/src/SoyFilesystem.cpp
+
+LIB_DEFINES = \
+-DTARGET_LINUX	\
 
 # -g stops symbol stripping
 # -f[lag] PIC position independent code (for dyanmically loaded code)
 # -rpath $ORIGIN makes the shared object runtimepath be same place as executable
-CFLAGS = -c -DTARGET_LINUX $(LOCAL_C_INCLUDES) -std=gnu++17 -fPIC -g
+CFLAGS = -c $(LIB_DEFINES) $(LIB_INCLUDES) -std=gnu++17 -fPIC -g
 LDFLAGS = -pthread
 LDFLAGS += '-Wl,-rpath,$$ORIGIN'
 LDFLAGS += '-Wl,-rpath-link=$(BUILD_DIR)'
 
 LIB_LINK_FLAGS = $(LDFLAGS) -shared
-TEST_APP_LINK_FLAGS = $(LDFLAGS)
+APP_LINK_FLAGS = $(LDFLAGS)
 
-LIBRARY_LINK_LIBS = \
+# gr: maybe this should include the os lib dir for x264
+LIB_LINK_LIBS = \
 -lx264
 
 ifeq ($(archTarget),nvidia)
@@ -77,7 +82,7 @@ ifeq ($(archTarget),nvidia)
 	LIB_LINK_FLAGS += -Wl,-rpath-link=$(TARGET_ROOTFS)/usr/lib/$(TEGRA_ARMABI)/tegra
 	LIB_LINK_FLAGS += -Wl,-rpath-link=$(TARGET_ROOTFS)/$(CUDA_PATH)/lib64
 
-	LIBRARY_LINK_LIBS += \
+	LIB_LINK_LIBS += \
 		-lpthread -lv4l2 -lEGL -lGLESv2 -lX11 \
 		-lnvbuf_utils -lnvjpeg -lnvosd -ldrm \
 		-lcuda -lcudart \
@@ -86,65 +91,69 @@ ifeq ($(archTarget),nvidia)
 		-L"$(TARGET_ROOTFS)/usr/lib/$(TEGRA_ARMABI)" \
 		-L"$(TARGET_ROOTFS)/usr/lib/$(TEGRA_ARMABI)/tegra"
 
-	LOCAL_SRC_FILES += \
-		$(SRC)/Source/NvidiaEncoder.cpp \
-		$(SRC)/Source/nvidia/samples/common/classes/NvV4l2Element.cpp	\
-		$(SRC)/Source/nvidia/samples/common/classes/NvV4l2ElementPlane.cpp	\
-		$(SRC)/Source/nvidia/samples/common/classes/NvVideoEncoder.cpp	\
-		$(SRC)/Source/nvidia/samples/common/classes/NvElement.cpp	\
-		$(SRC)/Source/nvidia/samples/common/classes/NvBuffer.cpp	\
-		$(SRC)/Source/nvidia/samples/common/classes/NvElementProfiler.cpp	\
-		$(SRC)/Source/nvidia/samples/common/classes/NvLogging.cpp	\
-		$(SRC)/Source/nvidia/samples/common/classes/NvUtils.cpp	
+	LIB_SRC_FILES += \
+		$(SRC_PATH)/NvidiaEncoder.cpp \
+		$(SRC_PATH)/nvidia/samples/common/classes/NvV4l2Element.cpp	\
+		$(SRC_PATH)/nvidia/samples/common/classes/NvV4l2ElementPlane.cpp	\
+		$(SRC_PATH)/nvidia/samples/common/classes/NvVideoEncoder.cpp	\
+		$(SRC_PATH)/nvidia/samples/common/classes/NvElement.cpp	\
+		$(SRC_PATH)/nvidia/samples/common/classes/NvBuffer.cpp	\
+		$(SRC_PATH)/nvidia/samples/common/classes/NvElementProfiler.cpp	\
+		$(SRC_PATH)/nvidia/samples/common/classes/NvLogging.cpp	\
+		$(SRC_PATH)/nvidia/samples/common/classes/NvUtils.cpp	
+
+	LIB_INCLUDES += \
+		-I$(SRC_PATH)/nvidia/include/
 endif
 
 
-LOCAL_C_INCLUDES += \
--I$(SRC)/Source/nvidia/include/
+LIB_OBJECTS=$(LIB_SRC_FILES:.cpp=.o)
+APP_OBJECTS=$(APP_SRC_FILES:.cpp=.o)
 
-LIB_OBJECTS=$(LOCAL_SRC_FILES:.cpp=.o)
-TESTAPP_OBJECTS=$(TESTAPP_SRC_FILES:.cpp=.o)
+OUT_LIB=$(BUILD_DIR)/lib${LIB_NAME}.so
+OUT_APP=$(BUILD_DIR)/${APP_NAME}
 
-# ARCHITECTURE=${archTarget}
-# env var MACHTYPE is this systems arch type, eg; aarch64-unknown-linux-gnu
-OUT_LIBRARY=$(BUILD_DIR)/lib${LIBRARY_NAME}.so
-OUT_EXECUTABLE=$(BUILD_DIR)/${TESTAPP_NAME}
+# These files (without directory structure) get copied to build dir
+OUT_FILE_SOURCES = \
+$(SRC_PATH)/PopH264.h	\
 
-# gr: automate this somehow so its a list of sources, then OUT_ is just their name with no directory structire
-OUT_HEADER=$(BUILD_DIR)/PopH264.h
-OUT_HEADER_SRC=$(SRC)/Source/PopH264.h
+# convert to Build/xxx target files
+OUT_FILES = $(addprefix ${BUILD_DIR}/,$(notdir ${OUT_FILE_SOURCES}))
+#$(info out files...)
+#$(info ${OUT_FILES})
 
-exec: $(OUT_EXECUTABLE)
+
+
+exec: $(OUT_APP)
 .PHONY: exec
 
-lib: $(OUT_LIBRARY) 
+lib: $(OUT_LIB) 
 .PHONY: lib
 
 # Copy other output files
-$(OUT_HEADER): $(OUT_HEADER_SRC)
+$(OUT_FILES): $(OUT_FILE_SOURCES)
 	mkdir -p $(BUILD_DIR)
-	$(info Copying $(OUT_HEADER))
-	cp $(OUT_HEADER_SRC) $(OUT_HEADER)
+	$(info Copying output files $(OUT_FILES))
+	$(foreach SourceFilename,$(OUT_FILE_SOURCES),'cp $(SourceFilename) ${BUILD_DIR}')
 
-$(OUT_EXECUTABLE): $(TESTAPP_OBJECTS) $(OUT_LIBRARY)
-	echo "Building test app $(OUT_EXECUTABLE)"
-	$(CC) $(TEST_APP_LINK_FLAGS) $(TESTAPP_OBJECTS) -o $@ -L$(BUILD_DIR) -l$(LIBRARY_NAME)
+$(OUT_APP): $(APP_OBJECTS) $(OUT_LIB)
+	echo "Building test app $(OUT_APP)"
+	mkdir -p $(BUILD_DIR)
+	$(CC) $(APP_LINK_FLAGS) $(APP_OBJECTS) -o $@ -L$(BUILD_DIR) -l$(LIB_NAME)
 
-$(OUT_LIBRARY): $(LIB_OBJECTS) $(OUT_HEADER)
-	echo "Building library $(OUT_LIBRARY)"
-	$(CC) $(LIB_LINK_FLAGS) -o $@ $(LIB_OBJECTS) $(LIBRARY_LINK_LIBS)
-	# ar rcs $@ $(LIB_OBJECTS)
-	echo "Listing dependencies"
-	ldd $(OUT_LIBRARY)
+$(OUT_LIB): $(LIB_OBJECTS) $(OUT_FILES)
+	echo "Building library $(OUT_LIB)"
+	$(CC) $(LIB_LINK_FLAGS) -o $@ $(LIB_OBJECTS) $(LIB_LINK_LIBS)
+	$(info Listing dependencies of $(OUT_LIB))
+	ldd $(OUT_LIB)
 
 .cpp.o:
-	$(CC) $(CFLAGS) $(LOCAL_C_INCLUDES) $(LIBRARY_C_INCLUDES) $< -o $@
+	$(CC) $(CFLAGS) $(APP_INCLUDES) $(LIB_INCLUDES) $< -o $@
 
 clean:
 	# clean build files, anything .o
 	echo "Cleaning files"
-	rm -f $(TESTAPP_OBJECTS)
-	rm -f $(LIB_OBJECTS)	
-	#find ../ -type f -name '*.o' -delete
-	rm -f $(OUT_LIBRARY)
-	rm -f $(OUT_EXECUTABLE)
+	rm -f $(APP_OBJECTS)
+	rm -f $(LIB_OBJECTS)
+	rm -f $(OUT_LIB)
+	rm -f $(OUT_APP)
