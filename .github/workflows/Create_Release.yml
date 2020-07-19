@@ -1,4 +1,8 @@
 name: Create Release
+
+env:
+  project: PopH264
+
 on:
   push:
     branches:
@@ -12,8 +16,6 @@ on:
 
 jobs:
   Build:
-    env:
-      project: PopH264
     name: ${{ matrix.config.os }}-${{ matrix.config.type }}
     runs-on: ${{ matrix.config.os }}
     strategy:
@@ -45,11 +47,11 @@ jobs:
           submodules: recursive
 
       - name: Configure Windows
-        if: matrix.config.os == 'windows'
+        if: matrix.config.os == 'windows' && false
         uses: microsoft/setup-msbuild@v1.0.0
 
       - name: Windows
-        if: matrix.config.os == 'windows'
+        if: matrix.config.os == 'windows' && false
         uses: thomasSDK/PopWindowsAction@v1
         with:
           BuildPlatform: x64
@@ -59,20 +61,21 @@ jobs:
           project: ${{ env.project }}
 
       - name: Apple
-        if: matrix.config.os == 'macOS'
+        if: matrix.config.os == 'macOS' && false
         uses: thomasSDK/PopAppleAction@v1
         with:
           BuildScheme: ${{ matrix.config.buildScheme }}
           project: ${{ env.project }}
 
       - name: Linux
-        if: matrix.config.type == 'linux'
+        if: matrix.config.type == 'linux' && false
         uses: thomasSDK/PopLinuxAction@v1
         with:
           architecture: ${{ matrix.config.architecture }}
           project: ${{ env.project }}
 
       - uses: actions/upload-artifact@v2
+        if: false==true
         with:
           name: ${{ matrix.config.os }}-${{ matrix.config.type }}
           path: build
@@ -92,6 +95,8 @@ jobs:
       - name: Copy files for packaging
         run: |
          echo Copying files into $PACKAGE_DIR
+         echo Project is ${{ env.project }}
+         echo Project2 is $project
          cp Readme.md $PACKAGE_DIR
         env:
           PACKAGE_DIR: ${{ env.project }}.Package/
