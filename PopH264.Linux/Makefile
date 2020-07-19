@@ -139,7 +139,7 @@ lib: $(OUT_LIB)
 $(OUT_FILES): $(OUT_FILE_SOURCES)
 	mkdir -p $(BUILD_DIR)
 	$(info Copying output files $(OUT_FILES))
-	$(foreach SourceFilename,$(OUT_FILE_SOURCES),'cp $(SourceFilename) ${BUILD_DIR}')
+	cp $(OUT_FILE_SOURCES) $(BUILD_DIR)
 
 $(OUT_APP): $(APP_OBJECTS) $(OUT_LIB)
 	$(info Building test app $(OUT_APP))
