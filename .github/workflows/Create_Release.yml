@@ -91,7 +91,10 @@ jobs:
       # copy files we want in the release/package into the package dir
       - name: Copy files for packaging
         run: |
-         cp Readme.md $project.Package/
+         echo Copying files into $PACKAGE_DIR
+         cp Readme.md $PACKAGE_DIR
+        env:
+          PACKAGE_DIR: ${{ env.project }}.Package/
 
       # make a release
       - name: Make github release
@@ -113,8 +116,8 @@ jobs:
       # copy files we want to
       # download github-publish dependencies (ci), then publish from package dir
       - run: |
-         cd $project.Package/
          npm ci
          npm publish
+        working-directory: ${{ env.project }}.Package/
         env:
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
