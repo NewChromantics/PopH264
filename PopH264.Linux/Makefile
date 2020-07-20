@@ -124,7 +124,6 @@ OUT_FILES = $(addprefix ${BUILD_DIR}/,$(notdir ${OUT_FILE_SOURCES}))
 
 
 GithubWorkflow: $(OUT_APP) $(OUT_LIB)
-	# gr: this prints out the word echo " should it be $(info ::set-output) ?
 	$(info ::set-output name=executable:$(OUT_APP))
 	$(info ::set-output name=library:$(OUT_LIB))
 .PHONY: GithubWorkflow
