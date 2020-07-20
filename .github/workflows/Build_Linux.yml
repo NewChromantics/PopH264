@@ -24,7 +24,7 @@ jobs:
 
           - os: Pi4
             type: linux
-            architecture: arm64
+            architecture: Pi4
 
     steps:
       - uses: actions/checkout@v2
