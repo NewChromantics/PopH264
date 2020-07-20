@@ -42,10 +42,10 @@ jobs:
           - os: macOS
             type: ios
             buildScheme: PopH264_Ios
-          
-          - os: macOS
-            type: osx
-            buildScheme: PopH264_Osx
+# tsdk: disabled as the build produces too many files and it breaks          
+#           - os: macOS
+#             type: osx
+#             buildScheme: PopH264_Osx
 
     steps:
       - name: Checkout repo
