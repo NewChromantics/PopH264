@@ -16,7 +16,7 @@ jobs:
       - uses: actions/checkout@v1
         with:
           submodules: "recursive"
-      - uses: thomasSDK/PopAppleAction@v1
+      - uses: NewChromantics/PopAction_BuildApple@v1
         with:
           BuildScheme: ${{ env.project }}_Osx
           project: ${{ env.project }}

@@ -27,7 +27,7 @@ jobs:
         with:
           submodules: "recursive"
       - name: Linux
-        uses: thomasSDK/PopLinuxAction@v1
+        uses: NewChromantics/PopAction_BuildLinux@v1
         with:
           architecture: ${{ matrix.config.architecture }}
           project: ${{ env.project }}
