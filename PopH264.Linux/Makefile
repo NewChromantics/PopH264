@@ -123,6 +123,11 @@ OUT_FILES = $(addprefix ${BUILD_DIR}/,$(notdir ${OUT_FILE_SOURCES}))
 #$(info ${OUT_FILES})
 
 
+GithubWorkflow: $(OUT_APP) $(OUT_LIB)
+	# gr: this prints out the word echo " should it be $(info ::set-output) ?
+	echo "::set-output name=executable:$(OUT_APP)"
+	echo "::set-output name=library:$(OUT_LIB)"
+.PHONY: GithubWorkflow
 
 exec: $(OUT_APP)
 .PHONY: exec
@@ -134,15 +139,15 @@ lib: $(OUT_LIB)
 $(OUT_FILES): $(OUT_FILE_SOURCES)
 	mkdir -p $(BUILD_DIR)
 	$(info Copying output files $(OUT_FILES))
-	$(foreach SourceFilename,$(OUT_FILE_SOURCES),'cp $(SourceFilename) ${BUILD_DIR}')
+	cp $(OUT_FILE_SOURCES) $(BUILD_DIR)
 
 $(OUT_APP): $(APP_OBJECTS) $(OUT_LIB)
-	echo "Building test app $(OUT_APP)"
+	$(info Building test app $(OUT_APP))
 	mkdir -p $(BUILD_DIR)
 	$(CC) $(APP_LINK_FLAGS) $(APP_OBJECTS) -o $@ -L$(BUILD_DIR) -l$(LIB_NAME)
 
 $(OUT_LIB): $(LIB_OBJECTS) $(OUT_FILES)
-	echo "Building library $(OUT_LIB)"
+	$(info Building library $(OUT_LIB))
 	$(CC) $(LIB_LINK_FLAGS) -o $@ $(LIB_OBJECTS) $(LIB_LINK_LIBS)
 	$(info Listing dependencies of $(OUT_LIB))
 	ldd $(OUT_LIB)
@@ -152,7 +157,7 @@ $(OUT_LIB): $(LIB_OBJECTS) $(OUT_FILES)
 
 clean:
 	# clean build files, anything .o
-	echo "Cleaning files"
+	$(info Cleaning files)
 	rm -f $(APP_OBJECTS)
 	rm -f $(LIB_OBJECTS)
 	rm -f $(OUT_LIB)

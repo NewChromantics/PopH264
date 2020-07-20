@@ -52,7 +52,7 @@ jobs:
 
       - name: Windows
         if: matrix.config.os == 'windows'
-        uses: thomasSDK/PopWindowsAction@v1
+        uses: NewChromantics/PopAction_BuildWindows@v1
         with:
           BuildPlatform: x64
           BuildConfiguration: Release
@@ -62,14 +62,14 @@ jobs:
 
       - name: Apple
         if: matrix.config.os == 'macOS'
-        uses: thomasSDK/PopAppleAction@v1
+        uses: NewChromantics/PopAction_BuildApple@v1
         with:
           BuildScheme: ${{ matrix.config.buildScheme }}
           project: ${{ env.project }}
 
       - name: Linux
         if: matrix.config.type == 'linux'
-        uses: thomasSDK/PopLinuxAction@v1
+        uses: NewChromantics/PopAction_BuildLinux@v1
         with:
           architecture: ${{ matrix.config.architecture }}
           project: ${{ env.project }}
@@ -77,7 +77,7 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.config.os }}-${{ matrix.config.type }}
-          path: build
+          path: Build
 
   publish-gpr:
     needs: Build
