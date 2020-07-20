@@ -35,10 +35,10 @@ jobs:
           - os: macOS
             type: ios
             buildScheme: PopH264_Ios
-#           OSx crashes the release at the moment
-#           - os: macOS
-#             type: osx
-#             buildScheme: PopH264_Osx
+          
+          - os: macOS
+            type: osx
+            buildScheme: PopH264_Osx
 
     steps:
       - name: Checkout repo
