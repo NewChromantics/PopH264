@@ -18,9 +18,9 @@ jobs:
             type: linux
             architecture: x86_64
 
-          - os: ARM64
+          - os: Nvidia
             type: linux
-            architecture: nvidia
+            architecture: arm64
 
           - os: Pi4
             type: linux
@@ -33,5 +33,6 @@ jobs:
       - name: Linux
         uses: NewChromantics/PopAction_BuildLinux@v1
         with:
+          machine: ${{ matrix.config.os }}
           architecture: ${{ matrix.config.architecture }}
           project: ${{ env.project }}
