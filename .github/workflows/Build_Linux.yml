@@ -22,6 +22,10 @@ jobs:
             type: linux
             architecture: nvidia
 
+          - os: Pi4
+            type: linux
+            architecture: arm64
+
     steps:
       - uses: actions/checkout@v1
         with:
