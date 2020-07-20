@@ -11,6 +11,9 @@ on:
     #gr: testing, but cannot have path AND branch
     #paths:
     #- '**.json'
+    #tsdk: need this otherwise it will never make a package later on    
+    tags:        
+      - v1 
   watch:
     types: [started]
 
@@ -25,9 +28,13 @@ jobs:
             type: linux
             architecture: x86_64
 
-          - os: ARM64
+          - os: Nvidia
             type: linux
-            architecture: nvidia
+            architecture: arm64
+
+          - os: Pi4
+            type: linux
+            architecture: arm64
 
           - os: windows
             type: windows
@@ -35,10 +42,10 @@ jobs:
           - os: macOS
             type: ios
             buildScheme: PopH264_Ios
-#           OSx crashes the release at the moment
-#           - os: macOS
-#             type: osx
-#             buildScheme: PopH264_Osx
+          
+          - os: macOS
+            type: osx
+            buildScheme: PopH264_Osx
 
     steps:
       - name: Checkout repo
@@ -71,6 +78,7 @@ jobs:
         if: matrix.config.type == 'linux'
         uses: NewChromantics/PopAction_BuildLinux@v1
         with:
+          machine: ${{ matrix.config.os }}
           architecture: ${{ matrix.config.architecture }}
           project: ${{ env.project }}
 
