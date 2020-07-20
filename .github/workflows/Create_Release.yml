@@ -29,6 +29,10 @@ jobs:
             type: linux
             architecture: nvidia
 
+          - os: Pi4
+            type: linux
+            architecture: arm64
+
           - os: windows
             type: windows
 
