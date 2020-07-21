@@ -111,7 +111,7 @@ jobs:
         if: matrix.config.os == 'macOS'
         with:
           name: ${{ matrix.config.os }}-${{ matrix.config.type }}
-          path: ${{ steps.GetTargetBuildDir.outputs.TargetBuildDir }}${{ matrix.config.buildScheme }}.framework
+          path: ${{ steps.GetTargetBuildDir.outputs.TargetBuildDir }}/${{ matrix.config.buildScheme }}.framework
 
   publish-gpr:
     needs: Build
