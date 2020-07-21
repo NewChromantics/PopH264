@@ -108,7 +108,7 @@ jobs:
           path: Build
 
       - name: Upload macOS
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v1
         if: matrix.config.os == 'macOS'
         with:
           name: ${{ matrix.config.os }}-${{ matrix.config.type }}
