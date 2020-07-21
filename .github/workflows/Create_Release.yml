@@ -68,6 +68,7 @@ jobs:
           project: ${{ env.project }}
 
       - name: Apple
+        id: Apple
         if: matrix.config.os == 'macOS'
         uses: NewChromantics/PopAction_BuildApple@v1
         with:
