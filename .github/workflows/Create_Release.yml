@@ -75,6 +75,9 @@ jobs:
           project: ${{ env.project }}
 
       - name: GetTargetBuildDir
+        env:
+          BuildProject: ${{ env.project }}.xcodeproj
+          BuildScheme: ${{ matrix.config.buildScheme }}
         if: matrix.config.os == 'macOS'
         id: GetTargetBuildDir
         run: |
