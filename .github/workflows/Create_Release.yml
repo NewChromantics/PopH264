@@ -27,31 +27,25 @@ jobs:
           - os: ubuntu-latest
             type: linux
             architecture: x86_64
-            BuildDirectory: Build
 
           - os: Nvidia
             type: linux
             architecture: arm64
-            BuildDirectory: Build
 
           - os: Pi4
             type: linux
             architecture: arm64
-            BuildDirectory: Build
 
           - os: windows
             type: windows
-            BuildDirectory: Build
 
           - os: macOS
             type: ios
             buildScheme: PopH264_Ios
-            BuildDirectory: build/Release-iphoneos/
 
           - os: macOS
             type: osx
             buildScheme: PopH264_Osx
-            BuildDirectory: build/Release/
 
     steps:
       - name: Checkout repo
@@ -80,6 +74,13 @@ jobs:
           BuildScheme: ${{ matrix.config.buildScheme }}
           project: ${{ env.project }}
 
+      - name: GetTargetBuildDir
+        if: matrix.config.os == 'macOS'
+        id: GetTargetBuildDir
+        run: |
+          echo "Setting target build dir"
+          echo "##[set-output name=TargetBuildDir;]$(xcodebuild -workspace $BuildProject/project.xcworkspace -scheme $BuildScheme -showBuildSettings | grep TARGET_BUILD_DIR | sed -e 's/.*TARGET_BUILD_DIR = //')"
+
       - name: Linux
         if: matrix.config.type == 'linux'
         uses: NewChromantics/PopAction_BuildLinux@v1
@@ -88,18 +89,19 @@ jobs:
           architecture: ${{ matrix.config.architecture }}
           project: ${{ env.project }}
 
-      - uses: actions/upload-artifact@v2
+      - name: Upload Windows And Linux
+        uses: actions/upload-artifact@v2
+        if: matrix.config.type != 'macOS'
         with:
           name: ${{ matrix.config.os }}-${{ matrix.config.type }}
-          path: ${{ matrix.config.BuildDirectory }}
+          path: Build
 
-      - uses: actions/upload-artifact@v2
-        if: matrix.config.os == 'macOS'
+      - name: Upload macOS
+        uses: actions/upload-artifact@v2
+        if: matrix.config.type == 'macOS'
         with:
           name: ${{ matrix.config.os }}-${{ matrix.config.type }}
-          path: |
-            ${{ matrix.config.BuildDirectory }}${{ matrix.config.buildScheme }}.framework
-            ${{ matrix.config.BuildDirectory }}${{ matrix.config.buildScheme }}.framework.dSYM
+          path: ${{steps.GetTargetBuildDir.outputs.TargetBuildDir}}
 
   publish-gpr:
     needs: Build
