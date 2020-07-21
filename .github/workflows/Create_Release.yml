@@ -89,6 +89,14 @@ jobs:
           name: ${{ matrix.config.os }}-${{ matrix.config.type }}
           path: Build
 
+      - name: Upload MacOs
+# tsdk: v2 of this action fails with osx https://github.com/actions/upload-artifact/issues/76
+        uses: actions/upload-artifact@v1
+        if: matrix.config.os == 'macOS'
+        with:
+          name: ${{ matrix.config.os }}-${{ matrix.config.type }}
+          path: ${{ steps.Apple.outputs.buildDirectory }}
+
   publish-gpr:
     needs: Build
     runs-on: ubuntu-latest
