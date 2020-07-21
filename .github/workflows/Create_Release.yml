@@ -27,17 +27,17 @@ jobs:
           - os: ubuntu-latest
             type: linux
             architecture: x86_64
-            BuildDirectory: build/x86_64
+            BuildDirectory: Build/Linux_x86_64
 
           - os: Nvidia
             type: linux
             architecture: arm64
-            BuildDirectory: build/arm64
+            BuildDirectory: Build/Linux_arm64
 
           - os: Pi4
             type: linux
             architecture: arm64
-            BuildDirectory: build/arm64
+            BuildDirectory: Build/Linux_arm64
 
           - os: windows
             type: windows
