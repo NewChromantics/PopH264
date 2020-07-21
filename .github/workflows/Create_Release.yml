@@ -102,13 +102,15 @@ jobs:
       - name: Test macOS buildDir
         run: |
           echo ${{steps.GetTargetBuildDir.outputs.TargetBuildDir}}
+          echo ${{ steps.GetTargetBuildDir.outputs.TargetBuildDir }}${{ matrix.config.buildScheme }}.framework
+          ls ${{ steps.GetTargetBuildDir.outputs.TargetBuildDir }}${{ matrix.config.buildScheme }}.framework
 
       - name: Upload macOS
         uses: actions/upload-artifact@v2
         if: matrix.config.os == 'macOS'
         with:
           name: ${{ matrix.config.os }}-${{ matrix.config.type }}
-          path: ${{steps.GetTargetBuildDir.outputs.TargetBuildDir}}
+          path: ${{ steps.GetTargetBuildDir.outputs.TargetBuildDir }}${{ matrix.config.buildScheme }}.framework
 
   publish-gpr:
     needs: Build
