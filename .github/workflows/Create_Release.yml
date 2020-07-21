@@ -27,25 +27,31 @@ jobs:
           - os: ubuntu-latest
             type: linux
             architecture: x86_64
+            BuildDirectory: build/x86_64
 
           - os: Nvidia
             type: linux
             architecture: arm64
+            BuildDirectory: build/arm64
 
           - os: Pi4
             type: linux
             architecture: arm64
+            BuildDirectory: build/arm64
 
           - os: windows
             type: windows
+            BuildDirectory: Build
 
           - os: macOS
             type: ios
             buildScheme: PopH264_Ios
-# tsdk: disabled as the build produces too many files and it breaks          
-#           - os: macOS
-#             type: osx
-#             buildScheme: PopH264_Osx
+            BuildDirectory: build/Release-iphoneos
+
+          - os: macOS
+            type: osx
+            buildScheme: PopH264_Osx
+            BuildDirectory: build/Release
 
     steps:
       - name: Checkout repo
@@ -85,7 +91,7 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.config.os }}-${{ matrix.config.type }}
-          path: Build
+          path: ${{ matrix.config.BuildDirectory }}
 
   publish-gpr:
     needs: Build
