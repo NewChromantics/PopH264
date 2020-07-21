@@ -90,6 +90,7 @@ jobs:
           echo ${{steps.GetTargetBuildDir.outputs.TargetBuildDir}}
           echo ${{ steps.GetTargetBuildDir.outputs.TargetBuildDir }}/${{ matrix.config.buildScheme }}.framework
           ls ${{ steps.GetTargetBuildDir.outputs.TargetBuildDir }}
+          ls ${{ steps.GetTargetBuildDir.outputs.TargetBuildDir }}/${{ matrix.config.buildScheme }}.framework
           
       - name: Linux
         if: matrix.config.type == 'linux'
