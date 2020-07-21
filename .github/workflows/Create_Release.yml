@@ -84,6 +84,13 @@ jobs:
           echo "Setting target build dir"
           echo "##[set-output name=TargetBuildDir;]$(xcodebuild -workspace $BuildProject/project.xcworkspace -scheme $BuildScheme -showBuildSettings | grep TARGET_BUILD_DIR | sed -e 's/.*TARGET_BUILD_DIR = //')"
 
+      - name: Test macOS buildDir
+        if: matrix.config.os == 'macOS'
+        run: |
+          echo ${{steps.GetTargetBuildDir.outputs.TargetBuildDir}}
+          echo ${{ steps.GetTargetBuildDir.outputs.TargetBuildDir }}${{ matrix.config.buildScheme }}.framework
+          ls ${{ steps.GetTargetBuildDir.outputs.TargetBuildDir }}
+          
       - name: Linux
         if: matrix.config.type == 'linux'
         uses: NewChromantics/PopAction_BuildLinux@v1
@@ -98,13 +105,6 @@ jobs:
         with:
           name: ${{ matrix.config.os }}-${{ matrix.config.type }}
           path: Build
-          
-      - name: Test macOS buildDir
-        if: matrix.config.os == 'macOS'
-        run: |
-          echo ${{steps.GetTargetBuildDir.outputs.TargetBuildDir}}
-          echo ${{ steps.GetTargetBuildDir.outputs.TargetBuildDir }}${{ matrix.config.buildScheme }}.framework
-          ls ${{ steps.GetTargetBuildDir.outputs.TargetBuildDir }}${{ matrix.config.buildScheme }}.framework
 
       - name: Upload macOS
         uses: actions/upload-artifact@v2
