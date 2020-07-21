@@ -91,14 +91,14 @@ jobs:
 
       - name: Upload Windows And Linux
         uses: actions/upload-artifact@v2
-        if: matrix.config.type != 'macOS'
+        if: matrix.config.os != 'macOS'
         with:
           name: ${{ matrix.config.os }}-${{ matrix.config.type }}
           path: Build
 
       - name: Upload macOS
         uses: actions/upload-artifact@v2
-        if: matrix.config.type == 'macOS'
+        if: matrix.config.os == 'macOS'
         with:
           name: ${{ matrix.config.os }}-${{ matrix.config.type }}
           path: ${{steps.GetTargetBuildDir.outputs.TargetBuildDir}}
