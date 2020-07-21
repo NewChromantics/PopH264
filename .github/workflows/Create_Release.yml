@@ -98,6 +98,10 @@ jobs:
         with:
           name: ${{ matrix.config.os }}-${{ matrix.config.type }}
           path: Build
+          
+      - name: Test macOS buildDir
+        run: |
+          echo ${{steps.GetTargetBuildDir.outputs.TargetBuildDir}}
 
       - name: Upload macOS
         uses: actions/upload-artifact@v2
