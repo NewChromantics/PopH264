@@ -46,12 +46,12 @@ jobs:
           - os: macOS
             type: ios
             buildScheme: PopH264_Ios
-            BuildDirectory: build/Release-iphoneos
+            BuildDirectory: build/Release-iphoneos/
 
           - os: macOS
             type: osx
             buildScheme: PopH264_Osx
-            BuildDirectory: build/Release
+            BuildDirectory: build/Release/
 
     steps:
       - name: Checkout repo
@@ -92,6 +92,14 @@ jobs:
         with:
           name: ${{ matrix.config.os }}-${{ matrix.config.type }}
           path: ${{ matrix.config.BuildDirectory }}
+
+      - uses: actions/upload-artifact@v2
+        if: matrix.config.os == 'macOS'
+        with:
+          name: ${{ matrix.config.os }}-${{ matrix.config.type }}
+          path: |
+            ${{ matrix.config.BuildDirectory }}${{ matrix.config.buildScheme }}.framework
+            ${{ matrix.config.BuildDirectory }}${{ matrix.config.buildScheme }}.framework.dSYM
 
   publish-gpr:
     needs: Build
