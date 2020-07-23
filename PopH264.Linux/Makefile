@@ -6,9 +6,10 @@ compiler ?= g++
 CC = ${compiler}
 
 # archTarget is the target architecture
-# if unspecified, this becomes Linux_Linux/ pick something better :)
+# tsdk: the naming of the build folders are handled by the github actions
+# archTarget could still be used for an if statements in the make file
 archTarget ?= Linux
-BUILD_DIR = ../Build/Linux_$(archTarget)
+BUILD_DIR = ../Build
 
 PROJECT_PATH = ..
 SRC_PATH = $(PROJECT_PATH)/Source

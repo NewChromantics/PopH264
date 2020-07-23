@@ -3,7 +3,7 @@
   "publishConfig": {
     "registry": "https://npm.pkg.github.com/"
   },
-  "version": "0.0.4",
+  "version": "0.0.6",
   "description": "H264 decode / encode",
   "main": "index.js",
   "scripts": {

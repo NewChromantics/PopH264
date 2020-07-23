@@ -1,0 +1,32 @@
+name: Build Apple
+
+env:
+  project: PopH264
+
+on:
+  push:
+    branches:
+      - master
+      - '*Test*'
+
+jobs:
+  Test:
+    name: ${{ matrix.config.os }}-${{ matrix.config.type }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      matrix:
+        config:
+          - os: macOS
+            type: Ios
+
+          - os: macOS
+            type: Osx
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: "recursive"
+      - uses: NewChromantics/PopAction_BuildApple@v1
+        with:
+          BuildScheme: ${{ env.project }}_${{ matrix.config.type }}
+          project: ${{ env.project }}
