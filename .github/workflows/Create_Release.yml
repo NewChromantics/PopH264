@@ -143,6 +143,7 @@ jobs:
           npm publish $NPM_PACKAGE_DRY_RUN
 
       # make a release
+      # needs to be after the npm package cause this step tars and deletes all the files in the dir which breaks it!       
       - name: Make github release
         # only try and make a release if this is a release (to help testing npm packaging)
         if: startsWith(github.ref, 'refs/tags/v')
