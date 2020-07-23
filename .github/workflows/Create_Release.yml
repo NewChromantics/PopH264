@@ -120,14 +120,14 @@ jobs:
           PACKAGE_DIR: ${{ env.project }}.Package/
 
       # make a release
-      - name: Make github release
-        # only try and make a release if this is a release (to help testing npm packaging)
-        if: startsWith(github.ref, 'refs/tags/v')
-        uses: fnkr/github-action-ghr@v1   
-        env:
-         GHR_COMPRESS: xz
-         GHR_PATH: ${{ env.project }}.Package/
-         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#       - name: Make github release
+#         # only try and make a release if this is a release (to help testing npm packaging)
+#         if: startsWith(github.ref, 'refs/tags/v')
+#         uses: fnkr/github-action-ghr@v1   
+#         env:
+#          GHR_COMPRESS: xz
+#          GHR_PATH: ${{ env.project }}.Package/
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # setup node for npm packaging
       - name: Make github package
@@ -144,9 +144,11 @@ jobs:
       # copy files we want to
       # download github-publish dependencies (ci), then publish from package dir
       - name: Publish
-        working-directory: ${{ env.project }}.Package
+        working-directory: ${{ env.project }}.Package/
         env:
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
         run: |
+          ls
+          pwd
           npm ci
           npm publish $NPM_PACKAGE_DRY_RUN
