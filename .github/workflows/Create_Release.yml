@@ -40,12 +40,10 @@ jobs:
             type: windows
 
           - os: macOS
-            type: ios
-            buildScheme: PopH264_Ios
+            type: Ios
 
           - os: macOS
-            type: osx
-            buildScheme: PopH264_Osx
+            type: Osx
 
     steps:
       - name: Checkout repo
@@ -72,7 +70,7 @@ jobs:
         if: matrix.config.os == 'macOS'
         uses: NewChromantics/PopAction_BuildApple@v1
         with:
-          BuildScheme: ${{ matrix.config.buildScheme }}
+          BuildScheme: ${{ env.project }}_${{ matrix.config.type }}
           project: ${{ env.project }}
           
       - name: Linux
