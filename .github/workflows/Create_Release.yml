@@ -37,7 +37,7 @@ jobs:
             architecture: arm64
 
           - os: windows
-            type: windows
+            type: x64
 
           - os: macOS
             type: Ios
@@ -62,7 +62,7 @@ jobs:
           BuildPlatform: x64
           BuildConfiguration: Release
           # would be nice to extract this from visual studio
-          BuildDirectory: Build\Release_x6
+          BuildDirectory: Build\Release_x64
           project: ${{ env.project }}
 
       - name: Apple
