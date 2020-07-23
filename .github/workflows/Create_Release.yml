@@ -147,6 +147,6 @@ jobs:
         working-directory: ${{ env.project }}.Package
         env:
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
-      - run: |
+        run: |
           npm ci
           npm publish $NPM_PACKAGE_DRY_RUN
