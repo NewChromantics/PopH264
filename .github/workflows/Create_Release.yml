@@ -13,7 +13,7 @@ on:
     #- '**.json'
     #tsdk: need this otherwise it will never make a package later on    
     tags:        
-      - v1 
+      - v*
   watch:
     types: [started]
 
@@ -27,31 +27,25 @@ jobs:
           - os: ubuntu-latest
             type: linux
             architecture: x86_64
-            BuildDirectory: build/x86_64
 
           - os: Nvidia
             type: linux
             architecture: arm64
-            BuildDirectory: build/arm64
 
           - os: Pi4
             type: linux
             architecture: arm64
-            BuildDirectory: build/arm64
 
           - os: windows
             type: windows
-            BuildDirectory: Build
 
           - os: macOS
             type: ios
             buildScheme: PopH264_Ios
-            BuildDirectory: build/Release-iphoneos
 
           - os: macOS
             type: osx
             buildScheme: PopH264_Osx
-            BuildDirectory: build/Release
 
     steps:
       - name: Checkout repo
@@ -74,12 +68,13 @@ jobs:
           project: ${{ env.project }}
 
       - name: Apple
+        id: Apple
         if: matrix.config.os == 'macOS'
         uses: NewChromantics/PopAction_BuildApple@v1
         with:
           BuildScheme: ${{ matrix.config.buildScheme }}
           project: ${{ env.project }}
-
+          
       - name: Linux
         if: matrix.config.type == 'linux'
         uses: NewChromantics/PopAction_BuildLinux@v1
@@ -88,10 +83,20 @@ jobs:
           architecture: ${{ matrix.config.architecture }}
           project: ${{ env.project }}
 
-      - uses: actions/upload-artifact@v2
+      - name: Upload Windows And Linux
+        uses: actions/upload-artifact@v2
+        if: matrix.config.os != 'macOS'
         with:
           name: ${{ matrix.config.os }}-${{ matrix.config.type }}
-          path: ${{ matrix.config.BuildDirectory }}
+          path: Build
+
+      - name: Upload MacOs
+# tsdk: v2 of this action fails with osx https://github.com/actions/upload-artifact/issues/76
+        uses: actions/upload-artifact@v1
+        if: matrix.config.os == 'macOS'
+        with:
+          name: ${{ matrix.config.os }}-${{ matrix.config.type }}
+          path: ${{ steps.Apple.outputs.buildDirectory }}
 
   publish-gpr:
     needs: Build
@@ -114,16 +119,6 @@ jobs:
         env:
           PACKAGE_DIR: ${{ env.project }}.Package/
 
-      # make a release
-      - name: Make github release
-        # only try and make a release if this is a release (to help testing npm packaging)
-        if: startsWith(github.ref, 'refs/tags/v')
-        uses: fnkr/github-action-ghr@v1   
-        env:
-         GHR_COMPRESS: xz
-         GHR_PATH: ${{ env.project }}.Package/
-         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       # setup node for npm packaging
       - name: Make github package
         uses: actions/setup-node@v1
@@ -138,9 +133,22 @@ jobs:
 
       # copy files we want to
       # download github-publish dependencies (ci), then publish from package dir
-      - run: |
-         npm ci
-         npm publish $NPM_PACKAGE_DRY_RUN
+      - name: Publish
         working-directory: ${{ env.project }}.Package/
         env:
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        run: |
+          ls
+          npm ci
+          npm publish $NPM_PACKAGE_DRY_RUN
+
+      # make a release
+      # needs to be after the npm package cause this step tars and deletes all the files in the dir which breaks it!       
+      - name: Make github release
+        # only try and make a release if this is a release (to help testing npm packaging)
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: fnkr/github-action-ghr@v1   
+        env:
+         GHR_COMPRESS: xz
+         GHR_PATH: ${{ env.project }}.Package/
+         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
