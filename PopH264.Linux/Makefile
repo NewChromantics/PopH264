@@ -8,7 +8,7 @@ CC = ${compiler}
 # archTarget is the target architecture
 # if unspecified, this becomes Linux_Linux/ pick something better :)
 archTarget ?= Linux
-BUILD_DIR = ../Build/Linux_$(archTarget)
+BUILD_DIR = ../Build
 
 PROJECT_PATH = ..
 SRC_PATH = $(PROJECT_PATH)/Source
