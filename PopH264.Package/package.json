@@ -3,7 +3,7 @@
   "publishConfig": {
     "registry": "https://npm.pkg.github.com/newchromatics"
   },
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "H264 decode / encode",
   "main": "index.js",
   "scripts": {
