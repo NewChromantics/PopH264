@@ -92,7 +92,7 @@ jobs:
         uses: actions/upload-artifact@v1
         if: matrix.config.os == 'macOS'
         with:
-          name: ${{ matrix.config.os }}-${{ matrix.config.type }}
+          name: ${{ env.project }}_${{ matrix.config.type }}.framework 
           path: ${{ steps.Apple.outputs.buildDirectory }}
 
   publish-gpr:
