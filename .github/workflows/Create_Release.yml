@@ -137,7 +137,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
         run: |
           ls
-          npm ci
+          npm i
           npm publish $NPM_PACKAGE_DRY_RUN
 
       # make a release
