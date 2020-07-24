@@ -77,8 +77,7 @@ jobs:
         if: matrix.config.type == 'linux'
         uses: NewChromantics/PopAction_BuildLinux@v1
         with:
-          machine: ${{ matrix.config.os }}
-          architecture: ${{ matrix.config.architecture }}
+          os: ${{ matrix.config.os }}
           project: ${{ env.project }}
 
       - name: Upload Windows And Linux
