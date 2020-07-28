@@ -32,9 +32,9 @@ jobs:
             type: linux
             architecture: arm64
 
-          # - os: Pi4
-          #   type: linux
-          #   architecture: arm64
+          - os: Pi4
+            type: linux
+            architecture: arm64
 
           - os: windows
             type: x64
@@ -92,10 +92,11 @@ jobs:
         with:
           project: ${{ env.project }}
 
-      - name: Upload Windows And Linux
+      - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ matrix.config.os }}-${{ matrix.config.type }}
+          # tsdk: these env vars are set in each of the actions
+          name: ${{ env.UPLOAD_NAME }}
           path: ${{ env.UPLOAD_DIR }}
 
   publish-gpr:
