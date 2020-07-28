@@ -27,23 +27,29 @@ jobs:
           - os: ubuntu-latest
             type: linux
             architecture: x86_64
+            action: NewChromantics/PopAction_BuildLinux@v1
 
           - os: Nvidia
             type: linux
             architecture: arm64
+            action: NewChromantics/PopAction_BuildLinux@v1
 
           - os: Pi4
             type: linux
             architecture: arm64
+            action: NewChromantics/PopAction_BuildLinux@v1
 
           - os: windows
             type: x64
+            action: NewChromantics/PopAction_BuildWindows@v1
 
           - os: macOS
             type: Ios
+            action: NewChromantics/PopAction_BuildApple@v1
 
           - os: macOS
             type: Osx
+            action: NewChromantics/PopAction_BuildApple@v1
 
     steps:
       - name: Checkout repo
@@ -55,45 +61,22 @@ jobs:
         if: matrix.config.os == 'windows'
         uses: microsoft/setup-msbuild@v1.0.0
 
-      - name: Windows
-        if: matrix.config.os == 'windows'
-        uses: NewChromantics/PopAction_BuildWindows@v1
+      - name: Build
+        uses: ${{ matrix.config.action }}
         with:
+          project: ${{ env.project }}
+          os: ${{ matrix.config.os }}
+          BuildScheme: ${{ env.project }}_${{ matrix.config.type }}
           BuildPlatform: x64
           BuildConfiguration: Release
           # would be nice to extract this from visual studio
           BuildDirectory: Build\Release_x64
-          project: ${{ env.project }}
 
-      - name: Apple
-        id: Apple
-        if: matrix.config.os == 'macOS'
-        uses: NewChromantics/PopAction_BuildApple@v1
-        with:
-          BuildScheme: ${{ env.project }}_${{ matrix.config.type }}
-          project: ${{ env.project }}
-          
-      - name: Linux
-        if: matrix.config.type == 'linux'
-        uses: NewChromantics/PopAction_BuildLinux@v1
-        with:
-          os: ${{ matrix.config.os }}
-          project: ${{ env.project }}
-
-      - name: Upload Windows And Linux
+      - name: Upload
         uses: actions/upload-artifact@v2
-        if: matrix.config.os != 'macOS'
-        with:
-          name: ${{ matrix.config.os }}-${{ matrix.config.type }}
-          path: Build
-
-      - name: Upload MacOs
-# tsdk: v2 of this action fails with osx https://github.com/actions/upload-artifact/issues/76
-        uses: actions/upload-artifact@v1
-        if: matrix.config.os == 'macOS'
         with:
           name: ${{ env.project }}_${{ matrix.config.type }}.framework 
-          path: ${{ steps.Apple.outputs.buildDirectory }}
+          path: ${{ steps.Build.outputs.buildDirectory }}
 
   publish-gpr:
     needs: Build
