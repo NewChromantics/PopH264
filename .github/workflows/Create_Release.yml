@@ -96,7 +96,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.config.os }}-${{ matrix.config.type }}
-          path: ${{ UPLOAD_DIR }}
+          path: ${{ env.UPLOAD_DIR }}
 
   publish-gpr:
     needs: Build
