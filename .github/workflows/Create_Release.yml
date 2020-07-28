@@ -46,7 +46,7 @@ jobs:
             type: Osx
 
           - os: ubuntu-latest
-            type: android
+            type: Android
 
     steps:
       - name: Checkout repo
@@ -59,7 +59,7 @@ jobs:
         uses: microsoft/setup-msbuild@v1.0.0
 
       - name: Windows
-        id: Build
+        id: Windows
         if: matrix.config.os == 'windows'
         uses: NewChromantics/PopAction_BuildWindows@v1
         with:
@@ -70,7 +70,7 @@ jobs:
           project: ${{ env.project }}
 
       - name: Apple
-        id: Build
+        id: Apple
         if: matrix.config.os == 'macOS'
         uses: NewChromantics/PopAction_BuildApple@v1
         with:
@@ -78,16 +78,16 @@ jobs:
           project: ${{ env.project }}
           
       - name: Linux
-        id: Build
+        id: Linux
         if: matrix.config.type == 'linux'
         uses: NewChromantics/PopAction_BuildLinux@v1
         with:
           os: ${{ matrix.config.os }}
           project: ${{ env.project }}
 
-      - name: android
-        id: Build
-        if: matrix.config.type == 'android'
+      - name: Android
+        id: Android
+        if: matrix.config.type == 'Android'
         uses: NewChromantics/PopAction_BuildAndroid@v1
         with:
           project: ${{ env.project }}
@@ -97,7 +97,7 @@ jobs:
         if: matrix.config.os != 'macOS'
         with:
           name: ${{ matrix.config.os }}-${{ matrix.config.type }}
-          path: Build
+          path: ${{ steps.Windows.outputs.buildDirectory || steps.Linux.outputs.buildDirectory || steps.Android.outputs.buildDirectory }}
 
       - name: Upload MacOs
 # tsdk: v2 of this action fails with osx https://github.com/actions/upload-artifact/issues/76
