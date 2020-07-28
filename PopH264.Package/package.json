@@ -1,9 +1,9 @@
 {
   "name": "@newchromantics/poph264",
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com/newchromatics"
+    "registry": "https://npm.pkg.github.com/"
   },
-  "version": "0.0.6",
+  "version": "1.2.10",
   "description": "H264 decode / encode",
   "main": "index.js",
   "scripts": {

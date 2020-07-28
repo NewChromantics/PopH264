@@ -5,10 +5,10 @@ APP_NAME = PopH264TestApp
 compiler ?= g++
 CC = ${compiler}
 
-# archTarget is the target architecture
+# osTarget is the target os eg. Nvidia / Pi4
 # tsdk: the naming of the build folders are handled by the github actions
-# archTarget could still be used for an if statements in the make file
-archTarget ?= Linux
+# osTarget is still used for if statements in the make file
+osTarget ?= Linux
 BUILD_DIR = ../Build
 
 PROJECT_PATH = ..
@@ -71,7 +71,7 @@ APP_LINK_FLAGS = $(LDFLAGS)
 LIB_LINK_LIBS = \
 -lx264
 
-ifeq ($(archTarget),nvidia)
+ifeq ($(osTarget),nvidia)
 	# from nvidia samples Rules.mk
 	# ARM ABI of the target platform
 	TEGRA_ARMABI ?= aarch64-linux-gnu

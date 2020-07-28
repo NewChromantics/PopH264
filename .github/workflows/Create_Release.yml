@@ -77,8 +77,7 @@ jobs:
         if: matrix.config.type == 'linux'
         uses: NewChromantics/PopAction_BuildLinux@v1
         with:
-          machine: ${{ matrix.config.os }}
-          architecture: ${{ matrix.config.architecture }}
+          os: ${{ matrix.config.os }}
           project: ${{ env.project }}
 
       - name: Upload Windows And Linux
@@ -93,7 +92,7 @@ jobs:
         uses: actions/upload-artifact@v1
         if: matrix.config.os == 'macOS'
         with:
-          name: ${{ matrix.config.os }}-${{ matrix.config.type }}
+          name: ${{ env.project }}_${{ matrix.config.type }}.framework 
           path: ${{ steps.Apple.outputs.buildDirectory }}
 
   publish-gpr:
@@ -137,7 +136,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
         run: |
           ls
-          npm ci
+          npm i
           npm publish $NPM_PACKAGE_DRY_RUN
 
       # make a release
