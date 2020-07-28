@@ -45,7 +45,7 @@ jobs:
           - os: macOS
             type: Osx
 
-          - os: ubuntu-latest
+          - os: Ubuntu 16.04
             type: Android
 
     steps:
