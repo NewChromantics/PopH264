@@ -94,18 +94,9 @@ jobs:
 
       - name: Upload Windows And Linux
         uses: actions/upload-artifact@v2
-        if: matrix.config.os != 'macOS'
         with:
           name: ${{ matrix.config.os }}-${{ matrix.config.type }}
-          path: ${{ steps.Windows.outputs.buildDirectory || steps.Linux.outputs.buildDirectory || steps.Android.outputs.buildDirectory }}
-
-      - name: Upload MacOs
-# tsdk: v2 of this action fails with osx https://github.com/actions/upload-artifact/issues/76
-        uses: actions/upload-artifact@v1
-        if: matrix.config.os == 'macOS' 
-        with:
-          name: ${{ env.project }}_${{ matrix.config.type }}.framework 
-          path: ${{ steps.Build.outputs.buildDirectory }}
+          path: $UPLOAD_DIR
 
   publish-gpr:
     needs: Build
@@ -148,7 +139,6 @@ jobs:
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
         run: |
           ls
-          npm i
           npm publish $NPM_PACKAGE_DRY_RUN
 
       # make a release
