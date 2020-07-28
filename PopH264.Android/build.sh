@@ -1,6 +1,4 @@
 #!/bin/sh
-#export ANDROID_NDK_HOME=/usr/local/Cellar/android-ndk/r11c/
-#ANDROID_NDK_HOME
 
 #echo "env vars"
 #env
