@@ -32,9 +32,9 @@ jobs:
             type: linux
             architecture: arm64
 
-          - os: Pi4
-            type: linux
-            architecture: arm64
+          # - os: Pi4
+          #   type: linux
+          #   architecture: arm64
 
           - os: windows
             type: x64
@@ -44,6 +44,9 @@ jobs:
 
           - os: macOS
             type: Osx
+
+          - os: ubuntu-16.04
+            type: Android
 
     steps:
       - name: Checkout repo
@@ -56,6 +59,7 @@ jobs:
         uses: microsoft/setup-msbuild@v1.0.0
 
       - name: Windows
+        id: Windows
         if: matrix.config.os == 'windows'
         uses: NewChromantics/PopAction_BuildWindows@v1
         with:
@@ -74,26 +78,26 @@ jobs:
           project: ${{ env.project }}
           
       - name: Linux
+        id: Linux
         if: matrix.config.type == 'linux'
         uses: NewChromantics/PopAction_BuildLinux@v1
         with:
           os: ${{ matrix.config.os }}
           project: ${{ env.project }}
 
-      - name: Upload Windows And Linux
-        uses: actions/upload-artifact@v2
-        if: matrix.config.os != 'macOS'
+      - name: Android
+        id: Android
+        if: matrix.config.type == 'Android'
+        uses: NewChromantics/PopAction_BuildAndroid@v1
         with:
-          name: ${{ matrix.config.os }}-${{ matrix.config.type }}
-          path: Build
+          project: ${{ env.project }}
 
-      - name: Upload MacOs
-# tsdk: v2 of this action fails with osx https://github.com/actions/upload-artifact/issues/76
-        uses: actions/upload-artifact@v1
-        if: matrix.config.os == 'macOS'
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
         with:
-          name: ${{ env.project }}_${{ matrix.config.type }}.framework 
-          path: ${{ steps.Apple.outputs.buildDirectory }}
+          # tsdk: these env vars are set in each of the actions
+          name: ${{ env.UPLOAD_NAME }}
+          path: ${{ env.UPLOAD_DIR }}
 
   publish-gpr:
     needs: Build
@@ -136,7 +140,6 @@ jobs:
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
         run: |
           ls
-          npm i
           npm publish $NPM_PACKAGE_DRY_RUN
 
       # make a release

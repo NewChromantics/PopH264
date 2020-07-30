@@ -1,6 +1,4 @@
 #!/bin/sh
-#export ANDROID_NDK=/usr/local/Cellar/android-ndk/r11c/
-#ANDROID_NDK
 
 #echo "env vars"
 #env
@@ -33,8 +31,8 @@ MAXCONCURRENTBUILDS=8
 BUILD_PROJECT_FOLDER=$BUILD_TARGET_NAME.Android
 
 # set android NDK dir
-if [ -z "$ANDROID_NDK" ]; then
-	echo "ANDROID_NDK env var not set"
+if [ -z "$ANDROID_NDK_HOME" ]; then
+	echo "ANDROID_NDK_HOME env var not set"
 	exit 1
 fi
 
@@ -42,7 +40,7 @@ function BuildAbi()
 {
 	ANDROID_ABI=$1
 	echo "ndk-build $ANDROID_ABI..."
-	$ANDROID_NDK/ndk-build -j$MAXCONCURRENTBUILDS NDK_DEBUG=0 NDK_PROJECT_PATH=$SOURCE_ROOT/$BUILD_PROJECT_FOLDER
+	$ANDROID_NDK_HOME/ndk-build -j$MAXCONCURRENTBUILDS NDK_DEBUG=0 NDK_PROJECT_PATH=$SOURCE_ROOT/$BUILD_PROJECT_FOLDER
 
 	RESULT=$?
 
@@ -82,7 +80,7 @@ fi
 
 if [ $ACTION == "clean" ]; then
 	echo "Android/build.sh: Cleaning..."
-	$ANDROID_NDK/ndk-build clean NDK_DEBUG=0
+	$ANDROID_NDK_HOME/ndk-build clean NDK_DEBUG=0
 	#ant clean
 	exit $?
 fi

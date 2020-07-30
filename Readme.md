@@ -13,3 +13,13 @@ Linux
   - `make archType=arm64` (jetson,pi4 = arm64)
 
 [Start Self Hosted Runner as a Service](https://docs.github.com/en/actions/hosting-your-own-runners/configuring-the-self-hosted-runner-application-as-a-service)
+
+Android
+----------------
+Use this docker container:
+https://hub.docker.com/r/simplatex/android-lightweight
+
+based on this article:
+https://medium.com/@simplatex/how-to-build-a-lightweight-docker-container-for-android-build-c52e4e68997e
+
+If needed we can build out own / modify this one but at the moment it works with no issues
