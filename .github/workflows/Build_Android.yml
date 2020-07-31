@@ -1,0 +1,23 @@
+name: Build Android
+
+on:
+  push:
+    branches:
+      - master
+      - '*Test*'
+
+jobs:
+  Build:
+    runs-on: ubuntu-latest
+    env:
+      project: PopH264
+    
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: 'recursive'
+
+    - name: Android
+      uses: NewChromantics/PopAction_BuildAndroid@v1
+      with:
+        project: ${{ env.project }}
