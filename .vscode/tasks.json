@@ -6,7 +6,7 @@
 		{
 			"label": "Build",
 			"type": "shell",
-			"command": "(cd PopH264.Linux && make archType=arm64)",
+			"command": "(cd PopH264.Linux && make osTarget=nvidia)",
 			"problemMatcher": [],
 			"group": {
 				"kind": "build",

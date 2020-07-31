@@ -105,6 +105,10 @@ ifeq ($(osTarget),nvidia)
 
 	LIB_INCLUDES += \
 		-I$(SRC_PATH)/nvidia/include/
+
+	LIB_DEFINES += -DENABLE_NVIDIA
+	# gr: we've already defined CFLAGS so need to update it here
+	CFLAGS += -DENABLE_NVIDIA
 endif
 
 

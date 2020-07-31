@@ -16,12 +16,6 @@
 #define ENABLE_MEDIAFOUNDATION
 #endif
 
-//tsdk: special DTARGET for Nvidia for now
-#if defined(TARGET_NVIDIA) //|| defined(TARGET_OSX)
-#define ENABLE_NVIDIA
-#endif
-
-
 #if defined(ENABLE_X264)
 #include "X264Encoder.h"
 #endif
@@ -34,6 +28,7 @@
 #include "MediaFoundationEncoder.h"
 #endif
 
+//	ENABLE_NVIDIA should be defined by makefile/project now
 #if defined(ENABLE_NVIDIA)
 #include "NvidiaEncoder.h"
 #endif
