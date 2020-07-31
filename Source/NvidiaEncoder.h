@@ -38,13 +38,17 @@ public:
 
 public:
 	TEncoder(TEncoderParams& Params,std::function<void(PopH264::TPacket&)> OnOutPacket);
-
+	~TEncoder();
+	
 	virtual void		Encode(const SoyPixelsImpl& Luma, const SoyPixelsImpl& ChromaU, const SoyPixelsImpl& ChromaV, const std::string& Meta, bool Keyframe) override;
 	virtual void		Encode(const SoyPixelsImpl& Pixels,const std::string& Meta,bool Keyframe) override;
 	virtual void		FinishEncoding() override;
 
 private:
 	void			InitEncoder(SoyPixelsMeta PixelMeta);		//	once we have some meta, set everything up
+
+	void			InitYuvMemoryMode();
+	void			InitH264MemoryMode();
 	void			InitH264Format(SoyPixelsMeta PixelMeta);
 	void			InitYuvFormat(SoyPixelsMeta InputMeta);
 	void			InitDmaBuffers(size_t BufferCount);

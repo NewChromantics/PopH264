@@ -17,6 +17,7 @@
 #endif
 
 #if defined(ENABLE_X264)
+#pragma warning("X264 encoder enabled")
 #include "X264Encoder.h"
 #endif
 
@@ -30,6 +31,7 @@
 
 //	ENABLE_NVIDIA should be defined by makefile/project now
 #if defined(ENABLE_NVIDIA)
+#pragma warning("Nvidia encoder enabled")
 #include "NvidiaEncoder.h"
 #endif
 

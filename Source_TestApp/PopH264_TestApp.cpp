@@ -122,11 +122,12 @@ void EncoderYuv8_88Test(const char* EncoderName="")
 	EncoderOptionsJson << "{\n";
 	EncoderOptionsJson << "	\"Encoder\":\"" << EncoderName << "\"	";
 	EncoderOptionsJson << "}";
+	DebugPrint(std::string("Encoder options: ") + EncoderOptionsJson.str());
 	
 	char ErrorBuffer[1000] = {0};
 	auto Handle = PopH264_CreateEncoder(EncoderOptionsJson.str().c_str(), ErrorBuffer, std::size(ErrorBuffer) );
 	std::stringstream Debug;
-	Debug << "PopH264_CreateEncoder handle=" << Handle << " error=" << ErrorBuffer;
+	Debug << "PopH264_CreateEncoder EncoderName=" << EncoderName << " handle=" << Handle << " error=" << ErrorBuffer;
 	DebugPrint(Debug.str());
 
 	SoyPixels Yuv( SoyPixelsMeta(640,480,SoyPixelsFormat::Yuv_8_88));
@@ -166,7 +167,7 @@ void EncoderYuv8_88Test(const char* EncoderName="")
 	
 int main()
 {
-	EncoderYuv8_88Test("x264");
+	EncoderYuv8_88Test("");
 
 #if defined(TEST_ASSETS)
 	MakeGreyscalePng("PopH264Test_GreyscaleGradient.png");

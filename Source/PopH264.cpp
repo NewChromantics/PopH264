@@ -274,11 +274,13 @@ __export int32_t PopH264_CreateEncoder(const char* OptionsJson,char* ErrorBuffer
 	}
 	catch(std::exception& e)
 	{
+		std::Debug << __PRETTY_FUNCTION__ << " exception " << e.what() << std::endl;
 		Soy::StringToBuffer( e.what(), ErrorBuffer, ErrorBufferSize );
 		return -1;
 	}
 	catch(...)
 	{
+		std::Debug << __PRETTY_FUNCTION__ << " unknown exception" << std::endl;
 		Soy::StringToBuffer("Unknown exception", ErrorBuffer, ErrorBufferSize );
 		return -1;
 	}
@@ -305,10 +307,12 @@ __export void PopH264_EncoderPushFrame(int32_t Instance,const char* MetaJson,con
 	}
 	catch(std::exception& e)
 	{
+		std::Debug << __PRETTY_FUNCTION__ << " exception " << e.what() << std::endl;
 		Soy::StringToBuffer( e.what(), ErrorBuffer, ErrorBufferSize );
 	}
 	catch(...)
 	{
+		std::Debug << __PRETTY_FUNCTION__ << " unknown exception" << std::endl;
 		Soy::StringToBuffer("Unknown exception", ErrorBuffer, ErrorBufferSize );
 	}
 }

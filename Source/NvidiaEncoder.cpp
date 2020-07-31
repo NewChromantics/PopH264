@@ -71,7 +71,8 @@ public:
 	void	OnFrameEncoded(struct v4l2_buffer *v4l2_buf, NvBuffer * buffer,NvBuffer * shared_buffer);
 	
 public:
-	v4l2_memory	mMemoryMode = V4L2_MEMORY_USERPTR;
+	v4l2_memory	mYuvMemoryMode = V4L2_MEMORY_MMAP;
+	v4l2_memory	mH264MemoryMode = V4L2_MEMORY_MMAP;	//	demo only uses mmap
 };
 
 
@@ -136,6 +137,8 @@ V4lPixelFormat::Type GetPixelFormat(SoyPixelsFormat::Type Format)
 Nvidia::TEncoder::TEncoder(TEncoderParams& Params,std::function<void(PopH264::TPacket&)> OnOutPacket) :
 	PopH264::TEncoder( OnOutPacket )
 {
+	log_level = LOG_LEVEL_DEBUG;
+
 	mNative.reset(new TNative);
 	
 	//	the nvvideoencoder is a wrapper for a V4L2 device
@@ -156,18 +159,117 @@ Nvidia::TEncoder::TEncoder(TEncoderParams& Params,std::function<void(PopH264::TP
 	*/
 }
 
+Nvidia::TEncoder::~TEncoder()
+{
+	Shutdown();
+}
+
 void Nvidia::TEncoder::InitEncoder(SoyPixelsMeta PixelMeta)
 {
 	if ( mInitialised )
 		return;
 	
+
 	//	"capture" plane needs to be set before "output"
 	InitH264Format(PixelMeta);
 	InitYuvFormat(PixelMeta);
+
+	//	need to set formats before memory
+	InitH264MemoryMode();
+	InitYuvMemoryMode();
+
+	{
+		auto& YuvPlane = GetYuvPlane();
+		YuvPlane.setStreamStatus(true);
+		auto& H264Plane = GetH264Plane();
+		H264Plane.setStreamStatus(true);
+	}
+	auto
+
 	InitH264Callback();
-	InitYuvCallback();
+	//InitYuvCallback();
 	
+	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 	mInitialised = true;
+}
+
+void Nvidia::TEncoder::InitYuvMemoryMode()
+{
+	std::Debug << __PRETTY_FUNCTION__ << std::endl;
+	auto& mMemoryMode = mNative->mYuvMemoryMode;
+
+	auto& YuvPlane = GetYuvPlane();
+
+	auto BufferCount = 6;
+
+	//	input can be any mode
+	switch(mMemoryMode)
+    {
+        case V4L2_MEMORY_MMAP:
+		{
+			auto Map = true;
+			auto Allocate = false;
+            auto Result = YuvPlane.setupPlane(V4L2_MEMORY_MMAP, BufferCount, Map, Allocate);
+         	IsOkay(Result,"Setup YUV memory V4L2_MEMORY_MMAP");
+		}
+		break;
+
+        case V4L2_MEMORY_USERPTR:
+		{
+            auto Map = false;
+			auto Allocate = true;
+            auto Result = YuvPlane.setupPlane(V4L2_MEMORY_USERPTR, BufferCount, Map, Allocate);
+			IsOkay(Result,"Setup YUV memory V4L2_MEMORY_USERPTR");
+		}
+		break;
+
+        case V4L2_MEMORY_DMABUF:
+			InitDmaBuffers(BufferCount);
+            break;
+
+        default:
+			throw Soy::AssertException("Invalid yuv memory mode");
+    }
+}
+
+
+void Nvidia::TEncoder::InitH264MemoryMode()
+{
+	std::Debug << __PRETTY_FUNCTION__ << std::endl;
+	auto& mMemoryMode = mNative->mH264MemoryMode;
+
+	auto& H264Plane = GetH264Plane();
+
+	//	demo is fewer than yuv
+	auto BufferCount = 6;
+
+	switch(mMemoryMode)
+    {
+        case V4L2_MEMORY_MMAP:
+		{
+			auto Map = true;
+			auto Allocate = false;
+            auto Result = H264Plane.setupPlane(V4L2_MEMORY_MMAP, BufferCount, Map, Allocate);
+         	IsOkay(Result,"Setup H264 memory V4L2_MEMORY_MMAP");
+		}
+		break;
+
+        case V4L2_MEMORY_USERPTR:
+		{
+            auto Map = false;
+			auto Allocate = true;
+            auto Result = H264Plane.setupPlane(V4L2_MEMORY_USERPTR, BufferCount, Map, Allocate);
+			IsOkay(Result,"Setup H264 memory V4L2_MEMORY_USERPTR");
+		}
+		break;
+
+        case V4L2_MEMORY_DMABUF:
+			InitDmaBuffers(BufferCount);
+            break;
+
+        default:
+			throw Soy::AssertException("Invalid yuv memory mode");
+    }
 }
 
 
@@ -236,35 +338,6 @@ void Nvidia::TEncoder::InitYuvFormat(SoyPixelsMeta PixelMeta)
 
 	
 	InitEncodingParams();
-
-	//	setup memory read mode
-	auto& mMemoryMode = mNative->mMemoryMode;
-	switch( mMemoryMode )
-	{
-		case V4L2_MEMORY_MMAP:
-			std::Debug << "Init memory mode V4L2_MEMORY_MMAP" << std::endl;
-			Result = YuvPlane.setupPlane(V4L2_MEMORY_MMAP, 10, true, false);
-			break;
-			
-		case V4L2_MEMORY_USERPTR:
-			std::Debug << "Init memory mode V4L2_MEMORY_USERPTR" << std::endl;
-			Result = YuvPlane.setupPlane(V4L2_MEMORY_USERPTR, 10, false, true);
-			break;
-			
-		case V4L2_MEMORY_DMABUF:
-			std::Debug << "Init memory mode V4L2_MEMORY_DMABUF" << std::endl;
-			InitDmaBuffers(10);
-			Result = 0;
-			break;
-			
-		default:
-		{
-			std::stringstream Debug;
-			Debug << "Unhandled memory mode " << magic_enum::enum_name(mMemoryMode);
-			throw Soy::AssertException(Debug);
-		}
-	}
-	IsOkay(Result,"Setting up memory mode");
 }
 
 
@@ -339,8 +412,15 @@ void Nvidia::TEncoder::InitH264Callback()
 		auto* ThisEncoder = reinterpret_cast<Nvidia::TEncoder*>(This);
 		//ThisEncoder->mNative.OnFrameEncoded( v4l2_buf, buffer, shared_buffer );
 		std::Debug << "H264 plane dequeue (frame encoded)" << std::endl;
-		
-		//	gr: what are we returning!
+
+		auto BytesUsed = buffer->planes[0].bytesused;
+		std::Debug << "Bytes used=" << BytesUsed << std::endl;
+		//	gr: 0 = eos
+	    if (BytesUsed == 0)
+    	{
+     	   return false;
+    	}
+
 		return true;
 	};
 	
@@ -542,6 +622,7 @@ void Nvidia::TEncoder::Start()
 
 void Nvidia::TEncoder::Sync()
 {
+	/*
 	std::Debug << __PRETTY_FUNCTION__ << std::endl;
 	auto& mMemoryMode = mNative->mMemoryMode;
 	/*
@@ -600,6 +681,23 @@ void Nvidia::TEncoder::WaitForEnd()
 	IsOkay(Result,"encoder_proc_blocking");
 	Encoder.capture_plane.waitForDQThread(-1);
 	 */
+	//	wait for threads to end
+	auto& YuvPlane = GetYuvPlane();
+	auto& H264Plane = GetH264Plane();
+
+	std::Debug << "Stopping DQ threads..." << std::endl;
+
+	//	gr: code says dont stop the thread, but I don't see how else to
+	//		(broken pipe is running forever and not blocking)
+	YuvPlane.stopDQThread();
+	H264Plane.stopDQThread();
+
+	//auto Timeout = -1;
+	auto Timeout = 100;
+	YuvPlane.waitForDQThread(Timeout);
+	H264Plane.waitForDQThread(Timeout);
+
+	std::Debug << "DQ thread ended" << std::endl;
 }
 
 /*
@@ -654,6 +752,7 @@ write_video_frame(std::ofstream * stream, NvBuffer &buffer)
 */
 void Nvidia::TEncoder::Shutdown()
 {
+	WaitForEnd();
 /*
 	if(ctx.b_use_enc_cmd)
 	{
@@ -706,7 +805,7 @@ void Nvidia::TEncoder::Encode(const SoyPixelsImpl& Pixels,const std::string& Met
 	v4l2_buf.index = BufferIndex;
 	v4l2_buf.m.planes = planes;
 	
-	auto& mMemoryMode = mNative->mMemoryMode;
+	auto& mMemoryMode = mNative->mYuvMemoryMode;
 	
 	if ( mMemoryMode == V4L2_MEMORY_DMABUF)
 	{
