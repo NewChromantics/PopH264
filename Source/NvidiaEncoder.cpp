@@ -58,7 +58,11 @@ namespace V4lPixelFormat
 {
 	enum Type : uint32_t
 	{
+		//	gr: from nvidia error output;
+		//		Only YUV420M, YUV444M and P010M are supported
 		YUV420M = V4L2_PIX_FMT_YUV420M,
+		NV12M = V4L2_PIX_FMT_NV12M,
+		NV21M = V4L2_PIX_FMT_NV21M,
 	};
 }
 
@@ -123,7 +127,16 @@ V4lPixelFormat::Type GetPixelFormat(SoyPixelsFormat::Type Format)
 	{
 		case SoyPixelsFormat::Yuv_844:
 			return V4lPixelFormat::YUV420M;
-			
+
+		case SoyPixelsFormat::Yuv_8_8_8:
+			return V4lPixelFormat::YUV420M;
+
+		case SoyPixelsFormat::Nv12:
+			return V4lPixelFormat::NV12M;
+
+		case SoyPixelsFormat::Nv21:
+			return V4lPixelFormat::NV21M;
+
 		default:break;
 	}
 	
@@ -328,7 +341,8 @@ void Nvidia::TEncoder::InitYuvFormat(SoyPixelsMeta PixelMeta)
 
 	//	the input is a "capture" plane
 	//SoyPixelsMeta PixelMeta(100,100,SoyPixelsFormat::Yuv_844);
-	//auto PixelFormat = GetPixelFormat( PixelMeta.GetFormat() );
+	//	gr: only a limited set of formats, so force this for now
+	//auto Format = GetPixelFormat( PixelMeta.GetFormat() );
 	auto Format = V4L2_PIX_FMT_YUV420M;
 	auto Width = PixelMeta.GetWidth();
 	auto Height = PixelMeta.GetHeight();
@@ -776,24 +790,41 @@ void Nvidia::TEncoder::FinishEncoding()
 	
 }
 
-void Nvidia::TEncoder::Encode(const SoyPixelsImpl& Luma, const SoyPixelsImpl& ChromaU, const SoyPixelsImpl& ChromaV, const std::string& Meta, bool Keyframe)
-{
-	std::Debug << __PRETTY_FUNCTION__ << std::endl;
-	Soy_AssertTodo();
-}
+
 
 void Nvidia::TEncoder::Encode(const SoyPixelsImpl& Pixels,const std::string& Meta,bool Keyframe)
 {
+	//	gotta be in yuv_8_8_8
+	auto* pSrcPixels = &Pixels;
+	SoyPixels Yuv_8_8_8_TempPixels;
+	if ( Pixels.GetFormat() != SoyPixelsFormat::Yuv_8_8_8 )
+	{
+		pSrcPixels = &Yuv_8_8_8_TempPixels;
+		Yuv_8_8_8_TempPixels.Copy( Pixels );
+		Yuv_8_8_8_TempPixels.SetFormat(SoyPixelsFormat::Yuv_8_8_8);
+	}
+	auto& SrcPixels = *pSrcPixels;
+
+	//	figure out our input
+	BufferArray<std::shared_ptr<SoyPixelsImpl>,MAX_PLANES> SrcPlanes;
+	SrcPixels.SplitPlanes(GetArrayBridge(SrcPlanes));
+
+	Encode( *SrcPlanes[0], *SrcPlanes[1], *SrcPlanes[2], Meta, Keyframe );
+}
+
+void Nvidia::TEncoder::Encode(const SoyPixelsImpl& Luma, const SoyPixelsImpl& ChromaU, const SoyPixelsImpl& ChromaV, const std::string& Meta, bool Keyframe)
+{
 	std::Debug << __PRETTY_FUNCTION__ << std::endl;
-	InitEncoder( Pixels.GetMeta() );
+	SoyPixelsMeta PixelsMeta( Luma.GetWidth(), Luma.GetHeight(), SoyPixelsFormat::Yuv_8_8_8 );
+	InitEncoder( PixelsMeta);
 	
 	auto& Encoder = *mEncoder;
 	auto& YuvPlane = GetYuvPlane();
 
+	//	gr: how do we decide which buffer to use?
 	auto BufferIndex = 0;
 	std::Debug << "Getting YUV buffer " << BufferIndex << "..." << std::endl;
 	//	pick a buffer
-	//for (uint32_t i = 0; i < ctx.enc->output_plane.getNumBuffers(); i++)
 	struct v4l2_buffer v4l2_buf;
 	struct v4l2_plane planes[MAX_PLANES];
 	NvBuffer* pBuffer = YuvPlane.getNthBuffer(BufferIndex);
@@ -819,14 +850,34 @@ void Nvidia::TEncoder::Encode(const SoyPixelsImpl& Pixels,const std::string& Met
 		*/
 	}
 	
+	BufferArray<const SoyPixelsImpl*,3> SrcPlanes;
+	SrcPlanes.PushBack(&Luma);
+	SrcPlanes.PushBack(&ChromaU);
+	SrcPlanes.PushBack(&ChromaV);
+
 	//	fill buffer with yuv
 	auto& Buffer = *pBuffer;
 	std::Debug << "Filling YUV buffer x" << Buffer.n_planes << "planes..." << std::endl;
 	for ( auto p=0;	p<Buffer.n_planes; p++)
 	{
-		NvBuffer::NvBufferPlane& Plane = Buffer.planes[p];
-		std::streamsize bytes_to_read = Plane.fmt.bytesperpixel * Plane.fmt.width;
-		throw Soy::AssertException("Todo: fill yuv plane buffer");
+		NvBuffer::NvBufferPlane& DstPlane = Buffer.planes[p];
+		std::Debug << "todo: fill buffer plane; " << p << "; bpp=" << DstPlane.fmt.bytesperpixel << " width=" << DstPlane.fmt.width << " height=" << DstPlane.fmt.height << std::endl;
+
+		if ( p >= SrcPlanes.GetSize() )
+		{
+			std::Debug << "no src plane(x" << SrcPlanes.GetSize() << ") for dst plane " << p << std::endl;
+			continue;
+		}
+
+		auto DstSize = DstPlane.fmt.bytesperpixel * DstPlane.fmt.width * DstPlane.fmt.height;
+		auto DstArray = GetRemoteArray(DstPlane.data,DstSize);
+		
+		auto& SrcPlane = *SrcPlanes[p];
+		auto& SrcArray = SrcPlane.GetPixelsArray();
+		std::Debug << "SrcPlane[" << p << "] = " << SrcPlane.GetMeta() << std::endl;
+		DstArray.Copy(SrcArray);
+
+		//throw Soy::AssertException("Todo: fill yuv plane buffer");
 		/*
 		data = (char *) plane.data;
 		plane.bytesused = 0;
