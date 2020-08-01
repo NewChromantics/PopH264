@@ -2,6 +2,7 @@
 
 #include "TEncoder.h"
 #include "SoyPixels.h"
+#include "SoyThread.h"
 
 // Only target Jetsons for now
 
@@ -20,7 +21,7 @@ namespace Nvidia
 }
 class NvVideoEncoder;
 class NvV4l2ElementPlane;
-
+class NvBuffer;
 
 
 class Nvidia::TEncoderParams
@@ -45,6 +46,8 @@ public:
 	virtual void		FinishEncoding() override;
 
 private:
+	bool			IsRunning()	{	return true;	}
+
 	void			InitEncoder(SoyPixelsMeta PixelMeta);		//	once we have some meta, set everything up
 
 	void			InitYuvMemoryMode();
@@ -55,17 +58,26 @@ private:
 	void			InitH264Callback();
 	void			InitYuvCallback();
 	void			InitEncodingParams();
+	void			QueueNextYuvBuffer(std::function<void(NvBuffer&)> FillBuffer);
 	void			Sync();
 	void			Start();
 	void			ReadNextFrame();
 	void			WaitForEnd();
 	void			Shutdown();
-	
-	//	nvidia has awkward names for these so we have a helper func
-	NvV4l2ElementPlane&	GetYuvPlane();
-	NvV4l2ElementPlane&	GetH264Plane();
 
 	
+	//	nvidia has awkward names for these so we have a helper func
+	NvV4l2ElementPlane&			GetYuvPlane();
+	NvV4l2ElementPlane&			GetH264Plane();
+
+	uint32_t					PopYuvUnusedBufferIndex();
+	void						PushYuvUnusedBufferIndex(uint32_t Index);
+
+private:
+	std::mutex					mYuvBufferLock;
+	BufferArray<uint32_t,20>	mYuvBufferIndexesUnused;
+	Soy::TSemaphore				mYuvBufferSemaphore;
+
 	NvVideoEncoder*				mEncoder = nullptr;
 	std::shared_ptr<TNative>	mNative;
 	bool						mInitialised = false;

@@ -47,6 +47,7 @@ $(SOY_PATH)/src/SoyPng.cpp \
 $(SOY_PATH)/src/SoyImage.cpp \
 $(SOY_PATH)/src/SoyStreamBuffer.cpp \
 $(SOY_PATH)/src/SoyFourcc.cpp \
+$(SOY_PATH)/src/SoyThread.cpp \
 
 APP_SRC_FILES =	\
 $(PROJECT_PATH)/Source_TestApp/PopH264_TestApp.cpp	\

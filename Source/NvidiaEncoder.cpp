@@ -182,7 +182,6 @@ void Nvidia::TEncoder::InitEncoder(SoyPixelsMeta PixelMeta)
 	if ( mInitialised )
 		return;
 	
-
 	//	"capture" plane needs to be set before "output"
 	InitH264Format(PixelMeta);
 	InitYuvFormat(PixelMeta);
@@ -197,10 +196,9 @@ void Nvidia::TEncoder::InitEncoder(SoyPixelsMeta PixelMeta)
 		auto& H264Plane = GetH264Plane();
 		H264Plane.setStreamStatus(true);
 	}
-	auto
-
+	
 	InitH264Callback();
-	//InitYuvCallback();
+	InitYuvCallback();
 	
 	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 	mInitialised = true;
@@ -425,10 +423,11 @@ void Nvidia::TEncoder::InitH264Callback()
 	{
 		auto* ThisEncoder = reinterpret_cast<Nvidia::TEncoder*>(This);
 		//ThisEncoder->mNative.OnFrameEncoded( v4l2_buf, buffer, shared_buffer );
-		std::Debug << "H264 plane dequeue (frame encoded)" << std::endl;
-
+		
+		auto BufferIndex = buffer->index;
+		auto PlaneCount = buffer->n_planes;
 		auto BytesUsed = buffer->planes[0].bytesused;
-		std::Debug << "Bytes used=" << BytesUsed << std::endl;
+		std::Debug << "H264 plane dequeue (frame encoded). BufferIndex=" << BufferIndex << " PlaneCount=" << PlaneCount << " Plane0 bytesused=" << BytesUsed << std::endl;
 		//	gr: 0 = eos
 	    if (BytesUsed == 0)
     	{
@@ -475,11 +474,9 @@ void Nvidia::TEncoder::InitYuvCallback()
 	auto Callback = [](struct v4l2_buffer *v4l2_buf, NvBuffer * buffer,
 							  NvBuffer * shared_buffer, void * This)
 	{
-		auto* ThisEncoder = reinterpret_cast<Nvidia::TEncoder*>(This);
-		//ThisEncoder->mNative.OnFrameEncoded( v4l2_buf, buffer, shared_buffer );
 		std::Debug << "YUV plane dequeue (index = " << v4l2_buf->index << ")" << std::endl;
-	
-		//	what is return!
+		auto* ThisEncoder = reinterpret_cast<Nvidia::TEncoder*>(This);
+		ThisEncoder->PushYuvUnusedBufferIndex(v4l2_buf->index);
 		return true;
 	};
 
@@ -812,28 +809,63 @@ void Nvidia::TEncoder::Encode(const SoyPixelsImpl& Pixels,const std::string& Met
 	Encode( *SrcPlanes[0], *SrcPlanes[1], *SrcPlanes[2], Meta, Keyframe );
 }
 
-void Nvidia::TEncoder::Encode(const SoyPixelsImpl& Luma, const SoyPixelsImpl& ChromaU, const SoyPixelsImpl& ChromaV, const std::string& Meta, bool Keyframe)
+
+uint32_t Nvidia::TEncoder::PopYuvUnusedBufferIndex()
 {
-	std::Debug << __PRETTY_FUNCTION__ << std::endl;
-	SoyPixelsMeta PixelsMeta( Luma.GetWidth(), Luma.GetHeight(), SoyPixelsFormat::Yuv_8_8_8 );
-	InitEncoder( PixelsMeta);
-	
+	while(IsRunning())
+	{
+		//	try and get next
+		{
+			std::lock_guard<std::mutex> Lock(mYuvBufferLock);
+			if ( !mYuvBufferIndexesUnused.IsEmpty() )
+			{
+				auto Popped = GetArrayBridge(mYuvBufferIndexesUnused).PopAt(0);
+				return Popped;
+			}
+		}
+
+		//	none availible, wait for notification that there is one
+		//	gr: would be nice to turn this into a promise!
+		std::Debug << __PRETTY_FUNCTION__ << " waiting for semaphore for unused buffer to be availible..." << std::endl;
+		mYuvBufferSemaphore.WaitAndReset(__PRETTY_FUNCTION__);
+	}
+
+	throw Soy::AssertException("Failed to get unused yuv buffer index");
+}
+
+void Nvidia::TEncoder::PushYuvUnusedBufferIndex(uint32_t Index)
+{
+	//	add to list and notify
+	{
+		std::lock_guard<std::mutex> Lock(mYuvBufferLock);
+		if ( mYuvBufferIndexesUnused.Find(Index) )
+			std::Debug << __PRETTY_FUNCTION__ << " warning: yuvbuffer list already contains " << Index << std::endl;
+		mYuvBufferIndexesUnused.PushBackUnique(Index);
+	}
+
+	//	notify anything waiting on this
+	mYuvBufferSemaphore.OnCompleted();
+}
+
+
+//	this function gets the next buffer, calls the callback, then queues for us
+//	it will block until there is a buffer ready (encode() is expected to block and be called on your own thread)
+void Nvidia::TEncoder::QueueNextYuvBuffer(std::function<void(NvBuffer&)> FillBuffer)
+{
 	auto& Encoder = *mEncoder;
 	auto& YuvPlane = GetYuvPlane();
 
-	//	gr: how do we decide which buffer to use?
-	auto BufferIndex = 0;
-	std::Debug << "Getting YUV buffer " << BufferIndex << "..." << std::endl;
-	//	pick a buffer
+	//	gr; get a free buffer... need to block here until one is availible
+	auto BufferIndex = PopYuvUnusedBufferIndex();
+	auto& Buffer = *YuvPlane.getNthBuffer(BufferIndex);
+
 	struct v4l2_buffer v4l2_buf;
 	struct v4l2_plane planes[MAX_PLANES];
-	NvBuffer* pBuffer = YuvPlane.getNthBuffer(BufferIndex);
-	if ( !pBuffer )
-		throw Soy::AssertException("GetNthBuffer null");
-	
 	memset(&v4l2_buf, 0, sizeof(v4l2_buf));
 	memset(planes, 0, MAX_PLANES * sizeof(struct v4l2_plane));
 	v4l2_buf.index = BufferIndex;
+	//	gr: this is a pointer, so when will it go out of scope?
+	//		is it copied in qBuffer?
 	v4l2_buf.m.planes = planes;
 	
 	auto& mMemoryMode = mNative->mYuvMemoryMode;
@@ -849,57 +881,55 @@ void Nvidia::TEncoder::Encode(const SoyPixelsImpl& Luma, const SoyPixelsImpl& Ch
 		IsOkay(Result,"Error while mapping buffer at output plane");
 		*/
 	}
-	
-	BufferArray<const SoyPixelsImpl*,3> SrcPlanes;
-	SrcPlanes.PushBack(&Luma);
-	SrcPlanes.PushBack(&ChromaU);
-	SrcPlanes.PushBack(&ChromaV);
-
-	//	fill buffer with yuv
-	auto& Buffer = *pBuffer;
-	std::Debug << "Filling YUV buffer x" << Buffer.n_planes << "planes..." << std::endl;
-	for ( auto p=0;	p<Buffer.n_planes; p++)
-	{
-		NvBuffer::NvBufferPlane& DstPlane = Buffer.planes[p];
-		std::Debug << "todo: fill buffer plane; " << p << "; bpp=" << DstPlane.fmt.bytesperpixel << " width=" << DstPlane.fmt.width << " height=" << DstPlane.fmt.height << std::endl;
-
-		if ( p >= SrcPlanes.GetSize() )
-		{
-			std::Debug << "no src plane(x" << SrcPlanes.GetSize() << ") for dst plane " << p << std::endl;
-			continue;
-		}
-
-		auto DstSize = DstPlane.fmt.bytesperpixel * DstPlane.fmt.width * DstPlane.fmt.height;
-		auto DstArray = GetRemoteArray(DstPlane.data,DstSize);
-		
-		auto& SrcPlane = *SrcPlanes[p];
-		auto& SrcArray = SrcPlane.GetPixelsArray();
-		std::Debug << "SrcPlane[" << p << "] = " << SrcPlane.GetMeta() << std::endl;
-		DstArray.Copy(SrcArray);
-
-		//throw Soy::AssertException("Todo: fill yuv plane buffer");
-		/*
-		data = (char *) plane.data;
-		plane.bytesused = 0;
-		for (j = 0; j < plane.fmt.height; j++)
-		{
-			stream->read(data, bytes_to_read);
-			if (stream->gcount() < bytes_to_read)
-				return -1;
-			data += plane.fmt.stride;
-		}
-		plane.bytesused = plane.fmt.stride * plane.fmt.height;
-		*/
-	}
+	std::Debug << "FillBuffer(" << BufferIndex << ")..." << std::endl;
+	FillBuffer(Buffer);
 	
 	//	if DMA or MMAP need to sync
 	Sync();
 	//	DMA also needs to set bytes used
 
-	std::Debug << "Queuing YUV buffer" << std::endl;
+	std::Debug << "Queuing YUV buffer " << BufferIndex << std::endl;
 	//	final queue
 	auto Result = YuvPlane.qBuffer(v4l2_buf, nullptr);
 	IsOkay(Result,"Error while queueing buffer at output plane");
+}
+
+void Nvidia::TEncoder::Encode(const SoyPixelsImpl& Luma, const SoyPixelsImpl& ChromaU, const SoyPixelsImpl& ChromaV, const std::string& Meta, bool Keyframe)
+{
+	std::Debug << __PRETTY_FUNCTION__ << std::endl;
+	SoyPixelsMeta PixelsMeta( Luma.GetWidth(), Luma.GetHeight(), SoyPixelsFormat::Yuv_8_8_8 );
+	InitEncoder( PixelsMeta);
+
+	auto FillBuffer = [&](NvBuffer& Buffer)
+	{
+		BufferArray<const SoyPixelsImpl*,3> SrcPlanes;
+		SrcPlanes.PushBack(&Luma);
+		SrcPlanes.PushBack(&ChromaU);
+		SrcPlanes.PushBack(&ChromaV);
+
+		std::Debug << "Filling YUV buffer x" << Buffer.n_planes << "planes..." << std::endl;
+		for ( auto p=0;	p<Buffer.n_planes; p++)
+		{
+			NvBuffer::NvBufferPlane& DstPlane = Buffer.planes[p];
+			std::Debug << "Fill buffer plane; " << p << "; bpp=" << DstPlane.fmt.bytesperpixel << " width=" << DstPlane.fmt.width << " height=" << DstPlane.fmt.height << std::endl;
+
+			if ( p >= SrcPlanes.GetSize() )
+			{
+				std::Debug << "no src plane(x" << SrcPlanes.GetSize() << ") for dst plane " << p << std::endl;
+				continue;
+			}
+
+			auto DstSize = DstPlane.fmt.bytesperpixel * DstPlane.fmt.width * DstPlane.fmt.height;
+			auto DstArray = GetRemoteArray(DstPlane.data,DstSize);
+			
+			auto& SrcPlane = *SrcPlanes[p];
+			auto& SrcArray = SrcPlane.GetPixelsArray();
+			std::Debug << "SrcPlane[" << p << "] = " << SrcPlane.GetMeta() << std::endl;
+			DstArray.Copy(SrcArray);
+		}
+	};
+
+	QueueNextYuvBuffer(FillBuffer);
 }
 
 
