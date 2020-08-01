@@ -922,9 +922,20 @@ void Nvidia::TEncoder::QueueNextYuvBuffer(std::function<void(NvBuffer&)> FillBuf
 	memset(planes, 0, MAX_PLANES * sizeof(struct v4l2_plane));
 	v4l2_buf.index = BufferIndex;
 	//	gr: this is a pointer, so when will it go out of scope?
-	//		is it copied in qBuffer?
+	//		is it copied in qBuffer? (I think it is)
 	v4l2_buf.m.planes = planes;
-	
+
+	//	gr: can we set iframe here?
+	//	gr: set buffer meta here?
+	v4l2_buf.flags = 0;	//	no flags = eof, so what should this be?
+	v4l2_buf.flags |= V4L2_BUF_FLAG_TIMESTAMP_COPY;
+
+	static int timestamp = 0;
+	timestamp += 33;
+	#define MICROSECOND_UNIT 1000000
+    v4l2_buf.timestamp.tv_sec = timestamp / (MICROSECOND_UNIT);
+    v4l2_buf.timestamp.tv_usec = timestamp % (MICROSECOND_UNIT);
+
 	auto& mMemoryMode = mNative->mYuvMemoryMode;
 	
 	if ( mMemoryMode == V4L2_MEMORY_DMABUF)
@@ -939,8 +950,18 @@ void Nvidia::TEncoder::QueueNextYuvBuffer(std::function<void(NvBuffer&)> FillBuf
 		*/
 	}
 	std::Debug << "FillBuffer(" << BufferIndex << ")..." << std::endl;
+	//	gr: bytesused in the planes gets set in dma mode
 	FillBuffer(Buffer);
-	
+
+	//	gr: we're filling buffer, but we send v4l2_buf meta
+	//	gr: this should be done in fillbuffer? but will always be the same
+	for ( auto p=0;	p<Buffer.n_planes; p++)
+	{
+		NvBuffer::NvBufferPlane& BufferPlane = Buffer.planes[p];
+		auto& V4lPlane = planes[p];
+		V4lPlane.bytesused = BufferPlane.bytesused;
+	}
+
 	//	if DMA or MMAP need to sync
 	Sync();
 	//	DMA also needs to set bytes used
@@ -983,6 +1004,7 @@ void Nvidia::TEncoder::Encode(const SoyPixelsImpl& Luma, const SoyPixelsImpl& Ch
 			auto& SrcArray = SrcPlane.GetPixelsArray();
 			std::Debug << "SrcPlane[" << p << "] = " << SrcPlane.GetMeta() << std::endl;
 			DstArray.Copy(SrcArray);
+
 		}
 	};
 
