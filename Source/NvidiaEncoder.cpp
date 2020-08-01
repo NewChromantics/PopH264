@@ -241,6 +241,15 @@ void Nvidia::TEncoder::InitYuvMemoryMode()
         default:
 			throw Soy::AssertException("Invalid yuv memory mode");
     }
+
+	//	buffers are now ready looking at the output
+	//	so put them in the "ready to be used" queue
+	//	gr: should I be calling "dqBuffer" here to request them all?
+	//	gr: what if the buffer indexes aren't setup? 
+	for ( auto i=0;	i<YuvPlane.getNumBuffers();	i++ )
+	{
+		PushYuvUnusedBufferIndex(i);
+	}
 }
 
 
@@ -411,6 +420,52 @@ void Nvidia::TEncoder::InitH264Format(SoyPixelsMeta InputMeta)
 	IsOkay(Result,"InitOutputFormat failed setCapturePlaneFormat");
 }
 
+namespace V4L2BufferFlags
+{
+	enum Type : uint32_t
+	{
+		Invalid = 0xffffffff,	//	for soyenum
+		MAPPED = V4L2_BUF_FLAG_MAPPED,
+		QUEUED = V4L2_BUF_FLAG_QUEUED,
+		DONE = V4L2_BUF_FLAG_DONE,
+		KEYFRAME = V4L2_BUF_FLAG_KEYFRAME,
+		PFRAME = V4L2_BUF_FLAG_PFRAME,
+		BFRAME = V4L2_BUF_FLAG_BFRAME,
+		ERROR = V4L2_BUF_FLAG_ERROR,
+		//IN_REQUEST = V4L2_BUF_FLAG_IN_REQUEST,
+		TIMECODE = V4L2_BUF_FLAG_TIMECODE,
+		//M2M_HOLD_CAPTURE_BUF = V4L2_BUF_FLAG_M2M_HOLD_CAPTURE_BUF,
+		PREPARED = V4L2_BUF_FLAG_PREPARED,
+		NO_CACHE_INVALIDATE = V4L2_BUF_FLAG_NO_CACHE_INVALIDATE,
+		NO_CACHE_CLEAN = V4L2_BUF_FLAG_NO_CACHE_CLEAN,
+		TIMESTAMP_MONOTONIC = V4L2_BUF_FLAG_TIMESTAMP_MONOTONIC,
+		TIMESTAMP_COPY = V4L2_BUF_FLAG_TIMESTAMP_COPY,
+		TIMESTAMP_UNDOCUMENTED = 0x00008000,	//	timestamp mask is 0xe so there's another bit here
+		TSTAMP_SRC_SOE = V4L2_BUF_FLAG_TSTAMP_SRC_SOE,
+		//	V4L2_BUF_FLAG_TSTAMP_SRC_MASK		0x00070000
+		//MAPPED = V4L2_BUF_FLAG_TSTAMP_SRC_EOF,	//	0
+		LAST = V4L2_BUF_FLAG_LAST,
+		//REQUEST_FD = V4L2_BUF_FLAG_REQUEST_FD,
+	};
+	DECLARE_SOYENUM(V4L2BufferFlags);
+}
+
+std::string GetFlagsDebug(uint32_t Flags)
+{
+	std::stringstream Debug;
+	Debug << "(0x" << std::hex << Flags << std::dec << ") ";
+	auto AllEnums = magic_enum::enum_values<V4L2BufferFlags::Type>();
+	for ( auto e : AllEnums )
+	{
+		auto evalue = static_cast<uint32_t>(e);
+		bool Present = (Flags & evalue)!=0;
+		if ( !Present )
+			continue;
+		Debug << magic_enum::enum_name(e) << ",";
+	}
+	return Debug.str();
+}
+
 
 void Nvidia::TEncoder::InitH264Callback()
 {
@@ -423,15 +478,16 @@ void Nvidia::TEncoder::InitH264Callback()
 	{
 		auto* ThisEncoder = reinterpret_cast<Nvidia::TEncoder*>(This);
 		//ThisEncoder->mNative.OnFrameEncoded( v4l2_buf, buffer, shared_buffer );
-		
 		auto BufferIndex = buffer->index;
 		auto PlaneCount = buffer->n_planes;
 		auto BytesUsed = buffer->planes[0].bytesused;
-		std::Debug << "H264 plane dequeue (frame encoded). BufferIndex=" << BufferIndex << " PlaneCount=" << PlaneCount << " Plane0 bytesused=" << BytesUsed << std::endl;
+		auto FlagsDebug = GetFlagsDebug(v4l2_buf->flags);
+		std::Debug << "H264 plane dequeue (frame encoded). BufferIndex=" << BufferIndex << " PlaneCount=" << PlaneCount << " Plane0 bytesused=" << BytesUsed << " SharedBuffer=" << (shared_buffer ? "non-null":"null") << " flags=" << FlagsDebug << std::endl;
+
 		//	gr: 0 = eos
 	    if (BytesUsed == 0)
     	{
-     	   return false;
+     	   //return false;
     	}
 
 		return true;
@@ -835,6 +891,7 @@ uint32_t Nvidia::TEncoder::PopYuvUnusedBufferIndex()
 
 void Nvidia::TEncoder::PushYuvUnusedBufferIndex(uint32_t Index)
 {
+	std::Debug << __PRETTY_FUNCTION__ << "(" << Index << ")" << std::endl;
 	//	add to list and notify
 	{
 		std::lock_guard<std::mutex> Lock(mYuvBufferLock);
