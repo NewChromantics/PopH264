@@ -33,6 +33,10 @@ typedef uint32_t __le32;
 #include "NvidiaEncoder.h"
 #include "nvidia/include/NvVideoEncoder.h"
 
+//	gr: cleanup this
+#define MICROSECOND_UNIT 1000000
+
+
 namespace Nvidia
 {
 	void	IsOkay(int Result, const char* Context);
@@ -470,6 +474,63 @@ std::string GetFlagsDebug(uint32_t Flags)
 	return Debug.str();
 }
 
+void Nvidia::TEncoder::OnFrameEncoded(ArrayBridge<uint8_t>&& FrameData,uint32_t Flags,std::chrono::milliseconds Timestamp)
+{
+	PopH264::TPacket OutputPacket;
+	OutputPacket.mData.reset(new Array<uint8_t>());
+	OutputPacket.mData->PushBackArray(FrameData);
+
+	//	json meta
+	OutputPacket.mInputMeta = std::string();
+	OnOutputPacket(OutputPacket);
+}
+
+bool Nvidia::TEncoder::OnEncodedBuffer(v4l2_buffer& v4l2_buf, NvBuffer * buffer,NvBuffer * shared_buffer)
+{
+	//	gr: don't know when shared_buffer comes up. 
+	if ( !buffer && shared_buffer )
+	{
+		std::Debug << "Warning: H264 dequeue callback, no buffer, using shared_buffer..." << std::endl;
+		buffer = shared_buffer;
+	}
+
+	//	pull out the data in the planes
+	//	we're only expecting one, but for the sake of completeness, iterate over them all
+	auto PlaneCount = buffer->n_planes;
+	auto Flags = v4l2_buf.flags;
+	auto FlagsDebug = GetFlagsDebug(Flags);
+	auto BufferIndex = buffer->index;
+	auto TimestampMicro64 = (v4l2_buf.timestamp.tv_sec * MICROSECOND_UNIT) + v4l2_buf.timestamp.tv_usec ;
+	auto TimestampMs = std::chrono::milliseconds( TimestampMicro64 / 1000 );
+	std::Debug << "H264 plane dequeue (frame encoded). BufferIndex=" << BufferIndex << " PlaneCount=" << PlaneCount << " SharedBuffer=" << (shared_buffer ? "non-null":"null") << " flags=" << FlagsDebug << " Timestamp=" << TimestampMs.count() << std::endl;
+
+	for ( auto p=0;	p<buffer->n_planes;	p++ )
+	{
+		auto& Plane = buffer->planes[p];
+		auto Format = Plane.fmt;
+		auto DataSize = Plane.bytesused;
+		auto DataOffset = Plane.mem_offset;
+		auto* Data = Plane.data + DataOffset;
+		auto DataArray = GetRemoteArray(Data,DataSize);
+		std::Debug << "Encoded plane; x" << DataSize << " bytes, flags=" << FlagsDebug << std::endl;
+		OnFrameEncoded( GetArrayBridge(DataArray), Flags, TimestampMs );
+	}
+
+	auto EndOfStreamNoBytes = PlaneCount ? (buffer->planes[0].bytesused == 0) : false;
+	auto EndOfStreamFlag = (Flags & V4L2BufferFlags::LAST)!=0;
+	if ( EndOfStreamNoBytes || EndOfStreamFlag )
+   	{
+		std::Debug << "End of stream (0bytes=" << EndOfStreamNoBytes << " Flag="<< EndOfStreamFlag <<")" << std::endl;
+		return false;
+   	}
+
+	//	gr: requeue this buffer index?
+	auto& H264Plane = GetH264Plane();
+	auto Result = H264Plane.qBuffer(v4l2_buf, nullptr);
+	IsOkay(Result,"Re-qbuffer encoded h264 buffer");
+		
+	return true;
+}
 
 void Nvidia::TEncoder::InitH264Callback()
 {
@@ -480,21 +541,24 @@ void Nvidia::TEncoder::InitH264Callback()
 	auto EncoderCallback = [](struct v4l2_buffer *v4l2_buf, NvBuffer * buffer,
 							  NvBuffer * shared_buffer, void * This)
 	{
-		auto* ThisEncoder = reinterpret_cast<Nvidia::TEncoder*>(This);
-		//ThisEncoder->mNative.OnFrameEncoded( v4l2_buf, buffer, shared_buffer );
-		auto BufferIndex = buffer->index;
-		auto PlaneCount = buffer->n_planes;
-		auto BytesUsed = buffer->planes[0].bytesused;
-		auto FlagsDebug = GetFlagsDebug(v4l2_buf->flags);
-		std::Debug << "H264 plane dequeue (frame encoded). BufferIndex=" << BufferIndex << " PlaneCount=" << PlaneCount << " Plane0 bytesused=" << BytesUsed << " SharedBuffer=" << (shared_buffer ? "non-null":"null") << " flags=" << FlagsDebug << std::endl;
-
-		//	gr: 0 = eos
-	    if (BytesUsed == 0)
-    	{
-     	   //return false;
-    	}
-
-		return true;
+		if ( !This )
+		{
+			std::Debug << "Warning: H264 dequeue callback, missing This" << std::endl; 
+			return false;
+		}
+		auto& ThisEncoder = *reinterpret_cast<Nvidia::TEncoder*>(This);
+		try
+		{
+			if ( !v4l2_buf )
+				throw Soy::AssertException("H264 dequeue callback; Missing v4l2_buf");
+			auto Continue = ThisEncoder.OnEncodedBuffer( *v4l2_buf, buffer, shared_buffer );
+			return Continue;
+		}
+		catch(std::exception& e)
+		{
+			std::Debug << "Exception handling encoded buffer: " << e.what() << std::endl;
+		}
+		return false;
 	};
 	
 	auto& H264Plane = GetH264Plane();
@@ -936,7 +1000,6 @@ void Nvidia::TEncoder::QueueNextYuvBuffer(std::function<void(NvBuffer&)> FillBuf
 
 	static int timestamp = 0;
 	timestamp += 33;
-	#define MICROSECOND_UNIT 1000000
     v4l2_buf.timestamp.tv_sec = timestamp / (MICROSECOND_UNIT);
     v4l2_buf.timestamp.tv_usec = timestamp % (MICROSECOND_UNIT);
 
