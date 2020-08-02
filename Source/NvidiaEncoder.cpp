@@ -448,13 +448,17 @@ namespace V4L2BufferFlags
 		//REQUEST_FD = V4L2_BUF_FLAG_REQUEST_FD,
 	};
 	DECLARE_SOYENUM(V4L2BufferFlags);
+
+	static const auto AllEnums = {	MAPPED,QUEUED,DONE,KEYFRAME,PFRAME,BFRAME,ERROR,TIMECODE,PREPARED,NO_CACHE_INVALIDATE,NO_CACHE_CLEAN,TIMESTAMP_MONOTONIC,TIMESTAMP_COPY,TIMESTAMP_UNDOCUMENTED,TSTAMP_SRC_SOE,LAST };
 }
 
 std::string GetFlagsDebug(uint32_t Flags)
 {
 	std::stringstream Debug;
 	Debug << "(0x" << std::hex << Flags << std::dec << ") ";
-	auto AllEnums = magic_enum::enum_values<V4L2BufferFlags::Type>();
+	//	gr: this isn't geting all enums :/
+	auto AllEnums = V4L2BufferFlags::AllEnums;
+
 	for ( auto e : AllEnums )
 	{
 		auto evalue = static_cast<uint32_t>(e);
@@ -953,12 +957,20 @@ void Nvidia::TEncoder::QueueNextYuvBuffer(std::function<void(NvBuffer&)> FillBuf
 	//	gr: bytesused in the planes gets set in dma mode
 	FillBuffer(Buffer);
 
-	//	gr: we're filling buffer, but we send v4l2_buf meta
+	//	we're filling nvbuffer data, but we send v4l2_buf meta, so need to update it
+	//	gr: maybe provide a copy-plane ArrayBridge or something to FillBuffer
 	//	gr: this should be done in fillbuffer? but will always be the same
 	for ( auto p=0;	p<Buffer.n_planes; p++)
 	{
 		NvBuffer::NvBufferPlane& BufferPlane = Buffer.planes[p];
 		auto& V4lPlane = planes[p];
+		//	gr: when dequeued the nv buffer bytesused is 0 so FillBuffer() may not have filled it
+		if ( BufferPlane.bytesused == 0 )
+		{
+			auto DefaultBytesUsed = BufferPlane.fmt.sizeimage;
+			std::Debug << "Post FillBuffer buffer plane bytesused=" << BufferPlane.bytesused << " defaulting to full size " << DefaultBytesUsed << std::endl;
+			BufferPlane.bytesused = DefaultBytesUsed;
+		}
 		V4lPlane.bytesused = BufferPlane.bytesused;
 	}
 
@@ -974,6 +986,9 @@ void Nvidia::TEncoder::QueueNextYuvBuffer(std::function<void(NvBuffer&)> FillBuf
 
 void Nvidia::TEncoder::Encode(const SoyPixelsImpl& Luma, const SoyPixelsImpl& ChromaU, const SoyPixelsImpl& ChromaV, const std::string& Meta, bool Keyframe)
 {
+	//std::Debug << "Skipping encode" << std::endl;
+	//return;
+
 	std::Debug << __PRETTY_FUNCTION__ << std::endl;
 	SoyPixelsMeta PixelsMeta( Luma.GetWidth(), Luma.GetHeight(), SoyPixelsFormat::Yuv_8_8_8 );
 	InitEncoder( PixelsMeta);
@@ -989,7 +1004,8 @@ void Nvidia::TEncoder::Encode(const SoyPixelsImpl& Luma, const SoyPixelsImpl& Ch
 		for ( auto p=0;	p<Buffer.n_planes; p++)
 		{
 			NvBuffer::NvBufferPlane& DstPlane = Buffer.planes[p];
-			std::Debug << "Fill buffer plane; " << p << "; bpp=" << DstPlane.fmt.bytesperpixel << " width=" << DstPlane.fmt.width << " height=" << DstPlane.fmt.height << std::endl;
+			//	gr: 640x480, but stride is 768???
+			std::Debug << "Fill buffer plane; " << p << "; bpp=" << DstPlane.fmt.bytesperpixel << " width=" << DstPlane.fmt.width << " height=" << DstPlane.fmt.height << " stride=" << DstPlane.fmt.stride << " sizeimage=" << DstPlane.fmt.sizeimage << std::endl;
 
 			if ( p >= SrcPlanes.GetSize() )
 			{
@@ -998,13 +1014,14 @@ void Nvidia::TEncoder::Encode(const SoyPixelsImpl& Luma, const SoyPixelsImpl& Ch
 			}
 
 			auto DstSize = DstPlane.fmt.bytesperpixel * DstPlane.fmt.width * DstPlane.fmt.height;
-			auto DstArray = GetRemoteArray(DstPlane.data,DstSize);
+			size_t UsedBytes = 0;
+			auto DstArray = GetRemoteArray(DstPlane.data,DstSize,UsedBytes);
 			
 			auto& SrcPlane = *SrcPlanes[p];
 			auto& SrcArray = SrcPlane.GetPixelsArray();
 			std::Debug << "SrcPlane[" << p << "] = " << SrcPlane.GetMeta() << std::endl;
 			DstArray.Copy(SrcArray);
-
+			DstPlane.bytesused = UsedBytes;
 		}
 	};
 
