@@ -183,6 +183,7 @@
 		BF1826AC24228D31006FEB93 /* SoyFourcc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SoyFourcc.h; path = Source/SoyLib/src/SoyFourcc.h; sourceTree = "<group>"; };
 		BF1826AD24228D31006FEB93 /* SoyFourcc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SoyFourcc.cpp; path = Source/SoyLib/src/SoyFourcc.cpp; sourceTree = "<group>"; };
 		BF21AEA824D5807F0046A434 /* BufferArray.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = BufferArray.hpp; path = Source/SoyLib/src/BufferArray.hpp; sourceTree = "<group>"; };
+		BF21AEAB24D74F010046A434 /* PopH264.Package */ = {isa = PBXFileReference; lastKnownFileType = folder; path = PopH264.Package; sourceTree = "<group>"; };
 		BF3225602445E57100C74D4D /* TInstanceManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TInstanceManager.h; path = Source/TInstanceManager.h; sourceTree = "<group>"; };
 		BF3225612445E57100C74D4D /* TEncoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TEncoder.h; path = Source/TEncoder.h; sourceTree = "<group>"; };
 		BF3225622445E57100C74D4D /* TEncoderInstance.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TEncoderInstance.h; path = Source/TEncoderInstance.h; sourceTree = "<group>"; };
@@ -427,6 +428,7 @@
 		BF4A6A0B1EA16D7C00613A64 = {
 			isa = PBXGroup;
 			children = (
+				BF21AEAB24D74F010046A434 /* PopH264.Package */,
 				BFDBAB8624BCC4AB00E8BCE1 /* PopH264.Linux */,
 				BFBC07F423882FB90070BCB4 /* libml_mediaerror.dylib */,
 				BF15207C2385930B00A70EBF /* libml_media_ccparser.dylib */,

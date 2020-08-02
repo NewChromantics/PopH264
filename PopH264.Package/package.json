@@ -3,8 +3,8 @@
   "publishConfig": {
     "registry": "https://npm.pkg.github.com/"
   },
-  "version": "0.0.7",
-  "description": "H264 decode / encode",
+  "version": "1.2.11",
+  "description": "H264 decoder & encoder CAPI library for various platforms",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -14,7 +14,7 @@
     "url": "git+https://github.com/NewChromantics/PopH264.git"
   },
   "keywords": [],
-  "author": "",
+  "author": "graham@newchromantics.com",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/NewChromantics/PopH264/issues"

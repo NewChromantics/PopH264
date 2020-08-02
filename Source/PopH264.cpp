@@ -19,7 +19,8 @@ namespace PopH264
 	//	1.2.8	Added Test data
 	//	1.2.9	Added PopH264_EncoderEndOfStream
 	//	1.2.10	Added PopH264_Shutdown
-	const Soy::TVersion	Version(1,2,10);
+	//	1.2.11	Added nvidia hardware decoder + new settings
+	const Soy::TVersion	Version(1,2,11);
 }
 
 
