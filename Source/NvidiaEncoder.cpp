@@ -1146,16 +1146,26 @@ void Nvidia::TEncoder::Encode(const SoyPixelsImpl& Luma, const SoyPixelsImpl& Ch
 				std::Debug << "no src plane(x" << SrcPlanes.GetSize() << ") for dst plane " << p << std::endl;
 				continue;
 			}
-
-			auto DstSize = DstPlane.fmt.bytesperpixel * DstPlane.fmt.width * DstPlane.fmt.height;
-			size_t UsedBytes = 0;
-			auto DstArray = GetRemoteArray(DstPlane.data,DstSize,UsedBytes);
-			
 			auto& SrcPlane = *SrcPlanes[p];
-			auto& SrcArray = SrcPlane.GetPixelsArray();
-			std::Debug << "SrcPlane[" << p << "] = " << SrcPlane.GetMeta() << std::endl;
-			DstArray.Copy(SrcArray);
-			DstPlane.bytesused = UsedBytes;
+
+			//	gr: it seems output is a bit messed up, so maybe stride is important
+			//	to make things a little simpler, make a destination image with stride width
+			if ( DstPlane.fmt.bytesperpixel != 1 )
+				throw Soy::AssertException("Currently can only handle 1BPP planes");
+			auto* DstPlaneData = DstPlane.data + DstPlane.mem_offset;
+			//	todo: check real buffer size to avoid bad memread
+			auto DstPlaneDataSize = DstPlane.fmt.stride * DstPlane.fmt.height;	
+			SoyPixelsRemote DstPlanePixels( DstPlaneData, DstPlane.fmt.stride, DstPlane.fmt.height, DstPlaneDataSize, SoyPixelsFormat::Greyscale );
+
+			auto Height = std::min<uint32_t>(DstPlane.fmt.height,SrcPlane.GetHeight());
+			auto Width = std::min<uint32_t>(DstPlane.fmt.width,SrcPlane.GetWidth());
+			for ( int y=0;	y<Height;	y++ )
+			{
+				auto DstLine = GetRemoteArray( &DstPlanePixels.GetPixelPtr(0,y,0), Width );
+				auto SrcLine = GetRemoteArray( &SrcPlane.GetPixelPtr(0,y,0), Width );
+				DstLine.Copy(SrcLine);
+			}
+			DstPlane.bytesused = DstPlaneDataSize;
 		}
 	};
 
