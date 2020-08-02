@@ -33,6 +33,9 @@ typedef uint32_t __le32;
 #include "NvidiaEncoder.h"
 #include "nvidia/include/NvVideoEncoder.h"
 
+#include "PopH264.h"
+#include "json11.hpp"
+
 //	gr: cleanup this
 #define MICROSECOND_UNIT 1000000
 
@@ -125,13 +128,13 @@ Nvidia::TEncoderParams::TEncoderParams(json11::Json& Options)
 //	gr: PopH264 multiple profile support is still todo
 v4l2_mpeg_video_h264_profile GetProfile()
 {
-	return H264_PROFILE_BASELINE;
+	return V4L2_MPEG_VIDEO_H264_PROFILE_BASELINE;
 }
 
 v4l2_mpeg_video_h264_level GetProfileLevel(size_t ProfileLevel)
 {
 	//	convert our levels (30=3.0 51=5.1 etc)
-	const std::map<size_t,v4l2_mpeg_video_h264_level> ProfileLevelValue =
+	std::map<size_t,v4l2_mpeg_video_h264_level> ProfileLevelValue =
 	{
 		{	10,	V4L2_MPEG_VIDEO_H264_LEVEL_1_0	},	//	V4L2_MPEG_VIDEO_H264_LEVEL_1B
 		{	11,	V4L2_MPEG_VIDEO_H264_LEVEL_1_1	},
@@ -180,7 +183,8 @@ V4lPixelFormat::Type GetPixelFormat(SoyPixelsFormat::Type Format)
 
 
 Nvidia::TEncoder::TEncoder(TEncoderParams& Params,std::function<void(PopH264::TPacket&)> OnOutPacket) :
-	PopH264::TEncoder( OnOutPacket )
+	PopH264::TEncoder	( OnOutPacket ),
+	mParams				( Params )
 {
 	log_level = LOG_LEVEL_DEBUG;
 
@@ -389,8 +393,8 @@ void Nvidia::TEncoder::InitYuvFormat(SoyPixelsMeta PixelMeta)
 	auto Result = Encoder.setOutputPlaneFormat( Format, Width, Height );
 	IsOkay(Result,"InitInputFormat failed setOutputPlaneFormat");
 
-	
-	InitEncodingParams();
+	//	encoding params have to be done AFTER setting up input
+	InitEncodingParams(mParams);
 }
 
 
@@ -409,26 +413,26 @@ NvV4l2ElementPlane& Nvidia::TEncoder::GetH264Plane()
 }
 
 
-void Nvidia::TEncoder::InitEncodingParams()
+void Nvidia::TEncoder::InitEncodingParams(const TEncoderParams& Params)
 {
 	std::Debug << __PRETTY_FUNCTION__ << std::endl;
 	auto& Encoder = *mEncoder;
 
 	{
-		auto Profile = GetProfile(mParams.mProfile);
-		std::Debug << "SetProfile(" << Profile << ")" << std::endl;
+		auto Profile = GetProfile();
+		std::Debug << "SetProfile(" << magic_enum::enum_name(Profile) << ")" << std::endl;
 		auto Result = Encoder.setProfile(Profile);
 		IsOkay(Result,"setProfile");
 	}
 	
 	{
-		auto Level = GetProfileLevel(mParams.mProfileLevel);
+		auto Level = GetProfileLevel(Params.mProfileLevel);
 		std::Debug << "setLevel(" << Level << ")" << std::endl;
 		auto Result = Encoder.setLevel(Level);
 		IsOkay(Result,"setLevel");
 	}
 	
-	auto AverageBitRate = mParams.mAverageKBitRate * 1024;
+	auto AverageBitRate = Params.mAverageKBitRate * 1024;
 	if ( AverageBitRate != 0 )
 	{
 		std::Debug << "setBitrate(" << AverageBitRate << ")" << std::endl;
@@ -436,7 +440,7 @@ void Nvidia::TEncoder::InitEncodingParams()
 		IsOkay(Result,"setBitrate");
 	}
 	
-	auto MaxBitRate = mParams.mPeakKBitRate * 1024;
+	auto MaxBitRate = Params.mPeakKBitRate * 1024;
 	if ( MaxBitRate != 0 )
 	{
 		std::Debug << "setPeakBitrate(" << MaxBitRate << ")" << std::endl;
@@ -446,19 +450,19 @@ void Nvidia::TEncoder::InitEncodingParams()
 	
 	//	ret = ctx.enc->setFrameRate(ctx.fps_n, ctx.fps_d);
 	{
-		std::Debug << "setSliceLevelEncode(" << mParams.mSliceLevelEncoding << ")" << std::endl;
-		auto Result = Encoder.setSliceLevelEncode(mParams.mSliceLevelEncoding);
+		std::Debug << "setSliceLevelEncode(" << Params.mSliceLevelEncoding << ")" << std::endl;
+		auto Result = Encoder.setSliceLevelEncode(Params.mSliceLevelEncoding);
 		IsOkay(Result,"setSliceLevelEncode");
 	}
 	
 	{
-		std::Debug << "setMaxPerfMode(" << mParams.mMaxPerformance << ")" << std::endl;
-		auto Result = Encoder.setMaxPerfMode(mParams.mMaxPerformance);
+		std::Debug << "setMaxPerfMode(" << Params.mMaxPerformance << ")" << std::endl;
+		auto Result = Encoder.setMaxPerfMode(Params.mMaxPerformance);
 		IsOkay(Result,"setMaxPerfMode");
 	}
 	
 	{
-		auto BitRateMode = mParams.mConstantBitRate ? V4L2_MPEG_VIDEO_BITRATE_MODE_CBR : V4L2_MPEG_VIDEO_BITRATE_MODE_VBR;
+		auto BitRateMode = Params.mConstantBitRate ? V4L2_MPEG_VIDEO_BITRATE_MODE_CBR : V4L2_MPEG_VIDEO_BITRATE_MODE_VBR;
 		std::Debug << "setRateControlMode(" << magic_enum::enum_name(BitRateMode) << ")" << std::endl;
 		auto Result = Encoder.setRateControlMode(BitRateMode);
 		IsOkay(Result,"setRateControlMode");
