@@ -1139,7 +1139,7 @@ void Nvidia::TEncoder::Encode(const SoyPixelsImpl& Luma, const SoyPixelsImpl& Ch
 		{
 			NvBuffer::NvBufferPlane& DstPlane = Buffer.planes[p];
 			//	gr: 640x480, but stride is 768???
-			std::Debug << "Fill buffer plane; " << p << "; bpp=" << DstPlane.fmt.bytesperpixel << " width=" << DstPlane.fmt.width << " height=" << DstPlane.fmt.height << " stride=" << DstPlane.fmt.stride << " sizeimage=" << DstPlane.fmt.sizeimage << std::endl;
+			std::Debug << "Fill buffer plane; " << p << "; bpp=" << DstPlane.fmt.bytesperpixel << " width=" << DstPlane.fmt.width << " height=" << DstPlane.fmt.height << " stride=" << DstPlane.fmt.stride << " sizeimage=" << DstPlane.fmt.sizeimage << " memoffset=" << DstPlane.mem_offset << " DstPlane.length=" << DstPlane.length << std::endl;
 
 			if ( p >= SrcPlanes.GetSize() )
 			{
@@ -1152,7 +1152,8 @@ void Nvidia::TEncoder::Encode(const SoyPixelsImpl& Luma, const SoyPixelsImpl& Ch
 			//	to make things a little simpler, make a destination image with stride width
 			if ( DstPlane.fmt.bytesperpixel != 1 )
 				throw Soy::AssertException("Currently can only handle 1BPP planes");
-			auto* DstPlaneData = DstPlane.data + DstPlane.mem_offset;
+			//	gr: the .data seems to already been aligned with mem_offset.
+			auto* DstPlaneData = DstPlane.data;// + DstPlane.mem_offset;
 			//	todo: check real buffer size to avoid bad memread
 			auto DstPlaneDataSize = DstPlane.fmt.stride * DstPlane.fmt.height;	
 			SoyPixelsRemote DstPlanePixels( DstPlaneData, DstPlane.fmt.stride, DstPlane.fmt.height, DstPlaneDataSize, SoyPixelsFormat::Greyscale );
