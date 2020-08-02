@@ -22,7 +22,7 @@ namespace Nvidia
 class NvVideoEncoder;
 class NvV4l2ElementPlane;
 class NvBuffer;
-
+struct v4l2_buffer;
 
 class Nvidia::TEncoderParams
 {
@@ -59,6 +59,8 @@ private:
 	void			InitYuvCallback();
 	void			InitEncodingParams();
 	void			QueueNextYuvBuffer(std::function<void(NvBuffer&)> FillBuffer);
+	bool			OnEncodedBuffer(v4l2_buffer&, NvBuffer* buffer,NvBuffer* shared_buffer);
+	void			OnFrameEncoded(ArrayBridge<uint8_t>&& FrameData,uint32_t Flags,std::chrono::milliseconds Timestamp);
 	void			Sync();
 	void			Start();
 	void			ReadNextFrame();
