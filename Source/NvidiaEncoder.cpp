@@ -86,7 +86,6 @@ public:
 
 Nvidia::TEncoderParams::TEncoderParams(json11::Json& Options)
 {
-	/*
 	auto SetInt = [&](const char* Name,size_t& ValueUnsigned)
 	{
 		auto& Handle = Options[Name];
@@ -110,20 +109,49 @@ Nvidia::TEncoderParams::TEncoderParams(json11::Json& Options)
 		Value = Handle.bool_value();
 		return true;
 	};
-	SetInt(POPH264_ENCODER_KEY_QUALITY, mPreset);
-	SetInt(POPH264_ENCODER_KEY_PROFILELEVEL, mProfileLevel);
-	SetInt(POPH264_ENCODER_KEY_ENCODERTHREADS, mEncoderThreads);
-	SetInt(POPH264_ENCODER_KEY_LOOKAHEADTHREADS, mLookaheadThreads);
-	SetBool(POPH264_ENCODER_KEY_BSLICEDTHREADS, mBSlicedThreads);
-	SetBool(POPH264_ENCODER_KEY_VERBOSEDEBUG, mEnableLog);
-	SetBool(POPH264_ENCODER_KEY_DETERMINISTIC, mDeterministic);
-	SetBool(POPH264_ENCODER_KEY_CPUOPTIMISATIONS, mCpuOptimisations);
+
 	
-	//	0 is auto on AVF, so handle that
-	if (mProfileLevel == 0)
-		mProfileLevel = 30;
-	*/
+	SetInt(POPH264_ENCODER_KEY_PROFILELEVEL, mProfileLevel);
+	SetBool(POPH264_ENCODER_KEY_VERBOSEDEBUG, mVerboseDebug);
+	SetInt(POPH264_ENCODER_KEY_AVERAGEKBPS, mAverageKBitRate);
+	SetInt(POPH264_ENCODER_KEY_MAXKBPS, mPeakKBitRate);
+	SetBool(POPH264_ENCODER_KEY_REALTIME, mMaxPerformance);
+	SetBool(POPH264_ENCODER_KEY_CONSTANTBITRATE, mConstantBitRate);
+	//SetBool(POPH264_ENCODER_KEY_AVERAGEKBPS, mInsertSpsBeforeKeyframe);
+	SetBool(POPH264_ENCODER_KEY_SLICELEVELENCODING, mSliceLevelEncoding);
 }
+
+
+//	gr: PopH264 multiple profile support is still todo
+v4l2_mpeg_video_h264_profile GetProfile()
+{
+	return H264_PROFILE_BASELINE;
+}
+
+v4l2_mpeg_video_h264_level GetProfileLevel(size_t ProfileLevel)
+{
+	//	convert our levels (30=3.0 51=5.1 etc)
+	const std::map<size_t,v4l2_mpeg_video_h264_level> ProfileLevelValue =
+	{
+		{	10,	V4L2_MPEG_VIDEO_H264_LEVEL_1_0	},	//	V4L2_MPEG_VIDEO_H264_LEVEL_1B
+		{	11,	V4L2_MPEG_VIDEO_H264_LEVEL_1_1	},
+		{	12,	V4L2_MPEG_VIDEO_H264_LEVEL_1_2	},
+		{	13,	V4L2_MPEG_VIDEO_H264_LEVEL_1_3	},
+		{	20,	V4L2_MPEG_VIDEO_H264_LEVEL_2_0	},
+		{	21,	V4L2_MPEG_VIDEO_H264_LEVEL_2_1	},
+		{	22,	V4L2_MPEG_VIDEO_H264_LEVEL_2_2	},
+		{	30,	V4L2_MPEG_VIDEO_H264_LEVEL_3_0	},
+		{	31,	V4L2_MPEG_VIDEO_H264_LEVEL_3_1	},
+		{	32,	V4L2_MPEG_VIDEO_H264_LEVEL_3_2	},
+		{	40,	V4L2_MPEG_VIDEO_H264_LEVEL_4_0	},
+		{	41,	V4L2_MPEG_VIDEO_H264_LEVEL_4_1	},
+		{	42,	V4L2_MPEG_VIDEO_H264_LEVEL_4_2	},
+		{	50,	V4L2_MPEG_VIDEO_H264_LEVEL_5_0	},
+		{	51,	V4L2_MPEG_VIDEO_H264_LEVEL_5_1	},
+	};
+	return ProfileLevelValue[ProfileLevel];
+}
+
 
 V4lPixelFormat::Type GetPixelFormat(SoyPixelsFormat::Type Format)
 {
@@ -386,22 +414,61 @@ void Nvidia::TEncoder::InitEncodingParams()
 	std::Debug << __PRETTY_FUNCTION__ << std::endl;
 	auto& Encoder = *mEncoder;
 
-	auto Profile = V4L2_MPEG_VIDEO_H264_PROFILE_BASELINE;
-	auto BitRate = 8 * 1000 * 500;
-	auto Level = V4L2_MPEG_VIDEO_H264_LEVEL_3_0;
+	{
+		auto Profile = GetProfile(mParams.mProfile);
+		std::Debug << "SetProfile(" << Profile << ")" << std::endl;
+		auto Result = Encoder.setProfile(Profile);
+		IsOkay(Result,"setProfile");
+	}
 	
-	//	set other params
-	std::Debug << "SetProfile(" << Profile << ")" << std::endl;
-	auto Result = Encoder.setProfile(Profile);
-	IsOkay(Result,"Failed to set level");
+	{
+		auto Level = GetProfileLevel(mParams.mProfileLevel);
+		std::Debug << "setLevel(" << Level << ")" << std::endl;
+		auto Result = Encoder.setLevel(Level);
+		IsOkay(Result,"setLevel");
+	}
+	
+	auto AverageBitRate = mParams.mAverageKBitRate * 1024;
+	if ( AverageBitRate != 0 )
+	{
+		std::Debug << "setBitrate(" << AverageBitRate << ")" << std::endl;
+		auto Result = Encoder.setBitrate(AverageBitRate);
+		IsOkay(Result,"setBitrate");
+	}
+	
+	auto MaxBitRate = mParams.mPeakKBitRate * 1024;
+	if ( MaxBitRate != 0 )
+	{
+		std::Debug << "setPeakBitrate(" << MaxBitRate << ")" << std::endl;
+		auto Result = Encoder.setPeakBitrate(MaxBitRate);
+		IsOkay(Result,"setBitrate");
+	}
+	
+	//	ret = ctx.enc->setFrameRate(ctx.fps_n, ctx.fps_d);
+	{
+		std::Debug << "setSliceLevelEncode(" << mParams.mSliceLevelEncoding << ")" << std::endl;
+		auto Result = Encoder.setSliceLevelEncode(mParams.mSliceLevelEncoding);
+		IsOkay(Result,"setSliceLevelEncode");
+	}
+	
+	{
+		std::Debug << "setMaxPerfMode(" << mParams.mMaxPerformance << ")" << std::endl;
+		auto Result = Encoder.setMaxPerfMode(mParams.mMaxPerformance);
+		IsOkay(Result,"setMaxPerfMode");
+	}
+	
+	{
+		auto BitRateMode = mParams.mConstantBitRate ? V4L2_MPEG_VIDEO_BITRATE_MODE_CBR : V4L2_MPEG_VIDEO_BITRATE_MODE_VBR;
+		std::Debug << "setRateControlMode(" << magic_enum::enum_name(BitRateMode) << ")" << std::endl;
+		auto Result = Encoder.setRateControlMode(BitRateMode);
+		IsOkay(Result,"setRateControlMode");
+	}
 
-	std::Debug << "setBitrate(" << BitRate << ")" << std::endl;
-	Result = Encoder.setBitrate(BitRate);
-	IsOkay(Result,"Failed to set bitrate");
-	
-	std::Debug << "setLevel(" << Level << ")" << std::endl;
-	Result = Encoder.setLevel(Level);
-	IsOkay(Result,"Failed to set level");
+	{
+		std::Debug << "setInsertSpsPpsAtIdrEnabled(" << Params.mInsertSpsBeforeKeyframe << ")" << std::endl;
+		auto Result = Encoder.setInsertSpsPpsAtIdrEnabled(Params.mInsertSpsBeforeKeyframe);
+		IsOkay(Result,"setInsertSpsPpsAtIdrEnabled");
+	}
 }
 
 

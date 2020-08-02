@@ -29,6 +29,15 @@ class Nvidia::TEncoderParams
 public:
 	TEncoderParams(){}
 	TEncoderParams(json11::Json& Options);
+	
+	size_t	mProfileLevel = 0;
+	bool	mVerboseDebug = false;
+	size_t	mAverageKBitRate = 0;
+	size_t	mPeakKBitRate = 0;
+	bool	mMaxPerformance = false;
+	bool	mConstantBitRate = false;
+	bool	mInsertSpsBeforeKeyframe = false;
+	bool	mSliceLevelEncoding = false;
 };
 
 
