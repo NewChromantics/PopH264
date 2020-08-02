@@ -186,8 +186,9 @@ Nvidia::TEncoder::TEncoder(TEncoderParams& Params,std::function<void(PopH264::TP
 	PopH264::TEncoder	( OnOutPacket ),
 	mParams				( Params )
 {
+	//	show debug for init
 	log_level = LOG_LEVEL_DEBUG;
-
+	
 	mNative.reset(new TNative);
 	
 	//	the nvvideoencoder is a wrapper for a V4L2 device
@@ -206,6 +207,10 @@ Nvidia::TEncoder::TEncoder(TEncoderParams& Params,std::function<void(PopH264::TP
 	auto Result = Encoder.subscribeEvent(V4L2_EVENT_EOS,0,0);
 	IsOkay(Result,"Failed to subscribe to EOS event");
 	*/
+	if ( mParams.mVerboseDebug )
+		log_level = LOG_LEVEL_DEBUG;
+	else
+		log_level = LOG_LEVEL_WARN;
 }
 
 Nvidia::TEncoder::~TEncoder()
@@ -573,7 +578,9 @@ bool Nvidia::TEncoder::OnEncodedBuffer(v4l2_buffer& v4l2_buf, NvBuffer * buffer,
 	auto BufferIndex = buffer->index;
 	auto TimestampMicro64 = (v4l2_buf.timestamp.tv_sec * MICROSECOND_UNIT) + v4l2_buf.timestamp.tv_usec ;
 	auto TimestampMs = std::chrono::milliseconds( TimestampMicro64 / 1000 );
-	std::Debug << "H264 plane dequeue (frame encoded). BufferIndex=" << BufferIndex << " PlaneCount=" << PlaneCount << " SharedBuffer=" << (shared_buffer ? "non-null":"null") << " flags=" << FlagsDebug << " Timestamp=" << TimestampMs.count() << std::endl;
+	
+	if ( mParams.mVerboseDebug )
+		std::Debug << "H264 plane dequeue (frame encoded). BufferIndex=" << BufferIndex << " PlaneCount=" << PlaneCount << " SharedBuffer=" << (shared_buffer ? "non-null":"null") << " flags=" << FlagsDebug << " Timestamp=" << TimestampMs.count() << std::endl;
 
 	for ( auto p=0;	p<buffer->n_planes;	p++ )
 	{
@@ -583,7 +590,8 @@ bool Nvidia::TEncoder::OnEncodedBuffer(v4l2_buffer& v4l2_buf, NvBuffer * buffer,
 		auto DataOffset = Plane.mem_offset;
 		auto* Data = Plane.data + DataOffset;
 		auto DataArray = GetRemoteArray(Data,DataSize);
-		std::Debug << "Encoded plane; x" << DataSize << " bytes, flags=" << FlagsDebug << std::endl;
+		if ( mParams.mVerboseDebug )
+			std::Debug << "Encoded h264 plane; x" << DataSize << " bytes, flags=" << FlagsDebug << std::endl;
 		OnFrameEncoded( GetArrayBridge(DataArray), Flags, TimestampMs );
 	}
 
@@ -669,7 +677,7 @@ void Nvidia::TEncoder::InitYuvCallback()
 	auto Callback = [](struct v4l2_buffer *v4l2_buf, NvBuffer * buffer,
 							  NvBuffer * shared_buffer, void * This)
 	{
-		std::Debug << "YUV plane dequeue (index = " << v4l2_buf->index << ")" << std::endl;
+		//std::Debug << "YUV plane dequeue (index = " << v4l2_buf->index << ")" << std::endl;
 		auto* ThisEncoder = reinterpret_cast<Nvidia::TEncoder*>(This);
 		ThisEncoder->PushYuvUnusedBufferIndex(v4l2_buf->index);
 		return true;
@@ -679,125 +687,7 @@ void Nvidia::TEncoder::InitYuvCallback()
 	auto* This = this;
 	YuvPlane.setDQThreadCallback(Callback);
 	YuvPlane.startDQThread(This);
-
-	
-	/*
-	//	Enqueue all the empty capture plane buffers.
-	//	gr: which are the H264 output buffers
-	for (uint32_t i = 0; i <Encoder.capture_plane.getNumBuffers(); i++)
-	{
-		struct v4l2_buffer v4l2_buf;
-		struct v4l2_plane planes[MAX_PLANES];
-		
-		memset(&v4l2_buf, 0, sizeof(v4l2_buf));
-		memset(planes, 0, MAX_PLANES * sizeof(struct v4l2_plane));
-		
-		v4l2_buf.index = i;
-		v4l2_buf.m.planes = planes;
-		
-		auto Result = Encoder.capture_plane.qBuffer(v4l2_buf, nullptr);
-		IsOkay(Result,"Failed to queue H264/capture_plane buffer");
-	}
-	*/
 }
-
-/*
-void Nvidia::TEncoder::OnFrameEncoded(struct v4l2_buffer *v4l2_buf, NvBuffer * buffer,NvBuffer * shared_buffer)
-{
-	auto& Encoder = *mEncoder;
-
-	//	gr: number of frames ready?
-	uint32_t frame_num = Encoder.capture_plane.getTotalDequeuedBuffers() - 1;
-	uint32_t ReconRef_Y_CRC = 0;
-	uint32_t ReconRef_U_CRC = 0;
-	uint32_t ReconRef_V_CRC = 0;
-	static uint32_t num_encoded_frames = 1;
-	struct v4l2_event ev;
-	int ret = 0;
-	
-	if (!v4l2_buf)
-	{
-		std::Debug << __PRETTY_FUNCTION__ << " error while dequeing output buffer (v4l2_buf=null)" << std::endl;
-		return;
-	}
-	
-	if ( mUsingCommands )
-	{
-		if(v4l2_buf->flags & V4L2_BUF_FLAG_LAST)
-		{
-			std::Debug << __PRETTY_FUNCTION__ << "V4L2_BUF_FLAG_LAST" << std::endl;
-			/*
-			memset(&ev,0,sizeof(struct v4l2_event));
-			ret = ctx->enc->dqEvent(ev,1000);
-			if (ret < 0)
-				cout << "Error in dqEvent" << endl;
-			if(ev.type == V4L2_EVENT_EOS)
-				return false;
-			*//*
-		}
-	}
-	
-	//	end of string
-	if (buffer->planes[0].bytesused == 0)
-	{
-		std::Debug << "Got 0 size buffer in capture" << std::endl;
-		return;
-	}
-	
-	//	Computing CRC with each frame
-	//if(ctx->pBitStreamCrc)
-	//	CalculateCrc (ctx->pBitStreamCrc, buffer->planes[0].data, buffer->planes[0].bytesused);
-	
-
-	//	push/read the encoded buffer
-	OnFrame(buffer);
-
-	//	get frame meta
-	/*
-	{
-		v4l2_ctrl_videoenc_outputbuf_metadata enc_metadata;
-		auto Result = Encoder.getMetadata(v4l2_buf->index, enc_metadata);
-		if ( Result == 0 )
-		{
-				cout << "Frame " << frame_num <<
-				": isKeyFrame=" << (int) enc_metadata.KeyFrame <<
-				" AvgQP=" << enc_metadata.AvgQP <<
-				" MinQP=" << enc_metadata.FrameMinQP <<
-				" MaxQP=" << enc_metadata.FrameMaxQP <<
-				" EncodedBits=" << enc_metadata.EncodedFrameBits <<
-				endl;
-			}
-		}
-	}
-	*/
-
-	//	Get motion vector parameters of the frames from encoder
-	/*
-	{
-		v4l2_ctrl_videoenc_outputbuf_metadata_MV enc_mv_metadata;
-		if (ctx->enc->getMotionVectors(v4l2_buf->index, enc_mv_metadata) == 0)
-		{
-			uint32_t numMVs = enc_mv_metadata.bufSize / sizeof(MVInfo);
-			MVInfo *pInfo = enc_mv_metadata.pMVInfo;
-			
-			cout << "Frame " << frame_num << ": Num MVs=" << numMVs << endl;
-			
-			for (uint32_t i = 0; i < numMVs; i++, pInfo++)
-			{
-				cout << i << ": mv_x=" << pInfo->mv_x <<
-				" mv_y=" << pInfo->mv_y <<
-				" weight=" << pInfo->weight <<
-				endl;
-			}
-		}
-	}
-	*//*
-	
-	//	put the output/h264 buffer back so it can be used
-	auto Result = Encoder.capture_plane.qBuffer(*v4l2_buf, nullptr);
-	IsOkay(Result,"Post-new-buffer re-enqueuing buffer for encoder");
-}
-*/
 
 
 
@@ -858,20 +748,6 @@ void Nvidia::TEncoder::Sync()
 
 void Nvidia::TEncoder::ReadNextFrame()
 {
-	auto& Encoder = *mEncoder;
-	
-	//	dequeue all the planes from the capture
-	/*
-	 //	dequeue a buffer to write to
-	 struct v4l2_buffer v4l2_buf;
-	 struct v4l2_plane planes[MAX_PLANES];
-	 NvBuffer *buffer = nullptr;
-	 memset(&v4l2_buf, 0, sizeof(v4l2_buf));
-	 memset(planes, 0, sizeof(planes));
-	 v4l2_buf.m.planes = planes;
-	 auto Result = YuvPlane.dqBuffer(v4l2_buf, &buffer, NULL, 10);
-	 IsOkay(Result,"Failed to dequeue YUV buffer");
-	 */
 }
 
 
@@ -906,56 +782,6 @@ void Nvidia::TEncoder::WaitForEnd()
 	std::Debug << "DQ thread ended" << std::endl;
 }
 
-/*
-int
-read_video_frame(std::ifstream * stream, NvBuffer & buffer)
-{
-	uint32_t i, j;
-	char *data;
-	
-	for (i = 0; i < buffer.n_planes; i++)
-	{
-		NvBuffer::NvBufferPlane &plane = buffer.planes[i];
-		std::streamsize bytes_to_read =
-		plane.fmt.bytesperpixel * plane.fmt.width;
-		data = (char *) plane.data;
-		plane.bytesused = 0;
-		for (j = 0; j < plane.fmt.height; j++)
-		{
-			stream->read(data, bytes_to_read);
-			if (stream->gcount() < bytes_to_read)
-				return -1;
-			data += plane.fmt.stride;
-		}
-		plane.bytesused = plane.fmt.stride * plane.fmt.height;
-	}
-	return 0;
-}
-
-int
-write_video_frame(std::ofstream * stream, NvBuffer &buffer)
-{
-	uint32_t i, j;
-	char *data;
-	
-	for (i = 0; i < buffer.n_planes; i++)
-	{
-		NvBuffer::NvBufferPlane &plane = buffer.planes[i];
-		size_t bytes_to_write =
-		plane.fmt.bytesperpixel * plane.fmt.width;
-		
-		data = (char *) plane.data;
-		for (j = 0; j < plane.fmt.height; j++)
-		{
-			stream->write(data, bytes_to_write);
-			if (!stream->good())
-				return -1;
-			data += plane.fmt.stride;
-		}
-	}
-	return 0;
-}
-*/
 void Nvidia::TEncoder::Shutdown()
 {
 	WaitForEnd();
@@ -979,7 +805,7 @@ void Nvidia::TEncoder::Shutdown()
 
 void Nvidia::TEncoder::FinishEncoding()
 {
-	
+	//	todo: queue an empty YUV buffer of 0 bytes
 }
 
 
@@ -1030,7 +856,8 @@ uint32_t Nvidia::TEncoder::PopYuvUnusedBufferIndex()
 
 void Nvidia::TEncoder::PushYuvUnusedBufferIndex(uint32_t Index)
 {
-	std::Debug << __PRETTY_FUNCTION__ << "(" << Index << ")" << std::endl;
+	if ( mParams.mVerboseDebug )
+		std::Debug << __PRETTY_FUNCTION__ << "(" << Index << ")" << std::endl;
 	//	add to list and notify
 	{
 		std::lock_guard<std::mutex> Lock(mYuvBufferLock);
@@ -1087,7 +914,8 @@ void Nvidia::TEncoder::QueueNextYuvBuffer(std::function<void(NvBuffer&)> FillBuf
 		IsOkay(Result,"Error while mapping buffer at output plane");
 		*/
 	}
-	std::Debug << "FillBuffer(" << BufferIndex << ")..." << std::endl;
+	if ( mParams.mVerboseDebug )
+		std::Debug << "FillBuffer(" << BufferIndex << ")..." << std::endl;
 	//	gr: bytesused in the planes gets set in dma mode
 	FillBuffer(Buffer);
 
@@ -1112,7 +940,8 @@ void Nvidia::TEncoder::QueueNextYuvBuffer(std::function<void(NvBuffer&)> FillBuf
 	Sync();
 	//	DMA also needs to set bytes used
 
-	std::Debug << "Queuing YUV buffer " << BufferIndex << std::endl;
+	if ( mParams.mVerboseDebug )
+		std::Debug << "Queuing YUV buffer " << BufferIndex << std::endl;
 	//	final queue
 	auto Result = YuvPlane.qBuffer(v4l2_buf, nullptr);
 	IsOkay(Result,"Error while queueing buffer at output plane");
@@ -1120,10 +949,7 @@ void Nvidia::TEncoder::QueueNextYuvBuffer(std::function<void(NvBuffer&)> FillBuf
 
 void Nvidia::TEncoder::Encode(const SoyPixelsImpl& Luma, const SoyPixelsImpl& ChromaU, const SoyPixelsImpl& ChromaV, const std::string& Meta, bool Keyframe)
 {
-	//std::Debug << "Skipping encode" << std::endl;
-	//return;
-
-	std::Debug << __PRETTY_FUNCTION__ << std::endl;
+	Soy::TScopeTimerPrint Timer(__PRETTY_FUNCTION__,15);
 	SoyPixelsMeta PixelsMeta( Luma.GetWidth(), Luma.GetHeight(), SoyPixelsFormat::Yuv_8_8_8 );
 	InitEncoder( PixelsMeta);
 
@@ -1134,12 +960,14 @@ void Nvidia::TEncoder::Encode(const SoyPixelsImpl& Luma, const SoyPixelsImpl& Ch
 		SrcPlanes.PushBack(&ChromaU);
 		SrcPlanes.PushBack(&ChromaV);
 
-		std::Debug << "Filling YUV buffer x" << Buffer.n_planes << "planes..." << std::endl;
+		if ( mParams.mVerboseDebug )
+			std::Debug << "Filling YUV buffer x" << Buffer.n_planes << "planes..." << std::endl;
 		for ( auto p=0;	p<Buffer.n_planes; p++)
 		{
 			NvBuffer::NvBufferPlane& DstPlane = Buffer.planes[p];
 			//	gr: 640x480, but stride is 768???
-			std::Debug << "Fill buffer plane; " << p << "; bpp=" << DstPlane.fmt.bytesperpixel << " width=" << DstPlane.fmt.width << " height=" << DstPlane.fmt.height << " stride=" << DstPlane.fmt.stride << " sizeimage=" << DstPlane.fmt.sizeimage << " memoffset=" << DstPlane.mem_offset << " DstPlane.length=" << DstPlane.length << std::endl;
+			if ( mParams.mVerboseDebug )
+				std::Debug << "Fill buffer plane; " << p << "; bpp=" << DstPlane.fmt.bytesperpixel << " width=" << DstPlane.fmt.width << " height=" << DstPlane.fmt.height << " stride=" << DstPlane.fmt.stride << " sizeimage=" << DstPlane.fmt.sizeimage << " memoffset=" << DstPlane.mem_offset << " DstPlane.length=" << DstPlane.length << std::endl;
 
 			if ( p >= SrcPlanes.GetSize() )
 			{
