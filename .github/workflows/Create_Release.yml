@@ -32,9 +32,9 @@ jobs:
             type: linux
             architecture: arm64
 
-          # - os: Pi4
-          #   type: linux
-          #   architecture: arm64
+          - os: Pi4
+            type: linux
+            architecture: arm64
 
           - os: windows
             type: x64
