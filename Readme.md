@@ -27,6 +27,7 @@ Any empty platforms are generally planned, but not yet implemented.
 | Android arm64-v8a | Broadway       |                   |                   |                   |              |
 | Magic Leap/Luma (Linux x86) | Broadway  | MLMediaCodec Google,Nvidia|      |                   |              |
 | Web            | Broadway.js       |                   |                   |                   |              |
+| Unity WebGL    |                   |                   |                   |                   |              |
 
 Unity Decoder Support
 -----------------------
