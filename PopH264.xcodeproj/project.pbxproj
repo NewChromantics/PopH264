@@ -1293,7 +1293,7 @@
 		BFF1C6DF22E3769B00AFDFD5 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ANDROID_NDK = /Volumes/Data256/AndroidSdk29/ndk/21.1.6352462;
+				ANDROID_NDK_HOME = "/usr/local/share/android-ndk";
 				BUILD_TARGET_NAME = PopH264;
 				UNITY_ASSET_PLUGIN_PATH = "$(UNITY_OUTPUT_PATH)/Android";
 			};
@@ -1302,7 +1302,7 @@
 		BFF1C6E022E3769B00AFDFD5 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ANDROID_NDK = /Volumes/Data256/AndroidSdk29/ndk/21.1.6352462;
+				ANDROID_NDK_HOME = "/usr/local/share/android-ndk";
 				BUILD_TARGET_NAME = PopH264;
 				UNITY_ASSET_PLUGIN_PATH = "$(UNITY_OUTPUT_PATH)/Android";
 			};

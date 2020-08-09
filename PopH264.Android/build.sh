@@ -1,4 +1,6 @@
 #!/bin/sh
+#export ANDROID_NDK_HOME=/usr/local/Cellar/android-ndk/r11c/
+#ANDROID_NDK_HOME
 
 #echo "env vars"
 #env
@@ -27,7 +29,12 @@ if [ -z "$ANDROID_API" ]; then
 fi
 
 
-MAXCONCURRENTBUILDS=8
+if [ -z "$ANDROID_PLATFORM" ]; then
+# tsdk: Minimum platform that supports ifaddrs
+	ANDROID_PLATFORM="24"
+fi
+
+MAXCONCURRENTBUILDS=1
 BUILD_PROJECT_FOLDER=$BUILD_TARGET_NAME.Android
 
 # set android NDK dir
@@ -36,11 +43,20 @@ if [ -z "$ANDROID_NDK_HOME" ]; then
 	exit 1
 fi
 
+# to avoid errors like Your APP_BUILD_SCRIPT points to an unknown file using Android ndk-build
+# https://stackoverflow.com/questions/6494567/your-app-build-script-points-to-an-unknown-file-using-android-ndk-build
+# expect the env var to be set
+# this could also be passed into the ndk-build command line
+if [ -z "$NDK_PROJECT_PATH" ]; then
+	echo "NDK_PROJECT_PATH is not set, defaulting to $BUILD_PROJECT_FOLDER..."
+	export NDK_PROJECT_PATH=$BUILD_PROJECT_FOLDER
+fi
+
 function BuildAbi()
 {
 	ANDROID_ABI=$1
 	echo "ndk-build $ANDROID_ABI..."
-	$ANDROID_NDK_HOME/ndk-build -j$MAXCONCURRENTBUILDS NDK_DEBUG=0 NDK_PROJECT_PATH=$SOURCE_ROOT/$BUILD_PROJECT_FOLDER
+	$ANDROID_NDK_HOME/ndk-build -j$MAXCONCURRENTBUILDS APP_PLATFORM=android-$ANDROID_PLATFORM ANDROID_ABI=$ANDROID_ABI NDK_DEBUG=1 NDK_LOG=1
 
 	RESULT=$?
 
