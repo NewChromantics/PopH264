@@ -1,3 +1,8 @@
+Documentation
+=========================
+The bulk of the documentation is in PopH264.h
+
+
 Build Status
 ==========================
 ![Build Windows](https://github.com/NewChromantics/PopH264/workflows/Build%20Windows/badge.svg)
