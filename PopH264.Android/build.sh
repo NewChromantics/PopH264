@@ -52,21 +52,28 @@ if [ -z "$NDK_PROJECT_PATH" ]; then
 	export NDK_PROJECT_PATH=$BUILD_PROJECT_FOLDER
 fi
 
-function BuildAbi()
+ADDITIONAL_BUILD_FILES=(Source/PopH264.h)
+
+function CopyAdditionalBuildFiles()
 {
 	ANDROID_ABI=$1
-	echo "ndk-build $ANDROID_ABI..."
-	$ANDROID_NDK_HOME/ndk-build -j$MAXCONCURRENTBUILDS APP_PLATFORM=android-$ANDROID_PLATFORM ANDROID_ABI=$ANDROID_ABI NDK_DEBUG=1 NDK_LOG=1
+	BUILD_PATH="$BUILD_PROJECT_FOLDER/libs/$ANDROID_ABI/"
+	echo "CopyAdditionalBuildFiles to $BUILD_PATH"
 
-	RESULT=$?
+	for Filename in ${ADDITIONAL_BUILD_FILES[@]}; do
+		echo "cp $Filename $BUILD_PATH"
+		cp $Filename $BUILD_PATH
+		RESULT=$?
+		if [[ $RESULT -ne 0 ]]; then
+			exit $RESULT
+		fi
+	done
+}
 
-	if [[ $RESULT -ne 0 ]]; then
-		exit $RESULT
-	fi
+function CopyBuildFilesToUnity()
+{
+	SRC_PATH="$BUILD_PROJECT_FOLDER/libs/"
 
-	SRC_PATH="$BUILD_PROJECT_FOLDER/libs/$ANDROID_ABI/lib$BUILD_TARGET_NAME.so"
-
-	# set android NDK dir
 	if [ -z "$UNITY_ASSET_PLUGIN_PATH" ]; then
 		echo "UNITY_ASSET_PLUGIN_PATH not set, skipping post-build copy of $SRC_PATH"
 	else
@@ -82,21 +89,43 @@ function BuildAbi()
 	fi
 }
 
+function BuildAbi()
+{
+	ANDROID_ABI=$1
+	ENABLE_DEBUG_SYMBOLS=$2
+	echo "ndk-build $ANDROID_ABI... DEBUG_SYMBOLS=$ENABLE_DEBUG_SYMBOLS"
+	$ANDROID_NDK_HOME/ndk-build -j$MAXCONCURRENTBUILDS APP_PLATFORM=android-$ANDROID_PLATFORM ANDROID_ABI=$ANDROID_ABI NDK_DEBUG=$ENABLE_DEBUG_SYMBOLS NDK_LOG=1 V=1
+
+	RESULT=$?
+
+	if [[ $RESULT -ne 0 ]]; then
+		exit $RESULT
+	fi
+
+	CopyAdditionalBuildFiles $ANDROID_ABI
+}
+
 #We never pass NDK_DEBUG=1 to vrlib as this generates a duplicate gdbserver
 #instead the app using vrlib can set it 
 if [ $ACTION == "release" ]; then
 	echo "Android/build.sh: $ACTION..."
 
-	BuildAbi armeabi-v7a
-	BuildAbi x86
-	BuildAbi x86_64
-	BuildAbi arm64-v8a
+	ENABLE_DEBUG_SYMBOLS=0
+
+	BuildAbi armeabi-v7a $ENABLE_DEBUG_SYMBOLS
+	BuildAbi x86 $ENABLE_DEBUG_SYMBOLS
+	BuildAbi x86_64 $ENABLE_DEBUG_SYMBOLS
+	BuildAbi arm64-v8a $ENABLE_DEBUG_SYMBOLS
+
+	CopyBuildFilesToUnity
+
 	exit 0
 fi
 
 if [ $ACTION == "clean" ]; then
 	echo "Android/build.sh: Cleaning..."
 	$ANDROID_NDK_HOME/ndk-build clean NDK_DEBUG=0
+	$ANDROID_NDK_HOME/ndk-build clean NDK_DEBUG=1
 	#ant clean
 	exit $?
 fi
