@@ -59,10 +59,15 @@ __export void				PopH264_DecoderAddOnNewFrameCallback(int32_t Instance,PopH264_C
 #define POPH264_ENCODER_KEY_ENCODERNAME		"Encoder"
 #define POPH264_ENCODER_KEY_PROFILELEVEL	"ProfileLevel"
 
-//	avf
+//	avf & nvidia
 #define POPH264_ENCODER_KEY_AVERAGEKBPS		"AverageKbps"
 #define POPH264_ENCODER_KEY_MAXKBPS			"MaxKbps"
-#define POPH264_ENCODER_KEY_REALTIME		"Realtime"
+#define POPH264_ENCODER_KEY_REALTIME		"Realtime"	//	on nvidia, this is "max performance" setting
+
+//	x264 & nvidia
+#define POPH264_ENCODER_KEY_VERBOSEDEBUG	"VerboseDebug"
+
+//	avf
 #define POPH264_ENCODER_KEY_MAXFRAMEBUFFERS	"MaxFrameBuffers"
 #define POPH264_ENCODER_KEY_MAXSLICEBYTES	"MaxSliceBytes"
 #define POPH264_ENCODER_KEY_MAXIMISEPOWEREFFICIENCY	"MaximisePowerEfficiency"
@@ -72,9 +77,13 @@ __export void				PopH264_DecoderAddOnNewFrameCallback(int32_t Instance,PopH264_C
 #define POPH264_ENCODER_KEY_ENCODERTHREADS		"EncoderThreads"
 #define POPH264_ENCODER_KEY_LOOKAHEADTHREADS	"LookaheadThreads"
 #define POPH264_ENCODER_KEY_BSLICEDTHREADS		"BSlicedThreads"
-#define POPH264_ENCODER_KEY_VERBOSEDEBUG		"VerboseDebug"
 #define POPH264_ENCODER_KEY_DETERMINISTIC		"Deterministic"
 #define POPH264_ENCODER_KEY_CPUOPTIMISATIONS	"CpuOptimisations"
+
+//	nvidia
+#define POPH264_ENCODER_KEY_CONSTANTBITRATE		"ConstantBitRate"	//	else variable
+#define POPH264_ENCODER_KEY_SLICELEVELENCODING	"SliceLevelEncoding"
+
 
 //	All options are optional
 //	.Encoder = "avf"|"x264"

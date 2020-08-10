@@ -122,11 +122,12 @@ void EncoderYuv8_88Test(const char* EncoderName="")
 	EncoderOptionsJson << "{\n";
 	EncoderOptionsJson << "	\"Encoder\":\"" << EncoderName << "\"	";
 	EncoderOptionsJson << "}";
+	DebugPrint(std::string("Encoder options: ") + EncoderOptionsJson.str());
 	
 	char ErrorBuffer[1000] = {0};
 	auto Handle = PopH264_CreateEncoder(EncoderOptionsJson.str().c_str(), ErrorBuffer, std::size(ErrorBuffer) );
 	std::stringstream Debug;
-	Debug << "PopH264_CreateEncoder handle=" << Handle << " error=" << ErrorBuffer;
+	Debug << "PopH264_CreateEncoder EncoderName=" << EncoderName << " handle=" << Handle << " error=" << ErrorBuffer;
 	DebugPrint(Debug.str());
 
 	SoyPixels Yuv( SoyPixelsMeta(640,480,SoyPixelsFormat::Yuv_8_88));
@@ -145,19 +146,33 @@ void EncoderYuv8_88Test(const char* EncoderName="")
 	PopH264_EncoderPushFrame(Handle, TestMetaJson, Yuv.GetPixelsArray().GetArray(), nullptr, nullptr, ErrorBuffer, std::size(ErrorBuffer));
 	PopH264_EncoderPushFrame(Handle, TestMetaJson, Yuv.GetPixelsArray().GetArray(), nullptr, nullptr, ErrorBuffer, std::size(ErrorBuffer));
 	PopH264_EncoderPushFrame( Handle, TestMetaJson, Yuv.GetPixelsArray().GetArray(), nullptr, nullptr, ErrorBuffer, std::size(ErrorBuffer) );
-	Debug << "PopH264_EncoderPushFrame error=" << ErrorBuffer;
-	DebugPrint(Debug.str());
 	
+	if ( strlen(ErrorBuffer) )
+	{
+		Debug << "PopH264_EncoderPushFrame error=" << ErrorBuffer;
+		DebugPrint(Debug.str());
+	}
+
 	PopH264_EncoderEndOfStream(Handle);
 	
 	//	todo: decode it again
+	int MaxErrors = 100;
 	while(true)
 	{
 		std::this_thread::sleep_for(std::chrono::milliseconds(10));
 		uint8_t PacketBuffer[1024*50];
 		auto FrameSize = PopH264_EncoderPopData(Handle, PacketBuffer, std::size(PacketBuffer) );
 		if ( FrameSize < 0 )
-			break;
+		{
+			//	gr: try a few times in case data isnt ready yet.
+			if ( MaxErrors-- < 0 )
+			{
+				DebugPrint("Re-decode, too many errors");
+				break;
+			}
+			std::this_thread::sleep_for(std::chrono::milliseconds(100));
+			continue;
+		}
 		std::Debug << "Encoder packet: x" << FrameSize << std::endl;
 	}
 	
@@ -166,7 +181,7 @@ void EncoderYuv8_88Test(const char* EncoderName="")
 	
 int main()
 {
-	EncoderYuv8_88Test("x264");
+	EncoderYuv8_88Test("");
 
 #if defined(TEST_ASSETS)
 	MakeGreyscalePng("PopH264Test_GreyscaleGradient.png");

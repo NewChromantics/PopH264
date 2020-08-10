@@ -182,6 +182,8 @@
 		BF1826A624228C43006FEB93 /* SoyPng.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SoyPng.cpp; path = Source/SoyLib/src/SoyPng.cpp; sourceTree = "<group>"; };
 		BF1826AC24228D31006FEB93 /* SoyFourcc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SoyFourcc.h; path = Source/SoyLib/src/SoyFourcc.h; sourceTree = "<group>"; };
 		BF1826AD24228D31006FEB93 /* SoyFourcc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SoyFourcc.cpp; path = Source/SoyLib/src/SoyFourcc.cpp; sourceTree = "<group>"; };
+		BF21AEA824D5807F0046A434 /* BufferArray.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = BufferArray.hpp; path = Source/SoyLib/src/BufferArray.hpp; sourceTree = "<group>"; };
+		BF21AEAB24D74F010046A434 /* PopH264.Package */ = {isa = PBXFileReference; lastKnownFileType = folder; path = PopH264.Package; sourceTree = "<group>"; };
 		BF3225602445E57100C74D4D /* TInstanceManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TInstanceManager.h; path = Source/TInstanceManager.h; sourceTree = "<group>"; };
 		BF3225612445E57100C74D4D /* TEncoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TEncoder.h; path = Source/TEncoder.h; sourceTree = "<group>"; };
 		BF3225622445E57100C74D4D /* TEncoderInstance.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TEncoderInstance.h; path = Source/TEncoderInstance.h; sourceTree = "<group>"; };
@@ -426,6 +428,7 @@
 		BF4A6A0B1EA16D7C00613A64 = {
 			isa = PBXGroup;
 			children = (
+				BF21AEAB24D74F010046A434 /* PopH264.Package */,
 				BFDBAB8624BCC4AB00E8BCE1 /* PopH264.Linux */,
 				BFBC07F423882FB90070BCB4 /* libml_mediaerror.dylib */,
 				BF15207C2385930B00A70EBF /* libml_media_ccparser.dylib */,
@@ -534,6 +537,7 @@
 		BF8AB6A221F225C5008E7E76 /* SoyLib */ = {
 			isa = PBXGroup;
 			children = (
+				BF21AEA824D5807F0046A434 /* BufferArray.hpp */,
 				BFEF6A1A246992CE000A1F88 /* SoyAvf.h */,
 				BFEF6A19246992CE000A1F88 /* SoyAvf.mm */,
 				BF8AB6A521F22602008E7E76 /* Array.hpp */,
@@ -1289,7 +1293,7 @@
 		BFF1C6DF22E3769B00AFDFD5 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ANDROID_NDK = /Volumes/Data256/AndroidSdk29/ndk/21.1.6352462;
+				ANDROID_NDK_HOME = "/usr/local/share/android-ndk";
 				BUILD_TARGET_NAME = PopH264;
 				UNITY_ASSET_PLUGIN_PATH = "$(UNITY_OUTPUT_PATH)/Android";
 			};
@@ -1298,7 +1302,7 @@
 		BFF1C6E022E3769B00AFDFD5 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ANDROID_NDK = /Volumes/Data256/AndroidSdk29/ndk/21.1.6352462;
+				ANDROID_NDK_HOME = "/usr/local/share/android-ndk";
 				BUILD_TARGET_NAME = PopH264;
 				UNITY_ASSET_PLUGIN_PATH = "$(UNITY_OUTPUT_PATH)/Android";
 			};
