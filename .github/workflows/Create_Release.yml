@@ -24,7 +24,7 @@ jobs:
     strategy:
       matrix:
         config:
-          - os: ubuntu-18.04
+          - os: ubuntu-latest
             type: linux
             architecture: x86_64
 
@@ -46,7 +46,7 @@ jobs:
           - os: macOS
             type: Osx
 
-          - os: ubuntu-18.04
+          - os: ubuntu-latest
             type: Android
 
     steps:
