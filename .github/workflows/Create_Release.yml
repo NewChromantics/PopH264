@@ -24,17 +24,18 @@ jobs:
     strategy:
       matrix:
         config:
-          - os: ubuntu-latest
+          - os: ubuntu-18.04
             type: linux
             architecture: x86_64
 
           - os: Nvidia
             type: linux
             architecture: arm64
-
-          - os: Pi4
-            type: linux
-            architecture: arm64
+# tsdk: the docker action to build android stalls on the pi build
+# either separate android or work out why (set up docker as runner on pi?)
+#           - os: Pi4
+#             type: linux
+#             architecture: arm64
 
           - os: windows
             type: x64
@@ -45,7 +46,7 @@ jobs:
           - os: macOS
             type: Osx
 
-          - os: ubuntu-16.04
+          - os: ubuntu-18.04
             type: Android
 
     steps:
