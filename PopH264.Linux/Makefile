@@ -72,7 +72,7 @@ APP_LINK_FLAGS = $(LDFLAGS)
 LIB_LINK_LIBS = \
 -lx264
 
-ifeq ($(osTarget),nvidia)
+ifeq ($(osTarget),Nvidia)
 	# from nvidia samples Rules.mk
 	# ARM ABI of the target platform
 	TEGRA_ARMABI ?= aarch64-linux-gnu
