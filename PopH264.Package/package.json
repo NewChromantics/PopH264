@@ -3,7 +3,7 @@
   "publishConfig": {
     "registry": "https://npm.pkg.github.com/"
   },
-  "version": "1.2.12",
+  "version": "1.2.13",
   "description": "H264 decoder & encoder CAPI library for various platforms",
   "main": "index.js",
   "scripts": {
