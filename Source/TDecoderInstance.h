@@ -15,7 +15,7 @@ namespace PopH264
 namespace PopH264
 {
 	class TFrame;
-	class TFrameMeta;
+	class TDecoderFrameMeta;
 	class TDecoderInstance;
 }
 
@@ -28,7 +28,7 @@ public:
 };
 
 //	meta we send back to caller
-class PopH264::TFrameMeta
+class PopH264::TDecoderFrameMeta
 {
 public:
 	SoyPixelsMeta	mPixelsMeta;			//	next frame format
@@ -58,7 +58,7 @@ public:
 	void									PopFrame(int32_t& FrameNumber,ArrayBridge<uint8_t>&& Plane0,ArrayBridge<uint8_t>&& Plane1,ArrayBridge<uint8_t>&& Plane2);
 	__exportfunc bool						PopFrame(TFrame& Frame);
 	void									PushFrame(const SoyPixelsImpl& Frame,size_t FrameNumber);
-	TFrameMeta								GetMeta();
+	TDecoderFrameMeta						GetMeta();
 	
 public:
 	std::function<void()>					mOnNewFrame;	//	called when a new frame is pushed

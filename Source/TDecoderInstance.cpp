@@ -218,9 +218,9 @@ bool PopH264::TDecoderInstance::PopFrame(TFrame& Frame)
 }
 
 
-PopH264::TFrameMeta PopH264::TDecoderInstance::GetMeta()
+PopH264::TDecoderFrameMeta PopH264::TDecoderInstance::GetMeta()
 {
-	TFrameMeta Meta;
+	TDecoderFrameMeta Meta;
 
 	//	set the cached pixel meta in case we have no frames
 	Meta.mPixelsMeta = this->mMeta;

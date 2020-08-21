@@ -25,19 +25,7 @@ namespace X264
 {
 	class TEncoder;
 	class TEncoderParams;
-
-	class TFrameMeta;
 }
-
-//	as packets are popped asynchronously to input, we need to keep meta
-//	associated with frames we use an arbritry number for frame (presentation
-//	time)
-class X264::TFrameMeta
-{
-public:
-	size_t		mFrameNumber = 0;
-	std::string	mMeta;
-};
 
 
 class X264::TEncoderParams
@@ -83,21 +71,11 @@ private:
 	void			AllocEncoder(const SoyPixelsMeta& Meta);
 	void			Encode(x264_picture_t* InputPicture);
 	
-	//	returns frame number used as PTS and stores meta
-	size_t			PushFrameMeta(const std::string& Meta);
-	//	gr: SOME frames will yield multiple packets (eg SPS & PPS) so some we need to keep around...
-	//		gotta work out a way to figure out what we can discard
-	std::string		GetFrameMeta(size_t FrameNumber);
-	
 protected:
 	SoyPixelsMeta	mPixelMeta;	//	invalid until we've pushed first frame
 	x264_t*			mHandle = nullptr;
 	x264_param_t	mParam = {0};
 	x264_picture_t	mPicture;
-	//Array<TPacket>	mPackets;
-	//std::mutex		mPacketsLock;
 	
-	size_t				mFrameCount = 0;
-	Array<TFrameMeta>	mFrameMetas;
 	TEncoderParams		mParams;
 };

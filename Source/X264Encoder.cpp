@@ -369,32 +369,3 @@ void X264::TEncoder::Encode(x264_picture_t* InputPicture)
 		throw Soy::AssertException("NALs output size doesn't match frame size");
 }
 
-
-size_t X264::TEncoder::PushFrameMeta(const std::string& Meta)
-{
-	TFrameMeta FrameMeta;
-	FrameMeta.mFrameNumber = mFrameCount;
-	FrameMeta.mMeta = Meta;
-	mFrameMetas.PushBack(FrameMeta);
-	mFrameCount++;
-	return FrameMeta.mFrameNumber;
-}
-
-std::string X264::TEncoder::GetFrameMeta(size_t FrameNumber)
-{
-	for ( auto i=0;	i<mFrameMetas.GetSize();	i++ )
-	{
-		auto& FrameMeta = mFrameMetas[i];
-		if ( FrameMeta.mFrameNumber != FrameNumber )
-			continue;
-
-		//	gr: for now, sometimes we get multiple packets for one frame, so we can't discard them all
-		//auto Meta = mFrameMetas.PopAt(i);
-		auto Meta = mFrameMetas[i];
-		return Meta.mMeta;
-	}
-	
-	std::stringstream Error;
-	Error << "No frame meta matching frame number " << FrameNumber;
-	throw Soy::AssertException(Error);
-}

@@ -626,35 +626,6 @@ void Avf::TEncoder::FinishEncoding()
 }
 
 
-
-size_t Avf::TEncoder::PushFrameMeta(const std::string& Meta)
-{
-	TFrameMeta FrameMeta;
-	FrameMeta.mFrameNumber = mFrameCount;
-	FrameMeta.mMeta = Meta;
-	mFrameMetas.PushBack(FrameMeta);
-	mFrameCount++;
-	return FrameMeta.mFrameNumber;
-}
-
-std::string Avf::TEncoder::GetFrameMeta(size_t FrameNumber)
-{
-	for ( auto i=0;	i<mFrameMetas.GetSize();	i++ )
-	{
-		auto& FrameMeta = mFrameMetas[i];
-		if ( FrameMeta.mFrameNumber != FrameNumber )
-			continue;
-
-		//	gr: for now, sometimes we get multiple packets for one frame, so we can't discard them all
-		//auto Meta = mFrameMetas.PopAt(i);
-		auto Meta = mFrameMetas[i];
-		return Meta.mMeta;
-	}
-	
-	std::stringstream Error;
-	Error << "No frame meta matching frame number " << FrameNumber;
-	throw Soy::AssertException(Error);
-}
 	
 void Avf::TEncoder::OnPacketCompressed(const ArrayBridge<uint8_t>& Data,size_t FrameNumber)
 {

@@ -156,7 +156,7 @@ json11::Json::object GetMetaJson(const SoyPixelsMeta& Meta)
 	return MetaJson;
 }
 
-std::string GetMetaJson(const PopH264::TFrameMeta& Meta)
+std::string GetMetaJson(const PopH264::TDecoderFrameMeta& Meta)
 {
 	//	start with pixels meta
 	auto Json = GetMetaJson(Meta.mPixelsMeta);

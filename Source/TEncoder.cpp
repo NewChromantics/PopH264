@@ -45,3 +45,32 @@ void PopH264::TEncoder::OnOutputPacket(TPacket& Packet)
 }
 
 
+
+size_t PopH264::TEncoder::PushFrameMeta(const std::string& Meta)
+{
+	TEncoderFrameMeta FrameMeta;
+	FrameMeta.mFrameNumber = mFrameCount;
+	FrameMeta.mMeta = Meta;
+	mFrameMetas.PushBack(FrameMeta);
+	mFrameCount++;
+	return FrameMeta.mFrameNumber;
+}
+
+std::string PopH264::TEncoder::GetFrameMeta(size_t FrameNumber)
+{
+	for (auto i = 0; i < mFrameMetas.GetSize(); i++)
+	{
+		auto& FrameMeta = mFrameMetas[i];
+		if (FrameMeta.mFrameNumber != FrameNumber)
+			continue;
+
+		//	gr: for now, sometimes we get multiple packets for one frame, so we can't discard them all
+		//auto Meta = mFrameMetas.PopAt(i);
+		auto Meta = mFrameMetas[i];
+		return Meta.mMeta;
+	}
+
+	std::stringstream Error;
+	Error << "No frame meta matching frame number " << FrameNumber;
+	throw Soy::AssertException(Error);
+}

@@ -17,7 +17,12 @@
 #endif
 
 #if defined(ENABLE_X264)
+#if defined(_MSC_VER)	//	different warning syntax, but we don't wanna do this globally :/
+//#define warning message
+#pragma message("X264 encoder enabled")
+#else
 #pragma warning("X264 encoder enabled")
+#endif
 #include "X264Encoder.h"
 #endif
 
@@ -226,7 +231,7 @@ void PopH264::TEncoderInstance::PeekPacket(json11::Json::object& Meta)
 		using namespace json11;
 		//	we're expecting json, so make it an object
 		std::string ParseError;
-		auto MetaObject = Json::parse(InputMeta, ParseError);
+	auto MetaObject = Json::parse(InputMeta, ParseError);
 
 		//	this shouldn't come up, as we've already parsed it on input, but just in case
 		if (!ParseError.empty())
