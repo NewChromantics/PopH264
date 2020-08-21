@@ -67,6 +67,8 @@ bool MediaFoundation::TDecoder::DecodeNextPacket()
 	if (!PopNalu(GetArrayBridge(Nalu)))
 		return false;
 
+	//	gr: this will change to come from PopNalu to sync with meta
+	auto PacketNumber = mPacketNumber++;
 	SetInputFormat();
 
 	auto NaluType = H264::GetPacketType(GetArrayBridge(Nalu));
@@ -116,7 +118,7 @@ bool MediaFoundation::TDecoder::DecodeNextPacket()
 
 	if (PushData)
 	{
-		if (!mTransformer->PushFrame(GetArrayBridge(Nalu)))
+		if (!mTransformer->PushFrame(GetArrayBridge(Nalu), PacketNumber))
 		{
 			//	data was rejected
 			UnpopNalu(GetArrayBridge(Nalu));
@@ -131,8 +133,8 @@ bool MediaFoundation::TDecoder::DecodeNextPacket()
 		while (PopAgain && --LoopSafety > 0)
 		{
 			Array<uint8_t> OutFrame;
-			SoyTime Time;
-			PopAgain = mTransformer->PopFrame(GetArrayBridge(OutFrame), Time);
+			int64_t PacketNumber = -1;
+			PopAgain = mTransformer->PopFrame(GetArrayBridge(OutFrame), PacketNumber);
 
 			//	no frame
 			if (OutFrame.IsEmpty())
@@ -143,8 +145,7 @@ bool MediaFoundation::TDecoder::DecodeNextPacket()
 
 			auto PixelMeta = mTransformer->GetOutputPixelMeta();
 			SoyPixelsRemote Pixels(OutFrame.GetArray(), OutFrame.GetDataSize(), PixelMeta);
-			auto FrameNumber = Time.mTime;
-			OnDecodedFrame(Pixels, FrameNumber);
+			OnDecodedFrame(Pixels, PacketNumber);
 		}
 	}
 

@@ -232,8 +232,10 @@ void MediaFoundation::TEncoder::Encode(const SoyPixelsImpl& _Pixels, const std::
 	
 	SetInputFormat(EncodePixels.GetMeta());
 
+	auto FrameNumber = PushFrameMeta(Meta);
+
 	auto& PixelsArray = EncodePixels.GetPixelsArray();
-	if (!mTransformer->PushFrame(GetArrayBridge(PixelsArray)))
+	if (!mTransformer->PushFrame(GetArrayBridge(PixelsArray), FrameNumber))
 	{
 		std::Debug << "Input rejected... dropping frame?" << std::endl;
 	}
@@ -255,13 +257,22 @@ bool MediaFoundation::TEncoder::FlushOutputFrame()
 	{
 		PopH264::TPacket Packet;
 		Packet.mData.reset(new Array<uint8_t>());
-		SoyTime Time;
-		mTransformer->PopFrame(GetArrayBridge(*Packet.mData), Time);
+		int64_t FrameNumber = -1;
+		mTransformer->PopFrame(GetArrayBridge(*Packet.mData), FrameNumber);
 
 		//	no packet
 		if (Packet.mData->IsEmpty())
 			return false;
 
+		try
+		{
+			Packet.mInputMeta = this->GetFrameMeta(FrameNumber);
+		}
+		catch (std::exception& e)
+		{
+			std::Debug << __PRETTY_FUNCTION__ << "; " << e.what() << std::endl;
+		}
+		
 		OnOutputPacket(Packet);
 		return true;
 	}

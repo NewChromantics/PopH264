@@ -138,7 +138,8 @@ void EncoderYuv8_88Test(const char* EncoderName="")
 		"Width":640,
 		"Height":480,
 		"LumaSize":460800,
-		"Format":"Yuv_8_88"
+		"Format":"Yuv_8_88",
+		"TestMeta":"PurpleMonkeyDishwasher"
 	}
 	)V0G0N";
 	PopH264_EncoderPushFrame(Handle, TestMetaJson, Yuv.GetPixelsArray().GetArray(), nullptr, nullptr, ErrorBuffer, std::size(ErrorBuffer));
@@ -160,6 +161,21 @@ void EncoderYuv8_88Test(const char* EncoderName="")
 	while(true)
 	{
 		std::this_thread::sleep_for(std::chrono::milliseconds(10));
+	
+		//	read meta first to make sure test data is propogated out again
+		char FrameMetaJson[1024] = { 0 };
+		PopH264_EncoderPeekData(Handle, FrameMetaJson, std::size(FrameMetaJson));
+		std::Debug << "PopH264_EncoderPeekData meta: " << FrameMetaJson << std::endl;
+		//	check for test data
+		{
+			auto TestString = "PurpleMonkeyDishwasher";
+			auto FoundPos = std::string(FrameMetaJson).find(TestString);
+			if (FoundPos == std::string::npos)
+			{
+				std::Debug << "Test string missing from meta " << TestString << std::endl;
+			}
+		}
+
 		uint8_t PacketBuffer[1024*50];
 		auto FrameSize = PopH264_EncoderPopData(Handle, PacketBuffer, std::size(PacketBuffer) );
 		if ( FrameSize < 0 )

@@ -33,7 +33,7 @@ namespace MediaFoundation
 	TActivateList	EnumTransforms(const GUID& Category);
 	TActivateMeta	GetBestTransform(const GUID& Category, const ArrayBridge<Soy::TFourcc>& InputFilter, const ArrayBridge<Soy::TFourcc>& OutputFilter);
 	
-	Soy::AutoReleasePtr<IMFSample>		CreateSample(const ArrayBridge<uint8_t>& Data, Soy::TFourcc Fourcc);
+	Soy::AutoReleasePtr<IMFSample>		CreateSample(const ArrayBridge<uint8_t>& Data, Soy::TFourcc Fourcc, uint64_t SampleTime100Nano);
 	Soy::AutoReleasePtr<IMFMediaBuffer>	CreateBuffer(const ArrayBridge<uint8_t>& Data);
 	Soy::AutoReleasePtr<IMFMediaBuffer>	CreateBuffer(DWORD Size, DWORD Alignment);
 	Soy::AutoReleasePtr<IMFSample>		CreateSample(DWORD Size, DWORD Alignment);
@@ -928,7 +928,7 @@ Soy::AutoReleasePtr<IMFMediaBuffer> MediaFoundation::CreateBuffer(DWORD Size, DW
 }
 
 
-Soy::AutoReleasePtr<IMFSample> MediaFoundation::CreateSample(const ArrayBridge<uint8_t>& Data,Soy::TFourcc Fourcc)
+Soy::AutoReleasePtr<IMFSample> MediaFoundation::CreateSample(const ArrayBridge<uint8_t>& Data,Soy::TFourcc Fourcc, uint64_t SampleTime100Nano)
 {
 //#pragma message("This binary will not load on windows 7")
 	auto Buffer = CreateBuffer(Data);
@@ -939,7 +939,11 @@ Soy::AutoReleasePtr<IMFSample> MediaFoundation::CreateSample(const ArrayBridge<u
 	pSample.Retain();
 
 	Result = pSample.mObject->AddBuffer(Buffer.mObject);
-	IsOkay(Result, "AddBuffer");
+	IsOkay(Result, "CreateSample - AddBuffer");
+
+	Result = pSample.mObject->SetSampleTime(SampleTime100Nano);
+	IsOkay(Result, "CreateSample - SetSampleTime");
+
 	//CHECK_HR(reConstructedVideoSample->SetSampleTime(llVideoTimeStamp), "Error setting the recon video sample time.\n");
 	//CHECK_HR(reConstructedVideoSample->SetSampleDuration(llSampleDuration), "Error setting recon video sample duration.\n");
 
@@ -989,7 +993,7 @@ void MediaFoundation::ReadData(IMFSample& Sample, ArrayBridge<uint8_t>& Data)
 
 
 
-bool MediaFoundation::TTransformer::PushFrame(const ArrayBridge<uint8_t>&& Data)
+bool MediaFoundation::TTransformer::PushFrame(const ArrayBridge<uint8_t>&& Data,int64_t FrameNumber)
 {
 	if (!mTransformer)
 		throw Soy::AssertException("Decoder is null");
@@ -1026,7 +1030,8 @@ bool MediaFoundation::TTransformer::PushFrame(const ArrayBridge<uint8_t>&& Data)
 		}
 	};
 
-	auto pSample = CreateSample(Data,Soy::TFourcc("H264"));
+	//	note: timestamp is 
+	auto pSample = CreateSample( Data, Soy::TFourcc("H264"), FrameNumber );
 
 	DebugInputStatus();
 
@@ -1151,7 +1156,7 @@ IMFMediaType& MediaFoundation::TTransformer::GetOutputMediaType()
 	return *mOutputMediaType.mObject;
 }
 
-bool MediaFoundation::TTransformer::PopFrame(ArrayBridge<uint8_t>&& Data,SoyTime& Time)
+bool MediaFoundation::TTransformer::PopFrame(ArrayBridge<uint8_t>&& Data,int64_t& FrameNumber)
 {
 	if (!mTransformer)
 		throw Soy::AssertException("Transformer is null");
@@ -1240,10 +1245,8 @@ bool MediaFoundation::TTransformer::PopFrame(ArrayBridge<uint8_t>&& Data,SoyTime
 
 	try
 	{
-		LONGLONG TimestampNs = 0;
-		auto Result = output_buffer.pSample->GetSampleTime(&TimestampNs);
+		auto Result = output_buffer.pSample->GetSampleTime(&FrameNumber);
 		IsOkay(Result, "GetSampleTime");
-		Time.mTime = TimestampNs / 10000;
 	}
 	catch (std::exception& e)
 	{
