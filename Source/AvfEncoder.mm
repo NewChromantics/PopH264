@@ -134,12 +134,20 @@ Avf::TCompressor::TCompressor(TEncoderParams& Params,const SoyPixelsMeta& Meta,s
 		//	gr: so iphone5s will send resolution above what's supproted, but SE (or ios13) won't
 		//		lets pre-empt this
 		//	problem: the auto baseline the SE chooses(4) won't decode
-		std::map<size_t,size_t> ProfileLevelMaxHeight =
+		//	gr: using 30fps values
+		std::map<size_t,std::tuple<size_t,size_t>> ProfileLevelMaxSize =
 		{
-			{	30,	576	},	//	720×576@25	720×480@30
-			{	31,	720	},	//	1,280×720@30.0 (5)
-			{	32,	1024	},		//	1,280×1,024@42.2 (4)
-			{	40,	1080	},	//	1,920×1,080@30.1	2,048×1,024@30.0
+			{	0,	{0,0}		},
+			{	13,	{352,288}	},	//
+			{	30,	{720,576}	},	//	720×576@25	720×480@30
+			{	31,	{1280,720}	},	//	1,280×720@30.0 (5)
+			{	32,	{1280,1024}	},	//	1,280×1,024@42.2 (4)
+			{	40,	{2048,1024}	},	//	1,920×1,080@30.1	2,048×1,024@30.0
+			{	41,	{2048,1024}	},	//
+			{	42,	{2048,1080}	},	//
+			{	50,	{2560,1920}	},	//
+			{	51,	{4096,2048}	},	//
+			{	52,	{4096,2304}	},	//
 		};
 		std::map<size_t,CFStringRef> ProfileLevelValue =
 		{
@@ -156,24 +164,24 @@ Avf::TCompressor::TCompressor(TEncoderParams& Params,const SoyPixelsMeta& Meta,s
 			{	52,	kVTProfileLevel_H264_Baseline_5_2	},
 		};
 		
+		std::stringstream ProfileDebug;
+		{
+			auto ProfileNumber = Params.mProfileLevel;
+			auto Profile = ProfileLevelValue[ProfileNumber];
+			auto ProfileMaxSize = ProfileLevelMaxSize[ProfileNumber];
+			ProfileDebug << Soy::CFStringToString(Profile) << "=" << ProfileNumber << ";";
+			ProfileDebug << "ProfileMaxSize=" << std::get<0>(ProfileMaxSize) << "x" << std::get<1>(ProfileMaxSize) << ";";
+		}
+				
 		{
 			void* CallbackParam = this;
 			auto Width = Meta.GetWidth();
 			auto Height = Meta.GetHeight();
+			ProfileDebug << Width << "x" << Height << ";";
 			OSStatus status = VTCompressionSessionCreate( NULL, Width, Height, kCMVideoCodecType_H264, sessionAttributes, NULL, NULL, OnCompressedCallback, CallbackParam, &mSession );
 			//std::Debug << "H264: VTCompressionSessionCreate " << status << std::endl;
-			Avf::IsOkay(status,"VTCompressionSessionCreate");
+			Avf::IsOkay(status, ProfileDebug.str()+"VTCompressionSessionCreate");
 		}
-
-		std::string ProfileDebug;
-		{
-			auto ProfileNumber = Params.mProfileLevel;
-			auto Profile = ProfileLevelValue[ProfileNumber];
-			std::stringstream Debug;
-			Debug << Soy::CFStringToString( Profile) << "=" << ProfileNumber << ";";
-			ProfileDebug = Debug.str();
-		}
-
 		
 		{
 			auto ProfileNumber = Params.mProfileLevel;
@@ -181,20 +189,13 @@ Avf::TCompressor::TCompressor(TEncoderParams& Params,const SoyPixelsMeta& Meta,s
 			//	32 not supported on iphonese/13 (VTSessionSetProperty fails)
 			auto Profile = ProfileLevelValue[ProfileNumber];
 			auto status = VTSessionSetProperty(mSession, kVTCompressionPropertyKey_ProfileLevel, Profile);
-			Avf::IsOkay(status, ProfileDebug + "kVTCompressionPropertyKey_ProfileLevel" );
-			
-			if ( ProfileNumber != 0 )
-			{
-				auto Height = Meta.GetHeight();
-				auto MaxHeight = ProfileLevelMaxHeight[ProfileNumber];
-				std::Debug << "H264 using profile " << ProfileNumber << " with height " << Height << ", max height in spec " << MaxHeight << std::endl;
-			}
+			Avf::IsOkay(status, ProfileDebug.str()+"kVTCompressionPropertyKey_ProfileLevel" );
 		}
 		
 		{
 			auto Realtime = Params.mRealtime ? kCFBooleanTrue : kCFBooleanFalse;
 			auto status = VTSessionSetProperty(mSession, kVTCompressionPropertyKey_RealTime, Realtime);
-			Avf::IsOkay(status,"kVTCompressionPropertyKey_RealTime");
+			Avf::IsOkay(status,ProfileDebug.str()+"kVTCompressionPropertyKey_RealTime");
 		}
 		
 		//	gr: this is the correct logic! (name sounds backwards to me)
@@ -203,7 +204,7 @@ Avf::TCompressor::TCompressor(TEncoderParams& Params,const SoyPixelsMeta& Meta,s
 			static auto OutputFramesInOrder = true;
 			auto FrameReorder = OutputFramesInOrder ? kCFBooleanTrue : kCFBooleanFalse;
 			auto status = VTSessionSetProperty(mSession, kVTCompressionPropertyKey_AllowFrameReordering, FrameReorder );
-			Avf::IsOkay(status,"kVTCompressionPropertyKey_AllowFrameReordering");
+			Avf::IsOkay(status,ProfileDebug.str()+"kVTCompressionPropertyKey_AllowFrameReordering");
 		}
 		
 		//	if this is false, it will force all frames to be keyframes
@@ -216,7 +217,7 @@ Avf::TCompressor::TCompressor(TEncoderParams& Params,const SoyPixelsMeta& Meta,s
 			int32_t AverageBitRate = Params.mAverageKbps * 1024 * 8;
 			CFNumberRef Number = CFNumberCreate(NULL, kCFNumberSInt32Type, &AverageBitRate );
 			auto status = VTSessionSetProperty(mSession, kVTCompressionPropertyKey_AverageBitRate, Number);
-			Avf::IsOkay(status,"kVTCompressionPropertyKey_AverageBitRate");
+			Avf::IsOkay(status,ProfileDebug.str()+"kVTCompressionPropertyKey_AverageBitRate");
 		}
 		
 		//	gr: setting this on my iphone 5s (ios 12) makes every frame drop
@@ -234,7 +235,7 @@ Avf::TCompressor::TCompressor(TEncoderParams& Params,const SoyPixelsMeta& Meta,s
 													  ValueCount,
 													  nullptr);
 			auto Status = VTSessionSetProperty(mSession, kVTCompressionPropertyKey_DataRateLimits, dataRateLimits);
-			Avf::IsOkay(Status,"kVTCompressionPropertyKey_DataRateLimits");
+			Avf::IsOkay(Status,ProfileDebug.str()+"kVTCompressionPropertyKey_DataRateLimits");
 		}
 		
 		if ( Params.mMaxSliceBytes > 0 )
@@ -242,7 +243,7 @@ Avf::TCompressor::TCompressor(TEncoderParams& Params,const SoyPixelsMeta& Meta,s
 			int32_t MaxSliceBytes = Params.mMaxSliceBytes;
 			CFNumberRef Number = CFNumberCreate(NULL, kCFNumberSInt32Type, &MaxSliceBytes );
 			auto status = VTSessionSetProperty(mSession, kVTCompressionPropertyKey_MaxH264SliceBytes, Number);
-			Avf::IsOkay(status,"kVTCompressionPropertyKey_MaxH264SliceBytes");
+			Avf::IsOkay(status,ProfileDebug.str()+"kVTCompressionPropertyKey_MaxH264SliceBytes");
 		}
 
 		auto OsVersion = Platform::GetOsVersion();
@@ -272,7 +273,7 @@ Avf::TCompressor::TCompressor(TEncoderParams& Params,const SoyPixelsMeta& Meta,s
 		}
 		
 		auto status = VTCompressionSessionPrepareToEncodeFrames(mSession);
-		Avf::IsOkay(status,ProfileDebug + "VTCompressionSessionPrepareToEncodeFrames");
+		Avf::IsOkay(status,ProfileDebug.str()+"VTCompressionSessionPrepareToEncodeFrames");
 	};
 #if defined(EXECUTE_ON_DISPATCH_QUEUE)
 	dispatch_sync(mQueue, Lambda);
