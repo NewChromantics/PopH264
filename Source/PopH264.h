@@ -71,6 +71,7 @@ __export void				PopH264_DecoderAddOnNewFrameCallback(int32_t Instance,PopH264_C
 #define POPH264_ENCODER_KEY_MAXFRAMEBUFFERS	"MaxFrameBuffers"
 #define POPH264_ENCODER_KEY_MAXSLICEBYTES	"MaxSliceBytes"
 #define POPH264_ENCODER_KEY_MAXIMISEPOWEREFFICIENCY	"MaximisePowerEfficiency"
+#define POPH264_ENCODER_KEY_KEYFRAMEFREQUENCY	"KeyFrameFrequency"	//	keyframe every N frames
 
 //	x264
 #define POPH264_ENCODER_KEY_QUALITY				"Quality"

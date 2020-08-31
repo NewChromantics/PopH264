@@ -22,7 +22,8 @@ namespace PopH264
 	//	1.2.11	Added nvidia hardware decoder + new settings
 	//	1.2.12/13 Temp numbers for continious build fixes
 	//	1.2.14	Fixed MediaFoundation encoder not outputing meta
-	const Soy::TVersion	Version(1,2,14);
+	//	1.2.15	Added KeyFrameFrequency option. AVF now encodes timestamps/framenumbers better producing much smaller packets
+	const Soy::TVersion	Version(1,2,15);
 }
 
 

@@ -89,6 +89,7 @@ Avf::TEncoderParams::TEncoderParams(json11::Json& Options)
 	SetInt( POPH264_ENCODER_KEY_MAXSLICEBYTES, mMaxSliceBytes );
 	SetBool( POPH264_ENCODER_KEY_MAXIMISEPOWEREFFICIENCY, mMaximisePowerEfficiency );
 	SetInt( POPH264_ENCODER_KEY_PROFILELEVEL, mProfileLevel );
+	SetInt( POPH264_ENCODER_KEY_KEYFRAMEFREQUENCY, mKeyFrameFrequency );
 }
 	
 	
@@ -304,9 +305,9 @@ Avf::TCompressor::TCompressor(TEncoderParams& Params,const SoyPixelsMeta& Meta,s
 			Avf::IsOkay(status,"kVTCompressionPropertyKey_MaxFrameDelayCount");
 		}
 		
-		if ( Params.mKeyframeFrequency > 0 )
+		if ( Params.mKeyFrameFrequency > 0 )
 		{
-			int32_t KeyframeFrequency = Params.mKeyframeFrequency;
+			int32_t KeyframeFrequency = Params.mKeyFrameFrequency;
 			CFNumberRef Number = CFNumberCreate(NULL, kCFNumberSInt32Type, &KeyframeFrequency );
 			auto status = VTSessionSetProperty(mSession, kVTCompressionPropertyKey_MaxKeyFrameInterval, Number);
 			Avf::IsOkay(status,"kVTCompressionPropertyKey_MaxKeyFrameInterval");
