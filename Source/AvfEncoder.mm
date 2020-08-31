@@ -272,6 +272,14 @@ Avf::TCompressor::TCompressor(TEncoderParams& Params,const SoyPixelsMeta& Meta,s
 			Avf::IsOkay(status,"kVTCompressionPropertyKey_MaxFrameDelayCount");
 		}
 		
+		if ( Params.mKeyframeFrequency > 0 )
+		{
+			int32_t KeyframeFrequency = Params.mKeyframeFrequency;
+			CFNumberRef Number = CFNumberCreate(NULL, kCFNumberSInt32Type, &KeyframeFrequency );
+			auto status = VTSessionSetProperty(mSession, kVTCompressionPropertyKey_MaxKeyFrameInterval, Number);
+			Avf::IsOkay(status,"kVTCompressionPropertyKey_MaxKeyFrameInterval");
+		}
+		
 		auto status = VTCompressionSessionPrepareToEncodeFrames(mSession);
 		Avf::IsOkay(status,ProfileDebug.str()+"VTCompressionSessionPrepareToEncodeFrames");
 	};

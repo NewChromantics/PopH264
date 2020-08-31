@@ -33,6 +33,7 @@ public:
 	size_t	mMaxFrameBuffers = 0;
 	size_t	mMaxSliceBytes = 0;
 	size_t	mProfileLevel = 0;
+	size_t	mKeyframeFrequency = 0;
 };
 
 class Avf::TEncoder : public PopH264::TEncoder
