@@ -1,5 +1,6 @@
 //	config for OSX bundle apps
 //#include "PopApp.xcconfig"
+#include "../Source/Version.xcconfig"
 
 
 GCC_PREPROCESSOR_DEFINITIONS = $(inherited) TARGET_OSX
