@@ -24,6 +24,38 @@
 
 //#define EXECUTE_ON_DISPATCH_QUEUE
 
+#include <CoreMedia/CMTime.h>
+
+//	we were using framenumber=secs but didn't produce many non-keyframes (each frame was 1sec apart)
+//	using a unit helps that; all frames still seem to be Slice_NonIDRPicture, but many much smaller ones
+//	(bit confusing)
+const auto FrameNumberToTimeUnit = 30;
+
+CMTime FrameNumberToTime(size_t FrameNumber)
+{
+	//	1 unit / 30 per sec
+	CMTime Timestamp = CMTimeMake( FrameNumber, FrameNumberToTimeUnit );
+	return Timestamp;
+}
+
+size_t TimeToFrameNumber(CMTime Time)
+{
+	if ( CMTIME_IS_INVALID( Time ) )
+		throw Soy::AssertException("Invalid timestamp");
+
+	//	missing CMTimeGetSeconds ? link to the CoreMedia framework
+	auto Value = Time.value;		//	frame number
+	auto Scale = Time.timescale;	//	scale
+	
+	if ( Scale != FrameNumberToTimeUnit )
+	{
+		auto Seconds = CMTimeGetSeconds(Time);
+		std::Debug << "TimeToFrameNumber( value=" << Value << " Scale=" << Scale <<") Seconds=" << Seconds << std::endl;
+	}
+	
+	return Value;
+}
+
 
 Avf::TEncoderParams::TEncoderParams(json11::Json& Options)
 {
@@ -73,7 +105,7 @@ public:
 	void	Encode(CVPixelBufferRef PixelBuffer,size_t FrameNumber,bool Keyframe);
 	
 private:
-	void	OnPacket(const ArrayBridge<uint8_t>&& Data,SoyTime PresentationTime);
+	void	OnPacket(const ArrayBridge<uint8_t>&& Data,size_t FrameNumber);
 	
 private:
 	std::function<void(const ArrayBridge<uint8_t>&&,size_t)>	mOnPacket;
@@ -420,9 +452,10 @@ void Avf::TCompressor::OnCompressed(OSStatus status, VTEncodeInfoFlags infoFlags
 	CMTime PresentationTimestamp = CMSampleBufferGetPresentationTimeStamp(SampleBuffer);
 	CMTime DecodeTimestamp = CMSampleBufferGetDecodeTimeStamp(SampleBuffer);
 	CMTime SampleDuration = CMSampleBufferGetDuration(SampleBuffer);
-	auto PresentationTime = Soy::Platform::GetTime(PresentationTimestamp);
-	auto DecodeTimecode = Soy::Platform::GetTime(DecodeTimestamp);
-	auto Duration = Soy::Platform::GetTime(SampleDuration);
+	auto FrameNumber = TimeToFrameNumber(PresentationTimestamp);
+	//	todo: deal with OOO packets with theirown decode time
+	//auto DecodeTimecode = Soy::Platform::GetTime(DecodeTimestamp);
+	//auto Duration = Soy::Platform::GetTime(SampleDuration);
 	
 	//	doing this check after getting meta to help debug
 	if (!CMSampleBufferDataIsReady(SampleBuffer))
@@ -458,7 +491,7 @@ void Avf::TCompressor::OnCompressed(OSStatus status, VTEncodeInfoFlags infoFlags
 			
 			auto EnumPacket = [&](const ArrayBridge<uint8_t>&& PacketData)
 			{
-				OnPacket( GetArrayBridge(PacketData), PresentationTime );
+				OnPacket( GetArrayBridge(PacketData), FrameNumber );
 			};
 			//	this could be multiple nals, and we need to cut the prefix, so enum
 			ExtractPackets( GetArrayBridge(PacketData), FormatDescription, EnumPacket );
@@ -497,7 +530,7 @@ void Avf::TCompressor::OnCompressed(OSStatus status, VTEncodeInfoFlags infoFlags
 	*/
 }
 
-void Avf::TCompressor::OnPacket(const ArrayBridge<uint8_t>&& Data,SoyTime PresentationTime)
+void Avf::TCompressor::OnPacket(const ArrayBridge<uint8_t>&& Data,size_t FrameNumber)
 {
 	//	fill output with nalu header
 	Array<uint8_t> NaluPacket;
@@ -518,9 +551,7 @@ void Avf::TCompressor::OnPacket(const ArrayBridge<uint8_t>&& Data,SoyTime Presen
 	}
 	
 	NaluPacket.PushBackArray(Data);
-	
-	auto FrameNumber = PresentationTime.mTime / 1000;
-	
+
 	mOnPacket( GetArrayBridge(NaluPacket), FrameNumber );
 }
 
@@ -534,7 +565,7 @@ void Avf::TCompressor::Encode(CVPixelBufferRef PixelBuffer,size_t FrameNumber,bo
 #endif
 	{
 		//	we're using this to pass a frame number, but really we should be giving a real time to aid the encoder
-		CMTime presentationTimeStamp = CMTimeMake(FrameNumber, 1);
+		CMTime presentationTimeStamp = FrameNumberToTime(FrameNumber);
 		VTEncodeInfoFlags OutputFlags = 0;
 		
 		//	specifying duration helps with bitrates and keyframing
