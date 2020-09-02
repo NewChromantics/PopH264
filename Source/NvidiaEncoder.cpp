@@ -550,16 +550,35 @@ std::string GetFlagsDebug(uint32_t Flags)
 	return Debug.str();
 }
 
-void Nvidia::TEncoder::OnFrameEncoded(ArrayBridge<uint8_t>&& FrameData,uint32_t Flags,std::chrono::milliseconds Timestamp)
+void Nvidia::TEncoder::OnFrameEncoded(ArrayBridge<uint8_t>&& FrameData,uint32_t Flags,size_t FrameNumber)
 {
 	PopH264::TPacket OutputPacket;
 	OutputPacket.mData.reset(new Array<uint8_t>());
 	OutputPacket.mData->PushBackArray(FrameData);
 
 	//	json meta
-	OutputPacket.mInputMeta = std::string();
+	OutputPacket.mInputMeta = GetFrameMeta(FrameNumber);
 	OnOutputPacket(OutputPacket);
 }
+
+size_t TimestampToFrameNumber(struct timeval& Timestamp)
+{
+	//auto TimestampMicro64 = (v4l2_buf.timestamp.tv_sec * MICROSECOND_UNIT) + v4l2_buf.timestamp.tv_usec ;
+	//auto TimestampMs = std::chrono::milliseconds( TimestampMicro64 / 1000 );
+	auto FrameNumber = Timestamp.tv_sec;
+	return FrameNumber;
+}
+
+struct timeval FrameNumberToTimestamp(size_t FrameNumber)
+{
+	//v4l2_buf.timestamp.tv_sec = timestamp / (MICROSECOND_UNIT);
+	//v4l2_buf.timestamp.tv_usec = timestamp % (MICROSECOND_UNIT);
+	struct timeval Timestamp;
+	Timestamp.tv_sec = FrameNumber;
+	Timestamp.tv_usec = 0;
+	return Timestamp;
+}
+
 
 bool Nvidia::TEncoder::OnEncodedBuffer(v4l2_buffer& v4l2_buf, NvBuffer * buffer,NvBuffer * shared_buffer)
 {
@@ -576,11 +595,10 @@ bool Nvidia::TEncoder::OnEncodedBuffer(v4l2_buffer& v4l2_buf, NvBuffer * buffer,
 	auto Flags = v4l2_buf.flags;
 	auto FlagsDebug = GetFlagsDebug(Flags);
 	auto BufferIndex = buffer->index;
-	auto TimestampMicro64 = (v4l2_buf.timestamp.tv_sec * MICROSECOND_UNIT) + v4l2_buf.timestamp.tv_usec ;
-	auto TimestampMs = std::chrono::milliseconds( TimestampMicro64 / 1000 );
+	auto FrameNumber = TimestampToFrameNumber(v4l2_buf.timestamp);
 	
 	if ( mParams.mVerboseDebug )
-		std::Debug << "H264 plane dequeue (frame encoded). BufferIndex=" << BufferIndex << " PlaneCount=" << PlaneCount << " SharedBuffer=" << (shared_buffer ? "non-null":"null") << " flags=" << FlagsDebug << " Timestamp=" << TimestampMs.count() << std::endl;
+		std::Debug << "H264 plane dequeue (frame encoded). BufferIndex=" << BufferIndex << " PlaneCount=" << PlaneCount << " SharedBuffer=" << (shared_buffer ? "non-null":"null") << " flags=" << FlagsDebug << " FrameNumber=" << FrameNumber << std::endl;
 
 	for ( auto p=0;	p<buffer->n_planes;	p++ )
 	{
@@ -592,7 +610,7 @@ bool Nvidia::TEncoder::OnEncodedBuffer(v4l2_buffer& v4l2_buf, NvBuffer * buffer,
 		auto DataArray = GetRemoteArray(Data,DataSize);
 		if ( mParams.mVerboseDebug )
 			std::Debug << "Encoded h264 plane; x" << DataSize << " bytes, flags=" << FlagsDebug << std::endl;
-		OnFrameEncoded( GetArrayBridge(DataArray), Flags, TimestampMs );
+		OnFrameEncoded( GetArrayBridge(DataArray), Flags, FrameNumber );
 	}
 
 	auto EndOfStreamNoBytes = PlaneCount ? (buffer->planes[0].bytesused == 0) : false;
@@ -873,7 +891,7 @@ void Nvidia::TEncoder::PushYuvUnusedBufferIndex(uint32_t Index)
 
 //	this function gets the next buffer, calls the callback, then queues for us
 //	it will block until there is a buffer ready (encode() is expected to block and be called on your own thread)
-void Nvidia::TEncoder::QueueNextYuvBuffer(std::function<void(NvBuffer&)> FillBuffer)
+void Nvidia::TEncoder::QueueNextYuvBuffer(std::function<void(NvBuffer&)> FillBuffer,size_t FrameNumber)
 {
 	auto& Encoder = *mEncoder;
 	auto& YuvPlane = GetYuvPlane();
@@ -896,10 +914,7 @@ void Nvidia::TEncoder::QueueNextYuvBuffer(std::function<void(NvBuffer&)> FillBuf
 	v4l2_buf.flags = 0;	//	no flags = eof, so what should this be?
 	v4l2_buf.flags |= V4L2_BUF_FLAG_TIMESTAMP_COPY;
 
-	static int timestamp = 0;
-	timestamp += 33;
-    v4l2_buf.timestamp.tv_sec = timestamp / (MICROSECOND_UNIT);
-    v4l2_buf.timestamp.tv_usec = timestamp % (MICROSECOND_UNIT);
+	v4l2_buf.timestamp = FrameNumberToTimestamp(FrameNumber);
 
 	auto& mMemoryMode = mNative->mYuvMemoryMode;
 	
@@ -998,7 +1013,10 @@ void Nvidia::TEncoder::Encode(const SoyPixelsImpl& Luma, const SoyPixelsImpl& Ch
 		}
 	};
 
-	QueueNextYuvBuffer(FillBuffer);
+	//	store meta
+	auto FrameNumber = PushFrameMeta(Meta);
+	
+	QueueNextYuvBuffer(FillBuffer, FrameNumber);
 }
 
 

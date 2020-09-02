@@ -67,9 +67,9 @@ private:
 	void			InitH264Callback();
 	void			InitYuvCallback();
 	void			InitEncodingParams(const TEncoderParams& Params);
-	void			QueueNextYuvBuffer(std::function<void(NvBuffer&)> FillBuffer);
+	void			QueueNextYuvBuffer(std::function<void(NvBuffer&)> FillBuffer,size_t FrameNumber);
 	bool			OnEncodedBuffer(v4l2_buffer&, NvBuffer* buffer,NvBuffer* shared_buffer);
-	void			OnFrameEncoded(ArrayBridge<uint8_t>&& FrameData,uint32_t Flags,std::chrono::milliseconds Timestamp);
+	void			OnFrameEncoded(ArrayBridge<uint8_t>&& FrameData,uint32_t Flags,size_t FrameNumber);
 	void			Sync();
 	void			Start();
 	void			ReadNextFrame();
