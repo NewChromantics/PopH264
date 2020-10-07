@@ -44,11 +44,9 @@
 		BF32256D2445ECD800C74D4D /* TDecoderInstance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF32256C2445ECD800C74D4D /* TDecoderInstance.cpp */; };
 		BF32256E2445ECD800C74D4D /* TDecoderInstance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF32256C2445ECD800C74D4D /* TDecoderInstance.cpp */; };
 		BF3225732445F0D200C74D4D /* X264Encoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF3225712445F0D100C74D4D /* X264Encoder.cpp */; };
-		BF3225742445F0D200C74D4D /* X264Encoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF3225712445F0D100C74D4D /* X264Encoder.cpp */; };
 		BF3225782445F8DD00C74D4D /* TEncoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF3225772445F8DD00C74D4D /* TEncoder.cpp */; };
 		BF3225792445F8DD00C74D4D /* TEncoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF3225772445F8DD00C74D4D /* TEncoder.cpp */; };
 		BF32257B244609C700C74D4D /* libx264.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BF32257A244609C700C74D4D /* libx264.a */; };
-		BF32257D244609D100C74D4D /* libx264.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BF32257C244609D100C74D4D /* libx264.a */; };
 		BF322580244610DD00C74D4D /* PopH264_Ios.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = BF151FD92384786600A70EBF /* PopH264_Ios.framework */; };
 		BF44AAB2249FB65500C9D982 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BF44AAB1249FB65500C9D982 /* AVFoundation.framework */; };
 		BF459CE221F7D60500CED59D /* PopH264Framework.h in Headers */ = {isa = PBXBuildFile; fileRef = BF459CDE21F7D60500CED59D /* PopH264Framework.h */; };
@@ -356,7 +354,6 @@
 				BFDB2BB62449F569009EC370 /* VideoToolbox.framework in Frameworks */,
 				BFDB2BB42449F54F009EC370 /* CoreVideo.framework in Frameworks */,
 				BF151FF02384789700A70EBF /* CoreMedia.framework in Frameworks */,
-				BF32257D244609D100C74D4D /* libx264.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -896,7 +893,6 @@
 				BF151FE22384787800A70EBF /* BroadwayDecoder.cpp in Sources */,
 				BF151FED2384788600A70EBF /* SoyTime.mm in Sources */,
 				BF151FEB2384788600A70EBF /* SoyString.cpp in Sources */,
-				BF3225742445F0D200C74D4D /* X264Encoder.cpp in Sources */,
 				BFFBE95624582ED000E9BE1B /* PopH264TestData.cpp in Sources */,
 				BF151FE32384787800A70EBF /* PopH264.cpp in Sources */,
 				BFEF6A2524699955000A1F88 /* SoyVector.cpp in Sources */,

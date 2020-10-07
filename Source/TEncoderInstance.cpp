@@ -4,7 +4,8 @@
 #include "json11.hpp"
 #include "PopH264.h"
 
-#if !defined(TARGET_ANDROID)
+//	gr: disabled on ios atm as there's no x64 build for simulator. See if we can change this at compile time (but can't do the same with linking!)
+#if !defined(TARGET_ANDROID) && !defined(TARGET_IOS)
 #define ENABLE_X264
 #endif
 
