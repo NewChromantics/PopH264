@@ -197,7 +197,13 @@ void EncoderYuv8_88Test(const char* EncoderName="")
 	
 int main()
 {
-	EncoderYuv8_88Test("");
+	//	test multiple encoding threads at once
+	std::thread ThreadA([] {	EncoderYuv8_88Test("");	});
+	std::thread ThreadB([] {	EncoderYuv8_88Test("");	});
+	std::thread ThreadC([] {	EncoderYuv8_88Test("");	});
+	ThreadA.join();
+	ThreadB.join();
+	ThreadC.join();
 
 #if defined(TEST_ASSETS)
 	MakeGreyscalePng("PopH264Test_GreyscaleGradient.png");
