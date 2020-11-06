@@ -311,9 +311,6 @@
     <ClInclude Include="..\Source\SoyLib\src\SoyH264.h">
       <Filter>SoyLib</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\PopH264DecoderInstance.h">
-      <Filter>Source</Filter>
-    </ClInclude>
     <ClInclude Include="..\Source\PopH264Framework.h">
       <Filter>Source</Filter>
     </ClInclude>

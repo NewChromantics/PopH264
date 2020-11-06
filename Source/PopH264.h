@@ -34,8 +34,12 @@ __export void				PopH264_Shutdown();
 //	returns 0 if Name doesnt exist
 __export int32_t			PopH264_GetTestData(const char* Name,uint8_t* Buffer,int32_t BufferSize);
 
-//	todo: rename these to CreateDecoder and DestroyDecoder
-__export int32_t			PopH264_CreateInstance(int32_t Mode);
+//	All options are optional
+//	returns an instance id. 0 on error.
+__export int32_t			PopH264_CreateDecoder(const char* OptionsJson, char* ErrorBuffer, int32_t ErrorBufferLength);
+__export void				PopH264_DestroyDecoder(int32_t Instance);
+
+//	deprecated for PopH264_DestroyDecoder
 __export void				PopH264_DestroyInstance(int32_t Instance);
 
 //	deprecate meta values for json

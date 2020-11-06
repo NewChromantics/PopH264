@@ -19,6 +19,11 @@ namespace PopH264
 	class TDecoderInstance;
 }
 
+namespace json11
+{
+	class Json;
+}
+
 class PopH264::TFrame
 {
 public:
@@ -46,7 +51,7 @@ public:
 class PopH264::TDecoderInstance
 {
 public:
-	TDecoderInstance(int32_t Mode);
+	TDecoderInstance(json11::Json& Options);
 	
 	void									AddOnNewFrameCallback(std::function<void()> Callback);
 

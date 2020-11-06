@@ -31,11 +31,12 @@ namespace PopH264
 
 namespace PopH264
 {
-	TInstanceManager<TEncoderInstance,std::string>	EncoderInstanceManager;
-	TInstanceManager<TDecoderInstance,uint32_t>		DecoderInstanceManager;
+	TInstanceManager<TEncoderInstance,std::string>		EncoderInstanceManager;
+	TInstanceManager<TDecoderInstance,json11::Json&>	DecoderInstanceManager;
 	
 	void		Shutdown(bool DllExit);
 }
+
 
 
 
@@ -245,17 +246,34 @@ __export void PopH264_Shutdown()
 }
 
 
-__export int32_t PopH264_CreateInstance(int32_t Mode)
+
+__export int32_t PopH264_CreateDecoder(const char* OptionsJson, char* ErrorBuffer, int32_t ErrorBufferLength)
 {
-	auto Function = [&]()
+	try
 	{
-		auto InstanceId = PopH264::DecoderInstanceManager.CreateInstance( Mode );
+		std::string ParseError;
+		json11::Json Options = json11::Json::parse(OptionsJson ? OptionsJson : "{}", ParseError);
+		if (!ParseError.empty())
+		{
+			ParseError = std::string("PopCameraDevice_CreateCameraDevice parse json error; ") + ParseError;
+			throw Soy::AssertException(ParseError);
+		}
+		auto InstanceId = PopH264::DecoderInstanceManager.CreateInstance(Options);
 		return InstanceId;
-	};
-	return SafeCall( Function, __func__, -1 );
+	}
+	catch (std::exception& e)
+	{
+		Soy::StringToBuffer(e.what(), ErrorBuffer, ErrorBufferLength);
+		return 0;
+	}
+	catch (...)
+	{
+		Soy::StringToBuffer("Unknown exception", ErrorBuffer, ErrorBufferLength);
+		return 0;
+	}
 }
 
-__export void PopH264_DestroyInstance(int32_t Instance)
+__export void PopH264_DestroyDecoder(int32_t Instance)
 {
 	auto Function = [&]()
 	{
@@ -265,6 +283,11 @@ __export void PopH264_DestroyInstance(int32_t Instance)
 	SafeCall(Function, __func__, 0 );
 }
 
+
+__export void PopH264_DestroyInstance(int32_t Instance)
+{
+	PopH264_DestroyDecoder(Instance);
+}
 
 
 

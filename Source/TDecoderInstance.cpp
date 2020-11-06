@@ -44,7 +44,7 @@
 #endif
 
 
-PopH264::TDecoderInstance::TDecoderInstance(int32_t Mode)
+PopH264::TDecoderInstance::TDecoderInstance(json11::Json& Options)
 {
 	auto OnFrameDecoded = [this](const SoyPixelsImpl& Pixels,size_t FrameNumber)
 	{

@@ -194,7 +194,6 @@
     <ClInclude Include="C:\Program Files (x86)\IntelSWTools\Intel(R) Media SDK 2019 R1\Software Development Kit\include\mfxvstructures.h" />
     <CopyFileToFolders Include="..\Source\PopH264.h" />
     <ClInclude Include="..\Source\MagicEnum\include\magic_enum.hpp" />
-    <ClInclude Include="..\Source\PopH264DecoderInstance.h" />
     <ClInclude Include="..\Source\PopH264Framework.h" />
     <ClInclude Include="..\Source\SoyLib\src\Array.hpp" />
     <ClInclude Include="..\Source\SoyLib\src\BufferArray.hpp" />
