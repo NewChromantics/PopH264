@@ -1,6 +1,6 @@
 Documentation
 =========================
-The bulk of the documentation is in PopH264.h
+The bulk of the API documentation is in PopH264.h
 
 
 Build Status
@@ -37,14 +37,16 @@ Any empty platforms are generally planned, but not yet implemented.
 Unity Decoder Support
 -----------------------
 - Included is a c# CAPI wrapper with threading support, texture2D output wrapper.
+- Turning this into a package is WIP.
 
 Unity Encoder Support
 -----------------------
 - Still todo, but is a CAPI which can be easily implemented 
+- Turning this into a package is WIP.
 
 Unreal Support
 ------------------
-- Not currently planned
+- Not currently planned, but CAPI which hopefully lends itself well to being a class.
 
 Build Instructions
 =======================
