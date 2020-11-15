@@ -243,6 +243,9 @@
     <ClCompile Include="..\Source\PopH264TestData.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source\AndroidMovieDecoder.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\SoyLib\src\Array.hpp">
@@ -528,6 +531,9 @@
       <Filter>Source</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\PopH264TestData.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\AndroidMovieDecoder.h">
       <Filter>Source</Filter>
     </ClInclude>
   </ItemGroup>

@@ -11,6 +11,10 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\Source\AndroidMovieDecoder.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\Source\BroadwayDecoder.cpp" />
     <ClCompile Include="..\Source\Broadway\Decoder\src\Broadway.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
@@ -125,6 +129,10 @@
     <ClCompile Include="..\Source\X264Encoder.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Source\AndroidMovieDecoder.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="..\Source\AvfEncoder.h" />
     <ClInclude Include="..\Source\BroadwayDecoder.h" />
     <ClInclude Include="..\Source\Broadway\Decoder\src\h264bsd_byte_stream.h" />
