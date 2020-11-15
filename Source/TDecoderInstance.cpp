@@ -43,6 +43,32 @@
 #include "MediaFoundationDecoder.h"
 #endif
 
+
+void PopH264::EnumDecoderNames(std::function<void(const std::string&)> EnumDecoderName)
+{
+#if defined(ENABLE_AVF)
+	EnumDecoderName(Avf::TDecoder::Name);
+#endif
+
+	//	todo: enum sub-decoder names
+#if defined(ENABLE_MAGICLEAP_DECODER)
+	EnumDecoderName(MagicLeap::TDecoder::Name);
+#endif
+
+#if defined(ENABLE_BROADWAY)
+	EnumDecoderName(Broadway::TDecoder::Name);
+#endif
+
+#if defined(ENABLE_INTELMEDIA)
+	EnumDecoderName(Intel::TDecoder::Name);
+#endif
+
+	//	todo: enum sub-decoder names
+#if defined(ENABLE_MEDIAFOUNDATION)
+	EnumDecoderName(MediaFoundation::TDecoder::Name);
+#endif
+}
+
 class TDecoderParams
 {
 public:

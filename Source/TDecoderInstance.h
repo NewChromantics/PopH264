@@ -7,16 +7,15 @@
 
 class SoyPixelsImpl;
 
-namespace PopH264
-{
-	class TDecoder;
-}
 
 namespace PopH264
 {
+	class TDecoder;
 	class TFrame;
 	class TDecoderFrameMeta;
 	class TDecoderInstance;
+
+	void		EnumDecoderNames(std::function<void(const std::string&)> EnumDecoderName);
 }
 
 namespace json11

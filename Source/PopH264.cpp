@@ -24,7 +24,8 @@ namespace PopH264
 	//	1.2.14	Fixed MediaFoundation encoder not outputing meta
 	//	1.2.15	Added KeyFrameFrequency option. AVF now encodes timestamps/framenumbers better producing much smaller packets
 	//	1.2.16	Nvidia encoder now outputting input meta
-	const Soy::TVersion	Version(1,2,16);
+	//	1.3.0	Decoder now created with Json. EnumDecoders added
+	const Soy::TVersion	Version(1,3,0);
 }
 
 
@@ -245,6 +246,34 @@ __export void PopH264_Shutdown()
 	SafeCall( Function, __func__, 0 );
 }
 
+
+
+__export void PopH264_EnumDecoders(char* DecodersJsonBuffer, int32_t DecodersJsonBufferLength)
+{
+	try
+	{
+		json11::Json::array DecoderNames;
+		auto EnumDecoder = [&](const std::string& DecoderName)
+		{
+			DecoderNames.push_back(DecoderName);
+		};
+		PopH264::EnumDecoderNames(EnumDecoder);
+
+		json11::Json::object Meta;
+		Meta["DecoderNames"] = DecoderNames;
+		
+		auto MetaString = json11::Json(Meta).dump();
+		Soy::StringToBuffer(MetaString, DecodersJsonBuffer, DecodersJsonBufferLength);
+	}
+	catch (std::exception& e)
+	{
+		Soy::StringToBuffer(e.what(), DecodersJsonBuffer, DecodersJsonBufferLength);
+	}
+	catch (...)
+	{
+		Soy::StringToBuffer("Unknown exception", DecodersJsonBuffer, DecodersJsonBufferLength);
+	}
+}
 
 
 __export int32_t PopH264_CreateDecoder(const char* OptionsJson, char* ErrorBuffer, int32_t ErrorBufferLength)

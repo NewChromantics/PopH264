@@ -1,5 +1,10 @@
 #pragma once
 
+/*
+	gr: this header should be C
+	it probably isn't strict C at the moment, but no classes, namespaces etc.
+*/
+
 #include <stdint.h>
 
 
@@ -45,6 +50,11 @@ __export void				PopH264_DestroyDecoder(int32_t Instance);
 
 //	deprecated for PopH264_DestroyDecoder
 __export void				PopH264_DestroyInstance(int32_t Instance);
+
+//	get a list of valid POPH264_DECODER_KEY_DECODERNAME values supported on this system
+//	in json format. More meta & debug may get added here
+__export void				PopH264_EnumDecoders(char* DecodersJsonBuffer,int32_t DecodersJsonBufferLength);
+
 
 //	deprecate meta values for json
 __export void				PopH264_GetMeta(int32_t Instance, int32_t* MetaValues, int32_t MetaValuesCount);
