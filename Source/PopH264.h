@@ -14,9 +14,6 @@
 #endif
 
 
-//	ditch these for strings, magic leap already has 4
-#define POPH264_DECODERMODE_SOFTWARE	0
-#define POPH264_DECODERMODE_HARDWARE	1
 
 //	function pointer type for new frame callback
 typedef void PopH264_Callback(void* Meta);
@@ -33,6 +30,13 @@ __export void				PopH264_Shutdown();
 //	returns -1 on error
 //	returns 0 if Name doesnt exist
 __export int32_t			PopH264_GetTestData(const char* Name,uint8_t* Buffer,int32_t BufferSize);
+
+
+
+
+#define POPH264_DECODER_KEY_DECODERNAME		"Decoder"
+
+
 
 //	All options are optional
 //	returns an instance id. 0 on error.

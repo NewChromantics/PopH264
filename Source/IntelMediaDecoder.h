@@ -15,6 +15,8 @@ namespace IntelMedia
 class IntelMedia::TDecoder : public PopH264::TDecoder
 {
 public:
+	static inline const char*	Name = "Intel";
+public:
 	TDecoder(std::function<void(const SoyPixelsImpl&, size_t)> OnDecodedFrame);
 	~TDecoder();
 

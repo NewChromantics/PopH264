@@ -2,7 +2,7 @@
 #include "SoyLib/src/SoyPng.h"
 #include "SoyLib/src/SoyImage.h"
 #include "PopH264.h"
-
+#include "json11.hpp"
 
 //	gr: this works on osx, but currently, none of the functions are implemented :)
 //	gr: also needs SDK
@@ -43,6 +43,21 @@
 #include "MediaFoundationDecoder.h"
 #endif
 
+class TDecoderParams
+{
+public:
+	TDecoderParams(json11::Json& Params);
+
+public:
+	std::string	mDecoderName;
+};
+
+TDecoderParams::TDecoderParams(json11::Json& Params)
+{
+	mDecoderName = Params[std::string(POPH264_DECODER_KEY_DECODERNAME)].string_value();
+}
+
+
 
 PopH264::TDecoderInstance::TDecoderInstance(json11::Json& Options)
 {
@@ -51,8 +66,10 @@ PopH264::TDecoderInstance::TDecoderInstance(json11::Json& Options)
 		this->PushFrame(Pixels, FrameNumber );
 	};
 	
+	TDecoderParams Params(Options);
+
 #if defined(ENABLE_AVF)
-	//if (Mode != POPH264_DECODERMODE_SOFTWARE)
+	if ( Params.mDecoderName.empty() || Params.mDecoderName == Avf::TDecoderName )
 	{
 		try
 		{
@@ -67,7 +84,7 @@ PopH264::TDecoderInstance::TDecoderInstance(json11::Json& Options)
 #endif
 	
 #if defined(ENABLE_MAGICLEAP_DECODER)
-	if (Mode != POPH264_DECODERMODE_SOFTWARE)
+	if (Params.mDecoderName.empty() || Soy::StringBeginsWith(Params.mDecoderName,MagicLeap::TDecoder::Name,false))
 	{
 		try
 		{
@@ -82,7 +99,7 @@ PopH264::TDecoderInstance::TDecoderInstance(json11::Json& Options)
 #endif
 
 #if defined(ENABLE_MEDIAFOUNDATION)
-	if (Mode != POPH264_DECODERMODE_SOFTWARE)
+	if (Params.mDecoderName.empty() || Soy::StringBeginsWith(Params.mDecoderName,MediaFoundation::TDecoder::Name,false) )
 	{
 		try
 		{
@@ -112,6 +129,7 @@ PopH264::TDecoderInstance::TDecoderInstance(json11::Json& Options)
 	
 	
 #if defined(ENABLE_BROADWAY)
+	if (Params.mDecoderName.empty() || Params.mDecoderName == Broadway::TDecoder::Name)
 	{
 		mDecoder.reset( new Broadway::TDecoder(OnFrameDecoded) );
 		return;
@@ -119,7 +137,7 @@ PopH264::TDecoderInstance::TDecoderInstance(json11::Json& Options)
 #endif
 	
 	std::stringstream Error;
-	Error << "No decoder supported (mode=" << Mode << ")";
+	Error << "No decoder supported (DecoderName=" << Params.mDecoderName << ")";
 	throw Soy::AssertException(Error);
 }
 

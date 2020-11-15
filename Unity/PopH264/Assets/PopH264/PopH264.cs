@@ -27,10 +27,10 @@ public static class PopH264
 	private static extern int	PopH264_GetVersion();
 
 	[DllImport(PluginName, CallingConvention = CallingConvention.Cdecl)]
-	private static extern int	PopH264_CreateInstance(int Mode);
+	private static extern int	PopH264_CreateDecoder(byte[] OptionsJson, [In, Out] byte[] ErrorBuffer, Int32 ErrorBufferLength);
 
 	[DllImport(PluginName, CallingConvention = CallingConvention.Cdecl)]
-	private static extern void	PopH264_DestroyInstance(int Instance);
+	private static extern void PopH264_DestroyDecoder(int Instance);
 
 	[DllImport(PluginName, CallingConvention = CallingConvention.Cdecl)]
 	private static extern int	PopH264_PushData(int Instance,byte[] Data,int DataSize,int FrameNumber);
@@ -79,13 +79,14 @@ public static class PopH264
 		public bool EndOfStream { get { return Bytes == null; } }	//	marker/command to tell decoder stream has ended
 	};
 
-	public enum DecoderMode
+	[System.Serializable]
+	public struct DecoderParams
 	{
-		Software = 0,
-		MagicLeap_NvidiaSoftware = 1,
-		MagicLeap_GoogleSoftware = 2,
-		MagicLeap_NvidiaHardware = 3,
-		MagicLeap_GoogleHardware = 4,
+		//	Avf, Broadway, MediaFoundation, MagicLeap, Intel etc
+		//	empty string defaults to "best" (hardware where possible)
+		//	todo: PopH264_EnumDecoders which will return a list of all possible decoders
+		//	ie. low level specific decoders/codecs installed on the system, including say MediaFoundation_NvidiaHardwareH264, or MagicLeap_GoogleSoftware
+		public string DecoderName;	
 	};
 
 	public class Decoder : IDisposable
@@ -101,17 +102,29 @@ public static class PopH264
 		int? InputThreadResult = 0;
 		public bool HadEndOfStream = false;
 
-		public Decoder(DecoderMode DecoderMode,bool ThreadedDecoding)
+		public Decoder(DecoderParams? DecoderParams,bool ThreadedDecoding)
 		{
 			//	show version on first call
 			var Version = PopH264_GetVersion();
 			Debug.Log("PopH264 version " + Version);
 			
 			this.ThreadedDecoding = ThreadedDecoding;
-			int Mode = (int)DecoderMode;
-			Instance = PopH264_CreateInstance(Mode);
+
+			//	alloc defaults
+			if (!DecoderParams.HasValue)
+				DecoderParams = new DecoderParams();
+
+			var ParamsJson = JSONUtility.stringify(DecoderParams.Value);
+			var ParamsJsonAscii = System.Text.ASCIIEncoding.ASCII.GetBytes(ParamsJson + "\0");
+			var ErrorBuffer = new byte[200];
+			Instance = PopH264_CreateDecoder(ParamsJsonAscii, ErrorBuffer, ErrorBuffer.Length);
+			var Error = GetString(ErrorBuffer);
 			if (Instance.Value <= 0)
-				throw new System.Exception("Failed to create decoder instance");
+				throw new System.Exception("Failed to create decoder instance;" + Error);
+			if (!String.IsNullOrEmpty(Error))
+			{
+				Debug.LogWarning("Created PopH264 decoder (" + Instance.Value + ") but error was not empty (length = " + Error.Length + ") " + Error);
+			}
 		}
 		~Decoder()
 		{
