@@ -1,9 +1,9 @@
-#include "AndroidMovieDecoder.h"
+#include "AndroidMedia.h"
 #include <sstream>
-#include "PopUnity.h"
 #include <thread>
-#include <SoyH264.h>
-#include <SoyWave.h>
+//#include <SoyH264.h>
+//#include <SoyWave.h>
+#include <SoyOpengl.h>
 
 
 //	android java defines, see if we can find a JNI header with these
@@ -87,7 +87,7 @@ enum
 	
 	//	note4 is giving us a pixel format of this, even when we have a surface texture. Renders okay.
 	//	gr; in non-opengl mode, the colour space is broken!
-	//		it is not the same as Yuv_8_8_8_Full (but close). The name is a big hint of this.
+	//		it is not the same as Yuv_8_8_8 (but close). The name is a big hint of this.
 	//		probably more like Yuv_8_88 but line by line.
 	OMX_QCOM_COLOR_FormatYVU420SemiPlanarInterlace = 0x7FA30C04,	//	2141391876
 };
@@ -98,15 +98,20 @@ enum
 
 void Android::IsOkay(MLResult Result,std::stringstream& Context)
 {
+Soy_AssertTodo();
+/*
 	if ( Result == MLResult_Ok )
 		return;
 	
 	auto Str = Context.str();
 	IsOkay( Result, Str.c_str() );
+	*/
 }
 
 const char* Android::GetErrorString(MLResult Result)
 {
+Soy_AssertTodo();
+/*
 	//	specific media errors
 	auto HasPrefix = [&](MLResult Prefix)
 	{
@@ -126,11 +131,13 @@ const char* Android::GetErrorString(MLResult Result)
 	}
 
 	return MLGetResultString(Result);
+	*/
 }
 
 void Android::IsOkay(MLResult Result,const char* Context)
 {
-	if ( Result == MLResult_Ok )
+	Soy_AssertTodo();
+/*if ( Result == MLResult_Ok )
 		return;
 
 	auto ResultString = GetErrorString(Result);
@@ -139,6 +146,7 @@ void Android::IsOkay(MLResult Result,const char* Context)
 	std::stringstream Error;
 	Error << "Error in " << Context << ": " << ResultString;
 	throw Soy::AssertException( Error );
+	*/
 }
 
 
@@ -200,6 +208,8 @@ void Android::GetMediaFileExtensions(ArrayBridge<std::string>&& Extensions)
 
 TSurfaceTexture::TSurfaceTexture(Opengl::TContext& Context,SoyPixelsMeta DesiredBufferMeta,Soy::TSemaphore* Semaphore,bool SingleBufferMode)
 {
+Soy_AssertTodo();
+/*
 	auto AllocateTexture = [this,DesiredBufferMeta,SingleBufferMode]
 	{
 		Opengl::FlushError("TSurfaceTexture::AllocateTexture");
@@ -256,11 +266,14 @@ TSurfaceTexture::TSurfaceTexture(Opengl::TContext& Context,SoyPixelsMeta Desired
 		Context.PushJob( AllocateTexture, *Semaphore );
 	else
 		Context.PushJob( AllocateTexture );
+		*/
 }
 
 TSurfaceTexture::~TSurfaceTexture()
 {
-	mTexture.Delete();
+	if ( mTexture )
+		mTexture->Delete();
+	mTexture.reset();
 }
 	
 bool TSurfaceTexture::Update(SoyTime& Timestamp,bool& Changed)
@@ -302,8 +315,8 @@ void TSurfacePixelBuffer::Lock(ArrayBridge<Opengl::TTexture>&& Textures,Opengl::
 	}
 
 	auto Texture = mSurfaceTexture->mTexture;
-	if ( Texture.IsValid() )
-		Textures.PushBack( Texture );
+	if ( Texture && Texture->IsValid() )
+		Textures.PushBack( *Texture );
 }
 
 void TSurfacePixelBuffer::Lock(ArrayBridge<SoyPixelsImpl*>&& Textures,float3x3& Transform)
@@ -324,7 +337,7 @@ bool TSurfaceTexture::IsValid() const
 		return false;
 	}
 	
-	if ( !mTexture.IsValid() )
+	if ( !mTexture || !mTexture->IsValid() )
 	{
 		std::Debug << "surface texture texture not valid " << std::endl;
 		return false;
@@ -343,10 +356,10 @@ SoyMediaFormat::Type Java::MediaCodecColourFormatIndexToPixelFormat(int ColourFo
 		case COLOR_Format32bitBGRA8888:	return SoyMediaFormat::BGRA;
 		case COLOR_Format32bitARGB8888:	return SoyMediaFormat::RGBA;
 		case COLOR_FormatL8:			return SoyMediaFormat::Greyscale;
-		case COLOR_FormatYUV420Planar:	return SoyMediaFormat::Yuv_8_8_8_Full;
-		case COLOR_FormatYUV420SemiPlanar:	return SoyMediaFormat::Yuv_8_88_Full;
+		case COLOR_FormatYUV420Planar:	return SoyMediaFormat::Yuv_8_8_8;
+		case COLOR_FormatYUV420SemiPlanar:	return SoyMediaFormat::Yuv_8_88;
 
-		case OMX_QCOM_COLOR_FormatYVU420SemiPlanarInterlace:	return SoyMediaFormat::Yuv_8_8_8_Full;
+		case OMX_QCOM_COLOR_FormatYVU420SemiPlanarInterlace:	return SoyMediaFormat::Yuv_8_8_8;
 			
 		//	handle this to remove the debug
 		case COLOR_FORMAT_UNKNOWN_MAYBE_SURFACE:	return SoyMediaFormat::Invalid;
@@ -489,7 +502,7 @@ TStreamMeta GetStreamFromMediaFormat(JniMediaFormat& Track,size_t StreamIndex)
 
 
 
-
+/*
 AndroidMediaExtractor::AndroidMediaExtractor(const TMediaExtractorParams& Params) :
 	TMediaExtractor		( Params ),
 	mDoneInitialAdvance	( false )
@@ -617,7 +630,7 @@ std::shared_ptr<TMediaPacket> AndroidMediaExtractor::ReadNextPacket()
 	auto& Buffer = *pBuffer;
 	auto& Extractor = *pExtractor;
 	
-	/*	gr: skips first keyframe!
+	/ *	gr: skips first keyframe!
 	//	soemtimes this throws (odd data? shark video!) an illegalArgumentException.
 	//	http://stackoverflow.com/questions/33148629/android-mediaextractor-readsampledata-illegalargumentexception
 	//	this post suggests we need to call advance at least once at the start
@@ -630,7 +643,7 @@ std::shared_ptr<TMediaPacket> AndroidMediaExtractor::ReadNextPacket()
 		}
 		mDoneInitialAdvance = true;
 	}
-	 */
+	 * /
 
 	
 	int Offset = 0;
@@ -718,8 +731,8 @@ std::shared_ptr<TMediaPacket> AndroidMediaExtractor::ReadNextPacket()
 	OnPacketExtracted(pPacket);
 	return pPacket;
 }
-
-
+*/
+/*
 AndroidEncoderBuffer::AndroidEncoderBuffer(int OutputBufferIndex,const std::shared_ptr<TJniObject>& Codec,const std::shared_ptr<TSurfaceTexture>& Surface) :
 	mOutputBufferIndex	( OutputBufferIndex ),
 	mCodec				( Codec ),
@@ -801,7 +814,10 @@ void AndroidEncoderBuffer::Unlock()
 {
 	//	don't release buffer here! if texture fails, and we go to pixels, this will release early. Fine to leave it in the destructor
 }
+*/
 
+
+/*
 
 AndroidMediaDecoder::AndroidMediaDecoder(const std::string& ThreadName,const TStreamMeta& Stream,std::shared_ptr<TMediaPacketBuffer>& InputBuffer,std::shared_ptr<TPixelBufferManager>& OutputBuffer,std::shared_ptr<Platform::TMediaFormat>& Format,const TVideoDecoderParams& Params,std::shared_ptr<Opengl::TContext> OpenglContext) :
 	TMediaDecoder		( ThreadName, InputBuffer, OutputBuffer ),
@@ -962,7 +978,7 @@ void AndroidMediaDecoder::Alloc(SoyPixelsMeta SurfaceMeta,std::shared_ptr<Platfo
 		
 		Format.reset( new Platform::TMediaFormat( JniMediaFormat( Formatj ) ) );
 		std::Debug << "Decoder format meta " << GetStreamFromMediaFormat( DecoderFormat,888) << std::endl;
-		 */
+		 * /
 	}
 					 
 	Alloc( SurfaceMeta, *Format, OpenglContext, SingleBufferMode );
@@ -1186,7 +1202,7 @@ void AndroidMediaDecoder::ProcessOutputPacket(std::function<bool(std::shared_ptr
 		 std::Debug << " timestamp=" << Frame.mTimestamp;
 		 std::Debug << " outputformat=" << OutputMeta;
 		 std::Debug << std::endl;
-		 */
+		 * /
 		
 		//	work out which path to use
 		std::shared_ptr<TJniObject> pByteBuffer;
@@ -1443,7 +1459,7 @@ void AndroidMediaDecoder::ProcessOutputPacket(TAudioBufferManager& Output)
 		
 		//std::Debug << "PushPixelBuffer()..." << std::endl;
 		FrameBuffer.PushPixelBuffer( Frame, BlockPush );
-		*/
+		* /
 		return true;
 	};
 	
@@ -1526,7 +1542,7 @@ bool AndroidMediaDecoder::ProcessPacket(const TMediaPacket& Packet)
 	std::Debug << " Size=" << Size;
 	std::Debug << " Packet decode time=" << Packet.mDecodeTimecode;
 	std::Debug << std::endl;
-	 */
+	 * /
 	mCodec->CallVoidMethod("queueInputBuffer", InputBufferId, Offset, Size, PresentationTimeMicrosecs, Flags );
 
 	if ( mPixelOutput )
@@ -1540,9 +1556,9 @@ bool AndroidMediaDecoder::ProcessPacket(const TMediaPacket& Packet)
 	
 	return true;
 }
+*/
 
-
-
+/*
 AndroidAudioDecoder::AndroidAudioDecoder(const std::string& ThreadName,const TStreamMeta& Stream,std::shared_ptr<TMediaPacketBuffer> InputBuffer,std::shared_ptr<TAudioBufferManager> OutputBuffer) :
 	TMediaDecoder	( ThreadName, InputBuffer, OutputBuffer )
 {
@@ -1595,3 +1611,4 @@ void AndroidAudioDecoder::ConvertPcmLinear16ToPcmFloat(const ArrayBridge<sint16>
 	}
 }
 
+*/

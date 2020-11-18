@@ -318,6 +318,7 @@
 		BFC6C4F52565CD8F00CBD99D /* SoyJava.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SoyJava.h; path = Source/SoyLib/src/SoyJava.h; sourceTree = "<group>"; };
 		BFC6C4F92565D16D00CBD99D /* AndroidDecoder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AndroidDecoder.cpp; path = Source/AndroidDecoder.cpp; sourceTree = "<group>"; };
 		BFC6C4FA2565D16D00CBD99D /* AndroidDecoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AndroidDecoder.h; path = Source/AndroidDecoder.h; sourceTree = "<group>"; };
+		BFC6C4FE2565DEFD00CBD99D /* SoyOpengl.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SoyOpengl.h; path = Source/SoyLib/src/SoyOpengl.h; sourceTree = "<group>"; };
 		BFD607741EA16F0A0035C814 /* IUnityGraphics.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IUnityGraphics.h; path = Source/Unity/IUnityGraphics.h; sourceTree = "<group>"; };
 		BFD607751EA16F0A0035C814 /* IUnityGraphicsD3D9.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IUnityGraphicsD3D9.h; path = Source/Unity/IUnityGraphicsD3D9.h; sourceTree = "<group>"; };
 		BFD607761EA16F0A0035C814 /* IUnityGraphicsD3D11.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IUnityGraphicsD3D11.h; path = Source/Unity/IUnityGraphicsD3D11.h; sourceTree = "<group>"; };
@@ -569,6 +570,7 @@
 				BFEF6A1A246992CE000A1F88 /* SoyAvf.h */,
 				BFEF6A19246992CE000A1F88 /* SoyAvf.mm */,
 				BF8AB6A421F22602008E7E76 /* SoyDebug.cpp */,
+				BFC6C4FE2565DEFD00CBD99D /* SoyOpengl.h */,
 				BF8AB6A821F22602008E7E76 /* SoyDebug.h */,
 				BF8AB6B721F22895008E7E76 /* SoyDebug.mm */,
 				BFF1C6E622E3A1D600AFDFD5 /* SoyFilesystem.h */,
