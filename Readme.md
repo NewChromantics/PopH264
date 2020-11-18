@@ -72,7 +72,7 @@ Android
 ----------------
 - Build on OSX by pre-installing the android-ndk with brew
   - `brew install cask android-ndk`
-- Then build the android scheme in the `xcodeproj`
+  - Then build the android scheme in the `xcodeproj`
   
 - Build on linux
   - Use this docker container https://hub.docker.com/r/simplatex/android-lightweight
