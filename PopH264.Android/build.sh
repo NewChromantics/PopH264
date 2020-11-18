@@ -1,6 +1,6 @@
 #!/bin/sh
-#export ANDROID_NDK_HOME=/usr/local/Cellar/android-ndk/r11c/
-#ANDROID_NDK_HOME
+# gr: this should have been set by brew on osx
+#export ANDROID_NDK_HOME="/usr/local/share/android-ndk"
 
 #echo "env vars"
 #env
@@ -80,7 +80,8 @@ function CopyBuildFilesToUnity()
 		DEST_PATH="$UNITY_ASSET_PLUGIN_PATH/$ANDROID_ABI"
 		echo "Copying $SRC_PATH to $DEST_PATH"
 
-		mkdir -p $DEST_PATH && cp $SRC_PATH $DEST_PATH
+		# -R to copy a directory (recurse)
+		mkdir -p $DEST_PATH && cp -R $SRC_PATH $DEST_PATH
 
 		RESULT=$?
 		if [[ $RESULT -ne 0 ]]; then

@@ -71,7 +71,7 @@ Linux
 Android
 ----------------
 - Build on OSX by pre-installing the android-ndk with brew
-  - `brew install cask android-ndk`
+  - `brew install homebrew/cask/android-ndk` note: `android-ndk` seems to be stuck on r13b which doesn't support `-std=c++17`
   - Then build the android scheme in the `xcodeproj`
   
 - Build on linux
