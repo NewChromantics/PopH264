@@ -87,6 +87,8 @@ $(SRC)/Source/TEncoderInstance.cpp \
 $(SRC)/Source/BroadwayDecoder.cpp \
 $(SRC)/Source/BroadwayAll.c \
 $(SRC)/Source/Json11/json11.cpp \
+$(SRC)/Source/AndroidDecoder.cpp \
+$(SRC)/Source/AndroidMedia.cpp \
 
 
 # soy lib files

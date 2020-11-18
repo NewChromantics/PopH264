@@ -312,6 +312,12 @@
 		BFC4719624477DEF00A2DA70 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		BFC4719E24477FC800A2DA70 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
 		BFC471A0244781CC00A2DA70 /* SoyString.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = SoyString.mm; path = Source/SoyLib/src/SoyString.mm; sourceTree = "<group>"; };
+		BFC6C4EF2565B1AB00CBD99D /* AndroidMedia.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AndroidMedia.h; path = Source/AndroidMedia.h; sourceTree = "<group>"; };
+		BFC6C4F02565B1AB00CBD99D /* AndroidMedia.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AndroidMedia.cpp; path = Source/AndroidMedia.cpp; sourceTree = "<group>"; };
+		BFC6C4F42565CD8F00CBD99D /* SoyJava.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SoyJava.cpp; path = Source/SoyLib/src/SoyJava.cpp; sourceTree = "<group>"; };
+		BFC6C4F52565CD8F00CBD99D /* SoyJava.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SoyJava.h; path = Source/SoyLib/src/SoyJava.h; sourceTree = "<group>"; };
+		BFC6C4F92565D16D00CBD99D /* AndroidDecoder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AndroidDecoder.cpp; path = Source/AndroidDecoder.cpp; sourceTree = "<group>"; };
+		BFC6C4FA2565D16D00CBD99D /* AndroidDecoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AndroidDecoder.h; path = Source/AndroidDecoder.h; sourceTree = "<group>"; };
 		BFD607741EA16F0A0035C814 /* IUnityGraphics.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IUnityGraphics.h; path = Source/Unity/IUnityGraphics.h; sourceTree = "<group>"; };
 		BFD607751EA16F0A0035C814 /* IUnityGraphicsD3D9.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IUnityGraphicsD3D9.h; path = Source/Unity/IUnityGraphicsD3D9.h; sourceTree = "<group>"; };
 		BFD607761EA16F0A0035C814 /* IUnityGraphicsD3D11.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IUnityGraphicsD3D11.h; path = Source/Unity/IUnityGraphicsD3D11.h; sourceTree = "<group>"; };
@@ -549,12 +555,10 @@
 		BF8AB6A221F225C5008E7E76 /* SoyLib */ = {
 			isa = PBXGroup;
 			children = (
-				BF21AEA824D5807F0046A434 /* BufferArray.hpp */,
-				BFEF6A1A246992CE000A1F88 /* SoyAvf.h */,
-				BFEF6A19246992CE000A1F88 /* SoyAvf.mm */,
 				BF8AB6A521F22602008E7E76 /* Array.hpp */,
 				BFC471862447624F00A2DA70 /* AvfPixelBuffer.h */,
 				BFC471892447625000A2DA70 /* AvfPixelBuffer.mm */,
+				BF21AEA824D5807F0046A434 /* BufferArray.hpp */,
 				BF8AB6A321F22602008E7E76 /* HeapArray.hpp */,
 				BF8AB6B421F22817008E7E76 /* memheap.cpp */,
 				BF8AB6B521F22818008E7E76 /* MemHeap.hpp */,
@@ -562,21 +566,25 @@
 				BFF1C70E22E3CF8A00AFDFD5 /* SoyArray.h */,
 				BF8AB6AF21F227EF008E7E76 /* SoyAssert.cpp */,
 				BF8AB6AE21F227EF008E7E76 /* SoyAssert.h */,
+				BFEF6A1A246992CE000A1F88 /* SoyAvf.h */,
+				BFEF6A19246992CE000A1F88 /* SoyAvf.mm */,
 				BF8AB6A421F22602008E7E76 /* SoyDebug.cpp */,
 				BF8AB6A821F22602008E7E76 /* SoyDebug.h */,
 				BF8AB6B721F22895008E7E76 /* SoyDebug.mm */,
 				BFF1C6E622E3A1D600AFDFD5 /* SoyFilesystem.h */,
-				BFFC941D245EE17900AEE711 /* SoyMedia.h */,
 				BF1826AD24228D31006FEB93 /* SoyFourcc.cpp */,
 				BF1826AC24228D31006FEB93 /* SoyFourcc.h */,
-				BF0CCB2224A78D8D00596877 /* SoyMediaFormat.cpp */,
-				BF0CCB2324A78D8D00596877 /* SoyMediaFormat.h */,
 				BFDB2BAB2448B4CE009EC370 /* SoyH264.cpp */,
 				BFDB2BAC2448B4CF009EC370 /* SoyH264.h */,
 				BF18269624226502006FEB93 /* SoyImage.cpp */,
 				BF18269724226502006FEB93 /* SoyImage.h */,
+				BFC6C4F42565CD8F00CBD99D /* SoyJava.cpp */,
+				BFC6C4F52565CD8F00CBD99D /* SoyJava.h */,
 				BFBC0800238AE8A70070BCB4 /* SoyLib_Ios.xcconfig */,
 				BFBC07FF238AE8A70070BCB4 /* SoyLib_Osx.xcconfig */,
+				BFFC941D245EE17900AEE711 /* SoyMedia.h */,
+				BF0CCB2224A78D8D00596877 /* SoyMediaFormat.cpp */,
+				BF0CCB2324A78D8D00596877 /* SoyMediaFormat.h */,
 				BF8AB6A621F22602008E7E76 /* SoyPixels.cpp */,
 				BF8AB6A721F22602008E7E76 /* SoyPixels.h */,
 				BF1826A624228C43006FEB93 /* SoyPng.cpp */,
@@ -590,17 +598,17 @@
 				BFC471A0244781CC00A2DA70 /* SoyString.mm */,
 				BFBC07ED2386C0B50070BCB4 /* SoyThread.cpp */,
 				BFBC07EE2386C0B50070BCB4 /* SoyThread.h */,
-				BFEF6A2124699955000A1F88 /* SoyVector.cpp */,
-				BFEF6A2024699955000A1F88 /* SoyVector.h */,
 				BF8AB6BC21F228D0008E7E76 /* SoyTime.cpp */,
 				BF8AB6BE21F228D0008E7E76 /* SoyTime.h */,
 				BF8AB6BD21F228D0008E7E76 /* SoyTime.mm */,
 				BFEF6A45247994EA000A1F88 /* SoyTypes_Android.h */,
+				BFFC941A245DC0B900AEE711 /* SoyTypes_CoreFoundation.h */,
 				BF53E83222EE024E008253CD /* SoyTypes_Lumin.h */,
 				BF8AB6BA21F228B8008E7E76 /* SoyTypes.cpp */,
-				BFFC941A245DC0B900AEE711 /* SoyTypes_CoreFoundation.h */,
 				BF8AB6B921F228B8008E7E76 /* SoyTypes.h */,
 				BF587C79244B57A2000745B9 /* SoyTypes.mm */,
+				BFEF6A2124699955000A1F88 /* SoyVector.cpp */,
+				BFEF6A2024699955000A1F88 /* SoyVector.h */,
 			);
 			name = SoyLib;
 			sourceTree = "<group>";
@@ -626,11 +634,10 @@
 		BFD6076D1EA16ED20035C814 /* Source */ = {
 			isa = PBXGroup;
 			children = (
-				BF004B6824FD3D1C00DC6A90 /* Version.xcconfig */,
-				BF096B1524B91F4E00D985E5 /* Linux */,
-				BF096B1424B918A400D985E5 /* nvidia */,
-				BF096B1124B9158A00D985E5 /* NvidiaEncoder.cpp */,
-				BF096B1224B9158A00D985E5 /* NvidiaEncoder.h */,
+				BFC6C4F02565B1AB00CBD99D /* AndroidMedia.cpp */,
+				BFC6C4EF2565B1AB00CBD99D /* AndroidMedia.h */,
+				BFC6C4F92565D16D00CBD99D /* AndroidDecoder.cpp */,
+				BFC6C4FA2565D16D00CBD99D /* AndroidDecoder.h */,
 				BFFBE97A245DB65000E9BE1B /* AvfDecoder.h */,
 				BFFBE97B245DB65000E9BE1B /* AvfDecoder.mm */,
 				BFC471802447523000A2DA70 /* AvfEncoder.h */,
@@ -641,13 +648,17 @@
 				BF8AB69F21F21F07008E7E76 /* BroadwayDecoder.cpp */,
 				BF8AB6A021F21F07008E7E76 /* BroadwayDecoder.h */,
 				BF18268E24226111006FEB93 /* Json11 */,
+				BF096B1524B91F4E00D985E5 /* Linux */,
 				BF53E83022EDCC7E008253CD /* MagicLeapDecoder.cpp */,
 				BF53E83122EDCC7F008253CD /* MagicLeapDecoder.h */,
+				BF096B1424B918A400D985E5 /* nvidia */,
+				BF096B1124B9158A00D985E5 /* NvidiaEncoder.cpp */,
+				BF096B1224B9158A00D985E5 /* NvidiaEncoder.h */,
 				BF8AB63821F20C41008E7E76 /* PopH264.cpp */,
 				BF8AB63721F20C41008E7E76 /* PopH264.h */,
+				BF459CDE21F7D60500CED59D /* PopH264Framework.h */,
 				BFFBE95324582ED000E9BE1B /* PopH264TestData.cpp */,
 				BFFBE95424582ED000E9BE1B /* PopH264TestData.h */,
-				BF459CDE21F7D60500CED59D /* PopH264Framework.h */,
 				BF8AB6A221F225C5008E7E76 /* SoyLib */,
 				BF53E82D22EDC989008253CD /* TDecoder.cpp */,
 				BF53E82C22EDC6A6008253CD /* TDecoder.h */,
@@ -660,6 +671,7 @@
 				BF3225602445E57100C74D4D /* TInstanceManager.h */,
 				BFD607731EA16EFC0035C814 /* Unity */,
 				BF8AB6C621F236F8008E7E76 /* Unity C# */,
+				BF004B6824FD3D1C00DC6A90 /* Version.xcconfig */,
 				BF3225702445F0A400C74D4D /* X264 */,
 				BF3225712445F0D100C74D4D /* X264Encoder.cpp */,
 				BF3225722445F0D200C74D4D /* X264Encoder.h */,

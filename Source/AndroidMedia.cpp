@@ -94,6 +94,55 @@ enum
 
 
 
+
+
+void Android::IsOkay(MLResult Result,std::stringstream& Context)
+{
+	if ( Result == MLResult_Ok )
+		return;
+	
+	auto Str = Context.str();
+	IsOkay( Result, Str.c_str() );
+}
+
+const char* Android::GetErrorString(MLResult Result)
+{
+	//	specific media errors
+	auto HasPrefix = [&](MLResult Prefix)
+	{
+		auto And = Result & Prefix;
+		return And == Prefix;
+	};
+
+	if ( HasPrefix(MLResultAPIPrefix_MediaGeneric) ||
+		HasPrefix(MLResultAPIPrefix_Media) ||
+		HasPrefix(MLResultAPIPrefix_MediaDRM) ||
+		HasPrefix(MLResultAPIPrefix_MediaOMX) ||
+		HasPrefix(MLResultAPIPrefix_MediaOMXExtensions) ||
+		HasPrefix(MLResultAPIPrefix_MediaOMXVendors) ||
+		HasPrefix(MLResultAPIPrefix_MediaPlayer) )
+	{
+		return MLMediaResultGetString( Result );
+	}
+
+	return MLGetResultString(Result);
+}
+
+void Android::IsOkay(MLResult Result,const char* Context)
+{
+	if ( Result == MLResult_Ok )
+		return;
+
+	auto ResultString = GetErrorString(Result);
+	
+	//	gr: sometimes we get unknown so, put error nmber in
+	std::stringstream Error;
+	Error << "Error in " << Context << ": " << ResultString;
+	throw Soy::AssertException( Error );
+}
+
+
+
 //	note: this currently casts away const-ness (because of GetRemoteArray)
 template<typename NEWTYPE,typename OLDTYPE>
 inline FixedRemoteArray<NEWTYPE> CastArray(const ArrayBridge<OLDTYPE>&& Array)

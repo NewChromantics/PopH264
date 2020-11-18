@@ -1,8 +1,36 @@
 #pragma once
 
-#include "PopMovieDecoder.h"
+#include "TDecoder.h"
 #include "SoyJava.h"
+#include "SoyPixels.h"
+#include "SoyMedia.h"	//	TPixelBuffer
 
+
+typedef int MLResult;
+typedef int MLHandle;
+#define ML_INVALID_HANDLE	0
+
+class MLMediaCodecBufferInfo
+{
+};
+
+namespace Android
+{
+	void			IsOkay(MLResult Result,const char* Context);
+	void			IsOkay(MLResult Result,std::stringstream& Context);
+	const char*		GetErrorString(MLResult Result);
+
+	SoyPixelsFormat::Type	GetPixelFormat(int32_t ColourFormat);
+	SoyPixelsMeta			GetPixelMeta(MLHandle Format);
+}
+
+namespace Opengl
+{
+	class TContext;
+	class TTexture;
+}
+
+class TVideoDecoderParams;	
 
 
 namespace Android
@@ -21,14 +49,14 @@ public:
 	bool				Update(SoyTime& Timestamp,bool& Changed);	//	returns success/fail
 	
 	bool				IsValid() const;
-	Opengl::TTexture&	GetTexture() 		{	return mTexture;	}//	eos texture
+	Opengl::TTexture&	GetTexture() 		{	return *mTexture;	}//	eos texture
 
 private:
 
 public:
 	std::shared_ptr<JSurfaceTexture>	mSurfaceTexture;
 	std::shared_ptr<JSurface>			mSurface;
-	Opengl::TTexture	mTexture;	//	actual texture used on surface texture
+	std::shared_ptr<Opengl::TTexture>	mTexture;	//	actual texture used on surface texture
 	SoyTime				mCurrentContentsTimestamp;
 };
 
@@ -68,7 +96,7 @@ public:
 };
 
 
-
+/*
 
 class AndroidMediaExtractor : public TMediaExtractor
 {
@@ -115,7 +143,7 @@ private:
 };
 
 
-class AndroidMediaDecoder : public TMediaDecoder
+class AndroidMediaDecoder : public PopH264::TDecoder
 {
 public:
 	AndroidMediaDecoder(const std::string& ThreadName,const TStreamMeta& Stream,std::shared_ptr<TMediaPacketBuffer>& InputBuffer,std::shared_ptr<TPixelBufferManager>& OutputBuffer,std::shared_ptr<Platform::TMediaFormat>& StreamFormat,const TVideoDecoderParams& Params,std::shared_ptr<Opengl::TContext> OpenglContext);
@@ -146,8 +174,8 @@ public:
 
 	std::shared_ptr<TSurfaceTexture>			mSurfaceTexture;
 };
-
-
+*/
+/*
 class AndroidAudioDecoder : public TMediaDecoder
 {
 public:
@@ -157,6 +185,6 @@ public:
 	
 	void				ConvertPcmLinear16ToPcmFloat(const ArrayBridge<sint16>&& Input,ArrayBridge<float>&& Output);
 };
-
+*/
 
 
