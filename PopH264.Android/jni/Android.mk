@@ -106,16 +106,16 @@ $(SOY_PATH)/src/SoyPng.cpp \
 $(SOY_PATH)/src/SoyImage.cpp \
 $(SOY_PATH)/src/SoyStreamBuffer.cpp \
 $(SOY_PATH)/src/SoyFourcc.cpp \
+$(SOY_PATH)/src/SoyThread.cpp \
+$(SOY_PATH)/src/SoyJava.cpp \
 
 #$(SOY_PATH)/src/SoyOpengl.cpp \
 #$(SOY_PATH)/src/SoyOpenglContext.cpp \
-#$(SOY_PATH)/src/SoyThread.cpp \
 #$(SOY_PATH)/src/SoyEvent.cpp \
 #$(SOY_PATH)/src/SoyShader.cpp \
 #$(SOY_PATH)/src/SoyUnity.cpp \
 #$(SOY_PATH)/src/SoyBase64.cpp \
 #$(SOY_PATH)/src/SoyGraphics.cpp \
-#$(SOY_PATH)/src/SoyJava.cpp \
 #$(SOY_PATH)/src/SoyStream.cpp \
 
 
