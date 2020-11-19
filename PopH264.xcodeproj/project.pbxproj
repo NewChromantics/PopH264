@@ -200,6 +200,8 @@
 		BF459CDD21F7D60500CED59D /* PopH264_Osx_Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = PopH264_Osx_Info.plist; sourceTree = "<group>"; };
 		BF459CDE21F7D60500CED59D /* PopH264Framework.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PopH264Framework.h; path = Source/PopH264Framework.h; sourceTree = "<group>"; };
 		BF459CED21F7D73B00CED59D /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
+		BF51B8822566E15B004DE4C7 /* SoyStream.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SoyStream.cpp; path = Source/SoyLib/src/SoyStream.cpp; sourceTree = "<group>"; };
+		BF51B8832566E15B004DE4C7 /* SoyStream.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SoyStream.h; path = Source/SoyLib/src/SoyStream.h; sourceTree = "<group>"; };
 		BF53E82622EC8B59008253CD /* PopH264.Lumin */ = {isa = PBXFileReference; lastKnownFileType = folder; path = PopH264.Lumin; sourceTree = "<group>"; };
 		BF53E82B22ECB934008253CD /* v0.21.0 */ = {isa = PBXFileReference; lastKnownFileType = folder; name = v0.21.0; path = ../MagicLeap/mlsdk/v0.21.0; sourceTree = "<group>"; };
 		BF53E82C22EDC6A6008253CD /* TDecoder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = TDecoder.h; path = Source/TDecoder.h; sourceTree = "<group>"; };
@@ -592,6 +594,8 @@
 				BF1826A624228C43006FEB93 /* SoyPng.cpp */,
 				BF1826A524228C43006FEB93 /* SoyPng.h */,
 				BF15207F238595C700A70EBF /* SoyRuntimeLibrary.cpp */,
+				BF51B8822566E15B004DE4C7 /* SoyStream.cpp */,
+				BF51B8832566E15B004DE4C7 /* SoyStream.h */,
 				BF15207E238595C700A70EBF /* SoyRuntimeLibrary.h */,
 				BF18269D2422656E006FEB93 /* SoyStreamBuffer.cpp */,
 				BF18269E2422656E006FEB93 /* SoyStreamBuffer.h */,

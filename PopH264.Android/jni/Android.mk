@@ -110,6 +110,8 @@ $(SOY_PATH)/src/SoyStreamBuffer.cpp \
 $(SOY_PATH)/src/SoyFourcc.cpp \
 $(SOY_PATH)/src/SoyThread.cpp \
 $(SOY_PATH)/src/SoyJava.cpp \
+$(SOY_PATH)/src/SoyStream.cpp \
+$(SOY_PATH)/src/SoyMediaFormat.cpp \
 
 #$(SOY_PATH)/src/SoyOpengl.cpp \
 #$(SOY_PATH)/src/SoyOpenglContext.cpp \
@@ -118,7 +120,6 @@ $(SOY_PATH)/src/SoyJava.cpp \
 #$(SOY_PATH)/src/SoyUnity.cpp \
 #$(SOY_PATH)/src/SoyBase64.cpp \
 #$(SOY_PATH)/src/SoyGraphics.cpp \
-#$(SOY_PATH)/src/SoyStream.cpp \
 
 
 
