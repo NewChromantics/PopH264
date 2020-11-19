@@ -1318,6 +1318,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = BF004B6824FD3D1C00DC6A90 /* Version.xcconfig */;
 			buildSettings = {
+				ANDROID_ABI_ONLY = "armeabi-v7a";
 				ANDROID_NDK_HOME = "/usr/local/share/android-ndk";
 				BUILD_TARGET_NAME = PopH264;
 				UNITY_ASSET_PLUGIN_PATH = "$(UNITY_OUTPUT_PATH)/Android";
@@ -1328,6 +1329,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = BF004B6824FD3D1C00DC6A90 /* Version.xcconfig */;
 			buildSettings = {
+				ANDROID_ABI_ONLY = "armeabi-v7a";
 				ANDROID_NDK_HOME = "/usr/local/share/android-ndk";
 				BUILD_TARGET_NAME = PopH264;
 				UNITY_ASSET_PLUGIN_PATH = "$(UNITY_OUTPUT_PATH)/Android";
