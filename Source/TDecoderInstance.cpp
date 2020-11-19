@@ -95,7 +95,7 @@ PopH264::TDecoderInstance::TDecoderInstance(json11::Json& Options)
 	TDecoderParams Params(Options);
 
 #if defined(ENABLE_AVF)
-	if ( Params.mDecoderName.empty() || Params.mDecoderName == Avf::TDecoderName )
+	if ( Params.mDecoderName.empty() || Params.mDecoderName == Avf::TDecoder::Name )
 	{
 		try
 		{

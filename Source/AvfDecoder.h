@@ -26,6 +26,8 @@ class TPixelBuffer;
 class Avf::TDecoder : public PopH264::TDecoder
 {
 public:
+	static inline const char*	Name = "Avf";
+public:
 	TDecoder(std::function<void(const SoyPixelsImpl&,size_t)> OnDecodedFrame);
 	~TDecoder();
 	

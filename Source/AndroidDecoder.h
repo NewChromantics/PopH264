@@ -124,6 +124,8 @@ private:
 class Android::TDecoder : public PopH264::TDecoder
 {
 public:
+	static inline const char*	Name = "Android";
+public:
 	TDecoder(std::function<void(const SoyPixelsImpl&,size_t)> OnDecodedFrame);
 	~TDecoder();
 
