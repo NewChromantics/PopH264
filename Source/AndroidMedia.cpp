@@ -208,8 +208,7 @@ void Android::GetMediaFileExtensions(ArrayBridge<std::string>&& Extensions)
 
 TSurfaceTexture::TSurfaceTexture(Opengl::TContext& Context,SoyPixelsMeta DesiredBufferMeta,Soy::TSemaphore* Semaphore,bool SingleBufferMode)
 {
-Soy_AssertTodo();
-/*
+#if defined(ENABLE_OPENGL)
 	auto AllocateTexture = [this,DesiredBufferMeta,SingleBufferMode]
 	{
 		Opengl::FlushError("TSurfaceTexture::AllocateTexture");
@@ -266,13 +265,21 @@ Soy_AssertTodo();
 		Context.PushJob( AllocateTexture, *Semaphore );
 	else
 		Context.PushJob( AllocateTexture );
-		*/
+#else
+	throw Soy::AssertException("Opengl not supported");
+#endif
 }
 
 TSurfaceTexture::~TSurfaceTexture()
 {
 	if ( mTexture )
+	{
+#if defined(ENABLE_OPENGL)
 		mTexture->Delete();
+#else
+		throw Soy::AssertException("Opengl not supported");
+#endif
+	}
 	mTexture.reset();
 }
 	
@@ -314,9 +321,13 @@ void TSurfacePixelBuffer::Lock(ArrayBridge<Opengl::TTexture>&& Textures,Opengl::
 		return;
 	}
 
+#if defined(ENABLE_OPENGL)
 	auto Texture = mSurfaceTexture->mTexture;
 	if ( Texture && Texture->IsValid() )
 		Textures.PushBack( *Texture );
+#else
+	throw Soy::AssertException("Opengl not supported");
+#endif
 }
 
 void TSurfacePixelBuffer::Lock(ArrayBridge<SoyPixelsImpl*>&& Textures,float3x3& Transform)
@@ -337,11 +348,15 @@ bool TSurfaceTexture::IsValid() const
 		return false;
 	}
 	
+#if defined(OPENGL_OPENGL)
 	if ( !mTexture || !mTexture->IsValid() )
 	{
 		std::Debug << "surface texture texture not valid " << std::endl;
 		return false;
 	}
+#else
+	throw Soy::AssertException("Opengl not supported");
+#endif
 	
 	return true;
 }

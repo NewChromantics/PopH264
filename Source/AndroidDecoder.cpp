@@ -307,6 +307,11 @@ bool Android::TDecoder::DecodeNextPacket()
 	return false;
 }
 
+void Android::TDecoder::OnDecodedFrame(const SoyPixelsImpl& Pixels,size_t FrameNumber)
+{
+	PopH264::TDecoder::OnDecodedFrame(Pixels,FrameNumber);
+}
+
 
 void Android::TInputThread::PushInputBuffer(int64_t BufferIndex)
 {
