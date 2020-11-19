@@ -74,7 +74,7 @@ public class Mp4 : MonoBehaviour {
 	public float DecodeToVideoTime = 0;
 	public int DecodeToVideoTimeMs { get { return (int)(DecodeToVideoTime * 1000.0f); } }
 
-	public PopH264.DecoderMode HardwareDecoding = PopH264.DecoderMode.Software;
+	public PopH264.DecoderParams DecoderParams;
 	public bool DecodeOnSeperateThread = true;
 
 	//	these values dictate how much processing time we give to each step
@@ -412,7 +412,7 @@ public class Mp4 : MonoBehaviour {
 
 		//	ideally only once we've verified we have an mp4, but before moov. Maybe just if an ftyp is found
 		if (Decoder == null)
-			Decoder = new PopH264.Decoder( HardwareDecoding, DecodeOnSeperateThread );
+			Decoder = new PopH264.Decoder(DecoderParams, DecodeOnSeperateThread );
 
 
 		System.Func<long, byte[]> PopData = (long DataSize)=>

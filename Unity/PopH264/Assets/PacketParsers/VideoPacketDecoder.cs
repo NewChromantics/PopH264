@@ -20,7 +20,7 @@ public class VideoPacketDecoder : MonoBehaviour
 	public float DecodeToVideoTime = 0;
 	public int DecodeToVideoTimeMs { get { return (int)(DecodeToVideoTime * 1000.0f); } }
 
-	public PopH264.DecoderMode HardwareDecoding = PopH264.DecoderMode.Software;
+	public PopH264.DecoderParams DecoderParams;
 	public bool DecodeOnSeperateThread = true;
 
 	//	these values dictate how much processing time we give to each step
@@ -205,7 +205,7 @@ public class VideoPacketDecoder : MonoBehaviour
 			return;
 
 		if (Decoder == null)
-			Decoder = new PopH264.Decoder(HardwareDecoding, DecodeOnSeperateThread);
+			Decoder = new PopH264.Decoder(DecoderParams, DecodeOnSeperateThread);
 
 		var PendingInputFrame = PendingInputFrames[0];
 		if ( VerboseDebug )

@@ -114,7 +114,7 @@ public static class PopH264
 			if (!DecoderParams.HasValue)
 				DecoderParams = new DecoderParams();
 
-			var ParamsJson = JSONUtility.stringify(DecoderParams.Value);
+			var ParamsJson = JsonUtility.ToJson(DecoderParams.Value);
 			var ParamsJsonAscii = System.Text.ASCIIEncoding.ASCII.GetBytes(ParamsJson + "\0");
 			var ErrorBuffer = new byte[200];
 			Instance = PopH264_CreateDecoder(ParamsJsonAscii, ErrorBuffer, ErrorBuffer.Length);
@@ -144,7 +144,7 @@ public static class PopH264
 			}
 
 			if (Instance.HasValue)
-				PopH264_DestroyInstance(Instance.Value);
+				PopH264_DestroyDecoder(Instance.Value);
 			Instance = null;
 		}
 
