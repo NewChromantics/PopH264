@@ -77,7 +77,7 @@ function CopyBuildFilesToUnity()
 	if [ -z "$UNITY_ASSET_PLUGIN_PATH" ]; then
 		echo "UNITY_ASSET_PLUGIN_PATH not set, skipping post-build copy of $SRC_PATH"
 	else
-		DEST_PATH="$UNITY_ASSET_PLUGIN_PATH/$ANDROID_ABI"
+		DEST_PATH="$UNITY_ASSET_PLUGIN_PATH/"
 		echo "Copying $SRC_PATH to $DEST_PATH"
 
 		# -R to copy a directory (recurse)
