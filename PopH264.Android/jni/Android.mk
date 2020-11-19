@@ -1,4 +1,6 @@
-LOCAL_PATH := $(call my-dir)
+# gr: make path absolute so errors have full path
+#		this makes them jump in xcode
+LOCAL_PATH := $(abspath $(call my-dir))
 
 
 # extra ../ as jni is always prepended

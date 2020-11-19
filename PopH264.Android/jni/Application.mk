@@ -32,6 +32,10 @@ APP_CPPFLAGS += $(GCC_PREPROCESSOR_DEFINITIONS_LIST)$(SPACE)
 APP_CPPFLAGS += -std=c++17
 APP_CPPFLAGS += -fexceptions
 
+# try and format errors so xcode can jump to them
+#APP_CPPFLAGS += -fno-show-column
+#APP_CPPFLAGS += -fno-caret-diagnostics
+
 # downgrade some GCC errors to warnings
 APP_CPPFLAGS += -fpermissive
 
