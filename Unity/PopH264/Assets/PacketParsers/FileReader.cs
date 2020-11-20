@@ -39,6 +39,13 @@ public abstract class FileReaderBase : MonoBehaviour
 
 public class JavaFileReader
 {
+	long FileOffset;
+	long FileLength = 0;
+	long FileCurrentPosition = 0;
+	AndroidJavaObject FileDescriptor;
+	AndroidJavaObject AssetFileDescriptor;
+	AndroidJavaObject FileInputStream;
+
 	public JavaFileReader(string InternalFilename, string JarOrZipOrApkFilename=null)
 	{
 		//	default to app's apk
@@ -46,7 +53,7 @@ public class JavaFileReader
 		if (JarOrZipOrApkFilename == null || JarOrZipOrApkFilename.Length==0)
 			JarOrZipOrApkFilename = Application.dataPath;
 
-		//InternalFilename = "!/assets/" + InternalFilename;
+		//	this is the prefix in APK's, but this code shouldn't assume it's always here, we could just be reading any zip file
 		InternalFilename = "assets/" + InternalFilename;
 
 		AndroidJavaObject ZipFile;
@@ -81,10 +88,9 @@ public class JavaFileReader
 			throw new System.Exception("Failed to open zip/jar/apk " + JarOrZipOrApkFilename);
 
 		var GetAssetFileDescriptorName = "getAssetFileDescriptor";
-		AndroidJavaObject FileDescriptor;
 		try
 		{
-			FileDescriptor = ZipFile.Call<AndroidJavaObject>(GetAssetFileDescriptorName, InternalFilename);
+			AssetFileDescriptor = ZipFile.Call<AndroidJavaObject>(GetAssetFileDescriptorName, InternalFilename);
 			/*
 			var AssetFileDescriptorClassName = "android/content/res/AssetFileDescriptor";
 			var AssetFileDescriptorSig = "L" + AssetFileDescriptorClassName + ";";
@@ -97,7 +103,7 @@ public class JavaFileReader
 			//	gr: returns a null object when filenot found (no exception set in java vm!)
 			if (FileDescriptor == System.IntPtr.Zero)
 			*/
-			if (FileDescriptor == null)
+			if (AssetFileDescriptor == null)
 				throw new System.Exception("Opened zip but failed to open " + InternalFilename);
 		}
 		catch (AndroidJavaException e)
@@ -105,17 +111,91 @@ public class JavaFileReader
 			throw new System.Exception("Failed to open file inside zip file (" + InternalFilename + "): " + e.Message);
 		}
 
-		throw new System.Exception("Got file descriptor");
+		try
+		{
+			FileOffset = AssetFileDescriptor.Call<long>("getStartOffset");
+			FileLength = AssetFileDescriptor.Call<long>("getLength");
+
+			/*	gr: i used this in my c++ code, but I can't find any documentation for it!
+					and now the class has no descriptor
+			var fd = AssetFileDescriptor.Get<int>("descriptor");		
+			Debug.Log("fd=" + fd);
+			*/
+			var FileDescriptor = AssetFileDescriptor.Call<AndroidJavaObject>("getFileDescriptor");
+			if (FileDescriptor == null)
+				throw new System.Exception("FileDescriptor inside Zip's AssetFileDescriptor is null");
+
+			/*	gr: this gets file descriptor (int fd), but we can't actually do anything with it
+			var ParcelFileDescriptor = AssetFileDescriptor.Call<AndroidJavaObject>("getParcelFileDescriptor");
+			if (ParcelFileDescriptor == null)
+				throw new System.Exception("ParcelFileDescriptor inside Zip's AssetFileDescriptor is null");
+
+			var fd = ParcelFileDescriptor.Call<int>("getFd");
+			Debug.Log("fd=" + fd);
+			*/
+			//	a filestream we can use for arbritry reads
+			FileInputStream = new AndroidJavaObject("java.io.FileInputStream", FileDescriptor);
+			if (FileInputStream == null)
+				throw new System.Exception("Failed to create FileInputStream from file descriptor");
+		}
+		catch (AndroidJavaException e)
+		{
+			throw new System.Exception("Failed to open file inside zip file (" + InternalFilename + "): " + e.Message);
+		}
+		
+		//throw new System.Exception("Got file descriptor offset="+ FileOffset +" length="+ FileLength);
+		Debug.Log("Got file descriptor, and file input stream; offset=" + FileOffset + " length=" + FileLength);
 	}
+
+	public void Close()
+	{
+		if (AssetFileDescriptor != null)
+			AssetFileDescriptor.Call("close");
+	}
+
 
 	public int GetFileSize()
 	{
-		return 0;
+		return (int)FileLength;
 	}
 
 	public byte[] ReadBytes(long Position, long Size)
 	{
-		return null;
+		var ReadPosition = Position + FileOffset;
+		if (ReadPosition < FileCurrentPosition)
+			throw new System.Exception("Trying to read " + ReadPosition + "(" + Position + " + offset " + FileOffset + ") but currently at " + FileCurrentPosition + " and cannot go backwards");
+
+		//	move into place
+		var ToSkip = ReadPosition - FileCurrentPosition;
+		var Skipped = FileInputStream.Call<long>("skip", ToSkip);
+		FileCurrentPosition += Skipped;
+		if (Skipped < ToSkip)
+			throw new System.Exception("Trying to skip " + ToSkip + " but only skipped " + Skipped + " Position is "+ FileCurrentPosition + " FileOffset=" + FileOffset +" FileLength=" + FileLength + "");
+
+		//	sbyte reported as obsolete, "use sbyte"
+		var Buffer = new byte[Size];
+		var BytesRead = FileInputStream.Call<int>("read", Buffer);
+		FileCurrentPosition += BytesRead;
+		Debug.Log("Read " + BytesRead + "/" + Size);
+		for ( var i=0;	i< Buffer.Length;	i+=200 )
+		{
+			var Sub = Buffer.SubArray(i, 200);
+			Debug.Log(Sub);
+		}
+
+
+		//	-1 means EOF
+		if (BytesRead == -1)
+			throw new System.Exception("End of File at " + FileCurrentPosition);
+
+		if (BytesRead <= 0)
+			return null;
+
+		if (BytesRead < Buffer.Length)
+		{
+			Buffer = Buffer.SubArray(0, BytesRead);
+		}
+		return Buffer;
 	}
 }
 
