@@ -1,5 +1,5 @@
 //#if NET_4_6	//	gr: not working?
-#if UNITY_ANDROID
+#if UNITY_ANDROID && !UNITY_EDITOR
 #define USE_JAVA_FILEHANDLE
 #else
 //#define USE_MEMORY_MAPPED_FILE
@@ -46,6 +46,11 @@ public class FileReader : FileReaderBase
 	[Header("On first update, send all bytes. Best disabled on very large files")]
 	public bool EnableOnPacket = true;
 
+	[Header("Pure debug, read X bytes per frame and dump to log")]
+	public bool DebugEntireFileContents = false;
+	long DebugFileContentsBytesPerFrame = 10000;
+	long? DebugEntireFilePosition = null;	//	null if we havent opned the file
+	
 #if USE_MEMORY_MAPPED_FILE
 	MemoryMappedFile File;
 	MemoryMappedViewAccessor FileView;
@@ -68,6 +73,19 @@ public class FileReader : FileReaderBase
 	//	gr: move this to Base and trigger when we get more data in
 	void Update()
 	{
+		if (DebugEntireFileContents )
+		{
+			try
+			{
+				DumpFileToLog();
+			}
+			catch(System.Exception e)
+			{
+				Debug.LogError(e);
+			}
+		}
+
+
 		if (!FirstUpdate)
 			return;
 
@@ -75,6 +93,7 @@ public class FileReader : FileReaderBase
 			OnDataChanged();
 
 		FirstUpdate = false;
+
 	}
 
 	public override long GetKnownFileSize()
@@ -101,7 +120,23 @@ public class FileReader : FileReaderBase
 		FirstUpdate = true;
 	}
 
-	override public System.Func<long, long, byte[]> GetReadFileFunction()
+	public void DumpFileToLog()
+	{
+		if (!DebugEntireFilePosition.HasValue)
+		{
+			OpenFile();
+			DebugEntireFilePosition = 0;
+		}
+
+		//	read more
+		var NewBytes = ReadFileBytes(DebugEntireFilePosition.Value, DebugFileContentsBytesPerFrame);
+		DebugEntireFilePosition = DebugEntireFilePosition.Value + NewBytes.Length;
+
+		var DebugString = System.BitConverter.ToString(NewBytes);
+		Debug.Log("Read x" + NewBytes.Length +": " + DebugString);
+	}
+
+	public void OpenFile()
 	{
 		//	catch files in resources
 		if (Filename.StartsWith("Resources/") || Filename.StartsWith("Resources\\"))
@@ -119,7 +154,7 @@ public class FileReader : FileReaderBase
 			{
 				FileBytes = Asset.bytes;
 				Debug.Log("Loaded " + ResourceFilename + "(" + Filename + ") from resources as bytes x" + FileBytes.Length);
-				return ReadFileBytes;
+				return;
 			}
 			else
 			{
@@ -165,11 +200,16 @@ public class FileReader : FileReaderBase
 #elif USE_FILE_HANDLE
 		File = System.IO.File.OpenRead(Filename);
 #elif USE_JAVA_FILEHANDLE
+		//	gr: we should only do this if it's prefixed with StreamingAssets ?
 		File = new PopAndroidFileReader(Filename);
 #else
 		FileBytes = System.IO.File.ReadAllBytes(Filename);
 #endif
+	}
 
+	override public System.Func<long, long, byte[]> GetReadFileFunction()
+	{
+		OpenFile();
 		return ReadFileBytes;
 	}
 
