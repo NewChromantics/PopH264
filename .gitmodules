@@ -22,3 +22,6 @@
 [submodule "Unity/PopH264/Assets/PopUnityCloud2"]
 	path = Unity/PopH264/Assets/PopUnityCloud2
 	url = https://github.com/NewChromantics/PopUnityCloud2.git
+[submodule "Unity/PopH264/Assets/PopUnityAndroidZipReader"]
+	path = Unity/PopH264/Assets/PopUnityAndroidZipReader
+	url = https://github.com/NewChromantics/PopUnityAndroidZipReader.git
