@@ -43,9 +43,17 @@
 #include "MediaFoundationDecoder.h"
 #endif
 
+#if defined(TARGET_ANDROID)
+#include "AndroidDecoder.h"
+#endif
+
 
 void PopH264::EnumDecoderNames(std::function<void(const std::string&)> EnumDecoderName)
 {
+#if defined(TARGET_ANDROID)
+	EnumDecoderName(Android::TDecoder::Name);
+#endif
+
 #if defined(ENABLE_AVF)
 	EnumDecoderName(Avf::TDecoder::Name);
 #endif
@@ -55,10 +63,6 @@ void PopH264::EnumDecoderNames(std::function<void(const std::string&)> EnumDecod
 	EnumDecoderName(MagicLeap::TDecoder::Name);
 #endif
 
-#if defined(ENABLE_BROADWAY)
-	EnumDecoderName(Broadway::TDecoder::Name);
-#endif
-
 #if defined(ENABLE_INTELMEDIA)
 	EnumDecoderName(Intel::TDecoder::Name);
 #endif
@@ -66,6 +70,10 @@ void PopH264::EnumDecoderNames(std::function<void(const std::string&)> EnumDecod
 	//	todo: enum sub-decoder names
 #if defined(ENABLE_MEDIAFOUNDATION)
 	EnumDecoderName(MediaFoundation::TDecoder::Name);
+#endif
+
+#if defined(ENABLE_BROADWAY)
+	EnumDecoderName(Broadway::TDecoder::Name);
 #endif
 }
 
@@ -93,9 +101,30 @@ PopH264::TDecoderInstance::TDecoderInstance(json11::Json& Options)
 	};
 	
 	TDecoderParams Params(Options);
+	auto AnyDecoder = Params.mDecoderName.empty();
+
+#if defined(TARGET_ANDROID)
+	if ( AnyDecoder || Params.mDecoderName == Android::TDecoder::Name )
+	{
+		try
+		{
+			mDecoder.reset(new Android::TDecoder(OnFrameDecoded));
+			return;
+		}
+		catch (std::exception& e)
+		{
+			std::Debug << "Failed to create Android decoder: " << e.what() << std::endl;
+			
+			if ( !AnyDecoder )
+				throw;
+		}
+	}
+#endif
+
+
 
 #if defined(ENABLE_AVF)
-	if ( Params.mDecoderName.empty() || Params.mDecoderName == Avf::TDecoder::Name )
+	if ( AnyDecoder || Params.mDecoderName == Avf::TDecoder::Name )
 	{
 		try
 		{
@@ -105,12 +134,14 @@ PopH264::TDecoderInstance::TDecoderInstance(json11::Json& Options)
 		catch (std::exception& e)
 		{
 			std::Debug << "Failed to create Avf decoder: " << e.what() << std::endl;
+			if ( !AnyDecoder )
+				throw;
 		}
 	}
 #endif
 	
 #if defined(ENABLE_MAGICLEAP_DECODER)
-	if (Params.mDecoderName.empty() || Soy::StringBeginsWith(Params.mDecoderName,MagicLeap::TDecoder::Name,false))
+	if ( AnyDecoder || Soy::StringBeginsWith(Params.mDecoderName,MagicLeap::TDecoder::Name,false))
 	{
 		try
 		{
@@ -120,12 +151,14 @@ PopH264::TDecoderInstance::TDecoderInstance(json11::Json& Options)
 		catch (std::exception& e)
 		{
 			std::Debug << "Failed to create MagicLeap decoder: " << e.what() << std::endl;
+			if ( !AnyDecoder )
+				throw;
 		}
 	}
 #endif
 
 #if defined(ENABLE_MEDIAFOUNDATION)
-	if (Params.mDecoderName.empty() || Soy::StringBeginsWith(Params.mDecoderName,MediaFoundation::TDecoder::Name,false) )
+	if ( AnyDecoder || Soy::StringBeginsWith(Params.mDecoderName,MediaFoundation::TDecoder::Name,false) )
 	{
 		try
 		{
@@ -135,6 +168,8 @@ PopH264::TDecoderInstance::TDecoderInstance(json11::Json& Options)
 		catch (std::exception& e)
 		{
 			std::Debug << "Failed to create MediaFoundation decoder: " << e.what() << std::endl;
+			if ( !AnyDecoder )
+				throw;
 		}
 	}
 #endif
@@ -149,13 +184,15 @@ PopH264::TDecoderInstance::TDecoderInstance(json11::Json& Options)
 		catch (std::exception& e)
 		{
 			std::Debug << "Failed to create IntelMedia decoder: " << e.what() << std::endl;
+			if ( !AnyDecoder )
+				throw;
 		}
 	}
 #endif
 	
 	
 #if defined(ENABLE_BROADWAY)
-	if (Params.mDecoderName.empty() || Params.mDecoderName == Broadway::TDecoder::Name)
+	if ( AnyDecoder || Params.mDecoderName == Broadway::TDecoder::Name)
 	{
 		mDecoder.reset( new Broadway::TDecoder(OnFrameDecoded) );
 		return;
