@@ -172,15 +172,28 @@ public class JavaFileReader
 		if (Skipped < ToSkip)
 			throw new System.Exception("Trying to skip " + ToSkip + " but only skipped " + Skipped + " Position is "+ FileCurrentPosition + " FileOffset=" + FileOffset +" FileLength=" + FileLength + "");
 
+		Size = Mathf.Min((int)Size, 200);
+
 		//	sbyte reported as obsolete, "use sbyte"
-		var Buffer = new byte[Size];
-		var BytesRead = FileInputStream.Call<int>("read", Buffer);
+		//	gr: sbyte always reads only 0 bytes
+		//var Bufferj = AndroidJNI.NewSByteArray((int)Size);
+		var Bufferj = AndroidJNI.NewByteArray((int)Size);
+		//var Buffer = new sbyte[Size];
+		//var BytesRead = FileInputStream.Call<int>("read", Buffer);
+		var BytesRead = FileInputStream.Call<int>("read", Bufferj);
 		FileCurrentPosition += BytesRead;
 		Debug.Log("Read " + BytesRead + "/" + Size);
-		for ( var i=0;	i< Buffer.Length;	i+=200 )
+
+		var Buffer = AndroidJNI.FromByteArray(Bufferj);
+
+		for ( var i=0;	i< BytesReadh;	i+=200 )
 		{
-			var Sub = Buffer.SubArray(i, 200);
-			Debug.Log(Sub);
+			Debug.Log("Data from " + i);
+			string SubStr = "";
+			for (var d = 0; d < 200; d++)
+				SubStr += Buffer[i] + " ";
+			Debug.Log(SubStr);
+			break;
 		}
 
 
@@ -191,11 +204,24 @@ public class JavaFileReader
 		if (BytesRead <= 0)
 			return null;
 
+		//	turn sbyte to byte
+		var Bufferu = new byte[BytesRead];
+		for ( var i=0;	i<Bufferu.Length;	i++ )
+		{
+			Bufferu[i] = (byte)Buffer[i];
+		}
+		return Bufferu;
+
+		/*
+		//	gr: cannot use SubArray with this (array.copy fails)
+		//var Bufferu = (byte[])(System.Array)Buffer;
+
 		if (BytesRead < Buffer.Length)
 		{
-			Buffer = Buffer.SubArray(0, BytesRead);
+			Bufferu = Bufferu.SubArray(0, BytesRead);
 		}
-		return Buffer;
+		return Bufferu;
+		*/
 	}
 }
 
