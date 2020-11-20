@@ -140,10 +140,26 @@ private:
 	void			OnOutputTextureAvailible();
 
 	std::string		GetDebugState();
-	
+
+	std::shared_ptr<Platform::TMediaFormat>		AllocFormat();
+	void			Alloc(SoyPixelsMeta SurfaceMeta,std::shared_ptr<Platform::TMediaFormat> Format,std::shared_ptr<Opengl::TContext> OpenglContext,bool SingleBufferMode);
+
+	void			CreateCodec();		//	returns false if we're not ready to push packets
+	void 			DequeueOutputBuffers();
+	void			DequeueInputBuffers();
+	//	input thread pulling data
+	void			GetNextInputData(ArrayBridge<uint8_t>&& PacketBuffer);
+
 private:
-	MLHandle		mHandle = ML_INVALID_HANDLE;
+	//	need SPS & PPS to create format, before we can create codec
+	Array<uint8_t>	mPendingSps;
+	Array<uint8_t>	mPendingPps;	
+	std::shared_ptr<JniMediaFormat>		mFormat;	//	format for codec!
+	std::shared_ptr<TJniObject>			mCodec;
+	std::shared_ptr<TSurfaceTexture>	mSurfaceTexture;
+	size_t			mPacketNumber = 0;
 	
+	std::function<void()>	mOnStartThread;
 	TInputThread	mInputThread;
 	TOutputThread	mOutputThread;
 	SoyPixelsMeta	mOutputPixelMeta;

@@ -17,6 +17,7 @@ namespace Android
 
 	//	got this mime from googling;
 	//	http://hello-qd.blogspot.com/2013/05/choose-decoder-and-encoder-by-google.html
+	//	http://twinkfed.homedns.org/Android/reference/android/media/MediaCodec.html#createDecoderByType(java.lang.String)
 	const auto*			H264MimeType = "video/avc";
 	
 	//	CSD-0 (from android mediacodec api)
@@ -150,11 +151,91 @@ std::string MagicLeap::GetCodec(int32_t Mode,bool& HardwareSurface)
 
 Android::TDecoder::TDecoder(std::function<void(const SoyPixelsImpl&,size_t)> OnDecodedFrame) :
 	PopH264::TDecoder	( OnDecodedFrame ),
-	mInputThread		( std::bind(&TDecoder::PopNalu, this, std::placeholders::_1 ), std::bind(&TDecoder::HasPendingData, this ) ),
+	mInputThread		( std::bind(&TDecoder::GetNextInputData, this, std::placeholders::_1 ), std::bind(&TDecoder::HasPendingData, this ) ),
 	mOutputThread		( std::bind(&TDecoder::OnDecodedFrame, this, std::placeholders::_1, std::placeholders::_2 ) )
 {
-	Soy_AssertTodo();
-	/*
+/*
+	//	see main thread/same thread comments
+	//	http://stackoverflow.com/questions/32772854/android-ndk-crash-in-androidmediacodec#
+	//	after getting this working, appears we can start on one thread and iterate on another.
+	//	keep this code here in case other phones/media players can't handle it...
+	//	gr: we use the deffered alloc so we can wait for the surface to be created
+	//		maybe we can mix creating stuff before the configure...
+	static bool DefferedAlloc = true;
+	bool Params_mDecoderUseHardwareBuffer = false;
+	
+	SoyPixelsMeta SurfaceMeta;
+	if ( Params_mDecoderUseHardwareBuffer )
+	{
+		Soy_AssertTodo();
+		SurfaceMeta = Params.mAssumedTargetTextureMeta;
+
+		if ( !SurfaceMeta.IsValidDimensions() )
+		{
+			std::stringstream Error;
+			Error << "Creating surface texture but params from VideoDecoderParams are invalid" << SurfaceMeta << std::endl;
+			throw Soy::AssertException( Error.str() );
+		}
+	}
+	
+	if ( DefferedAlloc )
+	{
+		//	gr: create all this on the same thread as the buffer queue
+		auto InvokeAlloc = [=](bool&)
+		{
+			try
+			{
+				Alloc( SurfaceMeta, Format, OpenglContext, Params.mAndroidSingleBufferMode );
+			}
+			catch(std::exception& e)
+			{
+				//	gr: get extended info here. Sometimes fails (and something then abort()'s the app) with
+				//	I/Pop     (12487): pop: Failed to allocate encoder Java exception in void TJniObject::CallVoidMethod(const std::string &, TJniObject &, TJniObject &, TJniObject &, int)configure: android.media.MediaCodec$CodecException: Error 0xffffffea
+				//	F/libc    (12487): Fatal signal 6 (SIGABRT), code -6 in tid 13250 (Thread-443)
+				//	https://developer.android.com/reference/android/media/MediaCodec.CodecException.html
+				std::Debug << "Failed to allocate encoder " << e.what() << std::endl;
+				std::this_thread::sleep_for(std::chrono::milliseconds(200) );
+				WaitToFinish();
+				std::Debug << "mCodec.reset()... " << std::endl;
+				std::this_thread::sleep_for(std::chrono::milliseconds(200) );
+				mCodec.reset();
+				std::Debug << "mCodec.reset()... finished "<< std::endl;
+				std::this_thread::sleep_for(std::chrono::milliseconds(200) );
+			}
+		};
+		this->mOnStart = InvokeAlloc;
+	}
+	else
+	{
+		Alloc( SurfaceMeta, Format, OpenglContext, Params.mAndroidSingleBufferMode );
+	}
+
+	//	start thread
+	Start();
+	*/
+}
+
+
+void Android::TDecoder::CreateCodec()
+{
+	//	codec ready
+	if ( mCodec )
+		return;
+	
+	//	need SPS & PPS 
+	if ( mPendingSps.IsEmpty() || mPendingPps.IsEmpty() )
+	{
+		std::stringstream Error;
+		Error << "CreateCodec still waiting for ";
+		if ( mPendingSps.IsEmpty() )
+			Error << "SPS ";
+		if ( mPendingPps.IsEmpty() )
+			Error << "PPS ";
+		throw Soy::AssertException(Error);
+	}	
+	
+	
+/*	magic leap
 	auto EnumCodec = [](const std::string& Name)
 	{
 		std::Debug << "Codec: " << Name << std::endl;
@@ -183,7 +264,62 @@ Android::TDecoder::TDecoder(std::function<void(const SoyPixelsImpl&,size_t)> OnD
 		Error << "MLMediaCodecCreateCodec(" << CodecName << ")";
 		IsOkay( Result, Error );
 	}
+	*/
 	
+	
+	//	make a format
+	auto SingleBufferMode = true;
+	std::shared_ptr<Opengl::TContext> OpenglContext;
+	std::shared_ptr<Platform::TMediaFormat> Format;
+	SoyPixelsMeta SurfaceMeta;
+	
+	//	create format from scratch
+	TJniClass MediaFormatClass("android.media.MediaFormat");
+	int FormatWidth = 512;
+	int FormatHeight = 480;
+	std::string FormatMime(H264MimeType);
+	std::Debug << "Creating format FormatMime=" << FormatMime << " " << FormatWidth <<"x" << FormatHeight << std::endl;
+	TJniObject Formatj = MediaFormatClass.CallStaticObjectMethod( "createVideoFormat", MediaFormatClass.GetClassName(), FormatMime, FormatWidth, FormatHeight );
+
+	//long DurationMicroSecs = Stream.mDuration.GetMicroSeconds();
+	//Formatj.CallVoidMethod("setLong", KEY_DURATION, DurationMicroSecs );
+	TJniObject SpsBuffer("java.nio.ByteBuffer");
+	TJniObject PpsBuffer("java.nio.ByteBuffer");
+	Java::ArrayToBuffer( GetArrayBridge(mPendingSps), SpsBuffer,"Sps" );
+	Java::ArrayToBuffer( GetArrayBridge(mPendingPps), SpsBuffer,"Pps" );
+	//auto SPS = OldFormatj.CallObjectMethod("getByteBuffer","java.nio.ByteBuffer","csd-0");
+	//auto PPS = OldFormatj.CallObjectMethod("getByteBuffer","java.nio.ByteBuffer","csd-1");
+	Formatj.CallVoidMethod("setByteBuffer", "csd-0", SpsBuffer );
+	Formatj.CallVoidMethod("setByteBuffer", "csd-1", PpsBuffer );
+	//byte[] header_sps = { 0, 0, 0, 1, 103, 100, 0, 40, -84, 52, -59, 1, -32, 17, 31, 120, 11, 80, 16, 16, 31, 0, 0, 3, 3, -23, 0, 0, -22, 96, -108 };
+	//byte[] header_pps = { 0, 0, 0, 1, 104, -18, 60, -128 };
+	//format.setByteBuffer("csd-0", ByteBuffer.wrap(header_sps));
+	//format.setByteBuffer("csd-1", ByteBuffer.wrap(header_pps));
+	//format.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, 1920 * 1080);
+	//format.setInteger("durationUs", 63446722);
+		
+	//	set colour format
+#define COLOR_FormatYUV420Planar	19
+	Formatj.CallVoidMethod("setInteger", KEY_COLOR_FORMAT, COLOR_FormatYUV420Planar );
+	//	=6291456, durationUs=30000000,
+		
+	//	http://stackoverflow.com/questions/15105843/mediacodec-jelly-bean#_=_
+	static bool ApplyMaxInputSize = true;
+	if ( ApplyMaxInputSize )
+	{
+#define KEY_MAX_INPUT_SIZE	"max-input-size"
+		int MaxInputSize = 0;
+		Formatj.CallVoidMethod("setInteger", KEY_MAX_INPUT_SIZE, MaxInputSize );
+	}
+		
+	mFormat.reset( new JniMediaFormat( Formatj ) );
+	//std::Debug << "Decoder format meta " << GetStreamFromMediaFormat( DecoderFormat,888) << std::endl;
+
+	
+	
+	
+	
+	/*
 	auto OnInputBufferAvailible = [](MLHandle Codec,int64_t BufferIndex,void* pThis)
 	{
 		auto& This = *static_cast<MagicLeap::TDecoder*>(pThis);
@@ -273,7 +409,70 @@ Android::TDecoder::TDecoder(std::function<void(const SoyPixelsImpl&,size_t)> OnD
 	//	MLMediaCodecFlush makes all inputs invalid... flush on close?
 	std::Debug << "Created TDecoder (" << CodecName << ")" << std::endl;
 	*/
+
+	//	gr: attempt to create this from the stream meta to remove the android dependency
+	//		note: when we do this, don't forget to set SPS and PPS http://stackoverflow.com/questions/19742047/how-to-use-mediacodec-without-mediaextractor-for-h264
+
+	//	gr: support createByCodecName like magic leap
+	std::Debug << "Creating decoder with mime " << FormatMime << std::endl;
+	TJniClass MediaCodecClass("android/media/MediaCodec");
+	auto MediaCodec = MediaCodecClass.CallStaticObjectMethod("createDecoderByType","android/media/MediaCodec", FormatMime );
+	if ( !MediaCodec )
+		throw Soy::AssertException("Failed to create decoder" );
+
+	//	store codec once we've reached a point when it needs to be released
+	mCodec.reset( new TJniObject( MediaCodec ) );
+
+
+	
+	//	create a surface if params specified
+	//	gr: now we create it here, we can block instead of this hacky sleep.
+	if ( SurfaceMeta.IsValidDimensions() && OpenglContext )
+	{
+		std::Debug << "Creating surface texture " << SurfaceMeta << " (and blocking...)" << std::endl;
+		Soy::TSemaphore Semaphore;
+		mSurfaceTexture.reset( new TSurfaceTexture( *OpenglContext, SurfaceMeta, &Semaphore, SingleBufferMode ) );
+		Semaphore.Wait();
+	}
+	else
+	{
+		std::Debug << "X Skipped creating surface texture: Context=" << (OpenglContext?"not-null":"null") << " SurfaceMeta=" << SurfaceMeta << std::endl;
+	}
+	
+	std::shared_ptr<JSurface> pSurface = mSurfaceTexture ? mSurfaceTexture->mSurface : nullptr;
+	if ( !pSurface )
+	{
+		std::Debug << "Configuring media codec without surface" << std::endl;
+	}
+	else
+	{
+#if defined(ENABLE_OPENGL)
+		std::Debug << "Configuring media codec WITH surface: " << mSurfaceTexture->GetTexture().GetMeta() << std::endl;
+#else
+		Soy_AssertTodo();
+#endif
+	}
+	auto Surfacej = pSurface ? *pSurface : TJniObject::Null("android.view.Surface");
+
+	
+	auto MediaCryptoj = TJniObject::Null("android.media.MediaCrypto");
+	int Flags = 0x0;	//	CONFIGURE_FLAG_ENCODE
+	
+	//	format cannot be null
+	//	see https://dxr.mozilla.org/mozilla-central/source/dom/media/platforms/android/AndroidDecoderModule.cpp
+	//	for a "working" implementation. Maybe buffers need resetting, maybe deque input & output needs to be on same thread?
+	MediaCodec.CallVoidMethod("configure", Formatj, Surfacej, MediaCryptoj, Flags );
+
+	//auto OutputFormat = MediaCodec.CallObjectMethod("getOutputFormat", "android.media.MediaFormat");
+
+	std::Debug << "MediaCodec.Start()" << std::endl;
+	MediaCodec.CallVoidMethod("start");
+	//mCodecStarted = true;
+	
+	std::Debug << __func__ << " finished" << std::endl;
 }
+
+
 
 Android::TDecoder::~TDecoder()
 {
@@ -297,14 +496,117 @@ Android::TDecoder::~TDecoder()
 }
 
 
+void Android::TDecoder::DequeueInputBuffers()
+{
+	//		and stick in the queue
+	//		this should trigger the input queue to start grabbing data
+	while(true)
+	{
+		auto TimeoutImmediateReturn = 0;
+		auto TimeoutBlock = -1;
+		long TimeoutUs = TimeoutImmediateReturn;
+			
+		//	this throws when not started... okay, but maybe cleaner not to. or as it's multithreaded...wait
+		int InputBufferId = mCodec->CallIntMethod("dequeueInputBuffer", TimeoutUs );
+		if ( InputBufferId < 0 )
+		{
+			//Java::IsOkay("Failed to get codec input buffer");
+			//std::Debug << "Failed to get codec input buffer" << std::endl;
+			//return false;
+			break;
+		}
+		OnInputBufferAvailible(InputBufferId);
+	}
+}
+
+void Android::TDecoder::DequeueOutputBuffers()
+{
+/*
+	//		and stick in the queue
+	//		this should trigger the input queue to start grabbing data
+	while(true)
+	{
+		auto TimeoutImmediateReturn = 0;
+		auto TimeoutBlock = -1;
+		long TimeoutUs = TimeoutImmediateReturn;
+			
+		//	this throws when not started... okay, but maybe cleaner not to. or as it's multithreaded...wait
+		int InputBufferId = mCodec->CallIntMethod("dequeueOutputBuffer", TimeoutUs );
+		if ( InputBufferId < 0 )
+		{
+			//Java::IsOkay("Failed to get codec input buffer");
+			//std::Debug << "Failed to get codec input buffer" << std::endl;
+			//return false;
+			break;
+		}
+		OnInputBufferAvailible(InputBufferId);
+	}
+	*/
+}
+
 //	returns true if more data to proccess
 bool Android::TDecoder::DecodeNextPacket()
 {
-	std::Debug << "DecodeNextPacket (HasPendingData x" << HasPendingData() << ") " << GetDebugState() << mOutputThread.GetDebugState() << std::endl;
-
-	//	wake the input thread, as when this is called, the super class has just put some pending data in
+	//	we have to wait for input thread to want to pull data here, we can't force it
 	mInputThread.Wake();
-	return false;
+
+
+	//	if we have no codec yet, we won't have any input buffers, so we won't have any requests from the input thread
+	//	we need to pull SPS & PPS and create codec
+	if ( !mCodec )
+	{
+		std::Debug << "DecodeNextPacket: Creating codec" << std::endl;
+		try
+		{
+			//	gr: this will create codec if we're ready to
+			//	gr: this will drop this packet if pre sps/pps		
+			Array<uint8_t> NaluPacket;
+			GetNextInputData( GetArrayBridge(NaluPacket) );
+		}
+		catch(std::exception& e)
+		{
+			std::Debug << "DecodeNextPacket CreateCodec failed; " << e.what() << std::endl;
+			return true;
+		}
+	}
+	
+	//	gr: we don't currently have callbacks for buffers, so deque any that are availible
+	DequeueInputBuffers();
+	DequeueOutputBuffers();
+	
+	//	even if we didn't get a frame, try to decode again as we processed a packet
+	return true;
+}
+
+void Android::TDecoder::GetNextInputData(ArrayBridge<uint8_t>&& PacketBuffer)
+{
+	auto& Nalu = PacketBuffer;
+	//	input thread wants some data to process
+	if (!PopNalu(GetArrayBridge(Nalu)))
+	{
+		std::stringstream Error;
+		Error << "GetNextInputData thread, no nalu ready (" << GetPendingDataSize() <<" bytes ready pending)";
+		throw Soy::AssertException(Error);
+	}
+
+	auto PacketNumber = mPacketNumber++;
+
+	//	update header packets
+	auto NaluType = H264::GetPacketType(GetArrayBridge(Nalu));
+	if (NaluType == H264NaluContent::SequenceParameterSet)
+	{
+		mPendingSps = Nalu;
+	}
+	if (NaluType == H264NaluContent::PictureParameterSet)
+	{
+		mPendingPps = Nalu;
+	}
+
+	//	not got enough info (format data) to create codec, dropping packet
+	CreateCodec();
+
+	//	reached here without throwing, so data is okay
+	//	gr: skip if sps?
 }
 
 void Android::TDecoder::OnDecodedFrame(const SoyPixelsImpl& Pixels,size_t FrameNumber)
@@ -338,7 +640,10 @@ void Android::TInputThread::PushInputBuffer(int64_t BufferIndex)
 	//	gr: as we can submit an offset, we could LOCK the pending data, submit, then unlock & delete and save a copy
 	size_t BufferWrittenSize = 0;
 	auto BufferArray = GetRemoteArray( Buffer, BufferSize, BufferWrittenSize );
-	mPopPendingData( GetArrayBridge(BufferArray) );
+	try
+	{
+		mPopPendingData( GetArrayBridge(BufferArray) );
+	}
 
 	//	process buffer
 	int64_t DataOffset = 0;
@@ -372,7 +677,8 @@ void Android::TInputThread::OnInputBufferAvailible(MLHandle CodecHandle,int64_t 
 
 void Android::TDecoder::OnInputBufferAvailible(int64_t BufferIndex)
 {
-	mInputThread.OnInputBufferAvailible( mHandle, BufferIndex );
+	MLHandle Handle;
+	mInputThread.OnInputBufferAvailible( Handle, BufferIndex );
 }
 
 void Android::TDecoder::OnOutputBufferAvailible(int64_t BufferIndex,const MLMediaCodecBufferInfo& BufferMeta)
@@ -381,7 +687,7 @@ void Android::TDecoder::OnOutputBufferAvailible(int64_t BufferIndex,const MLMedi
 	Meta.mPixelMeta = mOutputPixelMeta;
 	Meta.mBufferIndex = BufferIndex;
 	Meta.mMeta = BufferMeta;
-	mOutputThread.OnOutputBufferAvailible( mHandle, Meta );
+	mOutputThread.OnOutputBufferAvailible( BufferIndex, Meta );
 	std::Debug << "OnOutputBufferAvailible(" << BufferIndex << ") " << GetDebugState() << mOutputThread.GetDebugState() << std::endl;
 }
 
@@ -757,7 +1063,7 @@ Android::TInputThread::TInputThread(std::function<void(ArrayBridge<uint8_t>&&)> 
 	Start();
 }
 
-auto InputThreadNotReadySleep = 12;
+auto InputThreadNotReadySleep = 3000;//12;
 auto InputThreadThrottle = 2;
 auto InputThreadErrorThrottle = 1000;
 
@@ -765,8 +1071,9 @@ bool Android::TInputThread::Iteration(std::function<void(std::chrono::millisecon
 {
 	if ( mInputBuffers.IsEmpty() )
 	{
-		std::Debug << __PRETTY_FUNCTION__ << " No input buffers" << std::endl;
-		Sleep( std::chrono::milliseconds(InputThreadNotReadySleep) );
+		std::Debug << __PRETTY_FUNCTION__ << " No input buffers sleep(" << InputThreadNotReadySleep << ")" << std::endl;
+		//Sleep( std::chrono::milliseconds(InputThreadNotReadySleep) );
+		std::this_thread::sleep_for(std::chrono::milliseconds(InputThreadNotReadySleep) );
 		return true;
 	}
 

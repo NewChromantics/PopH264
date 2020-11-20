@@ -28,7 +28,8 @@ protected:
 	void			OnDecodedEndOfStream();
 	virtual bool	DecodeNextPacket()=0;	//	returns true if more data to proccess
 	
-	bool			HasPendingData()	{	return !mPendingData.IsEmpty();	}
+	bool			HasPendingData()		{	return !mPendingData.IsEmpty();	}
+	size_t			GetPendingDataSize()	{	return mPendingData.GetSize() - mPendingOffset;	}
 	bool			PopNalu(ArrayBridge<uint8_t>&& Buffer);
 	void			UnpopNalu(ArrayBridge<uint8_t>&& Buffer);
 
