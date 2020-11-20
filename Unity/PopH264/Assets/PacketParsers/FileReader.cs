@@ -79,6 +79,9 @@ public class FileReader : FileReaderBase
 
 	public override long GetKnownFileSize()
 	{
+		if (FileBytes != null)
+			return FileBytes.Length;
+
 #if USE_MEMORY_MAPPED_FILE
 		//return FileView.Capacity;
 		return FileSize;
