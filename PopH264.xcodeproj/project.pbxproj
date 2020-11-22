@@ -6,6 +6,22 @@
 	objectVersion = 46;
 	objects = {
 
+/* Begin PBXAggregateTarget section */
+		BF51B8C2256A7DBA004DE4C7 /* PopH264Aggregate */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = BF51B8C3256A7DBA004DE4C7 /* Build configuration list for PBXAggregateTarget "PopH264Aggregate" */;
+			buildPhases = (
+				BF51B8CA256A7E0E004DE4C7 /* ShellScript */,
+			);
+			dependencies = (
+				BF51B8C7256A7E09004DE4C7 /* PBXTargetDependency */,
+				BF51B8C9256A7E09004DE4C7 /* PBXTargetDependency */,
+			);
+			name = PopH264Aggregate;
+			productName = PopH264Aggregate;
+		};
+/* End PBXAggregateTarget section */
+
 /* Begin PBXBuildFile section */
 		BF0CCB2424A78D8D00596877 /* SoyMediaFormat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF0CCB2224A78D8D00596877 /* SoyMediaFormat.cpp */; };
 		BF0CCB2524A78D8D00596877 /* SoyMediaFormat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF0CCB2224A78D8D00596877 /* SoyMediaFormat.cpp */; };
@@ -110,6 +126,20 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		BF51B8C6256A7E09004DE4C7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BF4A6A0C1EA16D7C00613A64 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = BF151FD82384786600A70EBF;
+			remoteInfo = PopH264_Ios;
+		};
+		BF51B8C8256A7E09004DE4C7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BF4A6A0C1EA16D7C00613A64 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = BF459CD421F7D5C700CED59D;
+			remoteInfo = PopH264_Osx;
+		};
 		BFC4717D244750E200A2DA70 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = BF4A6A0C1EA16D7C00613A64 /* Project object */;
@@ -846,6 +876,10 @@
 		BF4A6A0C1EA16D7C00613A64 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				DefaultBuildSystemTypeForWorkspace = Original;
+				KnownAssetTags = (
+					New,
+				);
 				LastUpgradeCheck = 0810;
 				ORGANIZATIONNAME = NewChromantics;
 				TargetAttributes = {
@@ -857,6 +891,10 @@
 					BF459CD421F7D5C700CED59D = {
 						CreatedOnToolsVersion = 10.1;
 						DevelopmentTeam = X52DR36JY2;
+						ProvisioningStyle = Automatic;
+					};
+					BF51B8C2256A7DBA004DE4C7 = {
+						CreatedOnToolsVersion = 12.0;
 						ProvisioningStyle = Automatic;
 					};
 					BF53E82722EC8C1D008253CD = {
@@ -890,6 +928,7 @@
 				BF53E82722EC8C1D008253CD /* PopH264_Lumin */,
 				BF151FD82384786600A70EBF /* PopH264_Ios */,
 				BFC4717024474FFA00A2DA70 /* PopH264_TestApp */,
+				BF51B8C2256A7DBA004DE4C7 /* PopH264Aggregate */,
 			);
 		};
 /* End PBXProject section */
@@ -910,6 +949,30 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		BF51B8CA256A7E0E004DE4C7 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				./build/PopH264.xcframework,
+				./build/PopH264_Ios.xcarchive/Products/Library/Frameworks/PopH264_Ios.framework,
+				./build/PopH264_IosSimulator.xcarchive/Products/Library/Frameworks/PopH264_Ios.framework,
+				./build/PopH264_Osx.xcarchive/Products/Library/Frameworks/PopH264_Osx.framework,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\nxcodebuild archive -scheme PopH264_Ios -archivePath \"./build/PopH264_Ios\" -sdk iphoneos SKIP_INSTALL=NO\nxcodebuild archive -scheme PopH264_Ios -archivePath \"./build/PopH264_IosSimulator\" -sdk iphonesimulator SKIP_INSTALL=NO\nxcodebuild archive -scheme PopH264_Osx -archivePath \"./build/PopH264_Osx.xarchive\" SKIP_INSTALL=NO\nxcodebuild -create-xcframework -framework ./build/PopH264_Ios.xcarchive/Products/Library/Frameworks/PopH264_Ios.framework -framework ./build/PopH264_IosSimulator.xcarchive/Products/Library/Frameworks/PopH264_Ios.framework -framework ./build/PopH264_Osx.xcarchive/Products/Library/Frameworks/PopH264_Osx.framework -output ./build/PopH264.xcframework\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		BF151FD52384786600A70EBF /* Sources */ = {
@@ -1016,6 +1079,16 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		BF51B8C7256A7E09004DE4C7 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = BF151FD82384786600A70EBF /* PopH264_Ios */;
+			targetProxy = BF51B8C6256A7E09004DE4C7 /* PBXContainerItemProxy */;
+		};
+		BF51B8C9256A7E09004DE4C7 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = BF459CD421F7D5C700CED59D /* PopH264_Osx */;
+			targetProxy = BF51B8C8256A7E09004DE4C7 /* PBXContainerItemProxy */;
+		};
 		BFC4717E244750E200A2DA70 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = BF459CD421F7D5C700CED59D /* PopH264_Osx */;
@@ -1183,6 +1256,7 @@
 			baseConfigurationReference = BF004B6824FD3D1C00DC6A90 /* Version.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
 				CLANG_CXX_LIBRARY = "libc++";
@@ -1234,6 +1308,7 @@
 			baseConfigurationReference = BF004B6824FD3D1C00DC6A90 /* Version.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
 				CLANG_CXX_LIBRARY = "libc++";
@@ -1271,6 +1346,22 @@
 				SDKROOT = macosx;
 				UNITY_OUTPUT_PATH = "$(SOURCE_ROOT)/Unity/PopH264/Assets/PopH264/";
 				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = Release;
+		};
+		BF51B8C4256A7DBA004DE4C7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		BF51B8C5256A7DBA004DE4C7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
 		};
@@ -1384,6 +1475,15 @@
 			buildConfigurations = (
 				BF4A6A181EA16D7D00613A64 /* Debug */,
 				BF4A6A191EA16D7D00613A64 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		BF51B8C3256A7DBA004DE4C7 /* Build configuration list for PBXAggregateTarget "PopH264Aggregate" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BF51B8C4256A7DBA004DE4C7 /* Debug */,
+				BF51B8C5256A7DBA004DE4C7 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
