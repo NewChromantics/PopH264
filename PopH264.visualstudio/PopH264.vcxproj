@@ -110,6 +110,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\Source\SoyLib\src\SoyPixels.cpp" />
+    <ClCompile Include="..\Source\SoyLib\src\SoyPlatform.cpp" />
     <ClCompile Include="..\Source\SoyLib\src\SoyPng.cpp" />
     <ClCompile Include="..\Source\SoyLib\src\SoyRuntimeLibrary.cpp" />
     <ClCompile Include="..\Source\SoyLib\src\SoyStreamBuffer.cpp" />
@@ -171,6 +172,7 @@
     <ClInclude Include="..\Source\PopH264TestData.h" />
     <ClInclude Include="..\Source\SoyAvf.h" />
     <ClInclude Include="..\Source\SoyLib\src\SoyFilesystem.h" />
+    <ClInclude Include="..\Source\SoyLib\src\SoyPlatform.h" />
     <ClInclude Include="..\Source\SoyLib\src\SoyRuntimeLibrary.h" />
     <ClInclude Include="..\Source\TDecoderInstance.h" />
     <ClInclude Include="..\Source\TEncoder.h" />
