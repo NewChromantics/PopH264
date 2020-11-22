@@ -7,9 +7,9 @@
 	objects = {
 
 /* Begin PBXAggregateTarget section */
-		BF51B8C2256A7DBA004DE4C7 /* PopH264Aggregate */ = {
+		BF51B8C2256A7DBA004DE4C7 /* PopH264_Universal */ = {
 			isa = PBXAggregateTarget;
-			buildConfigurationList = BF51B8C3256A7DBA004DE4C7 /* Build configuration list for PBXAggregateTarget "PopH264Aggregate" */;
+			buildConfigurationList = BF51B8C3256A7DBA004DE4C7 /* Build configuration list for PBXAggregateTarget "PopH264_Universal" */;
 			buildPhases = (
 				BF51B8CA256A7E0E004DE4C7 /* ShellScript */,
 			);
@@ -17,7 +17,7 @@
 				BF51B8C7256A7E09004DE4C7 /* PBXTargetDependency */,
 				BF51B8C9256A7E09004DE4C7 /* PBXTargetDependency */,
 			);
-			name = PopH264Aggregate;
+			name = PopH264_Universal;
 			productName = PopH264Aggregate;
 		};
 /* End PBXAggregateTarget section */
@@ -928,7 +928,7 @@
 				BF53E82722EC8C1D008253CD /* PopH264_Lumin */,
 				BF151FD82384786600A70EBF /* PopH264_Ios */,
 				BFC4717024474FFA00A2DA70 /* PopH264_TestApp */,
-				BF51B8C2256A7DBA004DE4C7 /* PopH264Aggregate */,
+				BF51B8C2256A7DBA004DE4C7 /* PopH264_Universal */,
 			);
 		};
 /* End PBXProject section */
@@ -970,7 +970,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\nxcodebuild archive -scheme PopH264_Ios -archivePath \"./build/PopH264_Ios\" -sdk iphoneos SKIP_INSTALL=NO\nxcodebuild archive -scheme PopH264_Ios -archivePath \"./build/PopH264_IosSimulator\" -sdk iphonesimulator SKIP_INSTALL=NO\nxcodebuild archive -scheme PopH264_Osx -archivePath \"./build/PopH264_Osx.xarchive\" SKIP_INSTALL=NO\nxcodebuild -create-xcframework -framework ./build/PopH264_Ios.xcarchive/Products/Library/Frameworks/PopH264_Ios.framework -framework ./build/PopH264_IosSimulator.xcarchive/Products/Library/Frameworks/PopH264_Ios.framework -framework ./build/PopH264_Osx.xcarchive/Products/Library/Frameworks/PopH264_Osx.framework -output ./build/PopH264.xcframework\n";
+			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\nxcodebuild archive -scheme PopH264_Ios -archivePath \"./build/PopH264_Ios\" -sdk iphoneos SKIP_INSTALL=NO\nxcodebuild archive -scheme PopH264_Ios -archivePath \"./build/PopH264_IosSimulator\" -sdk iphonesimulator SKIP_INSTALL=NO\nxcodebuild archive -scheme PopH264_Osx -archivePath \"./build/PopH264_Osx\" SKIP_INSTALL=NO\nxcodebuild -create-xcframework -framework ./build/PopH264_Ios.xcarchive/Products/Library/Frameworks/PopH264_Ios.framework -framework ./build/PopH264_IosSimulator.xcarchive/Products/Library/Frameworks/PopH264_Ios.framework -framework ./build/PopH264_Osx.xcarchive/Products/Library/Frameworks/PopH264_Osx.framework -output ./build/PopH264.xcframework\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -1479,7 +1479,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		BF51B8C3256A7DBA004DE4C7 /* Build configuration list for PBXAggregateTarget "PopH264Aggregate" */ = {
+		BF51B8C3256A7DBA004DE4C7 /* Build configuration list for PBXAggregateTarget "PopH264_Universal" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				BF51B8C4256A7DBA004DE4C7 /* Debug */,
