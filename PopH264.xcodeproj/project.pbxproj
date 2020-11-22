@@ -244,6 +244,7 @@
 		BF51B8AD256A7203004DE4C7 /* SoyPlatform.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = SoyPlatform.mm; path = Source/SoyLib/src/SoyPlatform.mm; sourceTree = "<group>"; };
 		BF51B8B0256A72A4004DE4C7 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS14.0.sdk/System/Library/Frameworks/UIKit.framework; sourceTree = DEVELOPER_DIR; };
 		BF51B8B4256A7356004DE4C7 /* SoyFilesystem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SoyFilesystem.h; path = Source/SoyLib/src/SoyFilesystem.h; sourceTree = "<group>"; };
+		BF51B911256AEC86004DE4C7 /* BuildUniversal.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = BuildUniversal.sh; sourceTree = "<group>"; };
 		BF53E82622EC8B59008253CD /* PopH264.Lumin */ = {isa = PBXFileReference; lastKnownFileType = folder; path = PopH264.Lumin; sourceTree = "<group>"; };
 		BF53E82B22ECB934008253CD /* v0.21.0 */ = {isa = PBXFileReference; lastKnownFileType = folder; name = v0.21.0; path = ../MagicLeap/mlsdk/v0.21.0; sourceTree = "<group>"; };
 		BF53E82C22EDC6A6008253CD /* TDecoder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = TDecoder.h; path = Source/TDecoder.h; sourceTree = "<group>"; };
@@ -446,6 +447,7 @@
 		BF151FDA2384786600A70EBF /* Source_Ios */ = {
 			isa = PBXGroup;
 			children = (
+				BF51B911256AEC86004DE4C7 /* BuildUniversal.sh */,
 				BF151FF52384795600A70EBF /* PopH264_Ios.xcconfig */,
 				BF151FDC2384786600A70EBF /* PopH264_Ios_Info.plist */,
 			);
@@ -964,13 +966,10 @@
 			);
 			outputPaths = (
 				./build/PopH264.xcframework,
-				./build/PopH264_Ios.xcarchive/Products/Library/Frameworks/PopH264_Ios.framework,
-				./build/PopH264_IosSimulator.xcarchive/Products/Library/Frameworks/PopH264_Ios.framework,
-				./build/PopH264_Osx.xcarchive/Products/Library/Frameworks/PopH264_Osx.framework,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\nxcodebuild archive -scheme PopH264_Ios -archivePath \"./build/PopH264_Ios\" -sdk iphoneos SKIP_INSTALL=NO\nxcodebuild archive -scheme PopH264_Ios -archivePath \"./build/PopH264_IosSimulator\" -sdk iphonesimulator SKIP_INSTALL=NO\nxcodebuild archive -scheme PopH264_Osx -archivePath \"./build/PopH264_Osx\" SKIP_INSTALL=NO\nxcodebuild -create-xcframework -framework ./build/PopH264_Ios.xcarchive/Products/Library/Frameworks/PopH264_Ios.framework -framework ./build/PopH264_IosSimulator.xcarchive/Products/Library/Frameworks/PopH264_Ios.framework -framework ./build/PopH264_Osx.xcarchive/Products/Library/Frameworks/PopH264_Osx.framework -output ./build/PopH264.xcframework\n";
+			shellScript = "chmod +x ./Source_Ios/BuildUniversal.sh\n./Source_Ios/BuildUniversal.sh ${PROJECT_NAME}\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
