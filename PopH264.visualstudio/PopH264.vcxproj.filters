@@ -246,6 +246,9 @@
     <ClCompile Include="..\Source\AndroidMovieDecoder.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source\SoyLib\src\SoyPlatform.cpp">
+      <Filter>SoyLib</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\SoyLib\src\Array.hpp">
@@ -535,6 +538,9 @@
     </ClInclude>
     <ClInclude Include="..\Source\AndroidMovieDecoder.h">
       <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\SoyLib\src\SoyPlatform.h">
+      <Filter>SoyLib</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
