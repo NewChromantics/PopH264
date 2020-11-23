@@ -69,9 +69,6 @@ jobs:
         id: Apple
         if: matrix.config.os == 'macOS'
         uses: NewChromantics/PopAction_BuildApple@v2
-        run: |
-          echo "UPLOAD_NAME=xcframeworks" >> $GITHUB_ENV
-          echo "UPLOAD_DIR=Apple" >> $GITHUB_ENV
         with:
           project: ${{ env.project }}
           
