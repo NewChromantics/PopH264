@@ -52,7 +52,7 @@ jobs:
 
       - name: Configure Windows
         if: matrix.config.os == 'windows'
-        uses: microsoft/setup-msbuild@v1.0.0
+        uses: microsoft/setup-msbuild@v1.0.2
 
       - name: Windows
         id: Windows
