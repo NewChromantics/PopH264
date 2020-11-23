@@ -125,7 +125,7 @@ jobs:
       # set dry-run if this isn't a tag so npm publish will run, but not do anything (and not fail)
       - name: Set npm publish as dry-run
         if: startsWith(github.ref, 'refs/tags/v') != true
-        run: echo "::set-env name=NPM_PACKAGE_DRY_RUN::--dry-run"
+        run: echo "NPM_PACKAGE_DRY_RUN=--dry-run" >> $GITHUB_ENV
 
       # copy files we want to
       # download github-publish dependencies (ci), then publish from package dir
