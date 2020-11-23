@@ -40,10 +40,6 @@ jobs:
             type: x64
 
           - os: macOS
-            type: Ios
-
-          - os: macOS
-            type: Osx
 
           - os: ubuntu-16.04
             type: Android
@@ -56,7 +52,7 @@ jobs:
 
       - name: Configure Windows
         if: matrix.config.os == 'windows'
-        uses: microsoft/setup-msbuild@v1.0.0
+        uses: microsoft/setup-msbuild@v1.0.2
 
       - name: Windows
         id: Windows
@@ -72,9 +68,8 @@ jobs:
       - name: Apple
         id: Apple
         if: matrix.config.os == 'macOS'
-        uses: NewChromantics/PopAction_BuildApple@v1
+        uses: NewChromantics/PopAction_BuildApple@v2
         with:
-          BuildScheme: ${{ env.project }}_${{ matrix.config.type }}
           project: ${{ env.project }}
           
       - name: Linux
