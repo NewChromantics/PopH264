@@ -20,5 +20,4 @@ jobs:
       - uses: NewChromantics/PopAction_BuildApple@v1
         with:
           BuildScheme: ${{ env.project }}_Universal
-          BuildTargetDir:  ./build/${{env.project}}.xcframework
           project: ${{ env.project }}
