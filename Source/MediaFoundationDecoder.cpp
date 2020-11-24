@@ -80,23 +80,36 @@ bool MediaFoundation::TDecoder::DecodeNextPacket()
 	bool PushData = true;
 
 	//	skip some packets
+	static bool SetSpsOnce = true;
+	static bool SkipIfNotSpsSent = true;
+
 	switch (NaluType)
 	{
 	case H264NaluContent::SequenceParameterSet:
-		if (mSpsSet)
+		if (mSpsSet && SetSpsOnce)
 			PushData = false;
 		break;
 
 	case H264NaluContent::PictureParameterSet:
-		if (mPpsSet)
+		if (mPpsSet && SetSpsOnce)
 			PushData = false;
 		break;
 
 	case H264NaluContent::SupplimentalEnhancementInformation:
-		if (mSeiSet)
+		if (mSeiSet && SetSpsOnce)
 			PushData = false;
 		break;
-	default:break;
+
+	default:
+		if (SkipIfNotSpsSent)
+		{
+			if (!mSpsSet || !mPpsSet /*|| !mSeiSet*/)
+			{
+				std::Debug << __PRETTY_FUNCTION__ << " skipped " << NaluType << " as we're still waiting for sps/pps" << std::endl;
+				PushData = false;
+			}
+		}
+		break;
 	}
 
 	if (NaluType == H264NaluContent::EndOfStream)
@@ -159,8 +172,8 @@ bool MediaFoundation::TDecoder::DecodeNextPacket()
 size_t MediaFoundation::TDecoder::PopFrames()
 {
 	size_t FramesPushed = 0;
-	bool PopAgain = true;
 	int LoopSafety = 10;
+	bool PopAgain = true;
 	while (PopAgain && --LoopSafety > 0)
 	{
 		Array<uint8_t> OutFrame;
