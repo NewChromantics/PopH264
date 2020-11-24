@@ -34,18 +34,45 @@ void DebugPrint(const std::string& Message)
 typedef void CompareFunc_t(const char* MetaJson,uint8_t* Plane0,uint8_t* Plane1,uint8_t* Plane2);
 
 
+bool LoadDataFromFilename(const char* Filename,ArrayBridge<uint8_t>&& Data)
+{
+	FILE* File = nullptr;
+	auto Error = fopen_s(&File,Filename, "rb");
+	if (!File)
+		return false;
+	fseek(File, 0, SEEK_SET);
+	while (!feof(File))
+	{
+		uint8_t Buffer[1024 * 100];
+		auto BytesRead = fread(Buffer, 1, sizeof(Buffer), File);
+		auto BufferArray = GetRemoteArray(Buffer, BytesRead, BytesRead);
+		Data.PushBackArray(BufferArray);
+	}
+	fclose(File);
+	return true;
+}
+
+
 void DecoderTest(const char* TestDataName,CompareFunc_t* Compare)
 {
-	uint8_t TestData[7*1024];
-	auto TestDataSize = PopH264_GetTestData(TestDataName,TestData,std::size(TestData));
-	if ( TestDataSize > std::size(TestData) )
-		throw std::runtime_error("Buffer for test data not big enough");
-	
-	char* Options = nullptr;
+	Array<uint8_t> TestData;
+
+	if (!LoadDataFromFilename(TestDataName, GetArrayBridge(TestData)))
+	{
+		uint8_t TestDataBuffer[7 * 1024];
+		auto TestDataSize = PopH264_GetTestData(TestDataName, TestDataBuffer, std::size(TestDataBuffer));
+		if (TestDataSize > std::size(TestDataBuffer))
+			throw std::runtime_error("Buffer for test data not big enough");
+		auto TestDataArray = GetRemoteArray(TestDataBuffer, TestDataSize, TestDataSize);
+		TestData.PushBackArray(TestDataArray);
+	}
+
+	//auto* Options = "{\"Decoder\":\"Broadway\"}";
+	auto* Options = "{}";
 	char ErrorBuffer[1024] = { 0 };
 	auto Handle = PopH264_CreateDecoder(Options,ErrorBuffer,std::size(ErrorBuffer));
 
-	auto Result = PopH264_PushData( Handle, TestData, TestDataSize, 0 );
+	auto Result = PopH264_PushData( Handle, TestData.GetArray(), TestData.GetDataSize(), 0 );
 	if ( Result < 0 )
 		throw std::runtime_error("DecoderTest: PushData error");
 	
@@ -198,7 +225,7 @@ void EncoderYuv8_88Test(const char* EncoderName="")
 	
 int main()
 {
-	EncoderYuv8_88Test("");
+	//EncoderYuv8_88Test("");
 
 #if defined(TEST_ASSETS)
 	MakeGreyscalePng("PopH264Test_GreyscaleGradient.png");
@@ -210,7 +237,11 @@ int main()
 
 	try
 	{
-		DecoderTest("RainbowGradient.h264",CompareRainbow);
+		//DecoderTest("RainbowGradient.h264", CompareRainbow);
+		DecoderTest("D:/ER_ExtendLeanPoints/Assets/Front TrueDepth Camera_Greyscale.h264", nullptr);
+		//DecoderTest("D:/ER_ExtendLeanPoints/Assets/Front TrueDepth Camera_DepthFloatMetres.h264", nullptr);
+		//DecoderTest("RainbowGradient.h264", CompareRainbow);
+		//DecoderTest("RainbowGradient.h264",CompareRainbow);
 	}
 	catch (std::exception& e)
 	{
