@@ -68,8 +68,9 @@ jobs:
       - name: Apple
         id: Apple
         if: matrix.config.os == 'macOS'
-        uses: NewChromantics/PopAction_BuildApple@v2
+        uses: NewChromantics/PopAction_BuildApple@v1
         with:
+          BuildScheme: ${{ env.project }}_Universal
           project: ${{ env.project }}
           
       - name: Linux
