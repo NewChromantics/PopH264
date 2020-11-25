@@ -14,8 +14,6 @@
 				BF51B8CA256A7E0E004DE4C7 /* ShellScript */,
 			);
 			dependencies = (
-				BF51B8C7256A7E09004DE4C7 /* PBXTargetDependency */,
-				BF51B8C9256A7E09004DE4C7 /* PBXTargetDependency */,
 			);
 			name = PopH264_Universal;
 			productName = PopH264Aggregate;
@@ -126,20 +124,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		BF51B8C6256A7E09004DE4C7 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = BF4A6A0C1EA16D7C00613A64 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = BF151FD82384786600A70EBF;
-			remoteInfo = PopH264_Ios;
-		};
-		BF51B8C8256A7E09004DE4C7 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = BF4A6A0C1EA16D7C00613A64 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = BF459CD421F7D5C700CED59D;
-			remoteInfo = PopH264_Osx;
-		};
 		BFC4717D244750E200A2DA70 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = BF4A6A0C1EA16D7C00613A64 /* Project object */;
@@ -1078,16 +1062,6 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		BF51B8C7256A7E09004DE4C7 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = BF151FD82384786600A70EBF /* PopH264_Ios */;
-			targetProxy = BF51B8C6256A7E09004DE4C7 /* PBXContainerItemProxy */;
-		};
-		BF51B8C9256A7E09004DE4C7 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = BF459CD421F7D5C700CED59D /* PopH264_Osx */;
-			targetProxy = BF51B8C8256A7E09004DE4C7 /* PBXContainerItemProxy */;
-		};
 		BFC4717E244750E200A2DA70 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = BF459CD421F7D5C700CED59D /* PopH264_Osx */;
