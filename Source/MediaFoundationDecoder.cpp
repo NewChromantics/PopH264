@@ -63,6 +63,9 @@ void MediaFoundation::TDecoder::SetInputFormat()
 
 bool MediaFoundation::TDecoder::DecodeNextPacket()
 {
+	//	try and pop even if we dont push data in, in case bail early
+	PopFrames();
+
 	Array<uint8_t> Nalu;
 	if (!PopNalu(GetArrayBridge(Nalu)))
 		return false;
@@ -76,23 +79,37 @@ bool MediaFoundation::TDecoder::DecodeNextPacket()
 
 	bool PushData = true;
 
-	if (NaluType == H264NaluContent::SequenceParameterSet)
+	//	skip some packets
+	static bool SetSpsOnce = true;
+	static bool SkipIfNotSpsSent = true;
+
+	switch (NaluType)
 	{
-		static bool SpsSet = false;
-		if (SpsSet)return true;
-		SpsSet = true;
-	}
-	if (NaluType == H264NaluContent::PictureParameterSet)
-	{
-		static bool SpsSet = false;
-		if (SpsSet)return true;
-		SpsSet = true;
-	}
-	if (NaluType == H264NaluContent::SupplimentalEnhancementInformation)
-	{
-		static bool SpsSet = false;
-		if (SpsSet)return true;
-		SpsSet = true;
+	case H264NaluContent::SequenceParameterSet:
+		if (mSpsSet && SetSpsOnce)
+			PushData = false;
+		break;
+
+	case H264NaluContent::PictureParameterSet:
+		if (mPpsSet && SetSpsOnce)
+			PushData = false;
+		break;
+
+	case H264NaluContent::SupplimentalEnhancementInformation:
+		if (mSeiSet && SetSpsOnce)
+			PushData = false;
+		break;
+
+	default:
+		if (SkipIfNotSpsSent)
+		{
+			if (!mSpsSet || !mPpsSet /*|| !mSeiSet*/)
+			{
+				std::Debug << __PRETTY_FUNCTION__ << " skipped " << NaluType << " as we're still waiting for sps/pps" << std::endl;
+				PushData = false;
+			}
+		}
+		break;
 	}
 
 	if (NaluType == H264NaluContent::EndOfStream)
@@ -125,30 +142,60 @@ bool MediaFoundation::TDecoder::DecodeNextPacket()
 		}
 	}
 
-	//	try and pop frames
-	//	todo: other thread
+	//	mark some as pushed
+	switch (NaluType)
 	{
-		bool PopAgain = true;
-		int LoopSafety = 10;
-		while (PopAgain && --LoopSafety > 0)
-		{
-			Array<uint8_t> OutFrame;
-			int64_t PacketNumber = -1;
-			PopAgain = mTransformer->PopFrame(GetArrayBridge(OutFrame), PacketNumber);
+	case H264NaluContent::SequenceParameterSet:
+		mSpsSet = true;
+		break;
 
-			//	no frame
-			if (OutFrame.IsEmpty())
-			{
-				//	try and decode more nalu though!
-				continue;
-			}
+	case H264NaluContent::PictureParameterSet:
+		mPpsSet = true;
+		break;
 
-			auto PixelMeta = mTransformer->GetOutputPixelMeta();
-			SoyPixelsRemote Pixels(OutFrame.GetArray(), OutFrame.GetDataSize(), PixelMeta);
-			OnDecodedFrame(Pixels, PacketNumber);
-		}
+	case H264NaluContent::SupplimentalEnhancementInformation:
+		mSeiSet = true;
+		break;
+
+	default:break;
 	}
+
+	//	pop any frames that have come out in the mean time
+	PopFrames();
 
 	//	even if we didn't get a frame, try to decode again as we processed a packet
 	return true;
+}
+
+//	return number of frames pushed (out)
+//	maybe this can/should be on another thread
+size_t MediaFoundation::TDecoder::PopFrames()
+{
+	size_t FramesPushed = 0;
+	int LoopSafety = 10;
+	bool PopAgain = true;
+	while (PopAgain && --LoopSafety > 0)
+	{
+		Array<uint8_t> OutFrame;
+		int64_t PacketNumber = -1;
+		try
+		{
+			PopAgain = mTransformer->PopFrame(GetArrayBridge(OutFrame), PacketNumber);
+		}
+		catch (std::exception& e)
+		{
+			std::Debug << __PRETTY_FUNCTION__ << " exception " << e.what() << std::endl;
+			return FramesPushed;
+		}
+		
+		//	no frame
+		if (OutFrame.IsEmpty())
+			return FramesPushed;
+		
+		auto PixelMeta = mTransformer->GetOutputPixelMeta();
+		SoyPixelsRemote Pixels(OutFrame.GetArray(), OutFrame.GetDataSize(), PixelMeta);
+		OnDecodedFrame(Pixels, PacketNumber);
+		FramesPushed++;
+	}
+	return FramesPushed;
 }

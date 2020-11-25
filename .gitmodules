@@ -25,3 +25,6 @@
 [submodule "Unity/PopH264/Assets/PopUnityAndroidZipReader"]
 	path = Unity/PopH264/Assets/PopUnityAndroidZipReader
 	url = https://github.com/NewChromantics/PopUnityAndroidZipReader.git
+[submodule "TestData"]
+	path = TestData
+	url = https://github.com/NewChromantics/PopH264TestData.git

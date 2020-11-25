@@ -21,10 +21,18 @@ public:
 
 private:
 	virtual bool	DecodeNextPacket() override;
-	
+	size_t			PopFrames();
+
 	void			SetInputFormat();
 
 private:
 	std::shared_ptr<TTransformer>	mTransformer;
 	uint64_t		mPacketNumber = 0;		//	counter number to go with decoding nalus, this needs to move to base class and sync meta
+	
+	//	gr: only push SPS once per stream
+	//	todo: handle changing SPS/PPS mid-stream, but currently I think this breaks things a bit
+	//		maybe need to reset output format?
+	bool			mSpsSet = false;
+	bool			mPpsSet = false;
+	bool			mSeiSet = false;
 };
