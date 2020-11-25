@@ -25,7 +25,8 @@ namespace PopH264
 	//	1.2.15	Added KeyFrameFrequency option. AVF now encodes timestamps/framenumbers better producing much smaller packets
 	//	1.2.16	Nvidia encoder now outputting input meta
 	//	1.3.0	Decoder now created with Json. EnumDecoders added
-	const Soy::TVersion	Version(1,3,0);
+	//	1.3.1	Mediafoundation decoder working properly 
+	const Soy::TVersion	Version(1,3,1);
 }
 
 
