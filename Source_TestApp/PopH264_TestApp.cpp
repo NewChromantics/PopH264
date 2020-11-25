@@ -36,15 +36,14 @@ typedef void CompareFunc_t(const char* MetaJson,uint8_t* Plane0,uint8_t* Plane1,
 
 //	fopen_s is a ms specific "safe" func, so provide an alternative
 #if !defined(TARGET_WINDOWS)
-errno_t fopen_s(FILE **f, const char *name, const char *mode) 
+int fopen_s(FILE **f, const char *name, const char *mode) 
 {
-	errno_t ret = 0;
 	assert(f);
 	*f = fopen(name, mode);
-	/* Can't be sure about 1-to-1 mapping of errno and MS' errno_t */
+	//	Can't be sure about 1-to-1 mapping of errno and MS' errno_t
 	if (!*f)
-		ret = errno;
-	return ret;
+		return errno;
+	return 0;
 }
 #endif
 
