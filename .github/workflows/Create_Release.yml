@@ -68,8 +68,8 @@ jobs:
       - name: Apple
         id: Apple
         if: matrix.config.os == 'macOS'
-        # tsdk: set to aviod a cache? where is this? can we clean it?
-        uses: NewChromantics/PopAction_BuildApple@v1.0.4
+        # tsdk: set specific version to aviod a cache? where is this? can we clean it?
+        uses: NewChromantics/PopAction_BuildApple@v1.0.5
         with:
           BuildScheme: ${{ env.project }}_Universal
           project: ${{ env.project }}
