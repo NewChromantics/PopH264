@@ -2,6 +2,36 @@ Documentation
 =========================
 The bulk of the API documentation is in PopH264.h
 
+Installation
+===========================
+
+Unity
+--------------------
+Install as a unity package using their scoped registry system;
+- In your project's `ProjectName/Packages/manifest.json` add
+```
+"scopedRegistries": [
+    {
+      "name": "New Chromantics Packages",
+      "url": "https://npm.pkg.github.com/@newchromantics",
+      "scopes": [
+        "com.newchromantics"
+      ]
+    }
+  ]
+```
+- Generate a github PAT (a personal access token in your github user-settings)
+- In your user directory (`~` on mac) add a `.upmconfig.toml` file and add an entry
+```
+[npmAuth."https://npm.pkg.github.com/@newchromantics"]
+token = "your_personal_access_token"
+email = "you@youremail.com"
+alwaysAuth = true
+```
+- ~Add `.npmrc` to `ProjectName/Packages/`~ it seems an `.npmrc`(npm authorisation file) file is not required
+- Add `"com.newchromantics.poph264": "1.3.3",` to `ProjectName/Packages/manifest.json`
+- Thanks to Peter Law http://enigma23.co.uk/blog/how-to-setup-github-packages-and-unity/
+
 
 Build Status
 ==========================
