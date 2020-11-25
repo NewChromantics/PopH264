@@ -1,9 +1,11 @@
 {
-  "name": "@newchromantics/poph264",
+  "name":"com.newchromantics.poph264",
+  "oldname": "@newchromantics/poph264",
+  "displayName": "PopH264",
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com/"
+    "registry": "https://npm.pkg.github.com/@newchromantics"
   },
-  "version": "1.3.1",
+  "version": "1.3.2",
   "description": "H264 decoder & encoder CAPI library for various platforms",
   "main": "index.js",
   "scripts": {
@@ -14,7 +16,12 @@
     "url": "git+https://github.com/NewChromantics/PopH264.git"
   },
   "keywords": [],
-  "author": "graham@newchromantics.com",
+  "author":
+  {
+    "name" : "New Chromantics", 
+    "email" : "graham@newchromantics.com",
+    "url" : "https://github.com/NewChromantics/PopUnitySockets"
+  },
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/NewChromantics/PopH264/issues"
