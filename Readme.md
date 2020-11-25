@@ -26,6 +26,7 @@ Any empty platforms are generally planned, but not yet implemented.
 | Linux x64 ubuntu | Broadway        |                   | x264              |                   |              |
 | Osx            | Broadway          | AvFoundation      | x264              | AvFoundation      |              |
 | Ios            | Broadway          | AvFoundation      | x264              | AvFoundation      |              |
+| Ios Simulator  | Untested          | Untested          | Untested          | Untested          |              |
 | Android armeabi-v7a | Broadway     |                   |                   |                   |              |
 | Android x86    | Broadway          |                   |                   |                   |              |
 | Android x86_64 | Broadway          |                   |                   |                   |              |
@@ -57,7 +58,7 @@ Windows
 Osx & Ios
 ---------------
 - Open xcodeprojects and build
-
+- Use `PopH264_Universal` target to build `PopH264.xcframework` which contains OSX, IOS and IOS simulator frameworks.
 
 Linux
 ----------------
