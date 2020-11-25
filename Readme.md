@@ -9,7 +9,7 @@ Unity
 --------------------
 Install as a unity package using their scoped registry system;
 - In your project's `ProjectName/Packages/manifest.json` add
-- ```"scopedRegistries": [
+```"scopedRegistries": [
     {
       "name": "New Chromantics Packages",
       "url": "https://npm.pkg.github.com/@newchromantics",
@@ -21,7 +21,7 @@ Install as a unity package using their scoped registry system;
 ```
 - Generate a github PAT (a personal access token in your github user-settings)
 - In your user directory (`~` on mac) add a `.upmconfig.toml` file and add an entry
-- ```[npmAuth."https://npm.pkg.github.com/@newchromantics"]
+```[npmAuth."https://npm.pkg.github.com/@newchromantics"]
 token = "your_personal_access_token"
 email = "you@youremail.com"
 alwaysAuth = true
