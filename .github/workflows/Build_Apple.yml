@@ -7,17 +7,17 @@ on:
   push:
     branches:
       - master
-      - '*Test*'
+      - '*Test*' 
 
 jobs:
   Test:
     name: Universal
     runs-on: macOS
-
     steps:
       - uses: actions/checkout@v2
         with:
           submodules: "recursive"
-      - uses: NewChromantics/PopAction_BuildApple@v2
+      - uses: NewChromantics/PopAction_BuildApple@v1.0.4
         with:
+          BuildScheme: ${{ env.project }}_Universal
           project: ${{ env.project }}
