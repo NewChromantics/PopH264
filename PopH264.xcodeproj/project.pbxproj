@@ -949,11 +949,11 @@
 			outputFileListPaths = (
 			);
 			outputPaths = (
-				./build/PopH264.xcframework,
+				"${PRODUCT_FILENAME}",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "chmod +x ./Source_Ios/BuildUniversal.sh\n./Source_Ios/BuildUniversal.sh ${PROJECT_NAME}\n";
+			shellScript = "chmod +x ./Source_Ios/BuildUniversal.sh\n./Source_Ios/BuildUniversal.sh ${PROJECT_NAME} ${PRODUCT_FILENAME}\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -1326,7 +1326,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_FILENAME = "./Build/${PRODUCT_NAME}";
+				PRODUCT_NAME = "$(PROJECT_NAME).xcframework";
 			};
 			name = Debug;
 		};
@@ -1334,7 +1335,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_FILENAME = "./Build/${PRODUCT_NAME}";
+				PRODUCT_NAME = "$(PROJECT_NAME).xcframework";
 			};
 			name = Release;
 		};
