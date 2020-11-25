@@ -34,6 +34,20 @@ void DebugPrint(const std::string& Message)
 typedef void CompareFunc_t(const char* MetaJson,uint8_t* Plane0,uint8_t* Plane1,uint8_t* Plane2);
 
 
+//	fopen_s is a ms specific "safe" func, so provide an alternative
+#if !defined(TARGET_WINDOWS)
+errno_t fopen_s(FILE **f, const char *name, const char *mode) 
+{
+	errno_t ret = 0;
+	assert(f);
+	*f = fopen(name, mode);
+	/* Can't be sure about 1-to-1 mapping of errno and MS' errno_t */
+	if (!*f)
+		ret = errno;
+	return ret;
+}
+#endif
+
 bool LoadDataFromFilename(const char* Filename,ArrayBridge<uint8_t>&& Data)
 {
 	FILE* File = nullptr;
