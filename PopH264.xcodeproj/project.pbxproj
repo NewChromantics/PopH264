@@ -949,11 +949,11 @@
 			outputFileListPaths = (
 			);
 			outputPaths = (
-				"${PRODUCT_FILENAME}",
+				"${FULL_PRODUCT_NAME}",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "chmod +x ./Source_Ios/BuildUniversal.sh\n./Source_Ios/BuildUniversal.sh ${PROJECT_NAME} ${PRODUCT_FILENAME}\n";
+			shellScript = "chmod +x ./Source_Ios/BuildUniversal.sh\n./Source_Ios/BuildUniversal.sh ${PROJECT_NAME} ${FULL_PRODUCT_NAME}\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
