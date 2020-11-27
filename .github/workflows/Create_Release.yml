@@ -112,8 +112,8 @@ jobs:
         run: |
          echo Copying files into $PACKAGE_DIR
          echo Project is ${{ env.project }}
-         echo Project2 is $project
          cp Readme.md $PACKAGE_DIR
+         cp -R Unity/PopH264/Assets/PopH264/. $PACKAGE_DIR
         env:
           PACKAGE_DIR: ${{ env.project }}.Package/
 
