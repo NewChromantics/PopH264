@@ -1326,7 +1326,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
-				PRODUCT_FILENAME = "./Build/${PRODUCT_NAME}";
+				FULL_PRODUCT_NAME = "${PRODUCT_NAME}";
 				PRODUCT_NAME = "$(PROJECT_NAME).xcframework";
 			};
 			name = Debug;
@@ -1335,7 +1335,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
-				PRODUCT_FILENAME = "./Build/${PRODUCT_NAME}";
+				FULL_PRODUCT_NAME = "${PRODUCT_NAME}";
 				PRODUCT_NAME = "$(PROJECT_NAME).xcframework";
 			};
 			name = Release;
