@@ -258,7 +258,8 @@ public static class PopH264
 			//	maybe don't need to waste time checking any more, but certainly skip ultra small ones
 			if (Frame.Bytes.Length < 4)
 				return;
-
+			
+			/*	gr: removed this check for now to remove dependencies
 			try
 			{
 				var NaluHeaderLength = PopX.H264.GetNaluHeaderSize(Frame.Bytes);
@@ -277,6 +278,7 @@ public static class PopH264
 			{
 				Debug.LogException(e);
 			}
+			*/
 		}
 
 		public int PushFrameData(FrameInput Frame)
