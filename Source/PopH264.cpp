@@ -26,7 +26,8 @@ namespace PopH264
 	//	1.2.16	Nvidia encoder now outputting input meta
 	//	1.3.0	Decoder now created with Json. EnumDecoders added
 	//	1.3.1	Mediafoundation decoder working properly 
-	const Soy::TVersion	Version(1,3,1);
+	//	1.3.x	Meta versions for packaging
+	const Soy::TVersion	Version(1,3,7);
 }
 
 
