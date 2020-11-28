@@ -4,8 +4,6 @@ using System.Runtime.InteropServices;		// required for DllImport
 using System;								// requred for IntPtr
 using System.Text;
 using System.Collections.Generic;
-using PopX;     //	for PopX.PixelFormat, replace this and provide your own pixelformat if you want to remove the dependency
-
 
 
 /// <summary>
@@ -40,6 +38,34 @@ public static class PopH264
 
 	[DllImport(PluginName, CallingConvention = CallingConvention.Cdecl)]
 	private static extern int	PopH264_PopFrame(int Instance,byte[] Plane0,int Plane0Size,byte[] Plane1,int Plane1Size,byte[] Plane2,int Plane2Size);
+
+
+	//	gr: these numbers don't matter in PopH264, need a better way to map these across depedencies
+	//		other than matching strings
+	//	for use with PopYuv shader, these enum values should match the shader
+	public enum PixelFormat
+	{
+		Debug			=999,
+		Invalid			=0,
+		Greyscale		=1,
+		RGB				=2,
+		RGBA			=3,
+		BGRA			=4,
+		BGR				=5,
+		YYuv_8888_Full	=6,
+		YYuv_8888_Ntsc	=7,
+		Depth16mm		=8,
+		Chroma_U		=9,
+		Chroma_V		=10,
+		ChromaUV_88		=11,
+		ChromaVU_88		=12,
+		Luma_Ntsc		=13,
+
+
+		ChromaU_8 = Chroma_U,
+		ChromaV_8 = Chroma_V,
+	}
+
 
 	[System.Serializable]
 	public struct PlaneMeta
