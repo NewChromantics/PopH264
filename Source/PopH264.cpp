@@ -27,7 +27,7 @@ namespace PopH264
 	//	1.3.0	Decoder now created with Json. EnumDecoders added
 	//	1.3.1	Mediafoundation decoder working properly 
 	//	1.3.x	Meta versions for packaging
-	const Soy::TVersion	Version(1,3,8);
+	const Soy::TVersion	Version(1,3,9);
 }
 
 
