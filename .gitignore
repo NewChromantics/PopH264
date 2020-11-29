@@ -5,9 +5,6 @@ Unity/**/Temp/
 Unity/**/*.sln
 Unity/**/*.csproj
 xcuserdata/
-Unity/**/holobuild/
-Unity/**/UWP/
-Unity/**/holobuild/
 **/.vs/
 **/*.db
 **/*.opendb
@@ -15,7 +12,6 @@ Unity/**/holobuild/
 
 # build/project temp files
 *.visualstudio/x64/
-*.Android/libs/armeabi-v7a/
 *.Android/libs/**/*.so
 *.Lumin/release_ml1/
 *.Android/obj/
@@ -26,19 +22,6 @@ build-iphoneos/
 build-iphonesimulator/
 
 # built binaries, this list should be a reference to where binaries go
-Unity/PopH264/Assets/PopH264/PopH264.dll
-Unity/PopH264/Assets/PopH264/PopH264.pdb
-Unity/PopH264/Assets/PopH264/PopH264.Uwp.dll
-Unity/PopH264/Assets/PopH264/PopH264.bundle
-Unity/PopH264/Assets/PopH264/PopH264\.bundle/
-Unity/PopH264/Assets/PopH264/PopH264_Osx.framework/
-Unity/PopH264/Assets/PopH264/Lumin/libPopH264.so
-Unity/PopH264/Assets/PopH264/Android/**/*.so
-Unity/PopH264/Assets/PopH264/PopH264.exp
-Unity/PopH264/Assets/PopH264/PopH264.h
-Unity/PopH264/Assets/PopH264/PopH264.lib
-Unity/PopH264/Assets/PopH264/PopH264_TestApp.*
-Unity/PopH264/Assets/PopH264/x264.dll
 
 
 # visual studio temporary files
