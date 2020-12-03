@@ -581,15 +581,14 @@ bool Android::TDecoder::DecodeNextPacket()
 void Android::TDecoder::GetNextInputData(ArrayBridge<uint8_t>&& PacketBuffer)
 {
 	auto& Nalu = PacketBuffer;
+	PopH264::FrameNumber_t FrameNumber=0;
 	//	input thread wants some data to process
-	if (!PopNalu(GetArrayBridge(Nalu)))
+	if (!PopNalu(GetArrayBridge(Nalu),FrameNumber))
 	{
 		std::stringstream Error;
 		Error << "GetNextInputData thread, no nalu ready ";//(" << GetPendingDataSize() <<" bytes ready pending)";
 		throw Soy::AssertException(Error);
 	}
-
-	auto PacketNumber = mPacketNumber++;
 
 	//	update header packets
 	auto NaluType = H264::GetPacketType(GetArrayBridge(Nalu));

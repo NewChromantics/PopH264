@@ -157,7 +157,6 @@ private:
 	std::shared_ptr<JniMediaFormat>		mFormat;	//	format for codec!
 	std::shared_ptr<TJniObject>			mCodec;
 	std::shared_ptr<TSurfaceTexture>	mSurfaceTexture;
-	size_t			mPacketNumber = 0;
 	
 	std::function<void()>	mOnStartThread;
 	TInputThread	mInputThread;
