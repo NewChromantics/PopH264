@@ -125,7 +125,8 @@ void Broadway::IsOkay(H264SwDecRet Result,const char* Context)
 bool Broadway::TDecoder::DecodeNextPacket()
 {
 	Array<uint8_t> Nalu;
-	if ( !PopNalu( GetArrayBridge(Nalu) ) )
+	PopH264::FrameNumber_t FrameNumber = 0;
+	if ( !PopNalu( GetArrayBridge(Nalu), FrameNumber ) )
 		return false;
 	
 	const unsigned IntraGrayConcealment = 0;
@@ -138,7 +139,7 @@ bool Broadway::TDecoder::DecodeNextPacket()
 	if ( Input.dataLen == 0 )
 		return false;
 
-	Input.picId = 0;
+	Input.picId = FrameNumber;
 	Input.intraConcealmentMethod = IntraGrayConcealment;
 	
 	H264SwDecOutput Output;
@@ -279,6 +280,8 @@ void Broadway::TDecoder::OnMeta(const H264SwDecInfo& Meta)
 
 void Broadway::TDecoder::OnPicture(const H264SwDecPicture& Picture,const H264SwDecInfo& Meta,SoyTime DecodeDuration)
 {
+	auto FrameNumber = Picture.picId;
+	
 	//		headers just say
 	//	u32 *pOutputPicture;    /* Pointer to the picture, YUV format       */
 	auto Format = SoyPixelsFormat::Yuv_8_8_8;
@@ -293,7 +296,7 @@ void Broadway::TDecoder::OnPicture(const H264SwDecPicture& Picture,const H264SwD
 	auto* Pixels8 = reinterpret_cast<uint8_t*>(Picture.pOutputPicture);
 	SoyPixelsRemote Pixels( Pixels8, DataSize, PixelMeta );
 	
-	OnDecodedFrame( Pixels );
+	OnDecodedFrame( Pixels, FrameNumber );
 }
 
 

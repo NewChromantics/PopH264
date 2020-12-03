@@ -2,22 +2,15 @@
 #include "SoyH264.h"
 
 
-PopH264::TDecoder::TDecoder(std::function<void(const SoyPixelsImpl&,size_t)> OnDecodedFrame) :
+PopH264::TDecoder::TDecoder(std::function<void(const SoyPixelsImpl&,FrameNumber_t)> OnDecodedFrame) :
 	mOnDecodedFrame	( OnDecodedFrame )
 {
 }
 
-void PopH264::TDecoder::OnDecodedFrame(const SoyPixelsImpl& Pixels)
-{
-	auto FrameNumber = mPendingFrameNumbers.PopAt(0);
-	OnDecodedFrame( Pixels, FrameNumber );
-}
 
-
-void PopH264::TDecoder::OnDecodedFrame(const SoyPixelsImpl& Pixels,size_t FrameNumber)
+void PopH264::TDecoder::OnDecodedFrame(const SoyPixelsImpl& Pixels,FrameNumber_t FrameNumber)
 {
-	//	check against pending frame numbers?
-	mPendingFrameNumbers.Remove(FrameNumber);
+	//	todo: check against input frame numbers to make sure decoder is outputting same as it inputs
 	mOnDecodedFrame( Pixels, FrameNumber );
 }
 
@@ -40,15 +33,18 @@ void PopH264::TDecoder::PushEndOfStream()
 	Decode( GetArrayBridge(DataArray), 0 );
 }
 
-void PopH264::TDecoder::Decode(ArrayBridge<uint8_t>&& PacketData,size_t FrameNumber)
+void PopH264::TDecoder::Decode(ArrayBridge<uint8_t>&& PacketData,FrameNumber_t FrameNumber)
 {
+	//	gr: maybe we should split when we PopNalu to move this work away from caller thread
+	auto PushNalu = [&](const ArrayBridge<uint8_t>&& Nalu)
 	{
 		std::lock_guard<std::mutex> Lock(mPendingDataLock);
-		mPendingData.PushBackArray(PacketData);
-		//	todo: proper data<->number relationships, but we also need to cope with
-		//		when we don't have this
-		mPendingFrameNumbers.PushBack(FrameNumber);
-	}
+		std::shared_ptr<TInputNaluPacket> pPacket( new TInputNaluPacket() );
+		pPacket->mData.Copy(Nalu);
+		pPacket->mFrameNumber = FrameNumber;
+		mPendingDatas.PushBack(pPacket);
+	};
+	H264::SplitNalu( PacketData, PushNalu );
 	
 	while ( true )
 	{
@@ -59,81 +55,42 @@ void PopH264::TDecoder::Decode(ArrayBridge<uint8_t>&& PacketData,size_t FrameNum
 }
 
 
-void PopH264::TDecoder::UnpopNalu(ArrayBridge<uint8_t>&& Buffer)
+void PopH264::TDecoder::UnpopNalu(ArrayBridge<uint8_t>&& Nalu,FrameNumber_t FrameNumber)
 {
 	//	put-back data at the start of the queue
-	//	todo: if pending data offset size is > buffersize, can I always just reduce this?
-	InsertPendingData(Buffer);
+	//auto PushNalu = [&](const ArrayBridge<uint8_t>&& Nalu)
+	{
+		std::lock_guard<std::mutex> Lock(mPendingDataLock);
+		std::shared_ptr<TInputNaluPacket> pPacket( new TInputNaluPacket() );
+		pPacket->mData.Copy(Nalu);
+		pPacket->mFrameNumber = FrameNumber;
+		mPendingDatas.PushBack(pPacket);
+	};
 }
 
 
-bool PopH264::TDecoder::PopNalu(ArrayBridge<uint8_t>&& Buffer)
+bool PopH264::TDecoder::PopNalu(ArrayBridge<uint8_t>&& Buffer,FrameNumber_t& FrameNumber)
 {
-	std::lock_guard<std::mutex> Lock( mPendingDataLock );
-	auto* _PendingDataPtr = &mPendingData[mPendingOffset];
-	auto PendingDataSize = mPendingData.GetDataSize() - mPendingOffset;
-	auto PendingDataArray = GetRemoteArray(_PendingDataPtr, PendingDataSize);
-
-	
-	auto DataSize = H264::GetNextNaluOffset( GetArrayBridge(PendingDataArray) );
-	//	no next nal yet
-	if ( DataSize == 0 )
+	//	gr:could returnthis now and avoid the copy & alloc at caller
+	std::shared_ptr<TInputNaluPacket> NextPacket;
 	{
-		if ( !mPendingDataFinished )
-			return false;
-
-		//	we're out of data, so pop the remaining data
-		DataSize = PendingDataSize;
+		std::lock_guard<std::mutex> Lock( mPendingDataLock );
+		if ( mPendingDatas.IsEmpty() )
+		{
+			//	expecting more data to come
+			if ( !mPendingDataFinished )
+				return false;
 		
-		//	no more data, finished!
-		if ( DataSize == 0 )
+			//	no more data ever
 			return false;
+		}
+		NextPacket = mPendingDatas.PopAt(0);
 	}
-	
-	auto* Data = PendingDataArray.GetArray();
-	auto DataArray = GetRemoteArray( Data, DataSize );
-	
-	Buffer.Copy(DataArray);
-	RemovePendingData( DataSize );
+	Buffer.Copy( NextPacket->mData );
+	FrameNumber = NextPacket->mFrameNumber;
 	return true;
 }
 
-void PopH264::TDecoder::RemovePendingData(size_t Size)
-{
-	//	this function is expensive because of giant memmoves when we cut a small amount of data
-	//	we should use a RingArray, but for now, have a start offset, and remove when the offset
-	//	gets over a certain size
-
-	//	only called from this class, so should be locked
-	///std::lock_guard<std::mutex> Lock(mPendingDataLock);
-	mPendingOffset += Size;
-	static int KbThreshold = 1024 * 5;
-	if ( mPendingOffset > KbThreshold * 1024 )
-	{
-		mPendingData.RemoveBlock(0, mPendingOffset);
-		mPendingOffset = 0;
-	}
-}
-
-void PopH264::TDecoder::InsertPendingData(ArrayBridge<uint8_t>& Data)
-{
-	std::lock_guard<std::mutex> Lock(mPendingDataLock);
-
-	//	overwrite the used-data part
-	//	note: can we just reset this? can we ensure this call is always from unpop?
-	uint8_t* Dest = nullptr;
-	auto DataSize = Data.GetDataSize();
-	if (mPendingOffset >= DataSize)
-	{
-		mPendingOffset -= DataSize;
-		Dest = &mPendingData[mPendingOffset];
-	}
-	else
-	{
-		Dest = mPendingData.InsertBlock(mPendingOffset, DataSize);
-	}
-	memcpy(Dest, Data.GetArray(), DataSize);
-}
 
 
 

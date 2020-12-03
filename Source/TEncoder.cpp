@@ -22,26 +22,7 @@ void PopH264::TEncoder::OnOutputPacket(TPacket& Packet)
 		mOnOutputPacket(NextPacket);
 	};
 
-	//	split up packet if there are multiple nalus
-	size_t PrevNalu = 0;
-	while (true)
-	{
-		auto PacketData = GetArrayBridge(*Packet.mData).GetSubArray(PrevNalu);
-		auto NextNalu = H264::GetNextNaluOffset(GetArrayBridge(PacketData));
-		if (NextNalu == 0)
-		{
-			//	everything left
-			OutputPacket(GetArrayBridge(PacketData));
-			break;
-		}
-		else
-		{
-			auto SubArray = GetArrayBridge(PacketData).GetSubArray(0, NextNalu);
-			OutputPacket(GetArrayBridge(PacketData));
-			PrevNalu += NextNalu;
-		}
-	}
-	
+	H264::SplitNalu( GetArrayBridge(*Packet.mData), OutputPacket );
 }
 
 

@@ -10,38 +10,43 @@ class SoyPixelsImpl;
 namespace PopH264
 {
 	class TDecoder;
+	
+	class TInputNaluPacket;
+	typedef uint32_t FrameNumber_t;
 }
+
+class PopH264::TInputNaluPacket
+{
+public:
+	Array<uint8_t>	mData;
+	uint32_t		mFrameNumber = 0;	//	warning, as we've split data into multiple nalu-packets per-frame, this is NOT unique
+};
+
 
 class PopH264::TDecoder
 {
 public:
-	TDecoder(std::function<void(const SoyPixelsImpl&,size_t)> OnDecodedFrame);
+	TDecoder(std::function<void(const SoyPixelsImpl&,FrameNumber_t)> OnDecodedFrame);
 	
-	void			Decode(ArrayBridge<uint8_t>&& PacketData,size_t FrameNumber);
+	void			Decode(ArrayBridge<uint8_t>&& PacketData,FrameNumber_t FrameNumber);
 
 	//	gr: this has a callback because of flushing old packets. Need to overhaul the framenumber<->packet relationship
 	void			PushEndOfStream();
 	
 protected:
-	void			OnDecodedFrame(const SoyPixelsImpl& Pixels);
-	void			OnDecodedFrame(const SoyPixelsImpl& Pixels,size_t FrameNumber);
+	void			OnDecodedFrame(const SoyPixelsImpl& Pixels,FrameNumber_t FrameNumber);
 	void			OnDecodedEndOfStream();
 	virtual bool	DecodeNextPacket()=0;	//	returns true if more data to proccess
 	
-	bool			HasPendingData()		{	return !mPendingData.IsEmpty();	}
-	size_t			GetPendingDataSize()	{	return mPendingData.GetSize() - mPendingOffset;	}
-	bool			PopNalu(ArrayBridge<uint8_t>&& Buffer);
-	void			UnpopNalu(ArrayBridge<uint8_t>&& Buffer);
-
-private:
-	void			RemovePendingData(size_t Size);
-	void			InsertPendingData(ArrayBridge<uint8_t>& Data);	//	insert data (back) to the start
+	bool			HasPendingData()		{	return !mPendingDatas.IsEmpty();	}
+	bool			PopNalu(ArrayBridge<uint8_t>&& Buffer,FrameNumber_t& FrameNumber);
+	void			UnpopNalu(ArrayBridge<uint8_t>&& Buffer,FrameNumber_t FrameNumber);
 	
 private:
-	std::mutex		mPendingDataLock;
-	size_t			mPendingOffset = 0;		//	to reduce reallocations, we keep an offset where we've read
-	bool			mPendingDataFinished = false;	//	when we know we're at EOS
-	Array<uint8_t>	mPendingData;
-	Array<size_t>	mPendingFrameNumbers;
-	std::function<void(const SoyPixelsImpl&,size_t)>	mOnDecodedFrame;
+	std::mutex				mPendingDataLock;
+	//	this is currently a bit ineffecient (pool for quick fix?) but we need to keep input frame numbers in sync with data
+	Array<std::shared_ptr<TInputNaluPacket>>	mPendingDatas;
+	bool					mPendingDataFinished = false;	//	when we know we're at EOS
+	
+	std::function<void(const SoyPixelsImpl&,FrameNumber_t)>	mOnDecodedFrame;
 };

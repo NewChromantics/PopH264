@@ -499,7 +499,8 @@ void Avf::TDecoder::AllocDecoder()
 bool Avf::TDecoder::DecodeNextPacket()
 {
 	Array<uint8_t> Nalu;
-	if ( !PopNalu( GetArrayBridge(Nalu) ) )
+	PopH264::FrameNumber_t FrameNumber=0;
+	if ( !PopNalu( GetArrayBridge(Nalu), FrameNumber ) )
 		return false;
 
 	//	store latest sps & pps, need to cache these so we can create decoder
@@ -526,9 +527,6 @@ bool Avf::TDecoder::DecodeNextPacket()
 		return true;
 	}
 	
-	//	gr: get this from the pending list
-	auto FrameNumber = mFrameNumber;
-	mFrameNumber++;
 	mDecompressor->Decode( GetArrayBridge(Nalu), FrameNumber );
 	
 	//	if this was an end of stream packet, the decompressor should have flushed, so now

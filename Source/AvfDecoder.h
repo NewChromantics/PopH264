@@ -39,7 +39,6 @@ private:
 	void			OnDecodedFrame(TPixelBuffer& PixelBuffer,SoyTime PresentationTime);
 
 private:
-	size_t							mFrameNumber = 0;
 	std::shared_ptr<TDecompressor>	mDecompressor;
 	Array<uint8_t>					mNaluSps;
 	Array<uint8_t>					mNaluPps;

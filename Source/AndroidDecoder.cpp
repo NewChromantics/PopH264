@@ -585,7 +585,7 @@ void Android::TDecoder::GetNextInputData(ArrayBridge<uint8_t>&& PacketBuffer)
 	if (!PopNalu(GetArrayBridge(Nalu)))
 	{
 		std::stringstream Error;
-		Error << "GetNextInputData thread, no nalu ready (" << GetPendingDataSize() <<" bytes ready pending)";
+		Error << "GetNextInputData thread, no nalu ready ";//(" << GetPendingDataSize() <<" bytes ready pending)";
 		throw Soy::AssertException(Error);
 	}
 
