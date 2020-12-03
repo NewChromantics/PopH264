@@ -85,7 +85,8 @@ void DecoderTest(const char* TestDataName,CompareFunc_t* Compare)
 	char ErrorBuffer[1024] = { 0 };
 	auto Handle = PopH264_CreateDecoder(Options,ErrorBuffer,std::size(ErrorBuffer));
 
-	auto Result = PopH264_PushData( Handle, TestData.GetArray(), TestData.GetDataSize(), 0 );
+	int FirstFrameNumber = 9999;
+	auto Result = PopH264_PushData( Handle, TestData.GetArray(), TestData.GetDataSize(), FirstFrameNumber );
 	if ( Result < 0 )
 		throw std::runtime_error("DecoderTest: PushData error");
 	
@@ -93,6 +94,7 @@ void DecoderTest(const char* TestDataName,CompareFunc_t* Compare)
 	//PopH264_PushData(Handle, TestData, TestDataSize, 0);
 	
 	//	flush
+	//	gr: frame number shouldn't matter here? clarify the API
 	PopH264_PushData(Handle, nullptr, 0, 0);
 //	PopH264_PushData(Handle, nullptr, 0, 0);
 	
@@ -104,16 +106,19 @@ void DecoderTest(const char* TestDataName,CompareFunc_t* Compare)
 		uint8_t Plane0[256*256];
 		uint8_t Plane1[256*256];
 		uint8_t Plane2[256*256];
-		auto FrameTime = PopH264_PopFrame(Handle, Plane0, std::size(Plane0), Plane1, std::size(Plane1), Plane2, std::size(Plane2) );
+		auto FrameNumber = PopH264_PopFrame(Handle, Plane0, std::size(Plane0), Plane1, std::size(Plane1), Plane2, std::size(Plane2) );
 		std::stringstream Error;
-		Error << "Decoded testdata; " << MetaJson << " frame=" << FrameTime;
+		Error << "Decoded testdata; " << MetaJson << " FrameNumber=" << FrameNumber << " Should be " << FirstFrameNumber;
 		DebugPrint(Error.str());
-		bool IsValid = FrameTime >= 0;
+		bool IsValid = FrameNumber >= 0;
 		if ( !IsValid )
 		{
 			std::this_thread::sleep_for(std::chrono::milliseconds(500));
 			continue;
 		}
+		
+		if ( FrameNumber != FirstFrameNumber )
+			throw std::runtime_error("Wrong frame number from decoder");
 		
 		Compare( MetaJson, Plane0, Plane1, Plane2 );
 		break;
@@ -250,8 +255,8 @@ int main()
 
 	try
 	{
-		//DecoderTest("RainbowGradient.h264", CompareRainbow);
-		DecoderTest("D:/ER_ExtendLeanPoints/Assets/Front TrueDepth Camera_Greyscale.h264", nullptr);
+		DecoderTest("RainbowGradient.h264", CompareRainbow);
+		//DecoderTest("D:/ER_ExtendLeanPoints/Assets/Front TrueDepth Camera_Greyscale.h264", nullptr);
 		//DecoderTest("D:/ER_ExtendLeanPoints/Assets/Front TrueDepth Camera_DepthFloatMetres.h264", nullptr);
 		//DecoderTest("RainbowGradient.h264", CompareRainbow);
 		//DecoderTest("RainbowGradient.h264",CompareRainbow);
