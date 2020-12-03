@@ -15,6 +15,22 @@ namespace X264
 }
 
 
+//	without making seperate targets, can't build arm vs intel at the moment, and we don't have arm
+//	builds of x264 (we should move to OpenH264 anyway)
+//	but we still link to x86 x264, linker ignores it, so we get missing symbols 
+#if defined(TARGET_OSX) && !defined(TARGET_ARCH_INTEL64)
+#define NOT_SUPPORTED	{	throw Soy::AssertException("x264 not supported on this architecture");	}
+int	x264_encoder_delayed_frames(x264_t*)	NOT_SUPPORTED;	
+int	x264_encoder_encode( x264_t *, x264_nal_t **pp_nal, int *pi_nal, x264_picture_t *pic_in, x264_picture_t *pic_out )	NOT_SUPPORTED;	
+x264_t*	x264_encoder_open( x264_param_t * )	NOT_SUPPORTED;	
+int	x264_param_apply_profile( x264_param_t *, const char *profile )	NOT_SUPPORTED;	
+int	x264_param_default_preset( x264_param_t *, const char *preset, const char *tune )	NOT_SUPPORTED;	
+int	x264_picture_alloc( x264_picture_t *pic, int i_csp, int i_width, int i_height )	NOT_SUPPORTED;	
+#endif
+
+
+
+
 void X264::IsOkay(int Result, const char* Context)
 {
 	if (Result == 0)
