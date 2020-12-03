@@ -67,11 +67,11 @@ bool MediaFoundation::TDecoder::DecodeNextPacket()
 	PopFrames();
 
 	Array<uint8_t> Nalu;
-	if (!PopNalu(GetArrayBridge(Nalu)))
+	PopH264::FrameNumber_t FrameNumber = 0;
+	if (!PopNalu(GetArrayBridge(Nalu), FrameNumber))
 		return false;
 
 	//	gr: this will change to come from PopNalu to sync with meta
-	auto PacketNumber = mPacketNumber++;
 	SetInputFormat();
 
 	auto NaluType = H264::GetPacketType(GetArrayBridge(Nalu));
@@ -135,10 +135,10 @@ bool MediaFoundation::TDecoder::DecodeNextPacket()
 
 	if (PushData)
 	{
-		if (!mTransformer->PushFrame(GetArrayBridge(Nalu), PacketNumber))
+		if (!mTransformer->PushFrame(GetArrayBridge(Nalu), FrameNumber))
 		{
 			//	data was rejected
-			UnpopNalu(GetArrayBridge(Nalu));
+			UnpopNalu(GetArrayBridge(Nalu), FrameNumber);
 		}
 	}
 
