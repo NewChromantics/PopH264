@@ -28,7 +28,7 @@ namespace PopH264
 	//	1.3.1	Mediafoundation decoder working properly 
 	//	1.3.x	Meta versions for packaging
 	//	1.3.15	Fixed/fixing correct frame number output to match input of decoder
-	const Soy::TVersion	Version(1,3,15);
+	const Soy::TVersion	Version(1,3,16);
 }
 
 
