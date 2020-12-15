@@ -120,7 +120,8 @@ void DecoderTest(const char* TestDataName,CompareFunc_t* Compare)
 		if ( FrameNumber != FirstFrameNumber )
 			throw std::runtime_error("Wrong frame number from decoder");
 		
-		Compare( MetaJson, Plane0, Plane1, Plane2 );
+		if ( Compare )
+			Compare( MetaJson, Plane0, Plane1, Plane2 );
 		break;
 	}
 	
