@@ -405,14 +405,18 @@ MediaFoundation::TContext::TContext()
 
 MediaFoundation::TContext::~TContext()
 {
-	auto Result = MFShutdown();
 	try
 	{
-		IsOkay(Result, "MFShutdown");
+		//auto Result = MFShutdown();
+		//IsOkay(Result, "MFShutdown");
 	}
 	catch (std::exception& e)
 	{
 		std::Debug << e.what() << std::endl;
+	}
+	catch(...)
+	{
+		std::Debug << "unknown exception shutting down mediafoundation" << std::endl;
 	}
 }
 
