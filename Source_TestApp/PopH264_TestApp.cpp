@@ -256,9 +256,9 @@ int main()
 
 	try
 	{
-		DecoderTest("RainbowGradient.h264", CompareRainbow);
-		//DecoderTest("D:/ER_ExtendLeanPoints/Assets/Front TrueDepth Camera_Greyscale.h264", nullptr);
-		//DecoderTest("D:/ER_ExtendLeanPoints/Assets/Front TrueDepth Camera_DepthFloatMetres.h264", nullptr);
+		//DecoderTest("RainbowGradient.h264", CompareRainbow);
+		//DecoderTest("../TestData/Colour.h264", nullptr);
+		DecoderTest("../TestData/Depth.h264", nullptr);
 		//DecoderTest("RainbowGradient.h264", CompareRainbow);
 		//DecoderTest("RainbowGradient.h264",CompareRainbow);
 	}
