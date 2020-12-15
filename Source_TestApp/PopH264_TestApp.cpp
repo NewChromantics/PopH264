@@ -103,9 +103,9 @@ void DecoderTest(const char* TestDataName,CompareFunc_t* Compare)
 	{
 		char MetaJson[1000];
 		PopH264_PeekFrame( Handle, MetaJson, std::size(MetaJson) );
-		uint8_t Plane0[256*256];
-		uint8_t Plane1[256*256];
-		uint8_t Plane2[256*256];
+		static uint8_t Plane0[1024 * 1024];
+		static uint8_t Plane1[1024 * 1024];
+		static uint8_t Plane2[1024 * 1024];
 		auto FrameNumber = PopH264_PopFrame(Handle, Plane0, std::size(Plane0), Plane1, std::size(Plane1), Plane2, std::size(Plane2) );
 		std::stringstream Error;
 		Error << "Decoded testdata; " << MetaJson << " FrameNumber=" << FrameNumber << " Should be " << FirstFrameNumber;
