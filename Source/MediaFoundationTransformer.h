@@ -48,7 +48,7 @@ class IMFMediaType;
 class MediaFoundation::TTransformer
 {
 public:
-	TTransformer(TransformerCategory::Type Category,const ArrayBridge<Soy::TFourcc>&& InputFormats, const ArrayBridge<Soy::TFourcc>&& OutputFormats);
+	TTransformer(TransformerCategory::Type Category,const ArrayBridge<Soy::TFourcc>&& InputFormats, const ArrayBridge<Soy::TFourcc>&& OutputFormats,bool VerboseDebug);
 	~TTransformer();
 
 public:
@@ -85,6 +85,7 @@ private:
 	bool			mInputFormatSet = false;
 	bool			mOutputFormatSet = false;
 	Soy::AutoReleasePtr<IMFMediaType> mOutputMediaType;
+	bool			mVerboseDebug = false;
 
 public:
 	Array<Soy::TFourcc>	mSupportedInputFormats;

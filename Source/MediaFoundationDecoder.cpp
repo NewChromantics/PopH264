@@ -32,7 +32,8 @@ MediaFoundation::TDecoder::TDecoder(std::function<void(const SoyPixelsImpl&, siz
 	auto Inputs = FixedRemoteArray(InputFourccs);
 	auto Outputs = FixedRemoteArray(OutputFourccs);
 
-	mTransformer.reset(new MediaFoundation::TTransformer( TransformerCategory::VideoDecoder, GetArrayBridge(Inputs), GetArrayBridge(Outputs)));
+	bool VerboseDebug = false;
+	mTransformer.reset(new MediaFoundation::TTransformer(TransformerCategory::VideoDecoder, GetArrayBridge(Inputs), GetArrayBridge(Outputs), VerboseDebug));
 }
 
 MediaFoundation::TDecoder::~TDecoder()
@@ -75,13 +76,14 @@ bool MediaFoundation::TDecoder::DecodeNextPacket()
 	SetInputFormat();
 
 	auto NaluType = H264::GetPacketType(GetArrayBridge(Nalu));
-	std::Debug << "MediaFoundation decode " << magic_enum::enum_name(NaluType) << " x" << Nalu.GetSize() << std::endl;
+	//std::Debug << "MediaFoundation got " << magic_enum::enum_name(NaluType) << " x" << Nalu.GetSize() << std::endl;
 
 	bool PushData = true;
 
 	//	skip some packets
 	static bool SetSpsOnce = true;
 	static bool SkipIfNotSpsSent = true;
+	static bool SpsFirst = true;
 
 	switch (NaluType)
 	{
@@ -93,10 +95,14 @@ bool MediaFoundation::TDecoder::DecodeNextPacket()
 	case H264NaluContent::PictureParameterSet:
 		if (mPpsSet && SetSpsOnce)
 			PushData = false;
+		if (SpsFirst && !mSpsSet)
+			PushData = false;
 		break;
 
 	case H264NaluContent::SupplimentalEnhancementInformation:
 		if (mSeiSet && SetSpsOnce)
+			PushData = false;
+		if (SpsFirst && !mPpsSet)
 			PushData = false;
 		break;
 
@@ -105,7 +111,6 @@ bool MediaFoundation::TDecoder::DecodeNextPacket()
 		{
 			if (!mSpsSet || !mPpsSet /*|| !mSeiSet*/)
 			{
-				std::Debug << __PRETTY_FUNCTION__ << " skipped " << NaluType << " as we're still waiting for sps/pps" << std::endl;
 				PushData = false;
 			}
 		}
@@ -139,25 +144,34 @@ bool MediaFoundation::TDecoder::DecodeNextPacket()
 		{
 			//	data was rejected
 			UnpopNalu(GetArrayBridge(Nalu), FrameNumber);
+			std::Debug << __PRETTY_FUNCTION__ << " rejected " << NaluType << std::endl;
+		}
+		else
+		{
+			std::Debug << __PRETTY_FUNCTION__ << " pushed " << NaluType << std::endl;
+
+			//	mark some as pushed
+			switch (NaluType)
+			{
+			case H264NaluContent::SequenceParameterSet:
+				mSpsSet = true;
+				break;
+
+			case H264NaluContent::PictureParameterSet:
+				mPpsSet = true;
+				break;
+
+			case H264NaluContent::SupplimentalEnhancementInformation:
+				mSeiSet = true;
+				break;
+
+			default:break;
+			}
 		}
 	}
-
-	//	mark some as pushed
-	switch (NaluType)
+	else
 	{
-	case H264NaluContent::SequenceParameterSet:
-		mSpsSet = true;
-		break;
-
-	case H264NaluContent::PictureParameterSet:
-		mPpsSet = true;
-		break;
-
-	case H264NaluContent::SupplimentalEnhancementInformation:
-		mSeiSet = true;
-		break;
-
-	default:break;
+		std::Debug << __PRETTY_FUNCTION__ << " skipped " << NaluType << std::endl;
 	}
 
 	//	pop any frames that have come out in the mean time

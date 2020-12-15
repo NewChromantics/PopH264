@@ -46,6 +46,7 @@ MediaFoundation::TEncoderParams::TEncoderParams(json11::Json& Options)
 	SetInt(POPH264_ENCODER_KEY_QUALITY, mQuality);
 	SetInt(POPH264_ENCODER_KEY_PROFILELEVEL, mProfileLevel);
 	SetInt(POPH264_ENCODER_KEY_AVERAGEKBPS, mAverageKbps);
+	SetBool(POPH264_ENCODER_KEY_VERBOSEDEBUG, mVerboseDebug);
 }
 
 
@@ -59,8 +60,7 @@ MediaFoundation::TEncoder::TEncoder(TEncoderParams Params,std::function<void(Pop
 	auto Inputs = FixedRemoteArray(InputFourccs);
 	auto Outputs = FixedRemoteArray(OutputFourccs);
 
-	mTransformer.reset(new MediaFoundation::TTransformer(TransformerCategory::VideoEncoder, GetArrayBridge(Inputs), GetArrayBridge(Outputs)));
-
+	mTransformer.reset(new MediaFoundation::TTransformer(TransformerCategory::VideoEncoder, GetArrayBridge(Inputs), GetArrayBridge(Outputs), Params.mVerboseDebug ));
 }
 
 MediaFoundation::TEncoder::~TEncoder()

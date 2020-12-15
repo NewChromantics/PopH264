@@ -29,6 +29,7 @@ public:
 	//	these are required by MediaFoundation
 	size_t	mAverageKbps = 2000;	//	REALLY high rate gives D3D error for nvidia encoder
 	size_t	mProfileLevel = 30;
+	bool	mVerboseDebug = false;
 };
 
 

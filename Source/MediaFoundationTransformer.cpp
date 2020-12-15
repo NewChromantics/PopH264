@@ -686,7 +686,8 @@ MediaFoundation::TActivateMeta MediaFoundation::GetBestTransform(const GUID& Cat
 
 
 
-MediaFoundation::TTransformer::TTransformer(TransformerCategory::Type Category, const ArrayBridge<Soy::TFourcc>&& InputFormats, const ArrayBridge<Soy::TFourcc>&& OutputFormats)
+MediaFoundation::TTransformer::TTransformer(TransformerCategory::Type Category, const ArrayBridge<Soy::TFourcc>&& InputFormats, const ArrayBridge<Soy::TFourcc>&& OutputFormats,bool VerboseDebug) :
+	mVerboseDebug	( VerboseDebug )
 {
 	auto CategoryGuid = GetGuid(Category);
 
@@ -724,7 +725,9 @@ bool MediaFoundation::TTransformer::IsInputFormatReady()
 		if (Result == MF_E_TRANSFORM_TYPE_NOT_SET)
 			return false;
 		IsOkay(Result, "GetInputStatus");
-		std::Debug << "Input status is " << StatusFlags << std::endl;
+		//	gr: this seems to always be 1?
+		if ( mVerboseDebug )
+			std::Debug << "Input status is " << StatusFlags << std::endl;
 
 		auto CanAcceptData = (StatusFlags & MFT_INPUT_STATUS_ACCEPT_DATA) != 0;
 		if (!CanAcceptData)
@@ -1179,11 +1182,15 @@ bool MediaFoundation::TTransformer::PopFrame(ArrayBridge<uint8_t>&& Data,int64_t
 
 	//	gr: this also says false, when ProcessOutput tries to copy a sample!
 	auto FrameReady = (StatusFlags & MFT_OUTPUT_STATUS_SAMPLE_READY) != 0;
+
+	//	gr: this value is ALWAYS zero (maybe with decoder? or hardware decoder?) so don't skip
 	if (!FrameReady)
 	{
 		//return;
 	}
-	std::Debug << "FrameReady: " << FrameReady << std::endl;
+	//	gr: debug if its NOT 0, as we never get that value
+	if (FrameReady != 0)
+		std::Debug << "FrameReady: " << FrameReady << " StatusFlags=0x" << std::hex << StatusFlags << std::dec << std::endl;
 
 	MFT_OUTPUT_STREAM_INFO OutputInfo;
 	auto Result = Transformer.GetOutputStreamInfo(mOutputStreamId, &OutputInfo);
@@ -1245,7 +1252,8 @@ bool MediaFoundation::TTransformer::PopFrame(ArrayBridge<uint8_t>&& Data,int64_t
 	
 	//	read!
 	ReadData(*output_buffer.pSample, Data);
-	std::Debug << "size is " << Data.GetDataSize() << std::endl;
+	if ( mVerboseDebug )
+		std::Debug << "Output sample size is " << Data.GetDataSize() << std::endl;
 
 	try
 	{
