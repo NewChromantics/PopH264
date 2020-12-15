@@ -727,7 +727,7 @@ bool MediaFoundation::TTransformer::IsInputFormatReady()
 		IsOkay(Result, "GetInputStatus");
 		//	gr: this seems to always be 1?
 		if ( mVerboseDebug )
-			std::Debug << "Input status is " << StatusFlags << std::endl;
+			std::Debug << __PRETTY_FUNCTION__ << " Input status is " << StatusFlags << std::endl;
 
 		auto CanAcceptData = (StatusFlags & MFT_INPUT_STATUS_ACCEPT_DATA) != 0;
 		if (!CanAcceptData)
@@ -1014,7 +1014,8 @@ bool MediaFoundation::TTransformer::PushFrame(const ArrayBridge<uint8_t>&& Data,
 		try
 		{
 			IsOkay(Result, "GetInputStatus");
-			std::Debug << "Input status is " << StatusFlags << std::endl;
+			if (mVerboseDebug)
+				std::Debug << __PRETTY_FUNCTION__ << " Input status is " << StatusFlags << std::endl;
 		}
 		catch (std::exception& e)
 		{

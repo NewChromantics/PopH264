@@ -25,15 +25,15 @@ namespace MediaFoundation
 
 
 MediaFoundation::TDecoder::TDecoder(std::function<void(const SoyPixelsImpl&, size_t)> OnDecodedFrame) :
-	PopH264::TDecoder	( OnDecodedFrame )
+	PopH264::TDecoder	( OnDecodedFrame ),
+	mVerboseDebug		( false )
 {
 	Soy::TFourcc InputFourccs[] = { "H264" };
 	Soy::TFourcc OutputFourccs[] = { "NV12" };
 	auto Inputs = FixedRemoteArray(InputFourccs);
 	auto Outputs = FixedRemoteArray(OutputFourccs);
 
-	bool VerboseDebug = false;
-	mTransformer.reset(new MediaFoundation::TTransformer(TransformerCategory::VideoDecoder, GetArrayBridge(Inputs), GetArrayBridge(Outputs), VerboseDebug));
+	mTransformer.reset(new MediaFoundation::TTransformer(TransformerCategory::VideoDecoder, GetArrayBridge(Inputs), GetArrayBridge(Outputs), mVerboseDebug));
 }
 
 MediaFoundation::TDecoder::~TDecoder()
@@ -81,6 +81,7 @@ bool MediaFoundation::TDecoder::DecodeNextPacket()
 	bool PushData = true;
 
 	//	skip some packets
+	//	gr: we require SPS before PPS, before anything else otherwise nothing is output
 	static bool SetSpsOnce = true;
 	static bool SkipIfNotSpsSent = true;
 	static bool SpsFirst = true;
@@ -144,11 +145,14 @@ bool MediaFoundation::TDecoder::DecodeNextPacket()
 		{
 			//	data was rejected
 			UnpopNalu(GetArrayBridge(Nalu), FrameNumber);
-			std::Debug << __PRETTY_FUNCTION__ << " rejected " << NaluType << std::endl;
+			//	gr: important, always show this
+			//if (mVerboseDebug)
+				std::Debug << __PRETTY_FUNCTION__ << " rejected " << NaluType << " unpopped" << std::endl;
 		}
 		else
 		{
-			std::Debug << __PRETTY_FUNCTION__ << " pushed " << NaluType << std::endl;
+			if ( mVerboseDebug )
+				std::Debug << __PRETTY_FUNCTION__ << " pushed " << NaluType << std::endl;
 
 			//	mark some as pushed
 			switch (NaluType)
@@ -171,7 +175,8 @@ bool MediaFoundation::TDecoder::DecodeNextPacket()
 	}
 	else
 	{
-		std::Debug << __PRETTY_FUNCTION__ << " skipped " << NaluType << std::endl;
+		if (mVerboseDebug)
+			std::Debug << __PRETTY_FUNCTION__ << " skipped " << NaluType << std::endl;
 	}
 
 	//	pop any frames that have come out in the mean time

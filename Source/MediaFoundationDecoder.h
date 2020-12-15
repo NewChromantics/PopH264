@@ -34,4 +34,5 @@ private:
 	bool			mSpsSet = false;
 	bool			mPpsSet = false;
 	bool			mSeiSet = false;
+	bool			mVerboseDebug = false;
 };
