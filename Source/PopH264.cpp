@@ -28,7 +28,8 @@ namespace PopH264
 	//	1.3.1	Mediafoundation decoder working properly 
 	//	1.3.x	Meta versions for packaging
 	//	1.3.15	Fixed/fixing correct frame number output to match input of decoder
-	const Soy::TVersion	Version(1,3,16);
+	//	1.3.17	MediaFoundation now doesn't get stuck if we try and decode PPS or frames before SPS
+	const Soy::TVersion	Version(1,3,17);
 }
 
 
