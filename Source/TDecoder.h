@@ -10,9 +10,15 @@ class SoyPixelsImpl;
 namespace PopH264
 {
 	class TDecoder;
-	
+	class TDecoderParams;
+
 	class TInputNaluPacket;
 	typedef uint32_t FrameNumber_t;
+}
+
+namespace json11
+{
+	class Json;
 }
 
 class PopH264::TInputNaluPacket
@@ -20,6 +26,17 @@ class PopH264::TInputNaluPacket
 public:
 	Array<uint8_t>	mData;
 	uint32_t		mFrameNumber = 0;	//	warning, as we've split data into multiple nalu-packets per-frame, this is NOT unique
+};
+
+
+class PopH264::TDecoderParams
+{
+public:
+	TDecoderParams(json11::Json& Params);
+
+public:
+	std::string	mDecoderName;
+	bool		mVerboseDebug = false;
 };
 
 

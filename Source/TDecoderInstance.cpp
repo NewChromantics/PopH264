@@ -77,18 +77,20 @@ void PopH264::EnumDecoderNames(std::function<void(const std::string&)> EnumDecod
 #endif
 }
 
-class TDecoderParams
-{
-public:
-	TDecoderParams(json11::Json& Params);
 
-public:
-	std::string	mDecoderName;
-};
-
-TDecoderParams::TDecoderParams(json11::Json& Params)
+PopH264::TDecoderParams::TDecoderParams(json11::Json& Options)
 {
-	mDecoderName = Params[std::string(POPH264_DECODER_KEY_DECODERNAME)].string_value();
+	auto SetBool = [&](const char* Name,bool& Value)
+	{
+		auto& Handle = Options[Name];
+		if ( !Handle.is_bool() )
+			return false;
+		Value = Handle.bool_value();
+		return true;
+	};
+	
+	mDecoderName = Options[std::string(POPH264_DECODER_KEY_DECODERNAME)].string_value();
+	SetBool( POPH264_DECODER_KEY_VERBOSEDEBUG, mVerboseDebug );
 }
 
 
@@ -194,7 +196,7 @@ PopH264::TDecoderInstance::TDecoderInstance(json11::Json& Options)
 #if defined(ENABLE_BROADWAY)
 	if ( AnyDecoder || Params.mDecoderName == Broadway::TDecoder::Name)
 	{
-		mDecoder.reset( new Broadway::TDecoder(OnFrameDecoded) );
+		mDecoder.reset( new Broadway::TDecoder( Params, OnFrameDecoded ) );
 		return;
 	}
 #endif

@@ -40,7 +40,7 @@ __export int32_t			PopH264_GetTestData(const char* Name,uint8_t* Buffer,int32_t 
 
 
 #define POPH264_DECODER_KEY_DECODERNAME		"Decoder"
-
+#define POPH264_DECODER_KEY_VERBOSEDEBUG	"VerboseDebug"
 
 
 //	All options are optional
