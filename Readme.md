@@ -110,3 +110,16 @@ Android
   - Use this docker container https://hub.docker.com/r/simplatex/android-lightweight
   - based on this article: https://medium.com/@simplatex/how-to-build-a-lightweight-docker-container-for-android-build-c52e4e68997e
   - If needed we can build out own / modify this one but at the moment it works with no issues
+
+Misc Notes
+============================
+The following are various notes which PopH264 handles. (Or at least, it should handle and there should be an issue covering it if not).
+
+MediaFoundation
+--------------------
+- If you try and decode any Nalu before SPS, you get no error, but no output. This include PPS before SPS.
+
+Broadway
+-----------------
+- If you try and decode an IDR keyframe once then end the stream, you will get no frame out. It requires submitting the frame a second time to get the frame out.
+- SPS & PPS need to be sent before other packets, or we will get no output.
