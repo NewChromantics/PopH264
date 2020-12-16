@@ -47,8 +47,9 @@ void H264SwDecMemset(void *ptr, i32 value, u32 count)
 }
 */
 
-Broadway::TDecoder::TDecoder(std::function<void(const SoyPixelsImpl&,size_t)> OnDecodedFrame) :
-	PopH264::TDecoder	( OnDecodedFrame )
+Broadway::TDecoder::TDecoder(PopH264::TDecoderParams Params,std::function<void(const SoyPixelsImpl&,size_t)> OnDecodedFrame) :
+	PopH264::TDecoder	( OnDecodedFrame ),
+	mParams				( Params )
 {
 	auto disableOutputReordering = false;
 	auto Result = H264SwDecInit( &mDecoderInstance, disableOutputReordering );
@@ -150,61 +151,94 @@ bool Broadway::TDecoder::DecodeNextPacket()
 
 	//	if we havent had headers yet, broadway will fail (and not recover)
 	//	if we try and process frames, so drop them
-	if (!mProcessedHeaderPackets)
+	bool DecodePacket = true;
+	
+	switch (H264PacketType)
 	{
-		switch (H264PacketType)
-		{
+		//	can always process sps
+		case H264NaluContent::SequenceParameterSet:
+			break;
+			
+		case H264NaluContent::PictureParameterSet:
+			//	broadway needs SPS before PPS
+			if ( !mProcessedSps )
+				DecodePacket = false;
+			break;
+			
 		case H264NaluContent::Slice_NonIDRPicture:
 		case H264NaluContent::Slice_CodedPartitionA:
 		case H264NaluContent::Slice_CodedPartitionB:
 		case H264NaluContent::Slice_CodedPartitionC:
 		case H264NaluContent::Slice_CodedIDRPicture:
 		case H264NaluContent::Slice_AuxCodedUnpartitioned:
-			std::Debug << "Dropping packet " << magic_enum::enum_name(H264PacketType) << " as we havent yet processed headers" << std::endl;
-			return true;
-			
-		default:break;
-		}
+		default:
+			//	don't decode other packets until sps & pps is processed
+			if ( !mProcessedSps || !mProcessedPps )
+				DecodePacket = false;
+			break;
 	}
 
-	static bool Debug = true;
-	if ( Debug )
+	if ( mParams.mVerboseDebug )
 	{
-		std::Debug << "H264SwDecDecode(" << magic_enum::enum_name(H264PacketType) << ") x" << Nalu.GetDataSize() << std::endl;
+		//std::Debug << "Packet H264SwDecDecode(" << magic_enum::enum_name(H264PacketType) << ") x" << Nalu.GetDataSize() << " DecodePacket=" << DecodePacket << std::endl;
 	}
 	
-	Soy::TScopeTimerPrint Timer("H264 Decode",15);
-	auto Result = H264SwDecDecode( mDecoderInstance, &Input, &Output );
+	H264SwDecRet Result = H264SWDEC_STRM_PROCESSED;
+	SoyTime DecodeDuration;
+	ssize_t BytesProcessed = 0; 
 	
-	//	the first time we decode the first keyframe, it recognises new headers, but doesn't
-	//	actually decode the frame, so it never comes out (we havent got it flushing correctly yet)
-	//	processing this keyframe again has the active SPS setup, so we get a frame decoded immediately!
-	if ( Result == H264SWDEC_HDRS_RDY_BUFF_NOT_EMPTY && H264PacketType == H264NaluContent::Slice_CodedIDRPicture )
+	if ( DecodePacket )
 	{
+		Soy::TScopeTimerPrint Timer("H264 Decode",15);
 		Result = H264SwDecDecode( mDecoderInstance, &Input, &Output );
-		//	gr; OnMeta() may not be called now
-	}
-	auto DecodeDuration = Timer.Stop();
-	IsOkay( Result, "H264SwDecDecode" );
 	
-	//	calc what data wasn't used
-	auto BytesProcessed = static_cast<ssize_t>(Output.pStrmCurrPos - Input.pStream);
-	//	todo: keep this meta for external debugging
-	//std::Debug << "H264SwDecDecode result: " << GetDecodeResultString(Result) << ". Bytes processed: "  << BytesProcessed << "/" << Input.dataLen << std::endl;
+		//	the first time we decode the first keyframe, it recognises new headers, but doesn't
+		//	actually decode the frame, so it never comes out (we havent got it flushing correctly yet)
+		//	processing this keyframe again has the active SPS setup, so we get a frame decoded immediately!
+		if ( Result == H264SWDEC_HDRS_RDY_BUFF_NOT_EMPTY && H264PacketType == H264NaluContent::Slice_CodedIDRPicture )
+		{
+			Result = H264SwDecDecode( mDecoderInstance, &Input, &Output );
+			//	gr; OnMeta() may not be called now
+		}
+		DecodeDuration = Timer.Stop();
+		IsOkay( Result, "H264SwDecDecode" );
+	
+		//	calc what data wasn't used
+		BytesProcessed = static_cast<ssize_t>(Output.pStrmCurrPos - Input.pStream);
+		
+		if ( BytesProcessed != Input.dataLen )
+		//if ( mParams.mVerboseDebug )
+			std::Debug << "H264SwDecDecode result: " << GetDecodeResultString(Result) << ". Bytes processed: "  << BytesProcessed << "/" << Input.dataLen << std::endl;
+	}
 	
 	//	using AVF encoder, we weren't getting meta even after SPS/PPS (and SEI)
 	//	instead, if the encoder ate a SPS, consider headers delivered (maybe after SPS AND PPS?)
-	switch (H264PacketType)
+	if ( DecodePacket )
 	{
-		case H264NaluContent::SequenceParameterSet:
-			this->mProcessedHeaderPackets = true;
-			break;
+		if ( mParams.mVerboseDebug )
+			std::Debug << "Decoded " << H264PacketType << " result=" << GetDecodeResultString(Result) << std::endl;
+		
+		switch (H264PacketType)
+		{
+			case H264NaluContent::SequenceParameterSet:
+				mProcessedSps = true;
+				break;
+				
+			case H264NaluContent::PictureParameterSet:
+				mProcessedPps = true;
+				break;
 	
-		default:
-			break;
+			default:
+				break;
+		}
+	}
+	else
+	{
+		if ( mParams.mVerboseDebug )
+			std::Debug << "Dropped " << H264PacketType << " x" << Nalu.GetDataSize() << std::endl;
 	}
 
-	
+	//	handle result
 	auto GetMeta = [&]()
 	{
 		H264SwDecInfo Meta;
@@ -275,7 +309,23 @@ bool Broadway::TDecoder::DecodeNextPacket()
 
 void Broadway::TDecoder::OnMeta(const H264SwDecInfo& Meta)
 {
-	
+	if ( mParams.mVerboseDebug )
+	{
+		std::Debug << __PRETTY_FUNCTION__ << 
+			" profile=" << Meta.profile << 
+			" picWidth=" << Meta.picWidth <<
+			" picHeight=" << Meta.picHeight <<
+			" videoRange=" << Meta.videoRange <<
+			" matrixCoefficients=" << Meta.matrixCoefficients <<
+			" parWidth=" << Meta.parWidth <<
+			" parHeight=" << Meta.parHeight <<
+			" croppingFlag=" << Meta.croppingFlag <<
+			" cropParams.cropLeftOffset=" << Meta.cropParams.cropLeftOffset <<
+			" cropParams.cropOutWidth=" << Meta.cropParams.cropOutWidth <<
+			" cropParams.cropTopOffset=" << Meta.cropParams.cropTopOffset <<
+			" cropParams.cropOutHeight=" << Meta.cropParams.cropOutHeight <<
+			std::endl;
+	}
 }
 
 void Broadway::TDecoder::OnPicture(const H264SwDecPicture& Picture,const H264SwDecInfo& Meta,SoyTime DecodeDuration)
@@ -286,7 +336,9 @@ void Broadway::TDecoder::OnPicture(const H264SwDecPicture& Picture,const H264SwD
 	//	u32 *pOutputPicture;    /* Pointer to the picture, YUV format       */
 	auto Format = SoyPixelsFormat::Yuv_8_8_8;
 	SoyPixelsMeta PixelMeta( Meta.picWidth, Meta.picHeight, Format );
-	//std::Debug << "Decoded picture " << PixelMeta << std::endl;
+	
+	if ( mParams.mVerboseDebug )
+		std::Debug << "Decoded picture " << PixelMeta << std::endl;
 	
 	//	gr: wish we knew exactly how many bytes Picture.pOutputPicture pointed at!
 	//		but demos all use this measurement

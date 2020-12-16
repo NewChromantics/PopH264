@@ -4,6 +4,7 @@
 #include "SoyLib/src/Array.hpp"
 #include "SoyLib/src/HeapArray.hpp"
 #include "TDecoder.h"
+#include "PopH264.h"
 
 class SoyPixelsImpl;
 
@@ -30,7 +31,7 @@ public:
 	static inline const char*	Name = "Broadway";
 
 public:
-	TDecoder(std::function<void(const SoyPixelsImpl&,size_t)> OnDecodedFrame);
+	TDecoder(PopH264::TDecoderParams Params,std::function<void(const SoyPixelsImpl&,size_t)> OnDecodedFrame);
 	~TDecoder();
 
 private:
@@ -41,7 +42,12 @@ private:
 private:
 	H264SwDecInst	mDecoderInstance = nullptr;
 
+	PopH264::TDecoderParams	mParams;
+
 	//	broadway goes wrong if we try and decode frames without SPS/PPS and wont recover
 	//	so, reject other packets until we get them
-	bool			mProcessedHeaderPackets = false;
+	//	gr: NEED to process sps before pps
+	bool			mProcessedSps = false;
+	bool			mProcessedPps = false;
+	
 };
