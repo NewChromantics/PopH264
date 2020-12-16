@@ -50,4 +50,6 @@ private:
 	bool			mProcessedSps = false;
 	bool			mProcessedPps = false;
 	
+	//	gr: it seems the decoder gets stuck (no error) if we try and push i-frames before keyframes
+	bool			mProcessedKeyframe = false;	
 };

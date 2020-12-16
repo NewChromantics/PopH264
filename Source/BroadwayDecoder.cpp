@@ -165,15 +165,20 @@ bool Broadway::TDecoder::DecodeNextPacket()
 				DecodePacket = false;
 			break;
 			
+		case H264NaluContent::Slice_CodedIDRPicture:
+			//	don't decode until sps && pps done
+			if ( !mProcessedSps || !mProcessedPps )
+				DecodePacket = false;
+			break;
+				
 		case H264NaluContent::Slice_NonIDRPicture:
 		case H264NaluContent::Slice_CodedPartitionA:
 		case H264NaluContent::Slice_CodedPartitionB:
 		case H264NaluContent::Slice_CodedPartitionC:
-		case H264NaluContent::Slice_CodedIDRPicture:
 		case H264NaluContent::Slice_AuxCodedUnpartitioned:
 		default:
-			//	don't decode other packets until sps & pps is processed
-			if ( !mProcessedSps || !mProcessedPps )
+			//	need to process keyframe before intra frames or decoder gets stuck
+			if ( !mProcessedKeyframe )
 				DecodePacket = false;
 			break;
 	}
@@ -226,6 +231,10 @@ bool Broadway::TDecoder::DecodeNextPacket()
 				
 			case H264NaluContent::PictureParameterSet:
 				mProcessedPps = true;
+				break;
+	
+			case H264NaluContent::Slice_CodedIDRPicture:
+				mProcessedKeyframe = true;
 				break;
 	
 			default:
