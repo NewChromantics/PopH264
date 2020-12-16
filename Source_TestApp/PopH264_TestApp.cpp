@@ -66,7 +66,7 @@ bool LoadDataFromFilename(const char* Filename,ArrayBridge<uint8_t>&& Data)
 }
 
 
-void DecoderTest(const char* TestDataName,CompareFunc_t* Compare)
+void DecoderTest(const char* TestDataName,CompareFunc_t* Compare,const char* DecoderName)
 {
 	Array<uint8_t> TestData;
 
@@ -80,8 +80,13 @@ void DecoderTest(const char* TestDataName,CompareFunc_t* Compare)
 		TestData.PushBackArray(TestDataArray);
 	}
 
-	//auto* Options = "{\"Decoder\":\"Broadway\"}";
-	auto* Options = "{}";
+	std::stringstream OptionsStr;
+	OptionsStr << "{";
+	if ( DecoderName )
+		OptionsStr << "\"Decoder\":\"" << DecoderName << "\",";
+	OptionsStr << "\"VerboseDebug\":true";
+	OptionsStr << "}";
+	auto* Options = OptionsStr.str().c_str();
 	char ErrorBuffer[1024] = { 0 };
 	auto Handle = PopH264_CreateDecoder(Options,ErrorBuffer,std::size(ErrorBuffer));
 
@@ -241,7 +246,19 @@ void EncoderYuv8_88Test(const char* EncoderName="")
 	
 	PopH264_DestroyEncoder(Handle);
 }
-	
+
+void SafeDecoderTest(const char* TestDataName,CompareFunc_t* Compare,const char* DeocoderName=nullptr)
+{
+	try
+	{
+		DecoderTest(TestDataName, Compare, DeocoderName );
+	}
+	catch (std::exception& e)
+	{
+		DebugPrint(e.what());
+	}
+}
+
 int main()
 {
 	//EncoderYuv8_88Test("");
@@ -253,32 +270,22 @@ int main()
 
 	DebugPrint("PopH264_UnitTests");
 	//PopH264_UnitTests();
-
-	try
-	{
-		DecoderTest("RainbowGradient.h264", CompareRainbow);
-		DecoderTest("../TestData/Colour.h264", nullptr);
-		DecoderTest("../TestData/Depth.h264", nullptr);
-		//DecoderTest("RainbowGradient.h264", CompareRainbow);
-		//DecoderTest("RainbowGradient.h264",CompareRainbow);
-	}
-	catch (std::exception& e)
-	{
-		DebugPrint(e.what());
-	}
-
+	
+	//	depth data has iframe, pps, sps order
+	SafeDecoderTest("TestData/Depth.h264", nullptr, nullptr );
+	SafeDecoderTest("TestData/Depth.h264", nullptr, "Broadway" );
+	SafeDecoderTest("RainbowGradient.h264", CompareRainbow, nullptr );
+	SafeDecoderTest("RainbowGradient.h264", CompareRainbow, "Broadway" );
+	SafeDecoderTest("../TestData/Colour.h264", nullptr, nullptr );
+	SafeDecoderTest("../TestData/Colour.h264", nullptr, "Broadway" );
+	//SafeDecoderTest("RainbowGradient.h264", CompareRainbow);
+	//SafeDecoderTest("RainbowGradient.h264",CompareRainbow);
+	
 	return 0;
-
-	try
-	{
+	
 #if defined(TEST_ASSETS)
-		DecoderTest("GreyscaleGradient.h264",CompareGreyscale);
+	SafeDecoderTest("GreyscaleGradient.h264",CompareGreyscale);
 #endif
-	}
-	catch (std::exception& e)
-	{
-		DebugPrint(e.what());
-	}
 
 	EncoderGreyscaleTest();
 	
