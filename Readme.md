@@ -122,4 +122,5 @@ MediaFoundation
 Broadway
 -----------------
 - If you try and decode an IDR keyframe once then end the stream, you will get no frame out. It requires submitting the frame a second time to get the frame out.
-- SPS & PPS need to be sent before other packets, or we will get no output.
+- SPS & PPS need to be sent before other packets, or we will get no output. #20
+- If you try and decode an intra-frame before keyframe, the decoder will stop with no error and get no frame output. #21
