@@ -116,7 +116,10 @@ public static class PopH264
 		//	empty string defaults to "best" (hardware where possible)
 		//	todo: PopH264_EnumDecoders which will return a list of all possible decoders
 		//	ie. low level specific decoders/codecs installed on the system, including say MediaFoundation_NvidiaHardwareH264, or MagicLeap_GoogleSoftware
-		public string Decoder;	
+		public string Decoder;
+		
+		//	print extra debug info (all decoders)
+		public bool VerboseDebug;
 	};
 
 	public class Decoder : IDisposable
