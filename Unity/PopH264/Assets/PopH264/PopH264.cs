@@ -345,6 +345,10 @@ public static class PopH264
 				return null;
 			}
 
+			//	not going to extract a new frame, so skip buffer/texture allocations
+			if (Meta.FrameNumber <0)
+				return null;
+				
 			AllocListToSize(ref Planes, PlaneCount);
 			AllocListToSize(ref PixelFormats, PlaneCount);
 			AllocListToSize(ref PlaneCaches, PlaneCount);
