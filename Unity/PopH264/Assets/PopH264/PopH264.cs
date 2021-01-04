@@ -134,6 +134,18 @@ public static class PopH264
 		List<FrameInput> InputQueue;
 		int? InputThreadResult = 0;
 		public bool HadEndOfStream = false;
+		
+		//	reuse/alloc once a json buffer
+		byte[] JsonBufferPrealloc;
+		byte[] JsonBuffer
+		{
+			get
+			{
+				if (JsonBufferPrealloc == null)
+					JsonBufferPrealloc = new byte[1000];
+				return JsonBufferPrealloc;
+			}
+		}
 
 		public Decoder(DecoderParams? DecoderParams,bool ThreadedDecoding)
 		{
@@ -328,7 +340,6 @@ public static class PopH264
 		//	returns frame time
 		public int? GetNextFrame(ref List<Texture2D> Planes, ref List<PixelFormat> PixelFormats)
 		{
-			var JsonBuffer = new Byte[1000];
 			PopH264_PeekFrame(Instance.Value, JsonBuffer, JsonBuffer.Length);
 			var Json = GetString(JsonBuffer);
 			var Meta = JsonUtility.FromJson<FrameMeta>(Json);
