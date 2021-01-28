@@ -110,7 +110,7 @@ public class Mp4 : MonoBehaviour {
 	[Header("Turn off to debug by changing the material setting manually")]
 	public bool SetMaterialFormat = true;
 	List<Texture2D> PlaneTextures;
-	List<PixelFormat> PlaneFormats;
+	List<PopH264.PixelFormat> PlaneFormats;
 	PopH264.Decoder Decoder;
 
 	[Header("Whenever there's a new frame, all these blits will be processed")]
