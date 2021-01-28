@@ -4,7 +4,7 @@ LOCAL_PATH := $(abspath $(call my-dir))
 
 
 # extra ../ as jni is always prepended
-SRC := ../..
+SRC := ../../..
 #$(warning $(LOCAL_PATH))	#	debug
 
 # gr: get this from env var
@@ -131,18 +131,7 @@ $(SOY_PATH)/src/SoyMediaFormat.cpp \
 
 
 
-#$(warning Build shared library)	#	debug
-#include $(BUILD_SHARED_LIBRARY)
-
-
-#$(warning Build executable)	#	debug
-LOCAL_MODULE := "PopH264TestApp"
-LOCAL_MODULE_FILENAME := "PopH264TestApp.a"
-
-LOCAL_SRC_FILES  += \
-$(SRC)/Source_TestApp/PopH264_TestApp.cpp \
-
-include $(BUILD_EXECUTABLE)
+include $(BUILD_SHARED_LIBRARY)
 
 
 #$(call import-module,android-ndk-profiler)

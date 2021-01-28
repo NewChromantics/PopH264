@@ -6,7 +6,10 @@
 #env
 
 # require param
-ACTION="$1"
+#BUILD_PROJECT_FOLDER=$BUILD_TARGET_NAME.Android
+BUILD_PROJECT_FOLDER="$1"
+
+ACTION="$2"
 
 DEFAULT_ACTION="release"
 
@@ -35,7 +38,6 @@ if [ -z "$ANDROID_PLATFORM" ]; then
 fi
 
 MAXCONCURRENTBUILDS=1
-BUILD_PROJECT_FOLDER=$BUILD_TARGET_NAME.Android
 
 # set android NDK dir
 if [ -z "$ANDROID_NDK_HOME" ]; then
