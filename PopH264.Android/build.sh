@@ -151,7 +151,7 @@ if [ $ACTION == "buildandrun" ]; then
 	ENABLE_DEBUG_SYMBOLS=0
 
 	BuildAbi armeabi-v7a $ENABLE_DEBUG_SYMBOLS
-	InstallAndRunTestExecutable
+	#InstallAndRunTestExecutable
 
 	exit 0
 fi

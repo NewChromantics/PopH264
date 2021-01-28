@@ -789,7 +789,7 @@
 		};
 		BF66C6E325C34B28007A01B4 /* PopH264_AndroidTestApp */ = {
 			isa = PBXLegacyTarget;
-			buildArgumentsString = "PopH264.Android/PopH264TestApp buildandrun $(ACTION)";
+			buildArgumentsString = "PopH264.Android/PopH264TestApp $(ACTION)";
 			buildConfigurationList = BF66C6E425C34B28007A01B4 /* Build configuration list for PBXLegacyTarget "PopH264_AndroidTestApp" */;
 			buildPhases = (
 			);

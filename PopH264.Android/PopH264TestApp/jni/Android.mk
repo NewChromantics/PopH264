@@ -2,6 +2,13 @@
 #		this makes them jump in xcode
 LOCAL_PATH := $(abspath $(call my-dir))
 
+$(warning $(LOCAL_PATH))	#	debug
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := libPopH264
+LOCAL_SRC_FILES := ../../libPopH264/libs/$(TARGET_ARCH_ABI)/libPopH264.so
+include $(PREBUILT_SHARED_LIBRARY)
+
 
 # extra ../ as jni is always prepended
 SRC := ../../..
@@ -59,10 +66,8 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := $(APP_MODULE)
 
 LOCAL_C_INCLUDES += \
-$(LOCAL_PATH)/$(SRC)/Source/Broadway/Decoder	\
-$(LOCAL_PATH)/$(SRC)/Source/Broadway/Decoder/inc	\
 $(LOCAL_PATH)/$(SOY_PATH)/src	\
-$(LOCAL_PATH)/$(SRC)/Source/Json11	\
+$(LOCAL_PATH)/$(SRC)/Source/	
 
 
 
@@ -72,13 +77,9 @@ $(LOCAL_PATH)/$(SRC)/Source/Json11	\
 LOCAL_STATIC_LIBRARIES :=
 #LOCAL_STATIC_LIBRARIES += android-ndk-profiler
 
+LOCAL_SHARED_LIBRARIES := libPopH264
 
-#LOCAL_LDLIBS	+= -lGLESv3			# OpenGL ES 3.0
-#LOCAL_LDLIBS	+= -lEGL			# GL platform interface
 LOCAL_LDLIBS  	+= -llog			# logging
-#LOCAL_LDLIBS  	+= -landroid		# native windows
-#LOCAL_LDLIBS	+= -lz				# For minizip
-#LOCAL_LDLIBS	+= -lOpenSLES		# audio
 
 # gr: when the test app executable tries to run, it can't find the c++shared.so next to it
 #	use this to alter the rpath so it finds it
@@ -88,50 +89,18 @@ LOCAL_LDFLAGS	+= -Wl,-rpath,.
 # project files
 # todo: generate from input from xcode
 LOCAL_SRC_FILES  := \
-$(SRC)/Source/PopH264.cpp \
-$(SRC)/Source/PopH264TestData.cpp \
-$(SRC)/Source/TDecoder.cpp \
-$(SRC)/Source/TDecoderInstance.cpp \
-$(SRC)/Source/TEncoder.cpp \
-$(SRC)/Source/TEncoderInstance.cpp \
-$(SRC)/Source/BroadwayDecoder.cpp \
-$(SRC)/Source/BroadwayAll.c \
-$(SRC)/Source/Json11/json11.cpp \
-$(SRC)/Source/AndroidDecoder.cpp \
-$(SRC)/Source/AndroidMedia.cpp \
+$(SRC)/Source_TestApp/PopH264_TestApp.cpp \
 
 
 # soy lib files
 LOCAL_SRC_FILES  += \
 $(SOY_PATH)/src/SoyTypes.cpp \
-$(SOY_PATH)/src/SoyAssert.cpp \
-$(SOY_PATH)/src/SoyDebug.cpp \
-$(SOY_PATH)/src/SoyPixels.cpp \
-$(SOY_PATH)/src/memheap.cpp \
-$(SOY_PATH)/src/SoyArray.cpp \
-$(SOY_PATH)/src/SoyTime.cpp \
-$(SOY_PATH)/src/SoyString.cpp \
-$(SOY_PATH)/src/SoyH264.cpp \
-$(SOY_PATH)/src/SoyPng.cpp \
-$(SOY_PATH)/src/SoyImage.cpp \
-$(SOY_PATH)/src/SoyStreamBuffer.cpp \
-$(SOY_PATH)/src/SoyFourcc.cpp \
-$(SOY_PATH)/src/SoyThread.cpp \
-$(SOY_PATH)/src/SoyJava.cpp \
-$(SOY_PATH)/src/SoyStream.cpp \
-$(SOY_PATH)/src/SoyMediaFormat.cpp \
-
-#$(SOY_PATH)/src/SoyOpengl.cpp \
-#$(SOY_PATH)/src/SoyOpenglContext.cpp \
-#$(SOY_PATH)/src/SoyEvent.cpp \
-#$(SOY_PATH)/src/SoyShader.cpp \
-#$(SOY_PATH)/src/SoyUnity.cpp \
-#$(SOY_PATH)/src/SoyBase64.cpp \
-#$(SOY_PATH)/src/SoyGraphics.cpp \
 
 
+#$(warning Build executable)	#	debug
+LOCAL_MODULE := "PopH264TestApp"
 
-include $(BUILD_SHARED_LIBRARY)
+include $(BUILD_EXECUTABLE)
 
 
 #$(call import-module,android-ndk-profiler)
