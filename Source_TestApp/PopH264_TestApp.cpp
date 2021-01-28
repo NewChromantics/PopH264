@@ -7,7 +7,7 @@
 #define TARGET_WINDOWS
 #endif
 
-#if !defined(TARGET_WINDOWS)
+#if !defined(TARGET_WINDOWS) && !defined(TARGET_ANDROID)
 #define TEST_ASSETS
 #endif
 

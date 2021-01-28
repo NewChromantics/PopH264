@@ -63,6 +63,9 @@ $(LOCAL_PATH)/$(SRC)/Source/Broadway/Decoder	\
 $(LOCAL_PATH)/$(SRC)/Source/Broadway/Decoder/inc	\
 $(LOCAL_PATH)/$(SOY_PATH)/src	\
 $(LOCAL_PATH)/$(SRC)/Source/Json11	\
+$(LOCAL_PATH)/$(SRC)/Source/	
+
+
 
 # use warning as echo
 #$(warning $(LOCAL_C_INCLUDES))
@@ -76,6 +79,11 @@ LOCAL_LDLIBS  	+= -llog			# logging
 #LOCAL_LDLIBS  	+= -landroid		# native windows
 #LOCAL_LDLIBS	+= -lz				# For minizip
 #LOCAL_LDLIBS	+= -lOpenSLES		# audio
+
+# gr: when the test app executable tries to run, it can't find the c++shared.so next to it
+#	use this to alter the rpath so it finds it
+#LOCAL_LDFLAGS	+= -rdynamic
+LOCAL_LDFLAGS	+= -Wl,-rpath,.
 
 # project files
 # todo: generate from input from xcode
@@ -123,10 +131,18 @@ $(SOY_PATH)/src/SoyMediaFormat.cpp \
 
 
 
+#$(warning Build shared library)	#	debug
+#include $(BUILD_SHARED_LIBRARY)
 
-include $(BUILD_SHARED_LIBRARY)
 
+#$(warning Build executable)	#	debug
+LOCAL_MODULE := "PopH264TestApp"
+LOCAL_MODULE_FILENAME := "PopH264TestApp.a"
 
+LOCAL_SRC_FILES  += \
+$(SRC)/Source_TestApp/PopH264_TestApp.cpp \
+
+include $(BUILD_EXECUTABLE)
 
 
 #$(call import-module,android-ndk-profiler)

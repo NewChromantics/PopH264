@@ -789,7 +789,7 @@
 		};
 		BFF1C6DE22E3769B00AFDFD5 /* PopH264_Android */ = {
 			isa = PBXLegacyTarget;
-			buildArgumentsString = "$(ACTION)";
+			buildArgumentsString = "buildandrun $(ACTION)";
 			buildConfigurationList = BFF1C6E122E3769B00AFDFD5 /* Build configuration list for PBXLegacyTarget "PopH264_Android" */;
 			buildPhases = (
 			);

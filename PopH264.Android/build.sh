@@ -54,6 +54,20 @@ fi
 
 ADDITIONAL_BUILD_FILES=(Source/PopH264.h)
 
+
+function InstallAndRunTestExecutable()
+{
+	#adb push ./PopH264 /data/local/tmp && adb push ./libc++_shared.so /data/local/tmp && adb shell "cd /data/local/tmp && chmod +x ./PopH264 && ./PopH264"
+	adb push ./PopH264 /data/local/tmp
+	adb push ./libc++_shared.so /data/local/tmp
+	adb shell "cd /data/local/tmp && chmod +x ./PopH264 && ./PopH264"
+	
+	RESULT=$?
+	if [[ $RESULT -ne 0 ]]; then
+		exit $RESULT
+	fi
+}
+
 function CopyAdditionalBuildFiles()
 {
 	ANDROID_ABI=$1
@@ -128,6 +142,18 @@ if [ $ACTION == "release" ]; then
 
 	exit 0
 fi
+
+if [ $ACTION == "buildandrun" ]; then
+	echo "Android/build.sh: $ACTION..."
+
+	ENABLE_DEBUG_SYMBOLS=0
+
+	BuildAbi armeabi-v7a $ENABLE_DEBUG_SYMBOLS
+	InstallAndRunTestExecutable
+
+	exit 0
+fi
+
 
 if [ $ACTION == "clean" ]; then
 	echo "Android/build.sh: Cleaning..."
