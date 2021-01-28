@@ -787,6 +787,20 @@
 			passBuildSettingsInEnvironment = 1;
 			productName = PopH264Lumin;
 		};
+		BF63D78225C2DDCA00B383BD /* PopH264_AndroidTestApp */ = {
+			isa = PBXLegacyTarget;
+			buildArgumentsString = "$(ACTION)";
+			buildConfigurationList = BF63D78325C2DDCA00B383BD /* Build configuration list for PBXLegacyTarget "PopH264_AndroidTestApp" */;
+			buildPhases = (
+			);
+			buildToolPath = PopH264.Android/BuildTestApp.sh;
+			buildWorkingDirectory = "";
+			dependencies = (
+			);
+			name = PopH264_AndroidTestApp;
+			passBuildSettingsInEnvironment = 1;
+			productName = PopH264Android;
+		};
 		BFF1C6DE22E3769B00AFDFD5 /* PopH264_Android */ = {
 			isa = PBXLegacyTarget;
 			buildArgumentsString = "$(ACTION)";
@@ -919,6 +933,7 @@
 				BF151FD82384786600A70EBF /* PopH264_Ios */,
 				BFC4717024474FFA00A2DA70 /* PopH264_TestApp */,
 				BF51B8C2256A7DBA004DE4C7 /* PopH264_Universal */,
+				BF63D78225C2DDCA00B383BD /* PopH264_AndroidTestApp */,
 			);
 		};
 /* End PBXProject section */
@@ -1364,6 +1379,30 @@
 			};
 			name = Release;
 		};
+		BF63D78425C2DDCA00B383BD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = BF004B6824FD3D1C00DC6A90 /* Version.xcconfig */;
+			buildSettings = {
+				ANDROID_ABI_ONLY = "armeabi-v7a";
+				ANDROID_NDK_HOME = "/usr/local/share/android-ndk";
+				BUILD_TARGET_NAME = PopH264;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				UNITY_ASSET_PLUGIN_PATH = "$(UNITY_OUTPUT_PATH)/Android";
+			};
+			name = Debug;
+		};
+		BF63D78525C2DDCA00B383BD /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = BF004B6824FD3D1C00DC6A90 /* Version.xcconfig */;
+			buildSettings = {
+				ANDROID_ABI_ONLY = "armeabi-v7a";
+				ANDROID_NDK_HOME = "/usr/local/share/android-ndk";
+				BUILD_TARGET_NAME = PopH264;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				UNITY_ASSET_PLUGIN_PATH = "$(UNITY_OUTPUT_PATH)/Android";
+			};
+			name = Release;
+		};
 		BFC4717524474FFA00A2DA70 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = BF004B6824FD3D1C00DC6A90 /* Version.xcconfig */;
@@ -1472,6 +1511,15 @@
 			buildConfigurations = (
 				BF53E82922EC8C1D008253CD /* Debug */,
 				BF53E82A22EC8C1D008253CD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		BF63D78325C2DDCA00B383BD /* Build configuration list for PBXLegacyTarget "PopH264_AndroidTestApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BF63D78425C2DDCA00B383BD /* Debug */,
+				BF63D78525C2DDCA00B383BD /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
