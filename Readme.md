@@ -111,6 +111,31 @@ Android
   - based on this article: https://medium.com/@simplatex/how-to-build-a-lightweight-docker-container-for-android-build-c52e4e68997e
   - If needed we can build out own / modify this one but at the moment it works with no issues
 
+Unity Development
+==================
+Macos
+------------
+When building the plugin, build the OSX framework. The universal framework currently doesn't "install" (copy to /Unity/PopH264/Assets/PopH264)
+in `PopH264.cs` disable the define `POPH264_AS_FRAMEWORK` 
+
+Android
+-----------------
+- Depending on your version of unity you may find the platform architecture meta for each architecture ("ABI" or "Platform") gets lost and you need to set it again.
+- Unity seems to currently fail to find the `.so`'s that are put into the managed dll `PopH264Package.dll` via the `asmdef`. Delete the `.asmdef` and build plugins into a non-dll.
+- When running you may get `DllNotFound` exceptions;
+	- It seems unity can't find the android shared libraries (`libPopH264.so`) in a mangaged dll, so remove the asmdef
+	- Sometimes, it just doesn't copy the library into the apk. Double check the platform for `PopH264/armeabi-v7a/libPopH264.so` is `ArmV7` (or the correct one for your platform)
+	- Sometimes, this still doesn't help and unity needs to restart.
+	- Check that the lib is making it into the `.apk` by checking the libs exist in
+		- `YourProject/Temp/StagingArea/libs/armeabi-v7a`
+		- Rename your `.apk` to `.zip`, unzip it, it should be present in `/libs/armeabi-v7a`. If not... unity is not putting it in the right place. Check logs, restart unity, clear cache/temp/library
+
+Unity Integration
+==============
+- Create a `new Pop.H264.Decoder`
+- Push h264 data with your own reference frame number/time (normally you would extract this from an mp4/webm/ts/etc container, but it can be just an incrementing number)
+- Check your decoder every frame for a new frame
+
 Misc Notes
 ============================
 The following are various notes which PopH264 handles. (Or at least, it should handle and there should be an issue covering it if not).
