@@ -80,6 +80,12 @@ LOCAL_LDLIBS  	+= -llog			# logging
 #LOCAL_LDLIBS	+= -lz				# For minizip
 #LOCAL_LDLIBS	+= -lOpenSLES		# audio
 
+
+# native/ndk mediacodec
+LOCAL_LDLIBS += -lmediandk
+
+
+
 # gr: when the test app executable tries to run, it can't find the c++shared.so next to it
 #	use this to alter the rpath so it finds it
 #LOCAL_LDFLAGS	+= -rdynamic

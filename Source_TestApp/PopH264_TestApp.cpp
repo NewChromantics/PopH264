@@ -289,9 +289,6 @@ void CreateJavaVm()
 //#define main	android_main
 #endif
 
-#include "media/NdkMediaCodec.h"
-#include "media/NdkMediaExtractor.h"
-
 void android_main(struct android_app* state)
 {
 	std::cout << "android_main" << std::endl;
@@ -314,7 +311,6 @@ void android_main(struct android_app* state)
 int main()
 {
 	std::cout << "main" << std::endl;
-	AMediaCodec_createDecoderByType("video/avc");
 	
 #if defined(TARGET_ANDROID)
 	CreateJavaVm();
