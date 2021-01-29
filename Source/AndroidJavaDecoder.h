@@ -144,7 +144,7 @@ private:
 	std::shared_ptr<Platform::TMediaFormat>		AllocFormat();
 	void			Alloc(SoyPixelsMeta SurfaceMeta,std::shared_ptr<Platform::TMediaFormat> Format,std::shared_ptr<Opengl::TContext> OpenglContext,bool SingleBufferMode);
 
-	void			CreateCodec();		//	returns false if we're not ready to push packets
+	bool			CreateCodec();		//	returns false if we're not ready to push packets (ie, waiting for headers still)
 	void 			DequeueOutputBuffers();
 	void			DequeueInputBuffers();
 	//	input thread pulling data

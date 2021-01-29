@@ -2,11 +2,14 @@
 #		this makes them jump in xcode
 LOCAL_PATH := $(abspath $(call my-dir))
 
-$(warning $(LOCAL_PATH))	#	debug
+$(info $(LOCAL_PATH))	#	debug
+$(info $(ANDROID_ABI))	#	debug
+$(info $(TARGET_ARCH_ABI))	#	debug
+
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := libPopH264
-LOCAL_SRC_FILES := ../../libPopH264/libs/$(TARGET_ARCH_ABI)/libPopH264.so
+LOCAL_SRC_FILES := ../../libPopH264/libs/$(ANDROID_ABI)/libPopH264.so
 include $(PREBUILT_SHARED_LIBRARY)
 
 
@@ -70,11 +73,27 @@ $(LOCAL_PATH)/$(SOY_PATH)/src	\
 $(LOCAL_PATH)/$(SRC)/Source/	
 
 
+# include explicit java support
+# https://stackoverflow.com/a/33945805/355753
+#LOCAL_C_INCLUDES += ${JNI_H_INCLUDE}
+#LOCAL_SHARED_LIBRARIES += libnativehelper
+
+# missing
+#LOCAL_WHOLE_STATIC_LIBRARIES += libsigchain
+#LOCAL_LDFLAGS += \
+#	-Wl,--export-dynamic \
+#	-Wl,--version-script,art/sigchainlib/version-script.txt
+# gr: missing, which means JNI_CreateJavaVM is missing :/
+#LOCAL_LDLIBS  	+= -ljvm			# java
+
+# native glue support (hoping this starts JVM)
+LOCAL_STATIC_LIBRARIES += android_native_app_glue
+
+
 
 # use warning as echo
 #$(warning $(LOCAL_C_INCLUDES))
 
-LOCAL_STATIC_LIBRARIES :=
 #LOCAL_STATIC_LIBRARIES += android-ndk-profiler
 
 LOCAL_SHARED_LIBRARIES := libPopH264
@@ -104,3 +123,4 @@ include $(BUILD_EXECUTABLE)
 
 
 #$(call import-module,android-ndk-profiler)
+$(call import-module,android/native_app_glue)

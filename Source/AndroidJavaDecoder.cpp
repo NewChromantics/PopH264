@@ -216,11 +216,12 @@ Android::TDecoder::TDecoder(std::function<void(const SoyPixelsImpl&,size_t)> OnD
 }
 
 
-void Android::TDecoder::CreateCodec()
+//	return true if ready, return false if not ready (try again!). Exception on error
+bool Android::TDecoder::CreateCodec()
 {
 	//	codec ready
 	if ( mCodec )
-		return;
+		return true;
 	
 	//	need SPS & PPS 
 	if ( mPendingSps.IsEmpty() || mPendingPps.IsEmpty() )
@@ -232,6 +233,8 @@ void Android::TDecoder::CreateCodec()
 		if ( mPendingPps.IsEmpty() )
 			Error << "PPS ";
 		throw Soy::AssertException(Error);
+		std::Debug << Error.str() << std::endl;
+		return false;
 	}	
 	
 	
@@ -266,6 +269,7 @@ void Android::TDecoder::CreateCodec()
 	}
 	*/
 	
+	std::Debug << __PRETTY_FUNCTION__ << "making format..." << std::endl;
 	
 	//	make a format
 	auto SingleBufferMode = true;
@@ -470,6 +474,7 @@ void Android::TDecoder::CreateCodec()
 	//mCodecStarted = true;
 	
 	std::Debug << __func__ << " finished" << std::endl;
+	return true;
 }
 
 
@@ -555,7 +560,7 @@ bool Android::TDecoder::DecodeNextPacket()
 	//	we need to pull SPS & PPS and create codec
 	if ( !mCodec )
 	{
-		std::Debug << "DecodeNextPacket: Creating codec" << std::endl;
+		std::Debug << __PRETTY_FUNCTION__<< " Creating codec..." << std::endl;
 		try
 		{
 			//	gr: this will create codec if we're ready to
@@ -565,8 +570,8 @@ bool Android::TDecoder::DecodeNextPacket()
 		}
 		catch(std::exception& e)
 		{
-			std::Debug << "DecodeNextPacket CreateCodec failed; " << e.what() << std::endl;
-			return true;
+			std::Debug << "DecodeNextPacket CreateCodec failed; " << e.what() << " (assuming we need more data)" << std::endl;
+			return false;
 		}
 	}
 	
@@ -580,6 +585,14 @@ bool Android::TDecoder::DecodeNextPacket()
 
 void Android::TDecoder::GetNextInputData(ArrayBridge<uint8_t>&& PacketBuffer)
 {
+	//	gr: if no codec, fetch header packets
+	//	gr:	make this neater 
+	if ( !mCodec )
+	{
+		PeekHeaderNalus( GetArrayBridge(mPendingSps), GetArrayBridge(mPendingPps) );
+		CreateCodec();
+	}
+
 	auto& Nalu = PacketBuffer;
 	PopH264::FrameNumber_t FrameNumber=0;
 	//	input thread wants some data to process
