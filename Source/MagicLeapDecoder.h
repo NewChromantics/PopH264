@@ -111,7 +111,7 @@ private:
 	void			PushInputBuffer(int64_t BufferIndex);
 	
 private:
-	MLHandle		mHandle = ML_INVALID_HANDLE;
+	MLHandle		mCodec = ML_INVALID_HANDLE;
 
 	std::function<void(ArrayBridge<uint8_t>&&)>	mPopPendingData;
 	std::function<bool()>						mHasPendingData;
@@ -142,7 +142,7 @@ private:
 	std::string		GetDebugState();
 	
 private:
-	MLHandle		mHandle = ML_INVALID_HANDLE;
+	MLHandle		mCodec = ML_INVALID_HANDLE;
 	
 	TInputThread	mInputThread;
 	TOutputThread	mOutputThread;

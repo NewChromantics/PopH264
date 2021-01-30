@@ -5,6 +5,9 @@
 #pragma message "Building with android API level " STR(__ANDROID_API__)
 
 
+#include "TDecoder.h"
+#include "SoyPixels.h"
+#include "SoyMedia.h"	//	TPixelBuffer
 
 
 namespace Android
@@ -84,8 +87,8 @@ void Android::IsOkay(media_status_t Status,const char* Context)
 	throw Soy::AssertException(Error);
 }
 
-
-SoyPixelsMeta Android::GetPixelMeta(MLHandle Format)
+/*
+SoyPixelsMeta Android::GetPixelMeta(MediaFormat_t Format)
 {
 	Soy_AssertTodo();
 /*
@@ -147,7 +150,7 @@ SoyPixelsMeta Android::GetPixelMeta(MLHandle Format)
 	SoyPixelsMeta Meta( Width, Height, PixelFormat );
 	return Meta;
 	*/
-}
+//}
 
 /*
 void MagicLeap::EnumCodecs(std::function<void(const std::string&)> EnumCodec)
@@ -310,7 +313,9 @@ bool Android::TDecoder::CreateCodec()
 		void *userdata,
 		int32_t index)
 	{
-		std::Debug << "OnInputAvailible" << std::endl;
+		auto& This = *reinterpret_cast<TDecoder*>(userdata);
+		//std::Debug << "OnInputAvailible(" << index << ")" << std::endl;
+		This.OnInputBufferAvailible(index);
 	};
 	
 	AMediaCodecOnAsyncOutputAvailable OnOutputAvailible = [](AMediaCodec *codec,
@@ -318,13 +323,27 @@ bool Android::TDecoder::CreateCodec()
 		int32_t index,
 		AMediaCodecBufferInfo *bufferInfo)
 	{
-		std::Debug << "OnOutputAvailible" << std::endl;
+		if ( !userdata )
+		{
+			std::Debug << "OnOutputAvailible null this" << std::endl;
+			return;
+		}
+		if ( !bufferInfo )
+		{
+			std::Debug << "OnOutputAvailible null bufferinfo (index=" << index << ")" << std::endl;
+			return;
+		}
+		
+		auto& This = *reinterpret_cast<TDecoder*>(userdata);
+		std::Debug << "OnOutputAvailible(" << index << ")" << std::endl;
+		This.OnOutputBufferAvailible(index,*bufferInfo);
 	};
 
 	AMediaCodecOnAsyncFormatChanged OnFormatChanged = [](AMediaCodec *codec,
 		void *userdata,
 		AMediaFormat *format)
 	{
+		auto& This = *reinterpret_cast<TDecoder*>(userdata);
 		std::Debug << "OnFormatChanged" << std::endl;
 	};
 
@@ -334,7 +353,10 @@ bool Android::TDecoder::CreateCodec()
 		int32_t actionCode,
 		const char *detail)
 	{
-		std::Debug << "OnError" << std::endl;
+		auto& This = *reinterpret_cast<TDecoder*>(userdata);
+		if ( !detail )
+			detail = "<null>";
+		std::Debug << "OnError( " << GetStatusString(error) << ", actionCode=" << actionCode << ", detail=" << detail << ")" << std::endl;
 	};
 	AMediaCodecOnAsyncNotifyCallback Callbacks = {0};
 	Callbacks.onAsyncInputAvailable = OnInputAvailible;
@@ -647,11 +669,11 @@ void Android::TInputThread::PushInputBuffer(int64_t BufferIndex)
 }
 
 
-void Android::TInputThread::OnInputBufferAvailible(MLHandle CodecHandle,int64_t BufferIndex)
+void Android::TInputThread::OnInputBufferAvailible(MediaCodec_t Codec,int64_t BufferIndex)
 {
 	{
 		std::lock_guard<std::mutex> Lock(mInputBuffersLock);
-		mHandle = CodecHandle;
+		mCodec = Codec;
 		mInputBuffers.PushBack(BufferIndex);
 	}
 	std::Debug << "OnInputBufferAvailible(" << BufferIndex << ") " << GetDebugState() << std::endl;
@@ -660,20 +682,20 @@ void Android::TInputThread::OnInputBufferAvailible(MLHandle CodecHandle,int64_t 
 
 void Android::TDecoder::OnInputBufferAvailible(int64_t BufferIndex)
 {
-	MLHandle Handle;
-	mInputThread.OnInputBufferAvailible( Handle, BufferIndex );
+	mInputThread.OnInputBufferAvailible( mCodec, BufferIndex );
 }
 
-void Android::TDecoder::OnOutputBufferAvailible(int64_t BufferIndex,const MLMediaCodecBufferInfo& BufferMeta)
+void Android::TDecoder::OnOutputBufferAvailible(int64_t BufferIndex,const MediaBufferInfo_t& BufferMeta)
 {
 	TOutputBufferMeta Meta;
 	Meta.mPixelMeta = mOutputPixelMeta;
 	Meta.mBufferIndex = BufferIndex;
 	Meta.mMeta = BufferMeta;
-	mOutputThread.OnOutputBufferAvailible( BufferIndex, Meta );
+	mOutputThread.OnOutputBufferAvailible( mCodec, Meta );
 	std::Debug << "OnOutputBufferAvailible(" << BufferIndex << ") " << GetDebugState() << mOutputThread.GetDebugState() << std::endl;
 }
 
+/*
 void Android::TDecoder::OnOutputTextureAvailible()
 {
 	mOutputThread.OnOutputTextureAvailible();
@@ -683,7 +705,7 @@ void Android::TDecoder::OnOutputTextureWritten(int64_t PresentationTime)
 {
 	mOutputThread.OnOutputTextureWritten(PresentationTime);
 }
-
+/*
 void Android::TDecoder::OnOutputFormatChanged(MLHandle NewFormat)
 {
 	//	gr: we should do this like a queue for the output thread
@@ -700,7 +722,7 @@ void Android::TDecoder::OnOutputFormatChanged(MLHandle NewFormat)
 		std::Debug << __PRETTY_FUNCTION__ << " Exception " << e.what() << std::endl;
 	}
 }
-
+*/
 
 
 
@@ -719,14 +741,14 @@ void Android::TOutputThread::OnInputSubmitted(int32_t PresentationTime)
 }
 
 
-void Android::TOutputThread::OnOutputBufferAvailible(MLHandle CodecHandle,const TOutputBufferMeta& BufferMeta)
+void Android::TOutputThread::OnOutputBufferAvailible(MediaCodec_t Codec,const TOutputBufferMeta& BufferMeta)
 {
 	std::lock_guard<std::mutex> Lock(mOutputBuffersLock);
 	mOutputBuffers.PushBack( BufferMeta );
-	mCodecHandle = CodecHandle;
+	mCodec = Codec;
 	Wake();
 }
-
+/*
 void Android::TOutputThread::OnOutputTextureAvailible()
 {
 	//	gr: from the forums, there's a suggestion that no calls should be done during a callback
@@ -762,21 +784,21 @@ void Android::TOutputThread::OnOutputTextureWritten(int64_t PresentationTime)
 	Debug << "OnOutputTextureWritten(" << PresentationTime << ") but 0/" << mOutputTextures.GetSize() << " textures availible to mark written";
 	throw Soy::AssertException(Debug);
 }
-
+*/
 
 bool Android::TOutputThread::CanSleep()
 {
 	//	buffers to get
 	if ( !mOutputBuffers.IsEmpty() )
 		return false;
-	
+	/*
 	//	textures to get
 	if ( mOutputTexturesAvailible > 0 )
 		return false;
 	
 	if ( IsAnyOutputTextureReady() )
 		return false;
-	
+	*/
 	return true;
 }
 
@@ -791,11 +813,9 @@ bool Android::TInputThread::CanSleep()
 	
 	return false;
 }
-
+/*
 void Android::TOutputThread::RequestOutputTexture()
 {
-Soy_AssertTodo();
-/*
 	TOutputTexture OutputTexture;
 	{
 		//	gr: is this blocking?
@@ -816,9 +836,8 @@ Soy_AssertTodo();
 		mOutputTexturesAvailible--;
 	}
 	std::Debug << "Got new texture 0x" << std::hex << OutputTexture.mTextureHandle << std::dec << "..." << GetDebugState() << std::endl;
-	*/
 }
-
+*/
 vec4x<uint8_t> GetDebugColour(int Index)
 {
 	vec4x<uint8_t> Colours[] =
@@ -835,7 +854,7 @@ vec4x<uint8_t> GetDebugColour(int Index)
 	Index = Index % std::size(Colours);
 	return Colours[Index];
 }
-
+/*
 void Android::TOutputThread::PushOutputTexture(TOutputTexture& OutputTexture)
 {
 	//	for now, dummy texture, we need to push a handle (or make this readpixels on a gl thread)
@@ -893,15 +912,15 @@ void Android::TOutputThread::ReleaseOutputTexture(MLHandle TextureHandle)
 	}
 
 Soy_AssertTodo();
-/*
+
 	//	release it
 	auto Result = MLMediaCodecReleaseFrame( mCodecHandle, TextureHandle );
 	IsOkay( Result, "MLMediaCodecReleaseFrame" );
-	*/
 }
-
+*/
 void Android::TOutputThread::PopOutputBuffer(const TOutputBufferMeta& BufferMeta)
 {
+	Soy_AssertTodo();
 /*
 	{
 		std::lock_guard<std::mutex> Lock(mPushFunctionsLock);
@@ -913,6 +932,7 @@ void Android::TOutputThread::PopOutputBuffer(const TOutputBufferMeta& BufferMeta
 		}
 	}
 	*/
+	/*
 	//	gr: hold onto pointer and don't release buffer until it's been read,to avoid a copy
 	//		did this on android and it was a boost
 	Soy::TScopeTimerPrint Timer(__PRETTY_FUNCTION__,0);
@@ -925,7 +945,7 @@ void Android::TOutputThread::PopOutputBuffer(const TOutputBufferMeta& BufferMeta
 		//	release back!
 		auto Result = MLMediaCodecReleaseOutputBuffer( mCodecHandle, BufferHandle, Render );
 		IsOkay( Result, "MLMediaCodecReleaseOutputBuffer");
-	*/
+	*//*
 	};
 
 	const uint8_t* Data = nullptr;
@@ -992,6 +1012,7 @@ void Android::TOutputThread::PushFrame(const SoyPixelsImpl& Pixels,size_t FrameN
 
 bool Android::TOutputThread::Iteration()
 {
+/*
 	//	flush any texture requests
 	if ( mOutputTexturesAvailible > 0 )
 	{
@@ -1011,7 +1032,7 @@ bool Android::TOutputThread::Iteration()
 	{
 		PushOutputTextures();
 	}
-	
+	*/
 	if ( !mOutputBuffers.IsEmpty() )
 	{
 		//	read a buffer
@@ -1119,18 +1140,19 @@ std::string Android::TInputThread::GetDebugState()
 std::string Android::TOutputThread::GetDebugState()
 {
 	std::lock_guard<std::mutex> Lock(mOutputBuffersLock);
-	std::lock_guard<std::recursive_mutex> Lock2(mOutputTexturesLock);
+	//std::lock_guard<std::recursive_mutex> Lock2(mOutputTexturesLock);
 
 	std::stringstream Debug;
 	Debug << " mOutputBuffers[";
 	for ( auto i=0;	i<mOutputBuffers.GetSize();	i++ )
 		Debug << mOutputBuffers[i].mBufferIndex << ",";
 	Debug << "] ";
+	/*
 	Debug << "mOutputTexturesAvailible=" << mOutputTexturesAvailible << " ";
 	Debug << "mOutputTextures[";
 	for ( auto i=0;	i<mOutputTextures.GetSize();	i++ )
 		Debug << std::hex << "0x" << mOutputTextures[i].mTextureHandle << std::dec << ",";
 	Debug << "] ";
-
+*/
 	return Debug.str();
 }
