@@ -938,6 +938,16 @@ void Android::TOutputThread::PopOutputBuffer(const TOutputBufferMeta& BufferMeta
 	//	release buffer back as data has been used
 	auto ReleaseBuffer = [&](bool Render=true)
 	{
+	/*10-15 06:49:49.856  9681  9684 I CCodecBufferChannel: [c2.qti.avc.decoder#184] cannot render buffer without surface
+10-15 06:49:49.856  9681  9683 I PopH264 : pop: void Android::TOutputThread::PopOutputBuffer(const Android::TOutputBufferMeta &) took 1ms/0ms to execute
+10-15 06:49:49.856  9681  9683 I PopH264 : pop: Exception getting output buffer 0; SoyPixelsRemote meta size(0) different to data size (36864) mOutputBuffers[] 
+10-15 06:49:50.857  9681  9683 E MediaCodec: getBufferAndFormat - invalid operation (the index 0 is not owned by client)
+10-15 06:49:50.857  9681  9683 I PopH264 : pop: Got Invalid OutputBuffer(0) BufferSize=4294967295 BufferData=0x0
+10-15 06:49:50.858  9681  9683 E NdkMediaCodec: sf error code: -13
+10-15 06:49:50.858  9681  9683 I PopH264 : pop: void Android::TOutputThread::PopOutputBuffer(const Android::TOutputBufferMeta &) took 1ms/0ms to execute
+10-15 06:49:50.859  9681  9683 I PopH264 : pop: Exception getting output buffer 0; AMedia error -10000/AMEDIA_ERROR_UNKNOWN in MLMediaCodecReleaseOutputBuffer mOutputBuffers[] 
+10-15 06:49:51.630   986   986 I QC2CompStore: Deleting component(c2.qti.avc.decoder) id(32)
+10-15 06:49:51.632  1167  1167 E mediaserver: unlinkToDeath: removed reference to death recipient but */
 		auto Result = AMediaCodec_releaseOutputBuffer( mCodec, BufferIndex, Render );
 		IsOkay( Result, "MLMediaCodecReleaseOutputBuffer");
 	};
