@@ -698,7 +698,7 @@ void Android::TDecoder::OnOutputBufferAvailible(int64_t BufferIndex,const MediaB
 	Meta.mPixelMeta = mOutputPixelMeta;
 	Meta.mBufferIndex = BufferIndex;
 	Meta.mMeta = BufferMeta;
-	mOutputThread.OnOutputBufferAvailible( mCodec, Meta );
+	mOutputThread.OnOutputBufferAvailible( mCodec, mAsyncBuffers, Meta );
 	std::Debug << "OnOutputBufferAvailible(" << BufferIndex << ") " << GetDebugState() << mOutputThread.GetDebugState() << std::endl;
 }
 
@@ -748,11 +748,12 @@ void Android::TOutputThread::OnInputSubmitted(int32_t PresentationTime)
 }
 
 
-void Android::TOutputThread::OnOutputBufferAvailible(MediaCodec_t Codec,const TOutputBufferMeta& BufferMeta)
+void Android::TOutputThread::OnOutputBufferAvailible(MediaCodec_t Codec,bool AsyncBuffers,const TOutputBufferMeta& BufferMeta)
 {
 	std::lock_guard<std::mutex> Lock(mOutputBuffersLock);
 	mOutputBuffers.PushBack( BufferMeta );
 	mCodec = Codec;
+	mAsyncBuffers = AsyncBuffers;
 	Wake();
 }
 /*
@@ -927,36 +928,20 @@ Soy_AssertTodo();
 */
 void Android::TOutputThread::PopOutputBuffer(const TOutputBufferMeta& BufferMeta)
 {
-	Soy_AssertTodo();
-/*
-	{
-		std::lock_guard<std::mutex> Lock(mPushFunctionsLock);
-		if ( mPushFunctions.IsEmpty() )
-		{
-			std::stringstream Error;
-			Error << "PopOutputBuffer(" << BufferMeta.mBufferIndex << ") but no push funcs yet (probably race condition)";
-			throw Soy::AssertException( Error );
-		}
-	}
-	*/
-	/*
 	//	gr: hold onto pointer and don't release buffer until it's been read,to avoid a copy
 	//		did this on android and it was a boost
 	Soy::TScopeTimerPrint Timer(__PRETTY_FUNCTION__,0);
-	auto BufferHandle = static_cast<MLHandle>( BufferMeta.mBufferIndex );
+	//auto BufferHandle = static_cast<MLHandle>( BufferMeta.mBufferIndex );
 
+	auto BufferIndex = BufferMeta.mBufferIndex;
+
+	//	release buffer back as data has been used
 	auto ReleaseBuffer = [&](bool Render=true)
 	{
-	Soy_AssertTodo();
-	/*
-		//	release back!
-		auto Result = MLMediaCodecReleaseOutputBuffer( mCodecHandle, BufferHandle, Render );
+		auto Result = AMediaCodec_releaseOutputBuffer( mCodec, BufferIndex, Render );
 		IsOkay( Result, "MLMediaCodecReleaseOutputBuffer");
-	*//*
 	};
 
-	const uint8_t* Data = nullptr;
-	size_t DataSize = -1;
 	/*
 	MLMediaCodecBufferInfo BufferMeta;
 	int16_t Timeout = 0;
@@ -965,41 +950,27 @@ void Android::TOutputThread::PopOutputBuffer(const TOutputBufferMeta& BufferMeta
 	IsOkay( Result, "MLMediaCodecDequeueOutputBuffer");
 	std::Debug << "MLMediaCodecDequeueOutputBuffer returned buffer index " << NewBufferIndex << " compared to " << OutputBufferIndex << " time=" << BufferMeta.presentation_time_us << std::endl;
 	*/
-	
-	Soy_AssertTodo();
-	/*
-	auto Result = MLMediaCodecGetOutputBufferPointer( mCodecHandle, BufferHandle, &Data, &DataSize );
-	
-	//	gr: if we're in hardware mode, this DOES NOT return null/0 like docs say, but instead invalid operation
-	//		we release it
-	//	https://forum.magicleap.com/hc/en-us/community/posts/360055134771-Stagefright-assert-after-calling-MLMediaCodecDequeueInputBuffer?page=1#community_comment_360008514291
-	//	gr: we should probably store that we're in hardware mode...
-	if ( Result == MLMediaGenericResult_InvalidOperation )
-	{
-		std::Debug << "MLMediaCodecGetOutputBufferPointer returned MLMediaGenericResult_InvalidOperation, assuming hardware" << std::endl;
-		//	flush this frame (render=true) to get a frame-availible callback
-		ReleaseBuffer(true);
-		return;
-	}
-	
-	IsOkay( Result, "MLMediaCodecGetOutputBufferPointer");
-	
-	
+
+	size_t BufferSize = -1;
+	uint8_t* BufferData = AMediaCodec_getOutputBuffer( mCodec, BufferIndex, &BufferSize ); 
+		
 	//	if data is null, then output is a surface
-	if ( Data == nullptr || DataSize == 0 )
+	if ( BufferData == nullptr || BufferSize == 0 )
 	{
-		std::Debug << "Got Invalid OutputBuffer(" << BufferMeta.mBufferIndex << ") DataSize=" << DataSize << " DataPtr=0x" << std::hex << (size_t)(Data) << std::dec << std::endl;
+		std::Debug << "Got Invalid OutputBuffer(" << BufferMeta.mBufferIndex << ") BufferSize=" << BufferSize << " BufferData=0x" << std::hex << (size_t)(BufferData) << std::dec << std::endl;
 		ReleaseBuffer();
 		return;
 	}
 	
-	std::Debug << "Got OutputBuffer(" << BufferMeta.mBufferIndex << ") DataSize=" << DataSize << " DataPtr=0x" << std::hex << (size_t)(Data) << std::dec << std::endl;
+	auto FrameTime = BufferMeta.mMeta.presentationTimeUs;
+	auto Flags = BufferMeta.mMeta.flags; 
+	std::Debug << "Got OutputBuffer(" << BufferMeta.mBufferIndex << ") BufferSize=" << BufferSize << " BufferData=0x" << std::hex << (size_t)(BufferData) << std::dec << " FrameTime=" << FrameTime << " Flags=" << Flags << std::endl;
 	try
 	{
 		//	output pixels!
-		auto* DataMutable = const_cast<uint8_t*>( Data );
-		SoyPixelsRemote NewPixels( DataMutable, DataSize, BufferMeta.mPixelMeta );
-		PushFrame( NewPixels );
+		auto* BufferDataMutable = const_cast<uint8_t*>( BufferData );
+		SoyPixelsRemote NewPixels( BufferDataMutable, BufferSize, BufferMeta.mPixelMeta );
+		PushFrame( NewPixels, FrameTime );
 		ReleaseBuffer();
 	}
 	catch(std::exception& e)
@@ -1008,7 +979,6 @@ void Android::TOutputThread::PopOutputBuffer(const TOutputBufferMeta& BufferMeta
 		ReleaseBuffer();
 		throw;
 	}
-	*/
 }
 
 
@@ -1044,9 +1014,14 @@ bool Android::TOutputThread::Iteration()
 	{
 		//	read a buffer
 		TOutputBufferMeta BufferMeta;
+		if ( mAsyncBuffers )
 		{
 			std::lock_guard<std::mutex> Lock(mOutputBuffersLock);
 			BufferMeta = mOutputBuffers.PopAt(0);
+		}
+		else
+		{
+			Soy_AssertTodo();
 		}
 		try
 		{

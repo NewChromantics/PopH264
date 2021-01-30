@@ -67,7 +67,7 @@ public:
 	virtual bool	CanSleep() override;
 	
 	void			OnInputSubmitted(int32_t PresentationTime);
-	void			OnOutputBufferAvailible(MediaCodec_t CodecHandle,const TOutputBufferMeta& BufferMeta);
+	void			OnOutputBufferAvailible(MediaCodec_t Codec,bool AsyncBuffers,const TOutputBufferMeta& BufferMeta);
 	std::string		GetDebugState();
 	/*
 	void			OnOutputTextureWritten(int64_t PresentationTime);
@@ -99,6 +99,7 @@ private:
 	size_t						mOutputTextureCounter = 0;	//	for debug colour output
 	*/
 	MediaCodec_t				mCodec = nullptr;
+	bool						mAsyncBuffers = false;
 };
 
 
