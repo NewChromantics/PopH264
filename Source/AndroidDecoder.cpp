@@ -1,5 +1,10 @@
 #include "AndroidDecoder.h"
 
+#define STR_HELPER(x) #x
+#define STR(x) STR_HELPER(x)
+#pragma message "Building with android API level " STR(__ANDROID_API__)
+
+
 
 
 namespace Android
