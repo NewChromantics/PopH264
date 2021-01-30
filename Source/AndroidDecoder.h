@@ -114,7 +114,7 @@ public:
 	virtual bool	CanSleep() override;
 	
 	bool			HasPendingData()	{	return mHasPendingData();	}
-	void			OnInputBufferAvailible(MediaCodec_t CodecHandle,int64_t BufferIndex);
+	void			OnInputBufferAvailible(MediaCodec_t CodecHandle,bool AsyncBuffers,int64_t BufferIndex);
 	std::string		GetDebugState();
 	void			OnInputSubmitted(int32_t PresentationTime)	{}
 	
@@ -123,6 +123,7 @@ private:
 	
 private:
 	MediaCodec_t	mCodec = nullptr;
+	bool			mAsyncBuffers = false;
 
 	std::function<void(ArrayBridge<uint8_t>&&)>	mPopPendingData;
 	std::function<bool()>						mHasPendingData;
@@ -149,7 +150,7 @@ private:
 	
 	void			OnInputBufferAvailible(int64_t BufferIndex);
 	void			OnOutputBufferAvailible(int64_t BufferIndex,const MediaBufferInfo_t& BufferMeta);
-	//void			OnOutputFormatChanged(MLHandle NewFormat);
+	void			OnOutputFormatChanged(AMediaFormat& NewFormat);
 	//void			OnOutputTextureWritten(int64_t PresentationTime);
 	//void			OnOutputTextureAvailible();
 
@@ -158,7 +159,7 @@ private:
 	//std::shared_ptr<Platform::TMediaFormat>		AllocFormat();
 	//void			Alloc(SoyPixelsMeta SurfaceMeta,std::shared_ptr<Platform::TMediaFormat> Format,std::shared_ptr<Opengl::TContext> OpenglContext,bool SingleBufferMode);
 
-	bool			CreateCodec();		//	returns false if we're not ready to push packets (ie, waiting for headers still)
+	void			CreateCodec();		//	returns false if we're not ready to push packets (ie, waiting for headers still)
 	void 			DequeueOutputBuffers();
 	void			DequeueInputBuffers();
 	//	input thread pulling data
@@ -170,6 +171,7 @@ private:
 	Array<uint8_t>	mPendingPps;	
 	//std::shared_ptr<JniMediaFormat>		mFormat;	//	format for codec!
 	MediaCodec_t	mCodec = nullptr;
+	bool			mAsyncBuffers = false;
 	//std::shared_ptr<TSurfaceTexture>	mSurfaceTexture;
 	
 	std::function<void()>	mOnStartThread;

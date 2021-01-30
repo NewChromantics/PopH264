@@ -278,11 +278,14 @@ Android::TDecoder::TDecoder(std::function<void(const SoyPixelsImpl&,size_t)> OnD
 
 
 //	return true if ready, return false if not ready (try again!). Exception on error
-bool Android::TDecoder::CreateCodec()
+void Android::TDecoder::CreateCodec()
 {
 	//	codec ready
 	if ( mCodec )
-		return true;
+		return;
+
+	//	fetch header packets	
+	PeekHeaderNalus( GetArrayBridge(mPendingSps), GetArrayBridge(mPendingPps) );
 	
 	//	need SPS & PPS 
 	if ( mPendingSps.IsEmpty() || mPendingPps.IsEmpty() )
@@ -294,8 +297,6 @@ bool Android::TDecoder::CreateCodec()
 		if ( mPendingPps.IsEmpty() )
 			Error << "PPS ";
 		throw Soy::AssertException(Error);
-		std::Debug << Error.str() << std::endl;
-		return false;
 	}	
 	
 	
@@ -343,8 +344,18 @@ bool Android::TDecoder::CreateCodec()
 		void *userdata,
 		AMediaFormat *format)
 	{
+		if ( !userdata )
+		{
+			std::Debug << "OnFormatChanged null this" << std::endl;
+			return;
+		}
+		if ( !format )
+		{
+			std::Debug << "OnFormatChanged null format" << std::endl;
+			return;
+		}
 		auto& This = *reinterpret_cast<TDecoder*>(userdata);
-		std::Debug << "OnFormatChanged" << std::endl;
+		This.OnOutputFormatChanged(*format);
 	};
 
 	AMediaCodecOnAsyncError OnError = [](AMediaCodec *codec,
@@ -369,6 +380,7 @@ bool Android::TDecoder::CreateCodec()
 	#if __ANDROID_API__ >= 28
 	Status = AMediaCodec_setAsyncNotifyCallback( mCodec, Callbacks, this );
 	IsOkay(Status,"AMediaCodec_setAsyncNotifyCallback");
+	mAsyncBuffers = true;
 	#endif 
 
 	auto Width = 123;
@@ -464,7 +476,6 @@ bool Android::TDecoder::CreateCodec()
 	IsOkay(Status,"AMediaCodec_Start");
 	
 	std::Debug << __PRETTY_FUNCTION__ << " Codec created." << std::endl;
-	return true;
 }
 
 
@@ -556,10 +567,7 @@ bool Android::TDecoder::DecodeNextPacket()
 		std::Debug << __PRETTY_FUNCTION__<< " Creating codec..." << std::endl;
 		try
 		{
-			//	gr: this will create codec if we're ready to
-			//	gr: this will drop this packet if pre sps/pps		
-			Array<uint8_t> NaluPacket;
-			GetNextInputData( GetArrayBridge(NaluPacket) );
+			CreateCodec();
 		}
 		catch(std::exception& e)
 		{
@@ -569,8 +577,11 @@ bool Android::TDecoder::DecodeNextPacket()
 	}
 	
 	//	gr: we don't currently have callbacks for buffers, so deque any that are availible
-	DequeueInputBuffers();
-	DequeueOutputBuffers();
+	if ( !mAsyncBuffers )
+	{
+		DequeueInputBuffers();
+		DequeueOutputBuffers();
+	}
 	
 	//	even if we didn't get a frame, try to decode again as we processed a packet
 	return true;
@@ -578,13 +589,8 @@ bool Android::TDecoder::DecodeNextPacket()
 
 void Android::TDecoder::GetNextInputData(ArrayBridge<uint8_t>&& PacketBuffer)
 {
-	//	gr: if no codec, fetch header packets
-	//	gr:	make this neater 
-	if ( !mCodec )
-	{
-		PeekHeaderNalus( GetArrayBridge(mPendingSps), GetArrayBridge(mPendingPps) );
-		CreateCodec();
-	}
+	std::Debug << __PRETTY_FUNCTION__ << std::endl;
+	
 
 	auto& Nalu = PacketBuffer;
 	PopH264::FrameNumber_t FrameNumber=0;
@@ -592,10 +598,10 @@ void Android::TDecoder::GetNextInputData(ArrayBridge<uint8_t>&& PacketBuffer)
 	if (!PopNalu(GetArrayBridge(Nalu),FrameNumber))
 	{
 		std::stringstream Error;
-		Error << "GetNextInputData thread, no nalu ready ";//(" << GetPendingDataSize() <<" bytes ready pending)";
+		Error << "GetNextInputData, no nalu ready ";//(" << GetPendingDataSize() <<" bytes ready pending)";
 		throw Soy::AssertException(Error);
 	}
-
+/*
 	//	update header packets
 	auto NaluType = H264::GetPacketType(GetArrayBridge(Nalu));
 	if (NaluType == H264NaluContent::SequenceParameterSet)
@@ -612,6 +618,7 @@ void Android::TDecoder::GetNextInputData(ArrayBridge<uint8_t>&& PacketBuffer)
 
 	//	reached here without throwing, so data is okay
 	//	gr: skip if sps?
+	*/
 }
 
 void Android::TDecoder::OnDecodedFrame(const SoyPixelsImpl& Pixels,size_t FrameNumber)
@@ -622,20 +629,19 @@ void Android::TDecoder::OnDecodedFrame(const SoyPixelsImpl& Pixels,size_t FrameN
 
 void Android::TInputThread::PushInputBuffer(int64_t BufferIndex)
 {
-	Soy_AssertTodo();
-	/*
 	//	gr: we can grab a buffer without submitted it, so this is okay if we fail here
 	std::Debug << "Pushing to input buffer #" << BufferIndex << std::endl;
-		
-	auto BufferHandle = static_cast<MLHandle>( BufferIndex );
+
+	//auto BufferHandle = static_cast<MLHandle>( BufferIndex );
 	uint8_t* Buffer = nullptr;
 	size_t BufferSize = 0;
-	auto Result = MLMediaCodecGetInputBufferPointer( mHandle, BufferHandle, &Buffer, &BufferSize );
-	IsOkay( Result, "MLMediaCodecGetInputBufferPointer" );
+	Buffer = AMediaCodec_getInputBuffer( mCodec, BufferIndex, &BufferSize );
+	//auto Result = MLMediaCodecGetInputBufferPointer( mHandle, BufferHandle, &Buffer, &BufferSize );
+	//IsOkay( Result, "MLMediaCodecGetInputBufferPointer" );
 	if ( Buffer == nullptr )
 	{
 		std::stringstream Error;
-		Error << "MLMediaCodecGetInputBufferPointer gave us null buffer (size=" << BufferSize << ")";
+		Error << "AMediaCodec_getInputBuffer gave us null buffer (size=" << BufferSize << ")";
 		throw Soy::AssertException(Error);
 	}
 
@@ -645,10 +651,7 @@ void Android::TInputThread::PushInputBuffer(int64_t BufferIndex)
 	//	gr: as we can submit an offset, we could LOCK the pending data, submit, then unlock & delete and save a copy
 	size_t BufferWrittenSize = 0;
 	auto BufferArray = GetRemoteArray( Buffer, BufferSize, BufferWrittenSize );
-	try
-	{
-		mPopPendingData( GetArrayBridge(BufferArray) );
-	}
+	mPopPendingData( GetArrayBridge(BufferArray) );
 
 	//	process buffer
 	int64_t DataOffset = 0;
@@ -656,24 +659,28 @@ void Android::TInputThread::PushInputBuffer(int64_t BufferIndex)
 	mPacketCounter++;
 
 	int Flags = 0;
+  	//	AMEDIACODEC_BUFFER_FLAG_PARTIAL_FRAME
+	//Flags |= MLMediaCodecBufferFlag_KeyFrame;
+	//Flags |= AMEDIACODEC_BUFFER_FLAG_CODEC_CONFIG;
+	//Flags |= AMEDIACODEC_BUFFER_FLAG_END_OF_STREAM;
 	//Flags |= MLMediaCodecBufferFlag_KeyFrame;
 	//Flags |= MLMediaCodecBufferFlag_CodecConfig;
 	//Flags |= MLMediaCodecBufferFlag_EOS;
-	Result = MLMediaCodecQueueInputBuffer( mHandle, BufferHandle, DataOffset, BufferWrittenSize, PresentationTimeMicroSecs, Flags );
-	IsOkay( Result, "MLMediaCodecQueueInputBuffer" );
+	auto Result = AMediaCodec_queueInputBuffer( mCodec, BufferIndex, DataOffset, BufferWrittenSize, PresentationTimeMicroSecs, Flags );
+	IsOkay( Result, "AMediaCodec_queueInputBuffer" );
 	
 	OnInputSubmitted( PresentationTimeMicroSecs );
 
-	std::Debug << "MLMediaCodecQueueInputBuffer( BufferIndex=" << BufferIndex << " DataSize=" << BufferWrittenSize << "/" << BufferSize << " presentationtime=" << PresentationTimeMicroSecs << ") success" << std::endl;
-	*/
+	std::Debug << "AMediaCodec_queueInputBuffer( BufferIndex=" << BufferIndex << " DataSize=" << BufferWrittenSize << "/" << BufferSize << " presentationtime=" << PresentationTimeMicroSecs << ") success" << std::endl;
 }
 
 
-void Android::TInputThread::OnInputBufferAvailible(MediaCodec_t Codec,int64_t BufferIndex)
+void Android::TInputThread::OnInputBufferAvailible(MediaCodec_t Codec,bool AsyncBuffers,int64_t BufferIndex)
 {
 	{
 		std::lock_guard<std::mutex> Lock(mInputBuffersLock);
 		mCodec = Codec;
+		mAsyncBuffers = AsyncBuffers;
 		mInputBuffers.PushBack(BufferIndex);
 	}
 	std::Debug << "OnInputBufferAvailible(" << BufferIndex << ") " << GetDebugState() << std::endl;
@@ -682,7 +689,7 @@ void Android::TInputThread::OnInputBufferAvailible(MediaCodec_t Codec,int64_t Bu
 
 void Android::TDecoder::OnInputBufferAvailible(int64_t BufferIndex)
 {
-	mInputThread.OnInputBufferAvailible( mCodec, BufferIndex );
+	mInputThread.OnInputBufferAvailible( mCodec, mAsyncBuffers, BufferIndex );
 }
 
 void Android::TDecoder::OnOutputBufferAvailible(int64_t BufferIndex,const MediaBufferInfo_t& BufferMeta)
@@ -705,24 +712,24 @@ void Android::TDecoder::OnOutputTextureWritten(int64_t PresentationTime)
 {
 	mOutputThread.OnOutputTextureWritten(PresentationTime);
 }
-/*
-void Android::TDecoder::OnOutputFormatChanged(MLHandle NewFormat)
+*/
+void Android::TDecoder::OnOutputFormatChanged(AMediaFormat& NewFormat)
 {
 	//	gr: we should do this like a queue for the output thread
 	//		for streams that can change format mid-way
 	//	todo: make test streams that change format!
-	std::Debug << "Getting output format" << std::endl;
+	std::Debug << "Got new output format" << std::endl;
 	try
 	{
-		mOutputPixelMeta = GetPixelMeta( NewFormat );
-		std::Debug << "New output format is " << mOutputPixelMeta << std::endl;
+		//mOutputPixelMeta = GetPixelMeta( NewFormat );
+		//std::Debug << "New output format is " << mOutputPixelMeta << std::endl;
 	}
 	catch(std::exception& e)
 	{
 		std::Debug << __PRETTY_FUNCTION__ << " Exception " << e.what() << std::endl;
 	}
 }
-*/
+
 
 
 
@@ -1062,7 +1069,7 @@ bool Android::TOutputThread::Iteration()
 Android::TInputThread::TInputThread(std::function<void(ArrayBridge<uint8_t>&&)> PopPendingData,std::function<bool()> HasPendingData) :
 	mPopPendingData	( PopPendingData ),
 	mHasPendingData	( HasPendingData ),
-	SoyWorkerThread	("MagicLeapInputThread", SoyWorkerWaitMode::Wake )
+	SoyWorkerThread	("Android::TInputThread", SoyWorkerWaitMode::Wake )
 {
 	Start();
 }
@@ -1085,27 +1092,49 @@ bool Android::TInputThread::Iteration(std::function<void(std::chrono::millisecon
 	{
 		std::Debug << __PRETTY_FUNCTION__ << " No pending data" << std::endl;
 		Sleep( std::chrono::milliseconds(InputThreadNotReadySleep) );
+		std::this_thread::sleep_for(std::chrono::milliseconds(InputThreadNotReadySleep) );
 		return true;
 	}
 	
 	std::Debug << __PRETTY_FUNCTION__ << " Reading a buffer" << std::endl;
 
+	bool DequeueNextIndex = !mAsyncBuffers;
+
 	//	read a buffer
 	int64_t BufferIndex = -1;
+	if ( !DequeueNextIndex )
 	{
 		std::lock_guard<std::mutex> Lock(mInputBuffersLock);
 		BufferIndex = mInputBuffers.PopAt(0);
 	}
+	
 	try
 	{
+		if ( DequeueNextIndex )
+		{
+			int Timeout = 0;
+			//	gr: this returns -1000 in async mode (see logcat MediaCodec)
+			BufferIndex = AMediaCodec_dequeueInputBuffer( mCodec, Timeout );
+			if ( BufferIndex < 0 )
+			{
+				std::stringstream Error;
+				Error << "AMediaCodec_dequeueInputBuffer returned buffer index " << BufferIndex;
+				throw Soy::AssertException(Error);
+			}
+			std::lock_guard<std::mutex> Lock(mInputBuffersLock);
+			mInputBuffers.Remove(BufferIndex);
+		}
 		PushInputBuffer( BufferIndex );
 	}
 	catch(std::exception& e)
 	{
 		std::Debug << __PRETTY_FUNCTION__ << " Exception pushing input buffer " << BufferIndex << "; " << e.what() << GetDebugState() << std::endl;
-		std::lock_guard<std::mutex> Lock(mInputBuffersLock);
-		auto& ElementZero = *mInputBuffers.InsertBlock(0,1);
-		ElementZero = BufferIndex;
+		if ( BufferIndex >= 0 )
+		{
+			std::lock_guard<std::mutex> Lock(mInputBuffersLock);
+			auto& ElementZero = *mInputBuffers.InsertBlock(0,1);
+			ElementZero = BufferIndex;
+		}
 		Sleep( std::chrono::milliseconds(InputThreadErrorThrottle) );
 	}
 	
