@@ -28,13 +28,13 @@ fi
 
 
 if [ -z "$ANDROID_API" ]; then
-	ANDROID_API="23"
+	ANDROID_API="28"
 fi
 
 
 if [ -z "$ANDROID_PLATFORM" ]; then
-# tsdk: Minimum platform that supports ifaddrs
-	ANDROID_PLATFORM="24"
+# tsdk: 24 is Minimum platform that supports ifaddrs
+	ANDROID_PLATFORM="29"
 fi
 
 MAXCONCURRENTBUILDS=1
