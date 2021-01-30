@@ -65,7 +65,6 @@ std::string GetStatusString(media_status_t Status)
 	CASE_ERROR(AMEDIA_DRM_LICENSE_EXPIRED);
 	CASE_ERROR(AMEDIA_IMGREADER_ERROR_BASE);
 	CASE_ERROR(AMEDIA_IMGREADER_NO_BUFFER_AVAILABLE);
-	//CASE_ERROR(AMEDIA_IMGREADER_ERROR_BASE);
 	CASE_ERROR(AMEDIA_IMGREADER_MAX_IMAGES_ACQUIRED);
 	CASE_ERROR(AMEDIA_IMGREADER_CANNOT_LOCK_IMAGE);
 	CASE_ERROR(AMEDIA_IMGREADER_CANNOT_UNLOCK_IMAGE);
@@ -342,21 +341,55 @@ bool Android::TDecoder::CreateCodec()
 	Callbacks.onAsyncOutputAvailable = OnOutputAvailible;
 	Callbacks.onAsyncFormatChanged = OnFormatChanged;
 	Callbacks.onAsyncError = OnError;
-	
+
+
 	media_status_t Status = AMEDIA_OK;
 	#if __ANDROID_API__ >= 28
 	Status = AMediaCodec_setAsyncNotifyCallback( mCodec, Callbacks, this );
 	IsOkay(Status,"AMediaCodec_setAsyncNotifyCallback");
 	#endif 
 
+	auto Width = 123;
+	auto Height = 456;
 
 	//	create format
 	//	https://android.googlesource.com/platform/cts/+/fb9023359a546eaa93d7753c0c1af37f8d859111/tests/tests/media/libmediandkjni/native-media-jni.cpp#525
 	AMediaFormat* Format = AMediaFormat_new();
 	AMediaFormat_setString( Format, AMEDIAFORMAT_KEY_MIME, MimeType );
+	AMediaFormat_setInt32( Format, AMEDIAFORMAT_KEY_HEIGHT, Width );
+	AMediaFormat_setInt32( Format, AMEDIAFORMAT_KEY_WIDTH, Height );
+	//AMEDIAFORMAT_KEY_LEVEL
+	//AMEDIAFORMAT_KEY_PROFILE
+	//
+	//	magic leap version has nalu seperated SPS & PPS in csd-0
+	//	0001 sps 0001 pps
+	{
+		auto& Sps = mPendingSps;
+		auto& Pps = mPendingPps;
+		Array<uint8_t> SpsAndPps;
+		SpsAndPps.PushBackArray(Sps);
+		SpsAndPps.PushBackArray(Pps);
+		/*
+		AMEDIAFORMAT_KEY_CSD; # var introduced=28
+    AMEDIAFORMAT_KEY_CSD_0; # var introduced=28
+    AMEDIAFORMAT_KEY_CSD_1; # var introduced=28
+    AMEDIAFORMAT_KEY_CSD_2; # var introduced=28
+    AMEDIAFORMAT_KEY_CSD_AVC; # var introduced=29
+    AMEDIAFORMAT_KEY_CSD_HEVC; # var introduced=29
+    */
+    	//	gr: this isn't making a different (same profile, same level, same dimensions)
+		AMediaFormat_setBuffer( Format, AMEDIAFORMAT_KEY_CSD_AVC, SpsAndPps.GetArray(), SpsAndPps.GetDataSize() );
+	}
+	/*
+	
+    
+	AMEDIAFORMAT_KEY_CSD __INTRODUCED_IN(28);
+extern const char* AMEDIAFORMAT_KEY_CSD_0 __INTRODUCED_IN(28);
+extern const char* AMEDIAFORMAT_KEY_CSD_1 __INTRODUCED_IN(28);
+extern const char* AMEDIAFORMAT_KEY_CSD_2 __INTRODUCED_IN(28);
 	
 	//AMediaFormat_setBuffer( Format, "CS0", SPS, sizeof(sps));
-
+*/
 
 	//	configure with our new format
 	ANativeWindow* Surface = nullptr;
@@ -485,6 +518,9 @@ PopH264 : pop: int32_t PopH264_GetTestData(const char *, uint8_t *, int32_t) exc
 10-16 11:03:01.532 21828 21829 I PopH264 : pop: 
 
 */
+	//	gr: debug with 
+	//		adb logcat -s CCodec
+	std::Debug << __PRETTY_FUNCTION__ << " AMediaCodec_configure..." << std::endl;
 	Status = AMediaCodec_configure( mCodec, Format, Surface, Crypto, CodecFlags );
 	IsOkay(Status,"AMediaCodec_configure");
 /*
@@ -532,6 +568,11 @@ PopH264 : pop: int32_t PopH264_GetTestData(const char *, uint8_t *, int32_t) exc
 	Result = MLMediaCodecStart( mHandle );
 	IsOkay( Result, "MLMediaCodecStart" );
 	*/
+	std::Debug << __PRETTY_FUNCTION__ << " AMediaCodec_Start..." << std::endl;
+	Status = AMediaCodec_start(mCodec);
+	IsOkay(Status,"AMediaCodec_Start");
+	
+	std::Debug << __PRETTY_FUNCTION__ << " Codec created." << std::endl;
 	return true;
 }
 
