@@ -145,17 +145,6 @@ if [ $ACTION == "release" ]; then
 	exit 0
 fi
 
-if [ $ACTION == "buildandrun" ]; then
-	echo "Android/build.sh: $ACTION..."
-
-	ENABLE_DEBUG_SYMBOLS=0
-
-	BuildAbi armeabi-v7a $ENABLE_DEBUG_SYMBOLS
-	#InstallAndRunTestExecutable
-
-	exit 0
-fi
-
 
 if [ $ACTION == "clean" ]; then
 	echo "Android/build.sh: Cleaning..."
