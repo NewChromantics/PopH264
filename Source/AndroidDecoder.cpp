@@ -333,9 +333,10 @@ std::string MagicLeap::GetCodec(int32_t Mode,bool& HardwareSurface)
 }
 */
 
+
 Android::TDecoder::TDecoder(std::function<void(const SoyPixelsImpl&,size_t)> OnDecodedFrame) :
 	PopH264::TDecoder	( OnDecodedFrame ),
-	mInputThread		( std::bind(&TDecoder::GetNextInputData, this, std::placeholders::_1 ), std::bind(&TDecoder::HasPendingData, this ) ),
+	mInputThread		( std::bind(&TDecoder::GetNextInputData, this, std::placeholders::_1, std::placeholders::_2 ), std::bind(&TDecoder::HasPendingData, this ) ),
 	mOutputThread		( std::bind(&TDecoder::OnDecodedFrame, this, std::placeholders::_1, std::placeholders::_2 ) )
 {
 /*
@@ -720,13 +721,13 @@ bool Android::TDecoder::DecodeNextPacket()
 	return false;
 }
 
-void Android::TDecoder::GetNextInputData(ArrayBridge<uint8_t>&& PacketBuffer)
+void Android::TDecoder::GetNextInputData(ArrayBridge<uint8_t>&& PacketBuffer,PopH264::FrameNumber_t& FrameNumber)
 {
 	std::Debug << __PRETTY_FUNCTION__ << std::endl;
 	
 
 	auto& Nalu = PacketBuffer;
-	PopH264::FrameNumber_t FrameNumber=0;
+
 	//	input thread wants some data to process
 	if (!PopNalu(GetArrayBridge(Nalu),FrameNumber))
 	{
@@ -784,12 +785,12 @@ void Android::TInputThread::PushInputBuffer(int64_t BufferIndex)
 	//	gr: as we can submit an offset, we could LOCK the pending data, submit, then unlock & delete and save a copy
 	size_t BufferWrittenSize = 0;
 	auto BufferArray = GetRemoteArray( Buffer, BufferSize, BufferWrittenSize );
-	mPopPendingData( GetArrayBridge(BufferArray) );
+	PopH264::FrameNumber_t PacketTime = 0;
+	mPopPendingData( GetArrayBridge(BufferArray), PacketTime );
 
 	//	process buffer
 	int64_t DataOffset = 0;
-	uint64_t PresentationTimeMicroSecs = mPacketCounter;
-	mPacketCounter++;
+	uint64_t PresentationTimeMicroSecs = PacketTime;
 
 	int Flags = 0;
   	//	AMEDIACODEC_BUFFER_FLAG_PARTIAL_FRAME
@@ -1198,7 +1199,7 @@ bool Android::TOutputThread::Iteration()
 }
 
 
-Android::TInputThread::TInputThread(std::function<void(ArrayBridge<uint8_t>&&)> PopPendingData,std::function<bool()> HasPendingData) :
+Android::TInputThread::TInputThread(std::function<void(ArrayBridge<uint8_t>&&,PopH264::FrameNumber_t&)> PopPendingData,std::function<bool()> HasPendingData) :
 	mPopPendingData	( PopPendingData ),
 	mHasPendingData	( HasPendingData ),
 	SoyWorkerThread	("Android::TInputThread", SoyWorkerWaitMode::Wake )

@@ -108,7 +108,7 @@ private:
 class Android::TInputThread : public SoyWorkerThread
 {
 public:
-	TInputThread(std::function<void(ArrayBridge<uint8_t>&&)> PopPendingData,std::function<bool()> HasPendingData);
+	TInputThread(std::function<void(ArrayBridge<uint8_t>&&,PopH264::FrameNumber_t&)> PopPendingData,std::function<bool()> HasPendingData);
 	
 	virtual bool	Iteration() override	{	return true;	}
 	virtual bool	Iteration(std::function<void(std::chrono::milliseconds)> Sleep) override;
@@ -126,9 +126,8 @@ private:
 	MediaCodec_t	mCodec = nullptr;
 	bool			mAsyncBuffers = false;
 
-	std::function<void(ArrayBridge<uint8_t>&&)>	mPopPendingData;
+	std::function<void(ArrayBridge<uint8_t>&&,PopH264::FrameNumber_t&)>	mPopPendingData;
 	std::function<bool()>						mHasPendingData;
-	uint64_t		mPacketCounter = 0;	//	we don't pass around frame/presentation time, so we just use a counter
 	
 	//	list of buffers we can write to
 	std::mutex		mInputBuffersLock;
@@ -164,7 +163,7 @@ private:
 	void 			DequeueOutputBuffers();
 	void			DequeueInputBuffers();
 	//	input thread pulling data
-	void			GetNextInputData(ArrayBridge<uint8_t>&& PacketBuffer);
+	void			GetNextInputData(ArrayBridge<uint8_t>&& PacketBuffer,PopH264::FrameNumber_t& FrameNumber);
 
 private:
 	//	need SPS & PPS to create format, before we can create codec
