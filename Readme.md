@@ -58,13 +58,17 @@ Any empty platforms are generally planned, but not yet implemented.
 | Osx Arm64      | Broadway          | AvFoundation      |                  | AvFoundation      |              |
 | Ios            | Broadway          | AvFoundation      |               | AvFoundation      |              |
 | Ios Simulator  | Untested          | Untested          | Untested          | Untested          |              |
-| Android armeabi-v7a | Broadway     |                   |                   |                   |              |
-| Android x86    | Broadway          |                   |                   |                   |              |
-| Android x86_64 | Broadway          |                   |                   |                   |              |
-| Android arm64-v8a | Broadway       |                   |                   |                   |              |
+| Android armeabi-v7a | Broadway     | NdkMediaCodec          |                   |                   |              |
+| Android x86    | Broadway          | NdkMediaCodec            |                   |                   |              |
+| Android x86_64 | Broadway          | NdkMediaCodec        |                   |                   |              |
+| Android arm64-v8a | Broadway       | NdkMediaCodec            |                   |                   |              |
 | Magic Leap/Luma (Linux x86) | Broadway  | MLMediaCodec Google,Nvidia|      |                   |              |
 | Web            | Broadway.js       |                   |                   |                   |              |
 | Unity WebGL    |                   |                   |                   |                   |              |
+
+Todo:
+- List Android min-api/OS level
+
 
 Unity Decoder Support
 -----------------------
