@@ -8,13 +8,84 @@
 #include "TDecoder.h"
 #include "SoyPixels.h"
 #include "SoyMedia.h"	//	TPixelBuffer
+#include "media/NdkImage.h"
+
+
+
+enum
+{
+	//	http://developer.android.com/reference/android/media/MediaCodecInfo.CodecCapabilities.html
+	COLOR_Format12bitRGB444	= 3,
+	COLOR_Format16bitARGB1555 = 5,
+	COLOR_Format16bitARGB4444 = 4,
+	COLOR_Format16bitBGR565 = 7,
+	COLOR_Format16bitRGB565 = 6,
+	COLOR_Format18BitBGR666 = 41,
+	COLOR_Format18bitARGB1665 = 9,
+	COLOR_Format18bitRGB666 = 8,
+	COLOR_Format19bitARGB1666 = 10,
+	COLOR_Format24BitABGR6666 = 43,
+	COLOR_Format24BitARGB6666 = 42,
+	COLOR_Format24bitARGB1887 = 13,
+	COLOR_Format24bitBGR888 = 12,
+	COLOR_Format24bitRGB888 = 11,
+	COLOR_Format32bitABGR8888 = 0x7f00a000,
+	COLOR_Format32bitARGB8888 = 16,
+	COLOR_Format32bitBGRA8888 = 15,
+	COLOR_Format8bitRGB332 = 2,
+	COLOR_FormatCbYCrY = 27,
+	COLOR_FormatCrYCbY = 28,
+	COLOR_FormatL16 = 36,
+	COLOR_FormatL2 = 33,
+	COLOR_FormatL32 = 38,
+	COLOR_FormatL4 = 34,
+	COLOR_FormatL8 = 35,
+	COLOR_FormatMonochrome = 1,
+	COLOR_FormatRGBAFlexible = 0x7f36a888,
+	COLOR_FormatRGBFlexible = 0x7f36b888,
+	COLOR_FormatRawBayer10bit = 31,
+	COLOR_FormatRawBayer8bit = 30,
+	COLOR_FormatRawBayer8bitcompressed = 32,
+	COLOR_FormatSurface = 0x7f000789,
+	COLOR_FormatYCbYCr = 25,
+	COLOR_FormatYCrYCb = 26,
+	COLOR_FormatYUV411PackedPlanar = 18,
+	COLOR_FormatYUV411Planar = 17,
+	COLOR_FormatYUV420Flexible = 0x7f420888,
+	COLOR_FormatYUV420PackedPlanar = 20,
+	COLOR_FormatYUV420PackedSemiPlanar = 39,
+	COLOR_FormatYUV420Planar = 19,
+	COLOR_FormatYUV420SemiPlanar = 21,
+	COLOR_FormatYUV422Flexible = 0x7f422888,
+	COLOR_FormatYUV422PackedPlanar = 23,
+	COLOR_FormatYUV422PackedSemiPlanar = 40,
+	COLOR_FormatYUV422Planar = 22,
+	COLOR_FormatYUV422SemiPlanar = 24,
+	COLOR_FormatYUV444Flexible = 0x7f444888,
+	COLOR_FormatYUV444Interleaved = 29,
+	COLOR_QCOM_FormatYUV420SemiPlanar = 0x7fa30c00,
+	COLOR_TI_FormatYUV420PackedSemiPlanar = 0x7f000100,
+	
+	//	gr: mystery format (when using surface texture)
+	COLOR_FORMAT_UNKNOWN_MAYBE_SURFACE = 261,
+	
+	//	note4 is giving us a pixel format of this, even when we have a surface texture. Renders okay.
+	//	gr; in non-opengl mode, the colour space is broken!
+	//		it is not the same as Yuv_8_8_8 (but close). The name is a big hint of this.
+	//		probably more like Yuv_8_88 but line by line.
+	OMX_QCOM_COLOR_FormatYVU420SemiPlanarInterlace = 0x7FA30C04,	//	2141391876
+};
+
+
 
 
 namespace Android
 {
-	void			IsOkay(media_status_t Status,const char* Context);
-	void			EnumCodecs(std::function<void(const std::string&)> Enum);
-	
+	void					IsOkay(media_status_t Status,const char* Context);
+	void					EnumCodecs(std::function<void(const std::string&)> Enum);
+	SoyPixelsMeta			GetPixelMeta(MediaFormat_t Format);
+	SoyPixelsFormat::Type	GetPixelFormat(int32_t ColourFormat);
+
 	constexpr int32_t		Mode_NvidiaSoftware = 1;
 	constexpr int32_t		Mode_GoogleSoftware = 2;
 	constexpr int32_t		Mode_NvidiaHardware = 3;
@@ -87,27 +158,63 @@ void Android::IsOkay(media_status_t Status,const char* Context)
 	throw Soy::AssertException(Error);
 }
 
-/*
-SoyPixelsMeta Android::GetPixelMeta(MediaFormat_t Format)
+
+SoyPixelsFormat::Type Android::GetPixelFormat(int32_t ColourFormat)
 {
-	Soy_AssertTodo();
-/*
-	auto GetKey_integer = [&](MLMediaFormatKey Key)
+	switch(ColourFormat)
 	{
-		//MLMediaFormatGetKeyValueInt32
-		//MLMediaFormatGetKeyValueInt64
-		//MLMediaFormatGetKeyValueFloat
-		//	string
-		//ML_API MLResult ML_CALL MLMediaFormatGetKeySize(MLHandle handle, MLMediaFormatKey name, size_t *out_size);
-		//ML_API MLResult ML_CALL MLMediaFormatGetKeyString(MLHandle handle, MLMediaFormatKey name, char *out_string);
-		
-		//MLMediaFormatGetKeyByteBuffer
-		int32_t Value = 0;
-		auto Result = MLMediaFormatGetKeyValueInt32( Format, Key, &Value );
-		IsOkay( Result, Key );
-		return Value;
+	case AIMAGE_FORMAT_RGBA_8888:	return SoyPixelsFormat::RGBA;
+	case AIMAGE_FORMAT_RGBX_8888:	return SoyPixelsFormat::RGBA;
+	case AIMAGE_FORMAT_RGB_888:		return SoyPixelsFormat::RGB;
+	//AIMAGE_FORMAT_RGB_565
+	//case AIMAGE_FORMAT_RGBA_FP16:	return SoyPixelsFormat::HalfFloat4;
+	case COLOR_FormatYUV420Planar:	return SoyPixelsFormat::Yuv_8_8_8;
+	case AIMAGE_FORMAT_YUV_420_888:	return SoyPixelsFormat::Yuv_8_8_8;
+	//AIMAGE_FORMAT_JPEG
+	case AIMAGE_FORMAT_RAW16:		return SoyPixelsFormat::Depth16mm;
+	//	AIMAGE_FORMAT_RAW_PRIVATE	arbritry format, 8bit?
+	//	AIMAGE_FORMAT_RAW10
+	//	AIMAGE_FORMAT_RAW12
+	case AIMAGE_FORMAT_DEPTH16:		return SoyPixelsFormat::Depth16mm;
+	case AIMAGE_FORMAT_DEPTH_POINT_CLOUD:	return SoyPixelsFormat::Float4;
+	//	AIMAGE_FORMAT_PRIVATE
+	case AIMAGE_FORMAT_Y8:			return SoyPixelsFormat::Greyscale;
+	//	AIMAGE_FORMAT_HEIC
+	//	AIMAGE_FORMAT_DEPTH_JPEG
+	//case COLOR_FormatYUV420Flexible:	//	could be one of many 420s
 	};
 	
+	std::stringstream Error;
+	Error << "Unhandled colour format " << ColourFormat;
+	throw Soy::AssertException(Error);
+}
+
+
+SoyPixelsMeta Android::GetPixelMeta(MediaFormat_t Format)
+{
+	auto FormatDebugString = AMediaFormat_toString(Format);
+	if ( !FormatDebugString )
+		FormatDebugString = "<null>";
+	std::Debug << __PRETTY_FUNCTION__ << " format debug from android: " << FormatDebugString << std::endl; 
+
+
+	typedef const char* MLMediaFormatKey;
+	auto GetKey_integer = [&](MLMediaFormatKey Key)
+	{
+		int32_t Value = 0;
+		auto Result = AMediaFormat_getInt32( Format, Key, &Value );
+		if ( !Result )
+			throw Soy::AssertException( std::string("Failed to get MediaFormat key ") + Key );
+		//auto Result = MLMediaFormatGetKeyValueInt32( Format, Key, &Value );
+		//IsOkay( Result, Key );
+		return Value;
+	};
+	/*
+	auto GetKey_String = [&](MLMediaFormat Key)
+	{
+		if ( !AMediaFormat_getString( Foramt, 
+	};
+	*/
 	auto DebugKey = [&](MLMediaFormatKey Key)
 	{
 		try
@@ -121,6 +228,21 @@ SoyPixelsMeta Android::GetPixelMeta(MediaFormat_t Format)
 		}
 	};
 	
+	auto MLMediaFormat_Key_Duration = AMEDIAFORMAT_KEY_DURATION;
+	auto MLMediaFormat_Key_Width = AMEDIAFORMAT_KEY_WIDTH;
+	auto MLMediaFormat_Key_Height = AMEDIAFORMAT_KEY_HEIGHT;
+	auto MLMediaFormat_Key_Stride = AMEDIAFORMAT_KEY_STRIDE;
+	auto MLMediaFormat_Key_Mime = AMEDIAFORMAT_KEY_MIME;
+	auto MLMediaFormat_Key_Frame_Rate = AMEDIAFORMAT_KEY_FRAME_RATE;
+	auto MLMediaFormat_Key_Color_Format = AMEDIAFORMAT_KEY_COLOR_FORMAT;
+	//auto MLMediaFormat_Key_Crop_Left = AMEDIAFORMAT_KEY_FRAME_RATE;
+	//auto MLMediaFormat_Key_Crop_Right = AMEDIAFORMAT_KEY_FRAME_RATE;
+	//auto MLMediaFormat_Key_Crop_Bottom = AMEDIAFORMAT_KEY_FRAME_RATE;
+	//auto MLMediaFormat_Key_Crop_Top = AMEDIAFORMAT_KEY_FRAME_RATE;
+	auto Key_ChannelCount = AMEDIAFORMAT_KEY_CHANNEL_COUNT;
+	auto Key_ColourRange = AMEDIAFORMAT_KEY_COLOR_RANGE;
+	auto Key_Rotation = AMEDIAFORMAT_KEY_ROTATION;
+	
 	DebugKey( MLMediaFormat_Key_Duration);
 	auto Width = GetKey_integer(MLMediaFormat_Key_Width);
 	auto Height = GetKey_integer(MLMediaFormat_Key_Height);
@@ -128,11 +250,13 @@ SoyPixelsMeta Android::GetPixelMeta(MediaFormat_t Format)
 	//GetKey<string>(MLMediaFormat_Key_Mime
 	DebugKey(MLMediaFormat_Key_Frame_Rate);
 	DebugKey(MLMediaFormat_Key_Color_Format);
+	DebugKey(Key_ColourRange);
+	DebugKey(Key_Rotation);
 	auto ColourFormat = GetKey_integer(MLMediaFormat_Key_Color_Format);
-	DebugKey(MLMediaFormat_Key_Crop_Left);
-	DebugKey(MLMediaFormat_Key_Crop_Right);
-	DebugKey(MLMediaFormat_Key_Crop_Bottom);
-	DebugKey(MLMediaFormat_Key_Crop_Top);
+	//DebugKey(MLMediaFormat_Key_Crop_Left);
+	//DebugKey(MLMediaFormat_Key_Crop_Right);
+	//DebugKey(MLMediaFormat_Key_Crop_Bottom);
+	//DebugKey(MLMediaFormat_Key_Crop_Top);
 	//GetKey_long(MLMediaFormat_Key_Repeat_Previous_Frame_After
 	
 	//	there's a colour format key, but totally undocumented
@@ -149,8 +273,7 @@ SoyPixelsMeta Android::GetPixelMeta(MediaFormat_t Format)
 
 	SoyPixelsMeta Meta( Width, Height, PixelFormat );
 	return Meta;
-	*/
-//}
+}
 
 /*
 void MagicLeap::EnumCodecs(std::function<void(const std::string&)> EnumCodec)
@@ -355,7 +478,7 @@ void Android::TDecoder::CreateCodec()
 			return;
 		}
 		auto& This = *reinterpret_cast<TDecoder*>(userdata);
-		This.OnOutputFormatChanged(*format);
+		This.OnOutputFormatChanged(format);
 	};
 
 	AMediaCodecOnAsyncError OnError = [](AMediaCodec *codec,
@@ -694,6 +817,13 @@ void Android::TDecoder::OnInputBufferAvailible(int64_t BufferIndex)
 
 void Android::TDecoder::OnOutputBufferAvailible(int64_t BufferIndex,const MediaBufferInfo_t& BufferMeta)
 {
+	//	gr: in non-async mode we won't have the format, should fetch it here
+	auto* pFormat = AMediaCodec_getOutputFormat(mCodec);
+	if ( !pFormat )
+	{
+		std::Debug << __PRETTY_FUNCTION__ << " failed to get current output format from codec" << std::endl;
+	}
+	
 	TOutputBufferMeta Meta;
 	Meta.mPixelMeta = mOutputPixelMeta;
 	Meta.mBufferIndex = BufferIndex;
@@ -713,16 +843,16 @@ void Android::TDecoder::OnOutputTextureWritten(int64_t PresentationTime)
 	mOutputThread.OnOutputTextureWritten(PresentationTime);
 }
 */
-void Android::TDecoder::OnOutputFormatChanged(AMediaFormat& NewFormat)
+void Android::TDecoder::OnOutputFormatChanged(MediaFormat_t NewFormat)
 {
 	//	gr: we should do this like a queue for the output thread
 	//		for streams that can change format mid-way
 	//	todo: make test streams that change format!
-	std::Debug << "Got new output format" << std::endl;
+	std::Debug << "Got new output format..." << std::endl;
 	try
 	{
-		//mOutputPixelMeta = GetPixelMeta( NewFormat );
-		//std::Debug << "New output format is " << mOutputPixelMeta << std::endl;
+		mOutputPixelMeta = GetPixelMeta( NewFormat );
+		std::Debug << "New output format is " << mOutputPixelMeta << std::endl;
 	}
 	catch(std::exception& e)
 	{

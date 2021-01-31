@@ -151,7 +151,7 @@ private:
 	
 	void			OnInputBufferAvailible(int64_t BufferIndex);
 	void			OnOutputBufferAvailible(int64_t BufferIndex,const MediaBufferInfo_t& BufferMeta);
-	void			OnOutputFormatChanged(AMediaFormat& NewFormat);
+	void			OnOutputFormatChanged(MediaFormat_t NewFormat);
 	//void			OnOutputTextureWritten(int64_t PresentationTime);
 	//void			OnOutputTextureAvailible();
 
