@@ -30,7 +30,8 @@ namespace PopH264
 	//	1.3.15	Fixed/fixing correct frame number output to match input of decoder
 	//	1.3.17	MediaFoundation now doesn't get stuck if we try and decode PPS or frames before SPS
 	//	1.3.18	Broadway doesn't get stuck if we dont process in the order SPS, PPS, Keyframe
-	const Soy::TVersion	Version(1,3,18);
+	//	1.3.19	Android NDK MediaCodec implementation
+	const Soy::TVersion	Version(1,3,19);
 }
 
 
