@@ -459,8 +459,15 @@ void Android::TDecoder::CreateCodec()
 		}
 		
 		auto& This = *reinterpret_cast<TDecoder*>(userdata);
-		std::Debug << "OnOutputAvailible(" << index << ")" << std::endl;
-		This.OnOutputBufferAvailible(index,*bufferInfo);
+		try
+		{
+			std::Debug << "OnOutputAvailible callback(" << index << ")..." << std::endl;
+			This.OnOutputBufferAvailible(index,*bufferInfo);
+		}
+		catch(std::exception& e)
+		{
+			std::Debug << "OnOutputAvailible callback(" << index << ") exception; " << e.what() << std::endl;
+		}
 	};
 
 	AMediaCodecOnAsyncFormatChanged OnFormatChanged = [](AMediaCodec *codec,
@@ -679,6 +686,8 @@ void Android::TDecoder::DequeueOutputBuffers()
 //	returns true if more data to proccess
 bool Android::TDecoder::DecodeNextPacket()
 {
+	std::Debug << __PRETTY_FUNCTION__<< std::endl;
+
 	//	we have to wait for input thread to want to pull data here, we can't force it
 	mInputThread.Wake();
 
@@ -707,7 +716,8 @@ bool Android::TDecoder::DecodeNextPacket()
 	}
 	
 	//	even if we didn't get a frame, try to decode again as we processed a packet
-	return true;
+	//return true;
+	return false;
 }
 
 void Android::TDecoder::GetNextInputData(ArrayBridge<uint8_t>&& PacketBuffer)
@@ -818,18 +828,19 @@ void Android::TDecoder::OnInputBufferAvailible(int64_t BufferIndex)
 void Android::TDecoder::OnOutputBufferAvailible(int64_t BufferIndex,const MediaBufferInfo_t& BufferMeta)
 {
 	//	gr: in non-async mode we won't have the format, should fetch it here
+	/*	gr: this blocks... in async mode? no output in logcat
 	auto* pFormat = AMediaCodec_getOutputFormat(mCodec);
 	if ( !pFormat )
 	{
 		std::Debug << __PRETTY_FUNCTION__ << " failed to get current output format from codec" << std::endl;
 	}
-	
+	*/
 	TOutputBufferMeta Meta;
 	Meta.mPixelMeta = mOutputPixelMeta;
 	Meta.mBufferIndex = BufferIndex;
 	Meta.mMeta = BufferMeta;
 	mOutputThread.OnOutputBufferAvailible( mCodec, mAsyncBuffers, Meta );
-	std::Debug << "OnOutputBufferAvailible(" << BufferIndex << ") " << GetDebugState() << mOutputThread.GetDebugState() << std::endl;
+	std::Debug << "OnOutputBufferAvailible sent to output thread(" << BufferIndex << ") " << GetDebugState() << mOutputThread.GetDebugState() << std::endl;
 }
 
 /*
@@ -880,7 +891,9 @@ void Android::TOutputThread::OnInputSubmitted(int32_t PresentationTime)
 
 void Android::TOutputThread::OnOutputBufferAvailible(MediaCodec_t Codec,bool AsyncBuffers,const TOutputBufferMeta& BufferMeta)
 {
+	std::Debug << __PRETTY_FUNCTION__ << " locking..." << std::endl;
 	std::lock_guard<std::mutex> Lock(mOutputBuffersLock);
+	std::Debug << __PRETTY_FUNCTION__ << " locked" << std::endl;
 	mOutputBuffers.PushBack( BufferMeta );
 	mCodec = Codec;
 	mAsyncBuffers = AsyncBuffers;
@@ -1064,6 +1077,7 @@ void Android::TOutputThread::PopOutputBuffer(const TOutputBufferMeta& BufferMeta
 	//auto BufferHandle = static_cast<MLHandle>( BufferMeta.mBufferIndex );
 
 	auto BufferIndex = BufferMeta.mBufferIndex;
+	bool Released = false;
 
 	//	release buffer back as data has been used
 	auto ReleaseBuffer = [&](bool Render=true)
@@ -1078,8 +1092,11 @@ void Android::TOutputThread::PopOutputBuffer(const TOutputBufferMeta& BufferMeta
 10-15 06:49:50.859  9681  9683 I PopH264 : pop: Exception getting output buffer 0; AMedia error -10000/AMEDIA_ERROR_UNKNOWN in MLMediaCodecReleaseOutputBuffer mOutputBuffers[] 
 10-15 06:49:51.630   986   986 I QC2CompStore: Deleting component(c2.qti.avc.decoder) id(32)
 10-15 06:49:51.632  1167  1167 E mediaserver: unlinkToDeath: removed reference to death recipient but */
+		if ( Released )
+			return;
 		auto Result = AMediaCodec_releaseOutputBuffer( mCodec, BufferIndex, Render );
 		IsOkay( Result, "MLMediaCodecReleaseOutputBuffer");
+		Released = true;
 	};
 
 	/*
