@@ -83,7 +83,7 @@ namespace Android
 {
 	void					IsOkay(media_status_t Status,const char* Context);
 	void					EnumCodecs(std::function<void(const std::string&)> Enum);
-	SoyPixelsMeta			GetPixelMeta(MediaFormat_t Format);
+	SoyPixelsMeta			GetPixelMeta(MediaFormat_t Format,bool VerboseDebug=false);
 	SoyPixelsFormat::Type	GetPixelFormat(int32_t ColourFormat);
 
 	constexpr int32_t		Mode_NvidiaSoftware = 1;
@@ -190,13 +190,15 @@ SoyPixelsFormat::Type Android::GetPixelFormat(int32_t ColourFormat)
 }
 
 
-SoyPixelsMeta Android::GetPixelMeta(MediaFormat_t Format)
+SoyPixelsMeta Android::GetPixelMeta(MediaFormat_t Format,bool VerboseDebug)
 {
-	auto FormatDebugString = AMediaFormat_toString(Format);
-	if ( !FormatDebugString )
-		FormatDebugString = "<null>";
-	std::Debug << __PRETTY_FUNCTION__ << " format debug from android: " << FormatDebugString << std::endl; 
-
+	if ( VerboseDebug )
+	{
+		auto FormatDebugString = AMediaFormat_toString(Format);
+		if ( !FormatDebugString )
+			FormatDebugString = "<null>";
+		std::Debug << __PRETTY_FUNCTION__ << " format debug from android: " << FormatDebugString << std::endl; 
+	}
 
 	typedef const char* MLMediaFormatKey;
 	auto GetKey_integer = [&](MLMediaFormatKey Key)
@@ -243,34 +245,42 @@ SoyPixelsMeta Android::GetPixelMeta(MediaFormat_t Format)
 	auto Key_ColourRange = AMEDIAFORMAT_KEY_COLOR_RANGE;
 	auto Key_Rotation = AMEDIAFORMAT_KEY_ROTATION;
 	
-	DebugKey( MLMediaFormat_Key_Duration);
 	auto Width = GetKey_integer(MLMediaFormat_Key_Width);
 	auto Height = GetKey_integer(MLMediaFormat_Key_Height);
-	DebugKey( MLMediaFormat_Key_Stride );
-	//GetKey<string>(MLMediaFormat_Key_Mime
-	DebugKey(MLMediaFormat_Key_Frame_Rate);
-	DebugKey(MLMediaFormat_Key_Color_Format);
-	DebugKey(Key_ColourRange);
-	DebugKey(Key_Rotation);
 	auto ColourFormat = GetKey_integer(MLMediaFormat_Key_Color_Format);
-	//DebugKey(MLMediaFormat_Key_Crop_Left);
-	//DebugKey(MLMediaFormat_Key_Crop_Right);
-	//DebugKey(MLMediaFormat_Key_Crop_Bottom);
-	//DebugKey(MLMediaFormat_Key_Crop_Top);
-	//GetKey_long(MLMediaFormat_Key_Repeat_Previous_Frame_After
-	
+	if ( VerboseDebug )
+	{
+		DebugKey( MLMediaFormat_Key_Duration);
+		DebugKey( MLMediaFormat_Key_Stride );
+		//GetKey<string>(MLMediaFormat_Key_Mime
+		DebugKey(MLMediaFormat_Key_Frame_Rate);
+		DebugKey(MLMediaFormat_Key_Color_Format);
+		DebugKey(Key_ColourRange);
+		DebugKey(Key_Rotation);
+		DebugKey(MLMediaFormat_Key_Width);
+		DebugKey(MLMediaFormat_Key_Height);
+		DebugKey(MLMediaFormat_Key_Color_Format);
+		//DebugKey(MLMediaFormat_Key_Crop_Left);
+		//DebugKey(MLMediaFormat_Key_Crop_Right);
+		//DebugKey(MLMediaFormat_Key_Crop_Bottom);
+		//DebugKey(MLMediaFormat_Key_Crop_Top);
+		//GetKey_long(MLMediaFormat_Key_Repeat_Previous_Frame_After
+	}
+		
 	//	there's a colour format key, but totally undocumented
 	//	SDK says for  MLMediaCodecAcquireNextAvailableFrame;
 	//		Note: The returned buffer's color format is multi-planar YUV420. Since our
 	//		underlying hardware interops do not support multiplanar formats, advanced
 	auto PixelFormat = GetPixelFormat(ColourFormat);
 
-	std::Debug << "Format; ";
-	std::Debug << " Width=" << Width;
-	std::Debug << " Height=" << Height;
-	std::Debug << " PixelFormat=" << PixelFormat;
-	std::Debug << std::endl;
-
+	if ( VerboseDebug )
+	{	
+		std::Debug << "Format; ";
+		std::Debug << " Width=" << Width;	
+		std::Debug << " Height=" << Height;
+		std::Debug << " PixelFormat=" << PixelFormat;
+		std::Debug << std::endl;
+	}
 	SoyPixelsMeta Meta( Width, Height, PixelFormat );
 	return Meta;
 }
@@ -334,8 +344,9 @@ std::string MagicLeap::GetCodec(int32_t Mode,bool& HardwareSurface)
 */
 
 
-Android::TDecoder::TDecoder(std::function<void(const SoyPixelsImpl&,size_t)> OnDecodedFrame) :
+Android::TDecoder::TDecoder(PopH264::TDecoderParams Params,std::function<void(const SoyPixelsImpl&,size_t)> OnDecodedFrame) :
 	PopH264::TDecoder	( OnDecodedFrame ),
+	mParams				( Params ),
 	mInputThread		( std::bind(&TDecoder::GetNextInputData, this, std::placeholders::_1, std::placeholders::_2 ), std::bind(&TDecoder::HasPendingData, this ) ),
 	mOutputThread		( std::bind(&TDecoder::OnDecodedFrame, this, std::placeholders::_1, std::placeholders::_2 ) )
 {
@@ -462,7 +473,8 @@ void Android::TDecoder::CreateCodec()
 		auto& This = *reinterpret_cast<TDecoder*>(userdata);
 		try
 		{
-			std::Debug << "OnOutputAvailible callback(" << index << ")..." << std::endl;
+			if ( This.mParams.mVerboseDebug )
+				std::Debug << "OnOutputAvailible callback(" << index << ")..." << std::endl;
 			This.OnOutputBufferAvailible(index,*bufferInfo);
 		}
 		catch(std::exception& e)
@@ -554,7 +566,8 @@ void Android::TDecoder::CreateCodec()
 
 	//	gr: debug with 
 	//		adb logcat -s CCodec
-	std::Debug << __PRETTY_FUNCTION__ << " AMediaCodec_configure..." << std::endl;
+	if ( mParams.mVerboseDebug )
+		std::Debug << __PRETTY_FUNCTION__ << " AMediaCodec_configure..." << std::endl;
 	Status = AMediaCodec_configure( mCodec, Format, Surface, Crypto, CodecFlags );
 	IsOkay(Status,"AMediaCodec_configure");
 /*
@@ -602,11 +615,13 @@ void Android::TDecoder::CreateCodec()
 	Result = MLMediaCodecStart( mHandle );
 	IsOkay( Result, "MLMediaCodecStart" );
 	*/
-	std::Debug << __PRETTY_FUNCTION__ << " AMediaCodec_Start..." << std::endl;
+	if ( mParams.mVerboseDebug )
+		std::Debug << __PRETTY_FUNCTION__ << " AMediaCodec_Start..." << std::endl;
 	Status = AMediaCodec_start(mCodec);
 	IsOkay(Status,"AMediaCodec_Start");
 	
-	std::Debug << __PRETTY_FUNCTION__ << " Codec created." << std::endl;
+	if ( mParams.mVerboseDebug )
+		std::Debug << __PRETTY_FUNCTION__ << " Codec created." << std::endl;
 }
 
 
@@ -860,11 +875,13 @@ void Android::TDecoder::OnOutputFormatChanged(MediaFormat_t NewFormat)
 	//	gr: we should do this like a queue for the output thread
 	//		for streams that can change format mid-way
 	//	todo: make test streams that change format!
-	std::Debug << "Got new output format..." << std::endl;
+	if ( mParams.mVerboseDebug )
+		std::Debug << "Got new output format..." << std::endl;
 	try
 	{
-		mOutputPixelMeta = GetPixelMeta( NewFormat );
-		std::Debug << "New output format is " << mOutputPixelMeta << std::endl;
+		mOutputPixelMeta = GetPixelMeta( NewFormat, mParams.mVerboseDebug );
+		//if ( mParams.mVerboseDebug )
+			std::Debug << "New output format is " << mOutputPixelMeta << std::endl;
 	}
 	catch(std::exception& e)
 	{
@@ -1207,7 +1224,7 @@ Android::TInputThread::TInputThread(std::function<void(ArrayBridge<uint8_t>&&,Po
 	Start();
 }
 
-auto InputThreadNotReadySleep = 3000;//12;
+auto InputThreadNotReadySleep = 1000;//12;
 auto InputThreadThrottle = 2;
 auto InputThreadErrorThrottle = 1000;
 
@@ -1217,20 +1234,22 @@ bool Android::TInputThread::Iteration(std::function<void(std::chrono::millisecon
 	{
 		std::Debug << __PRETTY_FUNCTION__ << " No input buffers sleep(" << InputThreadNotReadySleep << ")" << std::endl;
 		//Sleep( std::chrono::milliseconds(InputThreadNotReadySleep) );
-		std::this_thread::sleep_for(std::chrono::milliseconds(InputThreadNotReadySleep) );
+		//std::this_thread::sleep_for(std::chrono::milliseconds(InputThreadNotReadySleep) );
 		return true;
 	}
 
 	if ( !HasPendingData() )
 	{
 		std::Debug << __PRETTY_FUNCTION__ << " No pending data" << std::endl;
-		Sleep( std::chrono::milliseconds(InputThreadNotReadySleep) );
-		std::this_thread::sleep_for(std::chrono::milliseconds(InputThreadNotReadySleep) );
+		//Sleep( std::chrono::milliseconds(InputThreadNotReadySleep) );
+		//std::this_thread::sleep_for(std::chrono::milliseconds(InputThreadNotReadySleep) );
 		return true;
 	}
 	
-	std::Debug << __PRETTY_FUNCTION__ << " Reading a buffer" << std::endl;
-
+	//if ( mParams.mVerboseDebug )
+	{
+		//std::Debug << __PRETTY_FUNCTION__ << " Reading a buffer" << std::endl;
+	}
 	bool DequeueNextIndex = !mAsyncBuffers;
 
 	//	read a buffer

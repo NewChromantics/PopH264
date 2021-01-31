@@ -141,7 +141,7 @@ class Android::TDecoder : public PopH264::TDecoder
 public:
 	static inline const char*	Name = "Android";
 public:
-	TDecoder(std::function<void(const SoyPixelsImpl&,size_t)> OnDecodedFrame);
+	TDecoder(PopH264::TDecoderParams Params,std::function<void(const SoyPixelsImpl&,size_t)> OnDecodedFrame);
 	~TDecoder();
 
 private:
@@ -172,6 +172,7 @@ private:
 	//std::shared_ptr<JniMediaFormat>		mFormat;	//	format for codec!
 	MediaCodec_t	mCodec = nullptr;
 	bool			mAsyncBuffers = false;
+	PopH264::TDecoderParams	mParams;
 	//std::shared_ptr<TSurfaceTexture>	mSurfaceTexture;
 	
 	std::function<void()>	mOnStartThread;
