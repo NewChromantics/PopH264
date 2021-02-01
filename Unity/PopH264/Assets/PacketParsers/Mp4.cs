@@ -574,7 +574,7 @@ public class Mp4 : MonoBehaviour {
 		if ( VerboseDebug )
 			Debug.Log("Push frame data #" + PendingInputFrame.FrameNumber);
 		var PushResult = Decoder.PushFrameData(PendingInputFrame);
-		if (PushResult != 0)
+		if (!PushResult)
 		{
 			//	decoder error
 			Debug.LogError("Decoder Push returned: " + PushResult + " (decoder error!)");
