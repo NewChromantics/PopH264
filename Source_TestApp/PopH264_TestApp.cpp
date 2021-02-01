@@ -352,11 +352,3 @@ void CompareRainbow(const char* MetaJson,uint8_t* Plane0Data,uint8_t* Plane1Data
 }
 #endif
 
-//	called by android OS on lib load
-#include <jni.h>
-__export JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void* reserved)
-{
-	std::cout << "JNI_OnLoad in TestApp" << std::endl;
-	
-	return JNI_VERSION_1_6;
-}
