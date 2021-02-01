@@ -7,7 +7,7 @@
 #define TARGET_WINDOWS
 #endif
 
-#if !defined(TARGET_WINDOWS)
+#if !defined(TARGET_WINDOWS) && !defined(TARGET_ANDROID)
 #define TEST_ASSETS
 #endif
 
@@ -68,14 +68,19 @@ bool LoadDataFromFilename(const char* Filename,ArrayBridge<uint8_t>&& Data)
 
 void DecoderTest(const char* TestDataName,CompareFunc_t* Compare,const char* DecoderName)
 {
+	std::cout << "DecoderTest(" << (TestDataName?TestDataName:"<null>") << "," << (DecoderName?DecoderName:"<null>") << ")" << std::endl;
 	Array<uint8_t> TestData;
 
 	if (!LoadDataFromFilename(TestDataName, GetArrayBridge(TestData)))
 	{
-		uint8_t TestDataBuffer[7 * 1024];
+		uint8_t TestDataBuffer[1 * 1024 * 1024];
 		auto TestDataSize = PopH264_GetTestData(TestDataName, TestDataBuffer, std::size(TestDataBuffer));
 		if (TestDataSize > std::size(TestDataBuffer))
-			throw std::runtime_error("Buffer for test data not big enough");
+		{
+			std::stringstream Debug;
+			Debug << "Buffer for test data (" << TestDataSize << ") not big enough";
+			throw std::runtime_error(Debug.str());
+		}
 		auto TestDataArray = GetRemoteArray(TestDataBuffer, TestDataSize, TestDataSize);
 		TestData.PushBackArray(TestDataArray);
 	}
@@ -259,8 +264,57 @@ void SafeDecoderTest(const char* TestDataName,CompareFunc_t* Compare,const char*
 	}
 }
 
+#if defined(TARGET_ANDROID)
+void CreateJavaVm()
+{
+/*
+	JavaVM *jvm;       / denotes a Java VM
+    JNIEnv *env;       // pointer to native method interface 
+    JavaVMInitArgs vm_args; // JDK/JRE 6 VM initialization arguments 
+    JavaVMOption* options = new JavaVMOption[1];
+    options[0].optionString = "-Djava.class.path=/usr/lib/java";
+    vm_args.version = JNI_VERSION_1_6;
+    vm_args.nOptions = 1;
+    vm_args.options = options;
+    vm_args.ignoreUnrecognized = false;
+    // load and initialize a Java VM, return a JNI interface pointer in env
+    JNI_CreateJavaVM(&jvm, &env, &vm_args);
+	JNI_OnLoad(jvm,nullptr);
+	*/
+}
+#endif
+
+#if defined(TARGET_ANDROID)
+#include <android_native_app_glue.h>
+//#define main	android_main
+#endif
+
+void android_main(struct android_app* state)
+{
+	std::cout << "android_main" << std::endl;
+	/*
+	struct engine engine;
+
+	// Suppress link-time optimization that removes unreferenced code
+	// to make sure glue isn't stripped.
+	app_dummy();
+
+
+	memset(&engine, 0, sizeof(engine));
+	state->userData = &engine;
+	state->onAppCmd = engine_handle_cmd;
+	state->onInputEvent = engine_handle_input;
+	engine.app = state;
+	*/
+}
+
 int main()
 {
+	std::cout << "main" << std::endl;
+	
+#if defined(TARGET_ANDROID)
+	CreateJavaVm();
+#endif
 	//EncoderYuv8_88Test("");
 
 #if defined(TEST_ASSETS)
@@ -274,8 +328,8 @@ int main()
 	//	depth data has iframe, pps, sps order
 	SafeDecoderTest("TestData/Depth.h264", nullptr, nullptr );
 	SafeDecoderTest("TestData/Depth.h264", nullptr, "Broadway" );
-	SafeDecoderTest("RainbowGradient.h264", CompareRainbow, nullptr );
 	SafeDecoderTest("RainbowGradient.h264", CompareRainbow, "Broadway" );
+	SafeDecoderTest("RainbowGradient.h264", CompareRainbow, nullptr );
 	SafeDecoderTest("../TestData/Colour.h264", nullptr, nullptr );
 	SafeDecoderTest("../TestData/Colour.h264", nullptr, "Broadway" );
 	//SafeDecoderTest("RainbowGradient.h264", CompareRainbow);
@@ -297,3 +351,12 @@ void CompareRainbow(const char* MetaJson,uint8_t* Plane0Data,uint8_t* Plane1Data
 {
 }
 #endif
+
+//	called by android OS on lib load
+#include <jni.h>
+__export JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void* reserved)
+{
+	std::cout << "JNI_OnLoad in TestApp" << std::endl;
+	
+	return JNI_VERSION_1_6;
+}

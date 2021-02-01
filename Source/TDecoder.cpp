@@ -92,5 +92,33 @@ bool PopH264::TDecoder::PopNalu(ArrayBridge<uint8_t>&& Buffer,FrameNumber_t& Fra
 }
 
 
+void PopH264::TDecoder::PeekHeaderNalus(ArrayBridge<uint8_t>&& SpsBuffer,ArrayBridge<uint8_t>&& PpsBuffer)
+{
+	std::lock_guard<std::mutex> Lock( mPendingDataLock );
+	
+	for ( auto pd=0;	pd<mPendingDatas.GetSize();	pd++ )
+	{
+		auto& PendingNaluData = mPendingDatas[pd]->mData;
+		auto NaluType = H264::GetPacketType(GetArrayBridge(PendingNaluData));
+		if (NaluType == H264NaluContent::SequenceParameterSet)
+		{
+			SpsBuffer.Copy(PendingNaluData);
+		}
+		if (NaluType == H264NaluContent::PictureParameterSet)
+		{
+			PpsBuffer.Copy(PendingNaluData);
+		}
+		if ( !SpsBuffer.IsEmpty() && !PpsBuffer.IsEmpty() )
+			return;
+	}
+
+	if ( !SpsBuffer.IsEmpty() && !PpsBuffer.IsEmpty() )
+		return;
+
+	std::stringstream Debug;
+	Debug << __PRETTY_FUNCTION__ << " failed to find sps(x" << SpsBuffer.GetDataSize() << ") or Pps(x" << PpsBuffer.GetDataSize() << ")";
+	throw Soy::AssertException(Debug);
+}
+
 
 

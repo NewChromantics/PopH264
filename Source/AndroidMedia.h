@@ -6,14 +6,6 @@
 #include "SoyMedia.h"	//	TPixelBuffer
 
 
-typedef int MLResult;
-typedef int MLHandle;
-#define ML_INVALID_HANDLE	0
-
-class MLMediaCodecBufferInfo
-{
-};
-
 namespace Android
 {
 	void			IsOkay(MLResult Result,const char* Context);
@@ -21,7 +13,7 @@ namespace Android
 	const char*		GetErrorString(MLResult Result);
 
 	SoyPixelsFormat::Type	GetPixelFormat(int32_t ColourFormat);
-	SoyPixelsMeta			GetPixelMeta(MLHandle Format);
+	SoyPixelsMeta			GetPixelMeta(MediaFormat_t Format);
 }
 
 namespace Opengl

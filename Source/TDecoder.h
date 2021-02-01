@@ -56,6 +56,7 @@ protected:
 	virtual bool	DecodeNextPacket()=0;	//	returns true if more data to proccess
 	
 	bool			HasPendingData()		{	return !mPendingDatas.IsEmpty();	}
+	void			PeekHeaderNalus(ArrayBridge<uint8_t>&& SpsBuffer,ArrayBridge<uint8_t>&& PpsBuffer);
 	bool			PopNalu(ArrayBridge<uint8_t>&& Buffer,FrameNumber_t& FrameNumber);
 	void			UnpopNalu(ArrayBridge<uint8_t>&& Buffer,FrameNumber_t FrameNumber);
 	

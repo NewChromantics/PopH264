@@ -6,7 +6,10 @@
 #env
 
 # require param
-ACTION="$1"
+#BUILD_PROJECT_FOLDER=$BUILD_TARGET_NAME.Android
+BUILD_PROJECT_FOLDER="$1"
+
+ACTION="$2"
 
 DEFAULT_ACTION="release"
 
@@ -25,17 +28,16 @@ fi
 
 
 if [ -z "$ANDROID_API" ]; then
-	ANDROID_API="23"
+	ANDROID_API="28"
 fi
 
 
 if [ -z "$ANDROID_PLATFORM" ]; then
-# tsdk: Minimum platform that supports ifaddrs
-	ANDROID_PLATFORM="24"
+# tsdk: 24 is Minimum platform that supports ifaddrs
+	ANDROID_PLATFORM="29"
 fi
 
 MAXCONCURRENTBUILDS=1
-BUILD_PROJECT_FOLDER=$BUILD_TARGET_NAME.Android
 
 # set android NDK dir
 if [ -z "$ANDROID_NDK_HOME" ]; then
@@ -53,6 +55,20 @@ if [ -z "$NDK_PROJECT_PATH" ]; then
 fi
 
 ADDITIONAL_BUILD_FILES=(Source/PopH264.h)
+
+
+function InstallAndRunTestExecutable()
+{
+	#adb push ./PopH264 /data/local/tmp && adb push ./libc++_shared.so /data/local/tmp && adb shell "cd /data/local/tmp && chmod +x ./PopH264 && ./PopH264"
+	adb push ./PopH264 /data/local/tmp
+	adb push ./libc++_shared.so /data/local/tmp
+	adb shell "cd /data/local/tmp && chmod +x ./PopH264 && ./PopH264"
+	
+	RESULT=$?
+	if [[ $RESULT -ne 0 ]]; then
+		exit $RESULT
+	fi
+}
 
 function CopyAdditionalBuildFiles()
 {
@@ -128,6 +144,7 @@ if [ $ACTION == "release" ]; then
 
 	exit 0
 fi
+
 
 if [ $ACTION == "clean" ]; then
 	echo "Android/build.sh: Cleaning..."

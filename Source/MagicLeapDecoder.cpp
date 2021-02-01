@@ -360,7 +360,7 @@ MagicLeap::TDecoder::TDecoder(int32_t Mode) :
 	//	https://forum.magicleap.com/hc/en-us/community/posts/360041748952-Follow-up-on-Multimedia-Decoder-API
 	//	our use of OMX.Nvidia.h264.decode and NAME, errors
 
-	auto Result = MLMediaCodecCreateCodec( CreateByType, MLMediaCodecType_Decoder, CodecName.c_str(), &mHandle );
+	auto Result = MLMediaCodecCreateCodec( CreateByType, MLMediaCodecType_Decoder, CodecName.c_str(), &mCodec );
 	{
 		std::stringstream Error;
 		Error << "MLMediaCodecCreateCodec(" << CodecName << ")";
@@ -418,7 +418,7 @@ MagicLeap::TDecoder::TDecoder(int32_t Mode) :
 	Callbacks.on_frame_rendered = OnFrameRendered;
 	Callbacks.on_frame_available = OnFrameAvailible;
 	
-	Result = MLMediaCodecSetCallbacks( mHandle, &Callbacks, this );
+	Result = MLMediaCodecSetCallbacks( mCodec, &Callbacks, this );
 	IsOkay( Result, "MLMediaCodecSetCallbacks" );
 
 	//	configure
@@ -448,21 +448,21 @@ MagicLeap::TDecoder::TDecoder(int32_t Mode) :
 	//	force software mode
 	if ( HardwareSurface )
 	{
-		Result = MLMediaCodecSetSurfaceHint( mHandle, MLMediaCodecSurfaceHint_Hardware );
+		Result = MLMediaCodecSetSurfaceHint( mCodec, MLMediaCodecSurfaceHint_Hardware );
 		IsOkay( Result, "MLMediaCodecSetSurfaceHint(hardware)" );
 	}
 	else
 	{
-		Result = MLMediaCodecSetSurfaceHint( mHandle, MLMediaCodecSurfaceHint_Software );
+		Result = MLMediaCodecSetSurfaceHint( mCodec, MLMediaCodecSurfaceHint_Software );
 		IsOkay( Result, "MLMediaCodecSetSurfaceHint(software)" );
 	}
 	
 	//MLHandle Crypto = ML_INVALID_HANDLE;
 	MLHandle Crypto = 0;	//	gr: INVALID_HANDLE doesnt work
-	Result = MLMediaCodecConfigure( mHandle, Format, Crypto );
+	Result = MLMediaCodecConfigure( mCodec, Format, Crypto );
 	IsOkay( Result, "MLMediaCodecConfigure" );
 	
-	Result = MLMediaCodecStart( mHandle );
+	Result = MLMediaCodecStart( mCodec );
 	IsOkay( Result, "MLMediaCodecStart" );
 	
 	//	MLMediaCodecFlush makes all inputs invalid... flush on close?
@@ -473,13 +473,13 @@ MagicLeap::TDecoder::~TDecoder()
 {
 	try
 	{
-		auto Result = MLMediaCodecStop( mHandle );
+		auto Result = MLMediaCodecStop( mCodec );
 		IsOkay( Result, "MLMediaCodecStop" );
 		
-		Result = MLMediaCodecFlush( mHandle );
+		Result = MLMediaCodecFlush( mCodec );
 		IsOkay( Result, "MLMediaCodecFlush" );
 		
-		Result = MLMediaCodecDestroy( mHandle );
+		Result = MLMediaCodecDestroy( mCodec );
 		IsOkay( Result, "MLMediaCodecDestroy" );
 	}
 	catch(std::exception& e)
@@ -513,7 +513,7 @@ void MagicLeap::TInputThread::PushInputBuffer(int64_t BufferIndex)
 	auto BufferHandle = static_cast<MLHandle>( BufferIndex );
 	uint8_t* Buffer = nullptr;
 	size_t BufferSize = 0;
-	auto Result = MLMediaCodecGetInputBufferPointer( mHandle, BufferHandle, &Buffer, &BufferSize );
+	auto Result = MLMediaCodecGetInputBufferPointer( mCodec, BufferHandle, &Buffer, &BufferSize );
 	IsOkay( Result, "MLMediaCodecGetInputBufferPointer" );
 	if ( Buffer == nullptr )
 	{
@@ -539,7 +539,7 @@ void MagicLeap::TInputThread::PushInputBuffer(int64_t BufferIndex)
 	//Flags |= MLMediaCodecBufferFlag_KeyFrame;
 	//Flags |= MLMediaCodecBufferFlag_CodecConfig;
 	//Flags |= MLMediaCodecBufferFlag_EOS;
-	Result = MLMediaCodecQueueInputBuffer( mHandle, BufferHandle, DataOffset, BufferWrittenSize, PresentationTimeMicroSecs, Flags );
+	Result = MLMediaCodecQueueInputBuffer( mCodec, BufferHandle, DataOffset, BufferWrittenSize, PresentationTimeMicroSecs, Flags );
 	IsOkay( Result, "MLMediaCodecQueueInputBuffer" );
 	
 	OnInputSubmitted( PresentationTimeMicroSecs );
@@ -552,7 +552,7 @@ void MagicLeap::TInputThread::OnInputBufferAvailible(MLHandle CodecHandle,int64_
 {
 	{
 		std::lock_guard<std::mutex> Lock(mInputBuffersLock);
-		mHandle = CodecHandle;
+		mCodec = CodecHandle;
 		mInputBuffers.PushBack(BufferIndex);
 	}
 	std::Debug << "OnInputBufferAvailible(" << BufferIndex << ") " << GetDebugState() << std::endl;
@@ -561,7 +561,7 @@ void MagicLeap::TInputThread::OnInputBufferAvailible(MLHandle CodecHandle,int64_
 
 void MagicLeap::TDecoder::OnInputBufferAvailible(int64_t BufferIndex)
 {
-	mInputThread.OnInputBufferAvailible( mHandle, BufferIndex );
+	mInputThread.OnInputBufferAvailible( mCodec, BufferIndex );
 }
 
 void MagicLeap::TDecoder::OnOutputBufferAvailible(int64_t BufferIndex,const MLMediaCodecBufferInfo& BufferMeta)
@@ -570,7 +570,7 @@ void MagicLeap::TDecoder::OnOutputBufferAvailible(int64_t BufferIndex,const MLMe
 	Meta.mPixelMeta = mOutputPixelMeta;
 	Meta.mBufferIndex = BufferIndex;
 	Meta.mMeta = BufferMeta;
-	mOutputThread.OnOutputBufferAvailible( mHandle, Meta );
+	mOutputThread.OnOutputBufferAvailible( mCodec, Meta );
 	std::Debug << "OnOutputBufferAvailible(" << BufferIndex << ") " << GetDebugState() << mOutputThread.GetDebugState() << std::endl;
 }
 

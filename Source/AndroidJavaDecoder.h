@@ -1,12 +1,11 @@
 #pragma once
 
-
 #include "TDecoder.h"
-#include <ml_media_codec.h>
+#include "AndroidMedia.h"
 #include "SoyThread.h"
 #include "SoyPixels.h"
 
-namespace MagicLeap
+namespace Android
 {
 	class TDecoder;
 	class TInputThread;
@@ -16,7 +15,7 @@ namespace MagicLeap
 }
 
 
-class MagicLeap::TOutputBufferMeta
+class Android::TOutputBufferMeta
 {
 public:
 	MLMediaCodecBufferInfo	mMeta;
@@ -24,7 +23,7 @@ public:
 	SoyPixelsMeta			mPixelMeta;			//	meta at time of availibility
 };
 
-class MagicLeap::TOutputTexture
+class Android::TOutputTexture
 {
 public:
 	bool			IsReadyToBePushed()
@@ -48,15 +47,14 @@ public:
 	bool			mReleased = false;			//	released by caller
 };
 
-class MagicLeap::TOutputThread : public SoyWorkerThread
+class Android::TOutputThread : public SoyWorkerThread
 {
 public:
-	TOutputThread();
+	TOutputThread(std::function<void(const SoyPixelsImpl& Pixels,size_t FrameNumber)> OnDecodedFrame);
 
 	virtual bool	Iteration() override;
 	virtual bool	CanSleep() override;
 	
-	void			PushOnOutputFrameFunc(std::function<void(const SoyPixelsImpl&,SoyTime)>& PushFrameFunc);
 	void			OnInputSubmitted(int32_t PresentationTime);
 	void			OnOutputBufferAvailible(MLHandle CodecHandle,const TOutputBufferMeta& BufferMeta);
 	std::string		GetDebugState();
@@ -69,12 +67,11 @@ private:
 	void			PushOutputTextures();
 	void			PushOutputTexture(TOutputTexture& OutputTexture);
 	void			ReleaseOutputTexture(MLHandle TextureHandle);
-	void			PushFrame(const SoyPixelsImpl& Pixels);
+	void			PushFrame(const SoyPixelsImpl& Pixels,size_t FrameNumber);
 	bool			IsAnyOutputTextureReady();
 
 private:
-	std::mutex		mPushFunctionsLock;
-	Array<std::function<void(const SoyPixelsImpl&,SoyTime)>>	mPushFunctions;
+	std::function<void(const SoyPixelsImpl& Pixels,size_t FrameNumber)>	mOnDecodedFrame;
 
 	//	list of buffers with some pending output data
 	std::mutex					mOutputBuffersLock;
@@ -93,7 +90,7 @@ private:
 
 
 
-class MagicLeap::TInputThread : public SoyWorkerThread
+class Android::TInputThread : public SoyWorkerThread
 {
 public:
 	TInputThread(std::function<void(ArrayBridge<uint8_t>&&)> PopPendingData,std::function<bool()> HasPendingData);
@@ -111,7 +108,7 @@ private:
 	void			PushInputBuffer(int64_t BufferIndex);
 	
 private:
-	MLHandle		mCodec = ML_INVALID_HANDLE;
+	MLHandle		mHandle = ML_INVALID_HANDLE;
 
 	std::function<void(ArrayBridge<uint8_t>&&)>	mPopPendingData;
 	std::function<bool()>						mHasPendingData;
@@ -124,14 +121,17 @@ private:
 
 
 
-class MagicLeap::TDecoder : public PopH264::TDecoder
+class Android::TDecoder : public PopH264::TDecoder
 {
 public:
-	TDecoder(int32_t Mode);
+	static inline const char*	Name = "Android";
+public:
+	TDecoder(std::function<void(const SoyPixelsImpl&,size_t)> OnDecodedFrame);
 	~TDecoder();
 
 private:
-	virtual bool	DecodeNextPacket(std::function<void(const SoyPixelsImpl&,SoyTime)> OnFrameDecoded) override;	//	returns true if more data to proccess
+	virtual bool	DecodeNextPacket() override;	//	returns true if more data to proccess
+	void			OnDecodedFrame(const SoyPixelsImpl& Pixels,size_t FrameNumber);
 	
 	void			OnInputBufferAvailible(int64_t BufferIndex);
 	void			OnOutputBufferAvailible(int64_t BufferIndex,const MLMediaCodecBufferInfo& BufferMeta);
@@ -140,10 +140,25 @@ private:
 	void			OnOutputTextureAvailible();
 
 	std::string		GetDebugState();
-	
+
+	std::shared_ptr<Platform::TMediaFormat>		AllocFormat();
+	void			Alloc(SoyPixelsMeta SurfaceMeta,std::shared_ptr<Platform::TMediaFormat> Format,std::shared_ptr<Opengl::TContext> OpenglContext,bool SingleBufferMode);
+
+	bool			CreateCodec();		//	returns false if we're not ready to push packets (ie, waiting for headers still)
+	void 			DequeueOutputBuffers();
+	void			DequeueInputBuffers();
+	//	input thread pulling data
+	void			GetNextInputData(ArrayBridge<uint8_t>&& PacketBuffer);
+
 private:
-	MLHandle		mCodec = ML_INVALID_HANDLE;
+	//	need SPS & PPS to create format, before we can create codec
+	Array<uint8_t>	mPendingSps;
+	Array<uint8_t>	mPendingPps;	
+	std::shared_ptr<JniMediaFormat>		mFormat;	//	format for codec!
+	std::shared_ptr<TJniObject>			mCodec;
+	std::shared_ptr<TSurfaceTexture>	mSurfaceTexture;
 	
+	std::function<void()>	mOnStartThread;
 	TInputThread	mInputThread;
 	TOutputThread	mOutputThread;
 	SoyPixelsMeta	mOutputPixelMeta;

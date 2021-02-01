@@ -1,9 +1,20 @@
 #pragma once
 
 #include "TDecoder.h"
-#include "AndroidMedia.h"
 #include "SoyThread.h"
 #include "SoyPixels.h"
+
+
+#include "media/NdkMediaCodec.h"
+//#include <NdkMediaError.h>
+
+
+//	NDK media formats
+typedef AMediaCodecBufferInfo MediaBufferInfo_t;
+typedef AMediaCodec* MediaCodec_t;
+typedef AMediaFormat* MediaFormat_t;
+typedef media_status_t MediaResult_t;
+
 
 namespace Android
 {
@@ -18,11 +29,11 @@ namespace Android
 class Android::TOutputBufferMeta
 {
 public:
-	MLMediaCodecBufferInfo	mMeta;
+	MediaBufferInfo_t		mMeta;
 	int64_t					mBufferIndex = -1;
 	SoyPixelsMeta			mPixelMeta;			//	meta at time of availibility
 };
-
+/*
 class Android::TOutputTexture
 {
 public:
@@ -46,7 +57,7 @@ public:
 	bool			mPushed = false;			//	sent to caller
 	bool			mReleased = false;			//	released by caller
 };
-
+*/
 class Android::TOutputThread : public SoyWorkerThread
 {
 public:
@@ -56,19 +67,22 @@ public:
 	virtual bool	CanSleep() override;
 	
 	void			OnInputSubmitted(int32_t PresentationTime);
-	void			OnOutputBufferAvailible(MLHandle CodecHandle,const TOutputBufferMeta& BufferMeta);
+	void			OnOutputBufferAvailible(MediaCodec_t Codec,bool AsyncBuffers,const TOutputBufferMeta& BufferMeta);
 	std::string		GetDebugState();
+	/*
 	void			OnOutputTextureWritten(int64_t PresentationTime);
 	void			OnOutputTextureAvailible();
-
+*/
 private:
 	void			PopOutputBuffer(const TOutputBufferMeta& BufferMeta);
+	/*
 	void			RequestOutputTexture();
 	void			PushOutputTextures();
 	void			PushOutputTexture(TOutputTexture& OutputTexture);
 	void			ReleaseOutputTexture(MLHandle TextureHandle);
-	void			PushFrame(const SoyPixelsImpl& Pixels,size_t FrameNumber);
 	bool			IsAnyOutputTextureReady();
+	*/
+	void			PushFrame(const SoyPixelsImpl& Pixels,size_t FrameNumber);
 
 private:
 	std::function<void(const SoyPixelsImpl& Pixels,size_t FrameNumber)>	mOnDecodedFrame;
@@ -76,15 +90,16 @@ private:
 	//	list of buffers with some pending output data
 	std::mutex					mOutputBuffersLock;
 	Array<TOutputBufferMeta>	mOutputBuffers;
-	
+/*	
 	//	texture's we've acquired
 	size_t						mOutputTexturesAvailible = 0;	//	shouldbe atomic
 	std::recursive_mutex		mOutputTexturesLock;
 	Array<TOutputTexture>		mOutputTextures;
 	
 	size_t						mOutputTextureCounter = 0;	//	for debug colour output
-	
-	MLHandle		mCodecHandle = ML_INVALID_HANDLE;
+	*/
+	MediaCodec_t				mCodec = nullptr;
+	bool						mAsyncBuffers = false;
 };
 
 
@@ -93,14 +108,14 @@ private:
 class Android::TInputThread : public SoyWorkerThread
 {
 public:
-	TInputThread(std::function<void(ArrayBridge<uint8_t>&&)> PopPendingData,std::function<bool()> HasPendingData);
+	TInputThread(std::function<void(ArrayBridge<uint8_t>&&,PopH264::FrameNumber_t&)> PopPendingData,std::function<bool()> HasPendingData);
 	
 	virtual bool	Iteration() override	{	return true;	}
 	virtual bool	Iteration(std::function<void(std::chrono::milliseconds)> Sleep) override;
 	virtual bool	CanSleep() override;
 	
 	bool			HasPendingData()	{	return mHasPendingData();	}
-	void			OnInputBufferAvailible(MLHandle CodecHandle,int64_t BufferIndex);
+	void			OnInputBufferAvailible(MediaCodec_t CodecHandle,bool AsyncBuffers,int64_t BufferIndex);
 	std::string		GetDebugState();
 	void			OnInputSubmitted(int32_t PresentationTime)	{}
 	
@@ -108,11 +123,11 @@ private:
 	void			PushInputBuffer(int64_t BufferIndex);
 	
 private:
-	MLHandle		mHandle = ML_INVALID_HANDLE;
+	MediaCodec_t	mCodec = nullptr;
+	bool			mAsyncBuffers = false;
 
-	std::function<void(ArrayBridge<uint8_t>&&)>	mPopPendingData;
+	std::function<void(ArrayBridge<uint8_t>&&,PopH264::FrameNumber_t&)>	mPopPendingData;
 	std::function<bool()>						mHasPendingData;
-	uint64_t		mPacketCounter = 0;	//	we don't pass around frame/presentation time, so we just use a counter
 	
 	//	list of buffers we can write to
 	std::mutex		mInputBuffersLock;
@@ -126,7 +141,7 @@ class Android::TDecoder : public PopH264::TDecoder
 public:
 	static inline const char*	Name = "Android";
 public:
-	TDecoder(std::function<void(const SoyPixelsImpl&,size_t)> OnDecodedFrame);
+	TDecoder(PopH264::TDecoderParams Params,std::function<void(const SoyPixelsImpl&,size_t)> OnDecodedFrame);
 	~TDecoder();
 
 private:
@@ -134,29 +149,31 @@ private:
 	void			OnDecodedFrame(const SoyPixelsImpl& Pixels,size_t FrameNumber);
 	
 	void			OnInputBufferAvailible(int64_t BufferIndex);
-	void			OnOutputBufferAvailible(int64_t BufferIndex,const MLMediaCodecBufferInfo& BufferMeta);
-	void			OnOutputFormatChanged(MLHandle NewFormat);
-	void			OnOutputTextureWritten(int64_t PresentationTime);
-	void			OnOutputTextureAvailible();
+	void			OnOutputBufferAvailible(int64_t BufferIndex,const MediaBufferInfo_t& BufferMeta);
+	void			OnOutputFormatChanged(MediaFormat_t NewFormat);
+	//void			OnOutputTextureWritten(int64_t PresentationTime);
+	//void			OnOutputTextureAvailible();
 
 	std::string		GetDebugState();
 
-	std::shared_ptr<Platform::TMediaFormat>		AllocFormat();
-	void			Alloc(SoyPixelsMeta SurfaceMeta,std::shared_ptr<Platform::TMediaFormat> Format,std::shared_ptr<Opengl::TContext> OpenglContext,bool SingleBufferMode);
+	//std::shared_ptr<Platform::TMediaFormat>		AllocFormat();
+	//void			Alloc(SoyPixelsMeta SurfaceMeta,std::shared_ptr<Platform::TMediaFormat> Format,std::shared_ptr<Opengl::TContext> OpenglContext,bool SingleBufferMode);
 
-	void			CreateCodec();		//	returns false if we're not ready to push packets
+	void			CreateCodec();		//	returns false if we're not ready to push packets (ie, waiting for headers still)
 	void 			DequeueOutputBuffers();
 	void			DequeueInputBuffers();
 	//	input thread pulling data
-	void			GetNextInputData(ArrayBridge<uint8_t>&& PacketBuffer);
+	void			GetNextInputData(ArrayBridge<uint8_t>&& PacketBuffer,PopH264::FrameNumber_t& FrameNumber);
 
 private:
 	//	need SPS & PPS to create format, before we can create codec
 	Array<uint8_t>	mPendingSps;
 	Array<uint8_t>	mPendingPps;	
-	std::shared_ptr<JniMediaFormat>		mFormat;	//	format for codec!
-	std::shared_ptr<TJniObject>			mCodec;
-	std::shared_ptr<TSurfaceTexture>	mSurfaceTexture;
+	//std::shared_ptr<JniMediaFormat>		mFormat;	//	format for codec!
+	MediaCodec_t	mCodec = nullptr;
+	bool			mAsyncBuffers = false;
+	PopH264::TDecoderParams	mParams;
+	//std::shared_ptr<TSurfaceTexture>	mSurfaceTexture;
 	
 	std::function<void()>	mOnStartThread;
 	TInputThread	mInputThread;

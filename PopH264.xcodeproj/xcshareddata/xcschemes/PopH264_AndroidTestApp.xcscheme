@@ -14,9 +14,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "BFF1C6DE22E3769B00AFDFD5"
-               BuildableName = "PopH264_Android"
-               BlueprintName = "PopH264_Android"
+               BlueprintIdentifier = "BF66C6E325C34B28007A01B4"
+               BuildableName = "PopH264_AndroidTestApp"
+               BlueprintName = "PopH264_AndroidTestApp"
                ReferencedContainer = "container:PopH264.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -40,15 +40,6 @@
       debugDocumentVersioning = "YES"
       debugServiceExtension = "internal"
       allowLocationSimulation = "YES">
-      <MacroExpansion>
-         <BuildableReference
-            BuildableIdentifier = "primary"
-            BlueprintIdentifier = "BFF1C6DE22E3769B00AFDFD5"
-            BuildableName = "PopH264_Android"
-            BlueprintName = "PopH264_Android"
-            ReferencedContainer = "container:PopH264.xcodeproj">
-         </BuildableReference>
-      </MacroExpansion>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"
@@ -59,9 +50,9 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "BFF1C6DE22E3769B00AFDFD5"
-            BuildableName = "PopH264_Android"
-            BlueprintName = "PopH264_Android"
+            BlueprintIdentifier = "BF66C6E325C34B28007A01B4"
+            BuildableName = "PopH264_AndroidTestApp"
+            BlueprintName = "PopH264_AndroidTestApp"
             ReferencedContainer = "container:PopH264.xcodeproj">
          </BuildableReference>
       </MacroExpansion>

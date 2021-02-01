@@ -4,7 +4,7 @@ LOCAL_PATH := $(abspath $(call my-dir))
 
 
 # extra ../ as jni is always prepended
-SRC := ../..
+SRC := ../../..
 #$(warning $(LOCAL_PATH))	#	debug
 
 # gr: get this from env var
@@ -64,11 +64,14 @@ $(LOCAL_PATH)/$(SRC)/Source/Broadway/Decoder/inc	\
 $(LOCAL_PATH)/$(SOY_PATH)/src	\
 $(LOCAL_PATH)/$(SRC)/Source/Json11	\
 
+
+
 # use warning as echo
 #$(warning $(LOCAL_C_INCLUDES))
 
 LOCAL_STATIC_LIBRARIES :=
 #LOCAL_STATIC_LIBRARIES += android-ndk-profiler
+
 
 #LOCAL_LDLIBS	+= -lGLESv3			# OpenGL ES 3.0
 #LOCAL_LDLIBS	+= -lEGL			# GL platform interface
@@ -76,6 +79,17 @@ LOCAL_LDLIBS  	+= -llog			# logging
 #LOCAL_LDLIBS  	+= -landroid		# native windows
 #LOCAL_LDLIBS	+= -lz				# For minizip
 #LOCAL_LDLIBS	+= -lOpenSLES		# audio
+
+
+# native/ndk mediacodec
+LOCAL_LDLIBS += -lmediandk
+
+
+
+# gr: when the test app executable tries to run, it can't find the c++shared.so next to it
+#	use this to alter the rpath so it finds it
+#LOCAL_LDFLAGS	+= -rdynamic
+LOCAL_LDFLAGS	+= -Wl,-rpath,.
 
 # project files
 # todo: generate from input from xcode
@@ -90,7 +104,8 @@ $(SRC)/Source/BroadwayDecoder.cpp \
 $(SRC)/Source/BroadwayAll.c \
 $(SRC)/Source/Json11/json11.cpp \
 $(SRC)/Source/AndroidDecoder.cpp \
-$(SRC)/Source/AndroidMedia.cpp \
+
+#$(SRC)/Source/AndroidMedia.cpp \
 
 
 # soy lib files
@@ -123,10 +138,7 @@ $(SOY_PATH)/src/SoyMediaFormat.cpp \
 
 
 
-
 include $(BUILD_SHARED_LIBRARY)
-
-
 
 
 #$(call import-module,android-ndk-profiler)
