@@ -147,9 +147,12 @@ The following are various notes which PopH264 handles. (Or at least, it should h
 MediaFoundation
 --------------------
 - If you try and decode any Nalu before SPS, you get no error, but no output. This include PPS before SPS.
+- If you submit an IDR keyframe twice, you should get a frame straight away. (PopH264 now always does this; `todo: option to disable this!`)
+- `MFT_MESSAGE_COMMAND_DRAIN` doesn't seem to have any effect
 
 Broadway
 -----------------
 - If you try and decode an IDR keyframe once then end the stream, you will get no frame out. It requires submitting the frame a second time to get the frame out.
+- Similarly, you can submit an IDR/keyframe twice and get that frame immediately output.
 - SPS & PPS need to be sent before other packets, or we will get no output. #20
 - If you try and decode an intra-frame before keyframe, the decoder will stop with no error and get no frame output. #21

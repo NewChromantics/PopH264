@@ -79,6 +79,8 @@ bool MediaFoundation::TDecoder::DecodeNextPacket()
 	//std::Debug << "MediaFoundation got " << magic_enum::enum_name(NaluType) << " x" << Nalu.GetSize() << std::endl;
 
 	bool PushData = true;
+	bool PushTwice = false;
+	bool DoDrain = false;
 
 	//	skip some packets
 	//	gr: we require SPS before PPS, before anything else otherwise nothing is output
@@ -107,6 +109,9 @@ bool MediaFoundation::TDecoder::DecodeNextPacket()
 			PushData = false;
 		break;
 
+	case H264NaluContent::Slice_CodedIDRPicture:
+		DoDrain = true;	//	try and force some frame output after a keyframe
+		PushTwice = true;	//	push keyframes twice to trick the decoder into decoding keyframe immediately
 	default:
 		if (SkipIfNotSpsSent)
 		{
@@ -120,6 +125,7 @@ bool MediaFoundation::TDecoder::DecodeNextPacket()
 
 	if (NaluType == H264NaluContent::EndOfStream)
 	{
+		//	gr: don't push as this is a special empty packet
 		PushData = false;
 		//	flush ditches pending inputs!
 		//mTransformer->ProcessCommand(MFT_MESSAGE_COMMAND_FLUSH);
@@ -133,13 +139,14 @@ bool MediaFoundation::TDecoder::DecodeNextPacket()
 		//	notify there will be no more input
 		mTransformer->ProcessCommand(MFT_MESSAGE_NOTIFY_END_OF_STREAM);
 		
-		//	drain means we're going to drain all outputs until Needs_more_input
-		mTransformer->ProcessCommand(MFT_MESSAGE_COMMAND_DRAIN);
+		DoDrain = true;
 		
 		//mTransformer->ProcessCommand(MFT_MESSAGE_COMMAND_FLUSH_OUTPUT_STREAM);
 	}
 
-	if (PushData)
+	auto PushCount = (PushData ? (PushTwice ? 2 : 1) : 0);
+
+	for ( auto pi=0;	pi<PushCount;	pi++ )
 	{
 		if (!mTransformer->PushFrame(GetArrayBridge(Nalu), FrameNumber))
 		{
@@ -173,10 +180,19 @@ bool MediaFoundation::TDecoder::DecodeNextPacket()
 			}
 		}
 	}
-	else
+	
+	if ( PushCount == 0 )
 	{
 		if (mVerboseDebug)
 			std::Debug << __PRETTY_FUNCTION__ << " skipped " << NaluType << std::endl;
+	}
+
+	if (DoDrain)
+	{
+		//	drain means we're going to drain all outputs until Needs_more_input
+		//	gr: calling EOS makes output come immediately from a keyframe, but drain doesn't seem to do anything
+		//mTransformer->ProcessCommand(MFT_MESSAGE_NOTIFY_END_OF_STREAM);
+		mTransformer->ProcessCommand(MFT_MESSAGE_COMMAND_DRAIN);
 	}
 
 	//	pop any frames that have come out in the mean time
