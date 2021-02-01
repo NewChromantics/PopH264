@@ -45,6 +45,10 @@ public static class PopH264
 	[DllImport(PluginName, CallingConvention = CallingConvention.Cdecl)]
 	private static extern int	PopH264_PushData(int Instance,byte[] Data,int DataSize,int FrameNumber);
 
+    //  wrapper for PopH264_PushData(null) - send an EndOFStream packet to the decoder to make it finish off any unprocessed packets
+    [DllImport(PluginName, CallingConvention = CallingConvention.Cdecl)]
+    private static extern int   PopH264_PushEndOfStream(int Instance);
+    
 	[DllImport(PluginName, CallingConvention = CallingConvention.Cdecl)]
 	private static extern void	PopH264_PeekFrame(int Instance, byte[] JsonBuffer, int JsonBufferSize);
 
@@ -141,7 +145,7 @@ public static class PopH264
 		bool ThreadedDecoding = true;
 		System.Threading.Thread InputThread;
 		List<FrameInput> InputQueue;
-		int? InputThreadResult = 0;
+		bool? InputThreadResult = null;
 		public bool HadEndOfStream = false;
 		
 		//	reuse/alloc once a json buffer
@@ -275,9 +279,10 @@ public static class PopH264
 					InputQueue.RemoveRange(0, 1);
 				}
 				var Length = (Frame.Bytes == null) ? 0 : Frame.Bytes.Length;
-				InputThreadResult = PopH264_PushData(Instance.Value, Frame.Bytes, Length, Frame.FrameNumber );
-			}
-		}
+                var Result = PopH264_PushData(Instance.Value, Frame.Bytes, Length, Frame.FrameNumber);
+                InputThreadResult = (Result==0);
+            }
+        }
 
 		void CheckH264Frame(FrameInput Frame)
 		{
@@ -309,7 +314,7 @@ public static class PopH264
 			*/
 		}
 
-		public int PushFrameData(FrameInput Frame)
+		public bool PushFrameData(FrameInput Frame)
 		{
 			//CheckH264Frame(Frame);
 			//Debug.Log(BitConverter.ToString(Frame.Bytes.SubArray(0, 8)));
@@ -317,7 +322,8 @@ public static class PopH264
 			if ( !ThreadedDecoding )
 			{
 				var Length = (Frame.Bytes==null) ? 0 : Frame.Bytes.Length;
-				return PopH264_PushData(Instance.Value, Frame.Bytes, Length, Frame.FrameNumber);
+				var Result = PopH264_PushData(Instance.Value, Frame.Bytes, Length, Frame.FrameNumber);
+                return (Result == 0);
 			}
 
 			if (InputThread == null )
@@ -334,17 +340,23 @@ public static class PopH264
 				//PushByteThread.Resume();
 			}
 
-			//	check for 
-			return InputThreadResult.HasValue ? InputThreadResult.Value : 0;
+			//	look out for previous errors
+			return InputThreadResult.HasValue ? InputThreadResult.Value : true;
 		}
 
-		public int PushFrameData(byte[] H264Data, int FrameNumber)
+		public bool PushFrameData(byte[] H264Data, int FrameNumber)
 		{
 			var NewFrame = new FrameInput();
 			NewFrame.FrameNumber = FrameNumber;
 			NewFrame.Bytes = H264Data;
 			return PushFrameData(NewFrame);
 		}
+
+        public bool PushEndOfStream()
+        {
+            var NewFrame = new FrameInput();
+            return PushFrameData(NewFrame);
+        }
 
 		//	returns frame time
 		public int? GetNextFrame(ref List<Texture2D> Planes, ref List<PixelFormat> PixelFormats)

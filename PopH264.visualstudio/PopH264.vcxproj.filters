@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Source">
@@ -562,9 +562,11 @@
     <None Include="..\Source\X264\bin\x86\x264.dll">
       <Filter>x264\x86</Filter>
     </None>
+    <None Include="..\Unity\PopH264\Assets\PopH264\PopH264.cs">
+      <Filter>Unity Source</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
-    <CopyFileToFolders Include="..\Unity\PopH264\Assets\PopH264\PopH264.cs" />
     <CopyFileToFolders Include="..\Source\X264\bin\x64\x264.dll">
       <Filter>x264\x64</Filter>
     </CopyFileToFolders>

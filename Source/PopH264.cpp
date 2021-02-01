@@ -31,7 +31,8 @@ namespace PopH264
 	//	1.3.17	MediaFoundation now doesn't get stuck if we try and decode PPS or frames before SPS
 	//	1.3.18	Broadway doesn't get stuck if we dont process in the order SPS, PPS, Keyframe
 	//	1.3.19	Android NDK MediaCodec implementation
-	const Soy::TVersion	Version(1,3,19);
+	//	1.3.20	Added PopH264_PushEndOfStream API as a clear wrapper for PopH264_PushData(null)
+	const Soy::TVersion	Version(1,3,20);
 }
 
 
@@ -127,6 +128,9 @@ __export int32_t PopH264_PushData(int32_t Instance,uint8_t* Data,int32_t DataSiz
 		return 0;
 	};
 	return SafeCall(Function, __func__, -1 );
+__export int32_t PopH264_PushEndOfStream(int32_t Instance)
+{
+	return PopH264_PushData(Instance, nullptr, 0, 0);
 }
 
 
