@@ -64,6 +64,7 @@ __export void				PopH264_PeekFrame(int32_t Instance,char* JsonBuffer,int32_t Jso
 //	This decodes the packet, but may not have an immediate output, and may have more than one frame output.
 //	This is synchronous, any scheduling should be on the caller.
 //	todo; fix framenumber to mix with fragmented data; for now, if framenumber is important, defragment nalu packets at high level
+//	returns 0 on success or -1 on error
 __export int32_t			PopH264_PushData(int32_t Instance,uint8_t* Data,int32_t DataSize,int32_t FrameNumber);
 
 //	returns frame number. -1 on error

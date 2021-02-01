@@ -34,18 +34,21 @@ public static class PopH264
 	[DllImport(PluginName, CallingConvention = CallingConvention.Cdecl)]
 	private static extern int	PopH264_GetVersion();
 
+    //  returns decoder instance id, 0 on error.
 	[DllImport(PluginName, CallingConvention = CallingConvention.Cdecl)]
 	private static extern int	PopH264_CreateDecoder(byte[] OptionsJson, [In, Out] byte[] ErrorBuffer, Int32 ErrorBufferLength);
 
 	[DllImport(PluginName, CallingConvention = CallingConvention.Cdecl)]
 	private static extern void PopH264_DestroyDecoder(int Instance);
 
+    //  returns 0 on success or -1 on error
 	[DllImport(PluginName, CallingConvention = CallingConvention.Cdecl)]
 	private static extern int	PopH264_PushData(int Instance,byte[] Data,int DataSize,int FrameNumber);
 
 	[DllImport(PluginName, CallingConvention = CallingConvention.Cdecl)]
 	private static extern void	PopH264_PeekFrame(int Instance, byte[] JsonBuffer, int JsonBufferSize);
 
+    //  returns frame number or -1
 	[DllImport(PluginName, CallingConvention = CallingConvention.Cdecl)]
 	private static extern int	PopH264_PopFrame(int Instance,byte[] Plane0,int Plane0Size,byte[] Plane1,int Plane1Size,byte[] Plane2,int Plane2Size);
 
