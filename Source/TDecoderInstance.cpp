@@ -164,7 +164,7 @@ PopH264::TDecoderInstance::TDecoderInstance(json11::Json& Options)
 	{
 		try
 		{
-			mDecoder.reset(new MediaFoundation::TDecoder(OnFrameDecoded));
+			mDecoder.reset(new MediaFoundation::TDecoder(Params,OnFrameDecoded));
 			return;
 		}
 		catch (std::exception& e)

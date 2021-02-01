@@ -16,7 +16,7 @@ public:
 	static inline const char*	Name = "MediaFoundation";
 
 public:
-	TDecoder(std::function<void(const SoyPixelsImpl&, size_t)> OnDecodedFrame);
+	TDecoder(PopH264::TDecoderParams& Params,std::function<void(const SoyPixelsImpl&, size_t)> OnDecodedFrame);
 	~TDecoder();
 
 private:
