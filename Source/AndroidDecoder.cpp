@@ -628,23 +628,48 @@ void Android::TDecoder::CreateCodec()
 
 Android::TDecoder::~TDecoder()
 {
-/*
-	try
+	std::Debug << __PRETTY_FUNCTION__ << std::endl;
+	if ( mCodec )
 	{
-		auto Result = MLMediaCodecStop( mHandle );
-		IsOkay( Result, "MLMediaCodecStop" );
+		try
+		{
+			auto Result = AMediaCodec_stop( mCodec );
+			IsOkay( Result, "AMediaCodec_stop" );
 		
-		Result = MLMediaCodecFlush( mHandle );
-		IsOkay( Result, "MLMediaCodecFlush" );
+			Result = AMediaCodec_flush( mCodec );
+			IsOkay( Result, "AMediaCodec_flush" );
+		}
+		catch(std::exception& e)
+		{
+			std::Debug << __PRETTY_FUNCTION__ << " AMediaCodec_stop/AMediaCodec_flush exception; " << e.what() << std::endl;
+		}
 		
-		Result = MLMediaCodecDestroy( mHandle );
-		IsOkay( Result, "MLMediaCodecDestroy" );
+		try
+		{
+			std::Debug << __PRETTY_FUNCTION__ << "stop input & output threads..." << std::endl;
+			mInputThread.Stop();
+			mOutputThread.Stop();
+			std::Debug << __PRETTY_FUNCTION__ << "wait for input & output threads to finish..." << std::endl;
+			mInputThread.WaitToFinish();
+			mOutputThread.WaitToFinish();
+		
+			//	gr: I seem to recall it's safe to destroy the codec if the threads arent finished, 
+			//		they will error internally need to make sure. Find some reference to thread safety in the docs/code!
+			std::Debug << "AMediaCodec_destroy" << std::endl;
+			auto Result = AMediaCodec_delete( mCodec );
+			IsOkay( Result, "AMediaCodec_delete" );
+		}
+		catch(std::exception& e)
+		{
+			std::Debug << __PRETTY_FUNCTION__ << " exception; " << e.what() << std::endl;
+		}
+		mCodec = nullptr;
 	}
-	catch(std::exception& e)
-	{
-		std::Debug << __func__ << e.what() << std::endl;
-	}
-	*/
+	
+	//	make sure threads are stopped regardless
+	std::Debug << __PRETTY_FUNCTION__ << "hail mary wait for input & output threads to finish..." << std::endl;
+	mInputThread.WaitToFinish();
+	mOutputThread.WaitToFinish();
 }
 
 
