@@ -65,6 +65,8 @@ bool LoadDataFromFilename(const char* Filename,ArrayBridge<uint8_t>&& Data)
 	return true;
 }
 
+//	gr: 1mb too big for windows on stack
+uint8_t TestDataBuffer[1 * 1024 * 1024];
 
 void DecoderTest(const char* TestDataName,CompareFunc_t* Compare,const char* DecoderName)
 {
@@ -73,7 +75,6 @@ void DecoderTest(const char* TestDataName,CompareFunc_t* Compare,const char* Dec
 
 	if (!LoadDataFromFilename(TestDataName, GetArrayBridge(TestData)))
 	{
-		uint8_t TestDataBuffer[1 * 1024 * 1024];
 		auto TestDataSize = PopH264_GetTestData(TestDataName, TestDataBuffer, std::size(TestDataBuffer));
 		if (TestDataSize > std::size(TestDataBuffer))
 		{
