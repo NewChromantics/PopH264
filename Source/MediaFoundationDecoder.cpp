@@ -24,9 +24,9 @@ namespace MediaFoundation
 }
 
 
-MediaFoundation::TDecoder::TDecoder(std::function<void(const SoyPixelsImpl&, size_t)> OnDecodedFrame) :
+MediaFoundation::TDecoder::TDecoder(PopH264::TDecoderParams& Params,std::function<void(const SoyPixelsImpl&, size_t)> OnDecodedFrame) :
 	PopH264::TDecoder	( OnDecodedFrame ),
-	mVerboseDebug		( false )
+	mVerboseDebug		( Params.mVerboseDebug )
 {
 	Soy::TFourcc InputFourccs[] = { "H264" };
 	Soy::TFourcc OutputFourccs[] = { "NV12" };
