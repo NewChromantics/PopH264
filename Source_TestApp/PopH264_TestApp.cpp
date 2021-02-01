@@ -92,7 +92,8 @@ void DecoderTest(const char* TestDataName,CompareFunc_t* Compare,const char* Dec
 		OptionsStr << "\"Decoder\":\"" << DecoderName << "\",";
 	OptionsStr << "\"VerboseDebug\":true";
 	OptionsStr << "}";
-	auto* Options = OptionsStr.str().c_str();
+	auto OptionsString = OptionsStr.str();
+	auto* Options = OptionsString.c_str();
 	char ErrorBuffer[1024] = { 0 };
 	auto Handle = PopH264_CreateDecoder(Options,ErrorBuffer,std::size(ErrorBuffer));
 
