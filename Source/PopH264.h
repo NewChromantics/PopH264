@@ -41,7 +41,8 @@ __export int32_t			PopH264_GetTestData(const char* Name,uint8_t* Buffer,int32_t 
 
 #define POPH264_DECODER_KEY_DECODERNAME		"Decoder"
 #define POPH264_DECODER_KEY_VERBOSEDEBUG	"VerboseDebug"
-
+#define POPH264_DECODER_KEY_MINBUFFERING	"MinimalBuffering"
+#define POPH264_DECODER_KEY_DOUBLEDECODEKEYFRAME	"DoubleDecodeKeyframe"	//	small hack for mediafoundation and broadway, get a keyframe output immediately by decoding an IDR frame twice
 
 //	All options are optional
 //	returns an instance id. 0 on error.

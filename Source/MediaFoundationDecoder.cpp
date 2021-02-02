@@ -26,14 +26,23 @@ namespace MediaFoundation
 
 MediaFoundation::TDecoder::TDecoder(PopH264::TDecoderParams& Params,std::function<void(const SoyPixelsImpl&, size_t)> OnDecodedFrame) :
 	PopH264::TDecoder	( OnDecodedFrame ),
-	mVerboseDebug		( Params.mVerboseDebug )
+	mParams				( Params )
 {
 	Soy::TFourcc InputFourccs[] = { "H264" };
 	Soy::TFourcc OutputFourccs[] = { "NV12" };
 	auto Inputs = FixedRemoteArray(InputFourccs);
 	auto Outputs = FixedRemoteArray(OutputFourccs);
 
-	mTransformer.reset(new MediaFoundation::TTransformer(TransformerCategory::VideoDecoder, GetArrayBridge(Inputs), GetArrayBridge(Outputs), mVerboseDebug));
+	mTransformer.reset(new MediaFoundation::TTransformer(TransformerCategory::VideoDecoder, GetArrayBridge(Inputs), GetArrayBridge(Outputs), mParams.mVerboseDebug ));
+
+	try
+	{
+		mTransformer->SetLowLatencyMode(Params.mMinmalBuffering);
+	}
+	catch (std::exception& e)
+	{
+		std::Debug << "Failed to set realtime/low-latency mode; " << e.what() << std::endl;
+	}
 }
 
 MediaFoundation::TDecoder::~TDecoder()
@@ -111,7 +120,7 @@ bool MediaFoundation::TDecoder::DecodeNextPacket()
 
 	case H264NaluContent::Slice_CodedIDRPicture:
 		DoDrain = true;	//	try and force some frame output after a keyframe
-		PushTwice = true;	//	push keyframes twice to trick the decoder into decoding keyframe immediately
+		PushTwice = mParams.mDoubleDecodeKeyframe;	//	push keyframes twice to trick the decoder into decoding keyframe immediately
 	default:
 		if (SkipIfNotSpsSent)
 		{
@@ -158,7 +167,7 @@ bool MediaFoundation::TDecoder::DecodeNextPacket()
 		}
 		else
 		{
-			if ( mVerboseDebug )
+			if ( mParams.mVerboseDebug )
 				std::Debug << __PRETTY_FUNCTION__ << " pushed " << NaluType << std::endl;
 
 			//	mark some as pushed
@@ -183,7 +192,7 @@ bool MediaFoundation::TDecoder::DecodeNextPacket()
 	
 	if ( PushCount == 0 )
 	{
-		if (mVerboseDebug)
+		if (mParams.mVerboseDebug)
 			std::Debug << __PRETTY_FUNCTION__ << " skipped " << NaluType << std::endl;
 	}
 
