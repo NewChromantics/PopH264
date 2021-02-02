@@ -133,7 +133,13 @@ public static class PopH264
 		
 		//	print extra debug info (all decoders)
 		public bool VerboseDebug;
-	};
+
+        public bool MinimalBuffering;
+        public bool DoubleDecodeKeyframe;
+        public bool DrainOnKeyframe;
+        public bool LowPowerMode;
+        public bool DropBadFrames;
+    };
 
 	public class Decoder : IDisposable
 	{

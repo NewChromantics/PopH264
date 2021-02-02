@@ -784,11 +784,49 @@ void MediaFoundation::TTransformer::SetLowLatencyMode(bool Enable)
 	auto Result = mTransformer->QueryInterface(IID_PPV_ARGS(&mpCodecAPI));
 	IsOkay(Result, "Failed to get CodecAPI interface");
 
+	VARIANT var; 
+	//	gr: docs say VT_BOOL, but we get an error saying its expecting ui4/long/32bit
+	//var.vt = VT_BOOL;
+	//var.boolVal = Enable ? VARIANT_TRUE : VARIANT_FALSE;
+	var.vt = VT_UI4;
+	var.ulVal = Enable ? 1 : 0;
+
+	Result = mpCodecAPI->SetValue(&CODECAPI_AVLowLatencyMode, &var);
+	IsOkay(Result, "Setting CODECAPI_AVLowLatencyMode");
+}
+
+
+void MediaFoundation::TTransformer::SetLowPowerMode(bool Enable)
+{
+	//	get interface
+	ICodecAPI *mpCodecAPI = nullptr;
+	auto Result = mTransformer->QueryInterface(IID_PPV_ARGS(&mpCodecAPI));
+	IsOkay(Result, "Failed to get CodecAPI interface");
+
+	//	0 = battery saving
+	//	100 = video quality
+	auto PowerUsage = Enable ? 0 : 100;
+
+	VARIANT var;
+	var.vt = VT_UI4;
+	var.ulVal = PowerUsage;
+	Result = mpCodecAPI->SetValue(&CODECAPI_AVDecVideoSWPowerLevel, &var);
+	IsOkay(Result, "Setting CODECAPI_AVDecVideoSWPowerLevel");
+}
+
+
+void MediaFoundation::TTransformer::SetDropBadFrameMode(bool Enable)
+{
+	//	get interface
+	ICodecAPI *mpCodecAPI = nullptr;
+	auto Result = mTransformer->QueryInterface(IID_PPV_ARGS(&mpCodecAPI));
+	IsOkay(Result, "Failed to get CodecAPI interface");
+
 	VARIANT var;
 	var.vt = VT_BOOL;
-	var.boolVal = Enable ? VARIANT_TRUE : VARIANT_FALSE;
-	Result = mpCodecAPI->SetValue(&CODECAPI_AVLowLatencyMode, &var);
-	IsOkay(Result, "Setting low latency mode");
+	var.ulVal = Enable;
+	Result = mpCodecAPI->SetValue(&CODECAPI_AVDecVideoDropPicWithMissingRef, &var);
+	IsOkay(Result, "Setting CODECAPI_AVDecVideoDropPicWithMissingRef");
 }
 
 void MediaFoundation::TTransformer::SetOutputFormat(IMFMediaType& MediaType)

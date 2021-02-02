@@ -43,6 +43,24 @@ MediaFoundation::TDecoder::TDecoder(PopH264::TDecoderParams& Params,std::functio
 	{
 		std::Debug << "Failed to set realtime/low-latency mode; " << e.what() << std::endl;
 	}
+
+	try
+	{
+		mTransformer->SetLowPowerMode(Params.mLowPowerMode);
+	}
+	catch (std::exception& e)
+	{
+		std::Debug << "Failed to set low power mode; " << e.what() << std::endl;
+	}
+
+	try
+	{
+		mTransformer->SetDropBadFrameMode(Params.mDropBadFrames);
+	}
+	catch (std::exception& e)
+	{
+		std::Debug << "Failed to set drop bad frames mode; " << e.what() << std::endl;
+	}
 }
 
 MediaFoundation::TDecoder::~TDecoder()
@@ -66,6 +84,12 @@ void MediaFoundation::TDecoder::SetInputFormat()
 	auto InputFormatGuid = GetGuid(InputFormat);
 	Result = InputMediaType->SetGUID(MF_MT_SUBTYPE, InputFormatGuid);
 	IsOkay(Result, "InputMediaType->SetGUID(MF_MT_SUBTYPE)");
+
+	//	gr: doesn't make much difference with frames
+	auto FramesPerSecond = 30;
+	Result = MFSetAttributeRatio(InputMediaType, MF_MT_FRAME_RATE, FramesPerSecond, 1);
+	IsOkay(Result, "Set MF_MT_FRAME_RATE");
+
 	mTransformer->SetInputFormat(*InputMediaType);
 	//Result = Transformer.SetInputType(0, InputMediaType, 0);
 	//IsOkay(Result, "SetInputType");
@@ -119,7 +143,7 @@ bool MediaFoundation::TDecoder::DecodeNextPacket()
 		break;
 
 	case H264NaluContent::Slice_CodedIDRPicture:
-		DoDrain = true;	//	try and force some frame output after a keyframe
+		DoDrain = mParams.mDrainOnKeyframe;	//	try and force some frame output after a keyframe
 		PushTwice = mParams.mDoubleDecodeKeyframe;	//	push keyframes twice to trick the decoder into decoding keyframe immediately
 	default:
 		if (SkipIfNotSpsSent)

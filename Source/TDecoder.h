@@ -39,6 +39,9 @@ public:
 	bool		mVerboseDebug = false;
 	bool		mMinmalBuffering = true;		//	POPH264_DECODER_KEY_MINBUFFERING
 	bool		mDoubleDecodeKeyframe = false;	//	POPH264_DECODER_KEY_DOUBLEDECODEKEYFRAME
+	bool		mDrainOnKeyframe = false;
+	bool		mLowPowerMode = false;
+	bool		mDropBadFrames = false;
 };
 
 

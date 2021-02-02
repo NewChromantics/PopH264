@@ -73,6 +73,8 @@ public:
 	bool			IsOutputFormatSet() { return mOutputFormatSet; }
 	
 	void			SetLowLatencyMode(bool Enable);
+	void			SetLowPowerMode(bool Enable);
+	void			SetDropBadFrameMode(bool Enable);
 
 private:
 	void			SetOutputFormat();
