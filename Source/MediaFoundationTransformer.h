@@ -71,6 +71,8 @@ public:
 
 	bool			IsInputFormatSet() { return mInputFormatSet; }
 	bool			IsOutputFormatSet() { return mOutputFormatSet; }
+	
+	void			SetLowLatencyMode(bool Enable);
 
 private:
 	void			SetOutputFormat();

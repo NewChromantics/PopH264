@@ -8,6 +8,7 @@
 
 #include <mfapi.h>
 #include <mftransform.h>
+#include <dshow.h>
 #include <codecapi.h>
 #include <Mferror.h>
 
@@ -774,6 +775,20 @@ void MediaFoundation::TTransformer::LockTransformer(std::function<void()> Execut
 	Execute();
 
 	//	relock?
+}
+
+void MediaFoundation::TTransformer::SetLowLatencyMode(bool Enable)
+{
+	//	get interface
+	ICodecAPI *mpCodecAPI = nullptr;
+	auto Result = mTransformer->QueryInterface(IID_PPV_ARGS(&mpCodecAPI));
+	IsOkay(Result, "Failed to get CodecAPI interface");
+
+	VARIANT var;
+	var.vt = VT_BOOL;
+	var.boolVal = Enable ? VARIANT_TRUE : VARIANT_FALSE;
+	Result = mpCodecAPI->SetValue(&CODECAPI_AVLowLatencyMode, &var);
+	IsOkay(Result, "Setting low latency mode");
 }
 
 void MediaFoundation::TTransformer::SetOutputFormat(IMFMediaType& MediaType)
