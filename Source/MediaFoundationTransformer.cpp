@@ -150,6 +150,12 @@ std::string MediaFoundation::GetValue(const PROPVARIANT& Variant, const GUID& Ke
 std::string MediaFoundation::GetName(const GUID& Guid)
 {
 #define CASE_GUID(MatchGuid)	if ( Guid == MatchGuid )	return #MatchGuid
+	CASE_GUID(MFVideoFormat_NV12);
+	CASE_GUID(MFVideoFormat_YUY2);
+	CASE_GUID(MFVideoFormat_YV12);
+	CASE_GUID(MFVideoFormat_IYUV);
+	CASE_GUID(MFVideoFormat_I420);
+
 	CASE_GUID(MF_MT_MAJOR_TYPE);
 	CASE_GUID(MF_MT_SUBTYPE);
 	CASE_GUID(MF_MT_ALL_SAMPLES_INDEPENDENT);
@@ -597,16 +603,6 @@ MediaFoundation::TActivateList MediaFoundation::EnumTransforms(const GUID& Categ
 	return Activates;
 }
 
-std::string GetName(const GUID Guid)
-{
-	if (Guid == MFVideoFormat_NV12)	return "MFVideoFormat_NV12";
-	if (Guid == MFVideoFormat_YUY2)	return "MFVideoFormat_YUY2";
-	if (Guid == MFVideoFormat_YV12)	return "MFVideoFormat_YV12";
-	if (Guid == MFVideoFormat_IYUV)	return "MFVideoFormat_IYUV";
-	if (Guid == MFVideoFormat_I420)	return "MFVideoFormat_I420";
-
-	return "<guid>";
-}
 
 //	get the best activate which matches the input list, and output list
 //	sorted results by hardware, then highest input, then highest output

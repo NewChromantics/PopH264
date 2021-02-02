@@ -128,6 +128,8 @@ __export int32_t PopH264_PushData(int32_t Instance,uint8_t* Data,int32_t DataSiz
 		return 0;
 	};
 	return SafeCall(Function, __func__, -1 );
+}
+
 __export int32_t PopH264_PushEndOfStream(int32_t Instance)
 {
 	return PopH264_PushData(Instance, nullptr, 0, 0);
