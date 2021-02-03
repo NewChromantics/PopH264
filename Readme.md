@@ -1,6 +1,15 @@
+Build Status
+==========================
+
+![Build Windows](https://github.com/NewChromantics/PopH264/workflows/Build%20Windows/badge.svg)
+![Build Linux](https://github.com/NewChromantics/PopH264/workflows/Build%20Linux/badge.svg)
+![Build Apple](https://github.com/NewChromantics/PopH264/workflows/Build%20Apple/badge.svg)
+![Create Release](https://github.com/NewChromantics/PopH264/workflows/Create%20Release/badge.svg)
+
 Temporary Notice Jan/Feb 2021
-=============================
+----------------------
 My build machines (github runners) are currently offline, as I am moving home/office so actions are not currently building.
+
 
 
 API Documentation
@@ -38,12 +47,6 @@ alwaysAuth = true
 - Thanks to Peter Law http://enigma23.co.uk/blog/how-to-setup-github-packages-and-unity/
 
 
-Build Status
-==========================
-![Build Windows](https://github.com/NewChromantics/PopH264/workflows/Build%20Windows/badge.svg)
-![Build Linux](https://github.com/NewChromantics/PopH264/workflows/Build%20Linux/badge.svg)
-![Build Apple](https://github.com/NewChromantics/PopH264/workflows/Build%20Apple/badge.svg)
-![Create Release](https://github.com/NewChromantics/PopH264/workflows/Create%20Release/badge.svg)
 
 Platform Support
 =======================
