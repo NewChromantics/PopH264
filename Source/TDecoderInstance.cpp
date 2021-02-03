@@ -91,7 +91,7 @@ PopH264::TDecoderParams::TDecoderParams(json11::Json& Options)
 	
 	mDecoderName = Options[std::string(POPH264_DECODER_KEY_DECODERNAME)].string_value();
 	SetBool( POPH264_DECODER_KEY_VERBOSEDEBUG, mVerboseDebug );
-	SetBool( POPH264_DECODER_KEY_ALLOWBUFFERING, mAllowBufferingBuffering );
+	SetBool( POPH264_DECODER_KEY_ALLOWBUFFERING, mAllowBuffering );
 	SetBool( POPH264_DECODER_KEY_DOUBLEDECODEKEYFRAME, mDoubleDecodeKeyframe);
 	SetBool( POPH264_DECODER_KEY_DRAINONKEYFRAME, mDrainOnKeyframe);
 	SetBool( POPH264_DECODER_KEY_LOWPOWERMODE, mLowPowerMode);
