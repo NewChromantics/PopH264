@@ -5,7 +5,7 @@ My build machines (github runners) are currently offline, as I am moving home/of
 
 API Documentation
 =========================
-The bulk of the API documentation is in PopH264.h
+The bulk of the API documentation is in PopH264.h, which is kept up-to-date as code changes.
 
 Installation
 ===========================
@@ -153,7 +153,6 @@ MediaFoundation
 --------------------
 - If you try and decode any Nalu before SPS, you get no error, but no output. This include PPS before SPS.
 - If you submit an IDR keyframe twice, you should get a frame straight away. (PopH264 now always does this; `todo: option to disable this!`)
-- `MFT_MESSAGE_COMMAND_DRAIN` doesn't seem to have any effect
 
 Broadway
 -----------------
