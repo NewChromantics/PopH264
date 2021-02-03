@@ -37,11 +37,11 @@ MediaFoundation::TDecoder::TDecoder(PopH264::TDecoderParams& Params,std::functio
 
 	try
 	{
-		mTransformer->SetLowLatencyMode(Params.mMinmalBuffering);
+		mTransformer->SetLowLatencyMode(!Params.mAllowBuffering);
 	}
 	catch (std::exception& e)
 	{
-		std::Debug << "Failed to set realtime/low-latency mode; " << e.what() << std::endl;
+		std::Debug << "Failed to set low-latency mode; " << e.what() << std::endl;
 	}
 
 	try

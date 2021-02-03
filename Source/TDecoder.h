@@ -36,9 +36,11 @@ public:
 
 public:
 	std::string	mDecoderName;
+	//	gr: because unity doesn't let us initialise structs, we need to try and make
+	//		all bool options default to false for our ideal default.
 	bool		mVerboseDebug = false;
-	bool		mMinmalBuffering = true;		//	POPH264_DECODER_KEY_MINBUFFERING
-	bool		mDoubleDecodeKeyframe = false;	//	POPH264_DECODER_KEY_DOUBLEDECODEKEYFRAME
+	bool		mAllowBuffering = false;
+	bool		mDoubleDecodeKeyframe = false;
 	bool		mDrainOnKeyframe = false;
 	bool		mLowPowerMode = false;
 	bool		mDropBadFrames = false;

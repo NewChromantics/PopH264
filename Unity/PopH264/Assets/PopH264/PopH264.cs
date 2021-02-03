@@ -134,7 +134,7 @@ public static class PopH264
 		//	print extra debug info (all decoders)
 		public bool VerboseDebug;
 
-        public bool MinimalBuffering;
+        public bool AllowBuffering;             //  by default poph264 tries to reduce amount of buffering decoders do and deliver frames ASAP
         public bool DoubleDecodeKeyframe;
         public bool DrainOnKeyframe;
         public bool LowPowerMode;
