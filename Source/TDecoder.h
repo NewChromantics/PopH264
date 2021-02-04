@@ -50,7 +50,7 @@ public:
 class PopH264::TDecoder
 {
 public:
-	TDecoder(std::function<void(const SoyPixelsImpl&,FrameNumber_t)> OnDecodedFrame);
+	TDecoder(std::function<void(const SoyPixelsImpl&,FrameNumber_t,const json11::Json&)> OnDecodedFrame);
 	
 	void			Decode(ArrayBridge<uint8_t>&& PacketData,FrameNumber_t FrameNumber);
 
@@ -59,6 +59,7 @@ public:
 	
 protected:
 	void			OnDecodedFrame(const SoyPixelsImpl& Pixels,FrameNumber_t FrameNumber);
+	void			OnDecodedFrame(const SoyPixelsImpl& Pixels,FrameNumber_t FrameNumber,const json11::Json& Meta);	
 	void			OnDecodedEndOfStream();
 	virtual bool	DecodeNextPacket()=0;	//	returns true if more data to proccess
 	
@@ -73,5 +74,5 @@ private:
 	Array<std::shared_ptr<TInputNaluPacket>>	mPendingDatas;
 	bool					mPendingDataFinished = false;	//	when we know we're at EOS
 	
-	std::function<void(const SoyPixelsImpl&,FrameNumber_t)>	mOnDecodedFrame;
+	std::function<void(const SoyPixelsImpl&,FrameNumber_t,const json11::Json&)>	mOnDecodedFrame;
 };

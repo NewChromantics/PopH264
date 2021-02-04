@@ -1,23 +1,30 @@
 #include "TDecoder.h"
 #include "SoyH264.h"
+#include "json11.hpp"
 
 
-PopH264::TDecoder::TDecoder(std::function<void(const SoyPixelsImpl&,FrameNumber_t)> OnDecodedFrame) :
+PopH264::TDecoder::TDecoder(std::function<void(const SoyPixelsImpl&,FrameNumber_t,const json11::Json&)> OnDecodedFrame) :
 	mOnDecodedFrame	( OnDecodedFrame )
 {
 }
 
 
+void PopH264::TDecoder::OnDecodedFrame(const SoyPixelsImpl& Pixels,FrameNumber_t FrameNumber,const json11::Json& Meta)
+{
+	mOnDecodedFrame( Pixels, FrameNumber, Meta );
+}
+
 void PopH264::TDecoder::OnDecodedFrame(const SoyPixelsImpl& Pixels,FrameNumber_t FrameNumber)
 {
-	//	todo: check against input frame numbers to make sure decoder is outputting same as it inputs
-	mOnDecodedFrame( Pixels, FrameNumber );
+	json11::Json::object Meta;
+	mOnDecodedFrame( Pixels, FrameNumber, Meta );
 }
 
 void PopH264::TDecoder::OnDecodedEndOfStream()
 {
 	SoyPixels Null;
-	mOnDecodedFrame(Null,0);
+	json11::Json::object Meta;
+	mOnDecodedFrame(Null,0,Meta);
 }
 
 void PopH264::TDecoder::PushEndOfStream()

@@ -47,7 +47,7 @@ void H264SwDecMemset(void *ptr, i32 value, u32 count)
 }
 */
 
-Broadway::TDecoder::TDecoder(PopH264::TDecoderParams Params,std::function<void(const SoyPixelsImpl&,size_t)> OnDecodedFrame) :
+Broadway::TDecoder::TDecoder(PopH264::TDecoderParams Params,std::function<void(const SoyPixelsImpl&,size_t,const json11::Json&)> OnDecodedFrame) :
 	PopH264::TDecoder	( OnDecodedFrame ),
 	mParams				( Params )
 {

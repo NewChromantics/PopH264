@@ -103,9 +103,10 @@ PopH264::TDecoderParams::TDecoderParams(json11::Json& Options)
 
 PopH264::TDecoderInstance::TDecoderInstance(json11::Json& Options)
 {
-	auto OnFrameDecoded = [this](const SoyPixelsImpl& Pixels,size_t FrameNumber)
+	auto OnFrameDecoded = [this](const SoyPixelsImpl& Pixels,size_t FrameNumber,const json11::Json& Meta)
 	{
-		this->PushFrame(Pixels, FrameNumber );
+		auto& MetaJson = Meta.object_items();
+		this->PushFrame( Pixels, FrameNumber, MetaJson );
 	};
 	
 	TDecoderParams Params(Options);
@@ -239,7 +240,8 @@ void PopH264::TDecoderInstance::PushData(const uint8_t* Data,size_t DataSize,siz
 			{
 				SoyPixels Pixels;
 				Soy::DecodeImage(Pixels, GetArrayBridge(DataArray));
-				this->PushFrame(Pixels, FrameNumber );
+				json11::Json::object Meta;
+				this->PushFrame(Pixels, FrameNumber, Meta );
 				return;
 			}
 		}
@@ -324,15 +326,17 @@ PopH264::TDecoderFrameMeta PopH264::TDecoderInstance::GetMeta()
 			Meta.mFramesQueued = mFrames.GetSize();
 			if ( Frame0.mPixels )
 				Meta.mPixelsMeta = Frame0.mPixels->GetMeta();
+			Meta.mMeta = Frame0.mMeta;
 		}
 	}
 	return Meta;
 }
 
-void PopH264::TDecoderInstance::PushFrame(const SoyPixelsImpl& Frame,size_t FrameNumber)
+void PopH264::TDecoderInstance::PushFrame(const SoyPixelsImpl& Frame,PopH264::FrameNumber_t FrameNumber,const json11::Json::object& Meta)
 {
 	TFrame NewFrame;
 	NewFrame.mFrameNumber = FrameNumber;
+	NewFrame.mMeta = Meta;
 
 	//	if we get an invalid pixels we're assuming it's the EndOfStream packet
 	if ( !Frame.GetMeta().IsValid() && FrameNumber == 0 )

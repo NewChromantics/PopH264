@@ -428,7 +428,7 @@ void Avf::TDecompressor::Flush()
 
 
 	
-Avf::TDecoder::TDecoder(std::function<void(const SoyPixelsImpl&,size_t)> OnDecodedFrame) :
+Avf::TDecoder::TDecoder(std::function<void(const SoyPixelsImpl&,size_t,const json11::Json&)> OnDecodedFrame) :
 	PopH264::TDecoder	( OnDecodedFrame )
 {
 }
@@ -438,21 +438,21 @@ Avf::TDecoder::~TDecoder()
 	mDecompressor.reset();
 }
 
-void Avf::TDecoder::OnDecodedFrame(TPixelBuffer& PixelBuffer,SoyTime PresentationTime)
+void Avf::TDecoder::OnDecodedFrame(TPixelBuffer& PixelBuffer,SoyTime PresentationTime,const json11::Json& Meta)
 {
 	BufferArray<SoyPixelsImpl*,4> Planes;
 	float3x3 Transform;
 	PixelBuffer.Lock( GetArrayBridge(Planes), Transform );
 	try
 	{
-		size_t FrameNumber = PresentationTime.mTime;
+		PopH264::FrameNumber_t FrameNumber = PresentationTime.mTime;
 		if ( Planes.GetSize() == 0 )
 		{
 			throw Soy::AssertException("No planes from pixel buffer");
 		}
 		else if ( Planes.GetSize() == 1 )
 		{
-			OnDecodedFrame( *Planes[0], FrameNumber );
+			OnDecodedFrame( *Planes[0], FrameNumber, Meta );
 		}
 		else
 		{
@@ -462,7 +462,7 @@ void Avf::TDecoder::OnDecodedFrame(TPixelBuffer& PixelBuffer,SoyTime Presentatio
 				Merged.AppendPlane(*Planes[1]);
 			else
 				Merged.AppendPlane(*Planes[1],*Planes[2]);
-			OnDecodedFrame( Merged, FrameNumber );
+			OnDecodedFrame( Merged, FrameNumber, Meta );
 		}
 		
 		PixelBuffer.Unlock();
@@ -480,7 +480,8 @@ void Avf::TDecoder::AllocDecoder()
 	auto OnPacket = [this](std::shared_ptr<TPixelBuffer> pPixelBuffer,SoyTime PresentationTime)
 	{
 		//std::Debug << "Decompressed pixel buffer " << PresentationTime << std::endl;
-		this->OnDecodedFrame( *pPixelBuffer, PresentationTime );
+		json11::Json::object Meta;
+		this->OnDecodedFrame( *pPixelBuffer, PresentationTime, Meta );
 	};
 
 	if ( mDecompressor )

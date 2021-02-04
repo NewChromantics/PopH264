@@ -61,7 +61,7 @@ public:
 class Android::TOutputThread : public SoyWorkerThread
 {
 public:
-	TOutputThread(std::function<void(const SoyPixelsImpl& Pixels,size_t FrameNumber)> OnDecodedFrame);
+	TOutputThread(std::function<void(const SoyPixelsImpl& Pixels,size_t FrameNumber,const json11::Json&)> OnDecodedFrame);
 
 	virtual bool	Iteration() override;
 	virtual bool	CanSleep() override;
@@ -85,7 +85,7 @@ private:
 	void			PushFrame(const SoyPixelsImpl& Pixels,size_t FrameNumber);
 
 private:
-	std::function<void(const SoyPixelsImpl& Pixels,size_t FrameNumber)>	mOnDecodedFrame;
+	std::function<void(const SoyPixelsImpl& Pixels,size_t FrameNumber,const json11::Json&)>	mOnDecodedFrame;
 
 	//	list of buffers with some pending output data
 	std::mutex					mOutputBuffersLock;
@@ -141,7 +141,7 @@ class Android::TDecoder : public PopH264::TDecoder
 public:
 	static inline const char*	Name = "Android";
 public:
-	TDecoder(PopH264::TDecoderParams Params,std::function<void(const SoyPixelsImpl&,size_t)> OnDecodedFrame);
+	TDecoder(PopH264::TDecoderParams Params,std::function<void(const SoyPixelsImpl&,size_t,const json11::Json&)> OnDecodedFrame);
 	~TDecoder();
 
 private:

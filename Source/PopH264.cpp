@@ -138,7 +138,7 @@ __export int32_t PopH264_PushEndOfStream(int32_t Instance)
 }
 
 
-json11::Json::object GetMetaJson(const SoyPixelsMeta& Meta)
+json11::Json::object GetMetaJson(json11::Json::object& MetaJson,const SoyPixelsMeta& Meta)
 {
 	using namespace json11;
 	Json::array PlaneArray;
@@ -170,16 +170,15 @@ json11::Json::object GetMetaJson(const SoyPixelsMeta& Meta)
 	
 	//	make final object
 	//	todo: add frame numbers etc here
-	auto MetaJson = Json::object{
-		{ "Planes",PlaneArray }
-	};
+	MetaJson["Planes"] = PlaneArray;
+
 	return MetaJson;
 }
 
 std::string GetMetaJson(const PopH264::TDecoderFrameMeta& Meta)
 {
-	//	start with pixels meta
-	auto Json = GetMetaJson(Meta.mPixelsMeta);
+	auto Json = Meta.mMeta;
+	GetMetaJson( Json, Meta.mPixelsMeta);
 	
 	if ( Meta.mEndOfStream )
 		Json["EndOfStream"] = true;

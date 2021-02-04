@@ -221,10 +221,15 @@
 		BF459CDD21F7D60500CED59D /* PopH264_Osx_Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = PopH264_Osx_Info.plist; sourceTree = "<group>"; };
 		BF459CDE21F7D60500CED59D /* PopH264Framework.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PopH264Framework.h; path = Source/PopH264Framework.h; sourceTree = "<group>"; };
 		BF459CED21F7D73B00CED59D /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
+		BF4D031B25CC6B6B003FF218 /* MediaFoundationEncoder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = MediaFoundationEncoder.h; path = Source/MediaFoundationEncoder.h; sourceTree = "<group>"; };
+		BF4D031C25CC6B6B003FF218 /* MediaFoundationDecoder.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = MediaFoundationDecoder.cpp; path = Source/MediaFoundationDecoder.cpp; sourceTree = "<group>"; };
+		BF4D031D25CC6B6B003FF218 /* MediaFoundationEncoder.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = MediaFoundationEncoder.cpp; path = Source/MediaFoundationEncoder.cpp; sourceTree = "<group>"; };
+		BF4D031E25CC6B6B003FF218 /* MediaFoundationDecoder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = MediaFoundationDecoder.h; path = Source/MediaFoundationDecoder.h; sourceTree = "<group>"; };
+		BF4D031F25CC6B6B003FF218 /* MediaFoundationTransformer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = MediaFoundationTransformer.cpp; path = Source/MediaFoundationTransformer.cpp; sourceTree = "<group>"; };
+		BF4D032025CC6B6B003FF218 /* MediaFoundationTransformer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = MediaFoundationTransformer.h; path = Source/MediaFoundationTransformer.h; sourceTree = "<group>"; };
 		BF51B8822566E15B004DE4C7 /* SoyStream.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SoyStream.cpp; path = Source/SoyLib/src/SoyStream.cpp; sourceTree = "<group>"; };
 		BF51B8832566E15B004DE4C7 /* SoyStream.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SoyStream.h; path = Source/SoyLib/src/SoyStream.h; sourceTree = "<group>"; };
 		BF51B89B256837D8004DE4C7 /* MediaFoundationDecoder.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = MediaFoundationDecoder.cpp; path = Source/MediaFoundationDecoder.cpp; sourceTree = "<group>"; };
-		BF51B89C256837D8004DE4C7 /* MediaFoundationDecoder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = MediaFoundationDecoder.h; path = Source/MediaFoundationDecoder.h; sourceTree = "<group>"; };
 		BF51B8A9256A713F004DE4C7 /* SoyPlatform.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SoyPlatform.h; path = Source/SoyLib/src/SoyPlatform.h; sourceTree = "<group>"; };
 		BF51B8AA256A713F004DE4C7 /* SoyPlatform.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SoyPlatform.cpp; path = Source/SoyLib/src/SoyPlatform.cpp; sourceTree = "<group>"; };
 		BF51B8AD256A7203004DE4C7 /* SoyPlatform.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = SoyPlatform.mm; path = Source/SoyLib/src/SoyPlatform.mm; sourceTree = "<group>"; };
@@ -676,12 +681,10 @@
 		BFD6076D1EA16ED20035C814 /* Source */ = {
 			isa = PBXGroup;
 			children = (
-				BFC6C4F02565B1AB00CBD99D /* AndroidMedia.cpp */,
-				BFC6C4EF2565B1AB00CBD99D /* AndroidMedia.h */,
 				BFC6C4F92565D16D00CBD99D /* AndroidDecoder.cpp */,
 				BFC6C4FA2565D16D00CBD99D /* AndroidDecoder.h */,
-				BF51B89B256837D8004DE4C7 /* MediaFoundationDecoder.cpp */,
-				BF51B89C256837D8004DE4C7 /* MediaFoundationDecoder.h */,
+				BFC6C4F02565B1AB00CBD99D /* AndroidMedia.cpp */,
+				BFC6C4EF2565B1AB00CBD99D /* AndroidMedia.h */,
 				BFFBE97A245DB65000E9BE1B /* AvfDecoder.h */,
 				BFFBE97B245DB65000E9BE1B /* AvfDecoder.mm */,
 				BFC471802447523000A2DA70 /* AvfEncoder.h */,
@@ -695,6 +698,12 @@
 				BF096B1524B91F4E00D985E5 /* Linux */,
 				BF53E83022EDCC7E008253CD /* MagicLeapDecoder.cpp */,
 				BF53E83122EDCC7F008253CD /* MagicLeapDecoder.h */,
+				BF51B89B256837D8004DE4C7 /* MediaFoundationDecoder.cpp */,
+				BF4D031E25CC6B6B003FF218 /* MediaFoundationDecoder.h */,
+				BF4D031D25CC6B6B003FF218 /* MediaFoundationEncoder.cpp */,
+				BF4D031B25CC6B6B003FF218 /* MediaFoundationEncoder.h */,
+				BF4D031F25CC6B6B003FF218 /* MediaFoundationTransformer.cpp */,
+				BF4D032025CC6B6B003FF218 /* MediaFoundationTransformer.h */,
 				BF096B1424B918A400D985E5 /* nvidia */,
 				BF096B1124B9158A00D985E5 /* NvidiaEncoder.cpp */,
 				BF096B1224B9158A00D985E5 /* NvidiaEncoder.h */,
@@ -719,6 +728,8 @@
 				BF3225702445F0A400C74D4D /* X264 */,
 				BF3225712445F0D100C74D4D /* X264Encoder.cpp */,
 				BF3225722445F0D200C74D4D /* X264Encoder.h */,
+				BF4D031C25CC6B6B003FF218 /* MediaFoundationDecoder.cpp */,
+				BF4D031E25CC6B6B003FF218 /* MediaFoundationDecoder.h */,
 			);
 			name = Source;
 			sourceTree = SOURCE_ROOT;

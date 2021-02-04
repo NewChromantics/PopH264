@@ -31,7 +31,7 @@ public:
 	static inline const char*	Name = "Broadway";
 
 public:
-	TDecoder(PopH264::TDecoderParams Params,std::function<void(const SoyPixelsImpl&,size_t)> OnDecodedFrame);
+	TDecoder(PopH264::TDecoderParams Params,std::function<void(const SoyPixelsImpl&,size_t,const json11::Json&)> OnDecodedFrame);
 	~TDecoder();
 
 private:

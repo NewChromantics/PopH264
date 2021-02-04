@@ -6,7 +6,7 @@
 #include "TDecoder.h"
 
 class SoyPixelsImpl;
-
+#include "json11.hpp"
 
 namespace PopH264
 {
@@ -29,16 +29,18 @@ public:
 	std::shared_ptr<SoyPixelsImpl>	mPixels;
 	int32_t							mFrameNumber = -1;		//	this may be time, specified by user, so is really just Meta
 	bool							mEndOfStream = false;
+	json11::Json::object			mMeta;					//	additional (maybe decoder dependent) meta
 };
 
 //	meta we send back to caller
 class PopH264::TDecoderFrameMeta
 {
 public:
-	SoyPixelsMeta	mPixelsMeta;			//	next frame format
-	int32_t			mFrameNumber = -1;		//	this may be time, specified by user, so is really just Meta
-	bool			mEndOfStream = false;	//	this is the last frame
-	size_t			mFramesQueued = 0;		//	frames buffered up
+	SoyPixelsMeta			mPixelsMeta;			//	next frame format
+	int32_t					mFrameNumber = -1;		//	this may be time, specified by user, so is really just Meta
+	bool					mEndOfStream = false;	//	this is the last frame
+	size_t					mFramesQueued = 0;		//	frames buffered up
+	json11::Json::object	mMeta;					//	additional (maybe decoder dependent) meta
 };
 
 #if defined(_MSC_VER)
@@ -61,7 +63,7 @@ public:
 	//	output
 	void									PopFrame(int32_t& FrameNumber,ArrayBridge<uint8_t>&& Plane0,ArrayBridge<uint8_t>&& Plane1,ArrayBridge<uint8_t>&& Plane2);
 	__exportfunc bool						PopFrame(TFrame& Frame);
-	void									PushFrame(const SoyPixelsImpl& Frame,size_t FrameNumber);
+	void									PushFrame(const SoyPixelsImpl& Frame,PopH264::FrameNumber_t FrameNumber,const json11::Json::object& Meta);
 	TDecoderFrameMeta						GetMeta();
 	
 public:

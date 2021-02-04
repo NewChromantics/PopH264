@@ -344,11 +344,11 @@ std::string MagicLeap::GetCodec(int32_t Mode,bool& HardwareSurface)
 */
 
 
-Android::TDecoder::TDecoder(PopH264::TDecoderParams Params,std::function<void(const SoyPixelsImpl&,size_t)> OnDecodedFrame) :
+Android::TDecoder::TDecoder(PopH264::TDecoderParams Params,std::function<void(const SoyPixelsImpl&,size_t,const json11::Json&)> OnDecodedFrame) :
 	PopH264::TDecoder	( OnDecodedFrame ),
 	mParams				( Params ),
 	mInputThread		( std::bind(&TDecoder::GetNextInputData, this, std::placeholders::_1, std::placeholders::_2 ), std::bind(&TDecoder::HasPendingData, this ) ),
-	mOutputThread		( std::bind(&TDecoder::OnDecodedFrame, this, std::placeholders::_1, std::placeholders::_2 ) )
+	mOutputThread		( std::bind(&TDecoder::OnDecodedFrame, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3 ) )
 {
 /*
 	//	see main thread/same thread comments
@@ -797,7 +797,8 @@ void Android::TDecoder::GetNextInputData(ArrayBridge<uint8_t>&& PacketBuffer,Pop
 
 void Android::TDecoder::OnDecodedFrame(const SoyPixelsImpl& Pixels,size_t FrameNumber)
 {
-	PopH264::TDecoder::OnDecodedFrame(Pixels,FrameNumber);
+	json11::Json::object Meta;
+	PopH264::TDecoder::OnDecodedFrame(Pixels,FrameNumber,Meta);
 }
 
 
@@ -917,7 +918,7 @@ void Android::TDecoder::OnOutputFormatChanged(MediaFormat_t NewFormat)
 
 
 
-Android::TOutputThread::TOutputThread(std::function<void(const SoyPixelsImpl& Pixels,size_t FrameNumber)> OnDecodedFrame) :
+Android::TOutputThread::TOutputThread(std::function<void(const SoyPixelsImpl& Pixels,size_t FrameNumber,const json11::Json&)> OnDecodedFrame) :
 	SoyWorkerThread	("AndroidOutputThread", SoyWorkerWaitMode::Wake ),
 	mOnDecodedFrame	( OnDecodedFrame )
 {

@@ -28,7 +28,7 @@ class Avf::TDecoder : public PopH264::TDecoder
 public:
 	static inline const char*	Name = "Avf";
 public:
-	TDecoder(std::function<void(const SoyPixelsImpl&,size_t)> OnDecodedFrame);
+	TDecoder(std::function<void(const SoyPixelsImpl&,size_t,const json11::Json&)> OnDecodedFrame);
 	~TDecoder();
 	
 private:
@@ -36,7 +36,7 @@ private:
 	void			AllocDecoder();
 
 	using			PopH264::TDecoder::OnDecodedFrame;	//	reveal inherited versions of OnDecodedFrame when resolving
-	void			OnDecodedFrame(TPixelBuffer& PixelBuffer,SoyTime PresentationTime);
+	void			OnDecodedFrame(TPixelBuffer& PixelBuffer,SoyTime PresentationTime,const json11::Json& Meta);
 
 private:
 	std::shared_ptr<TDecompressor>	mDecompressor;

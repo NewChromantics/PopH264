@@ -14,6 +14,8 @@
 
 #include <SoyAutoReleasePtr.h>
 
+#include "json11.hpp"
+
 //	https://github.com/sipsorcery/mediafoundationsamples/blob/master/MFH264RoundTrip/MFH264RoundTrip.cpp
 
 namespace MediaFoundation
@@ -24,7 +26,7 @@ namespace MediaFoundation
 }
 
 
-MediaFoundation::TDecoder::TDecoder(PopH264::TDecoderParams& Params,std::function<void(const SoyPixelsImpl&, size_t)> OnDecodedFrame) :
+MediaFoundation::TDecoder::TDecoder(PopH264::TDecoderParams& Params,std::function<void(const SoyPixelsImpl&, size_t,const json11::Json&)> OnDecodedFrame) :
 	PopH264::TDecoder	( OnDecodedFrame ),
 	mParams				( Params )
 {
@@ -246,6 +248,7 @@ size_t MediaFoundation::TDecoder::PopFrames()
 	{
 		Array<uint8_t> OutFrame;
 		int64_t PacketNumber = -1;
+		json11::Json::object Meta;
 		try
 		{
 			PopAgain = mTransformer->PopFrame(GetArrayBridge(OutFrame), PacketNumber);
@@ -262,7 +265,7 @@ size_t MediaFoundation::TDecoder::PopFrames()
 		
 		auto PixelMeta = mTransformer->GetOutputPixelMeta();
 		SoyPixelsRemote Pixels(OutFrame.GetArray(), OutFrame.GetDataSize(), PixelMeta);
-		OnDecodedFrame(Pixels, PacketNumber);
+		OnDecodedFrame( Pixels, PacketNumber, Meta );
 		FramesPushed++;
 	}
 	return FramesPushed;
