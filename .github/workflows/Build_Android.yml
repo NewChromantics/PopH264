@@ -17,7 +17,14 @@ jobs:
       with:
         submodules: 'recursive'
 
-    - name: Android
-      uses: NewChromantics/PopAction_BuildAndroid@v1
+    - name: Build Android lib
+      uses: NewChromantics/PopAction_BuildAndroid@v2
       with:
-        project: ${{ env.project }}
+        buildscript: "PopH264.Android/build.sh"
+        buildpath: "PopH264.Android/libPopH264"
+        
+    - name: Build Android test app
+      uses: NewChromantics/PopAction_BuildAndroid@v2
+      with:
+        buildscript: "PopH264.Android/build.sh"
+        buildpath: "PopH264.Android/PopH264TestApp"
