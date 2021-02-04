@@ -82,7 +82,7 @@ private:
 	void			ReleaseOutputTexture(MLHandle TextureHandle);
 	bool			IsAnyOutputTextureReady();
 	*/
-	void			PushFrame(const SoyPixelsImpl& Pixels,size_t FrameNumber);
+	void			PushFrame(const SoyPixelsImpl& Pixels,size_t FrameNumber,const json11::Json& Meta);
 
 private:
 	std::function<void(const SoyPixelsImpl& Pixels,size_t FrameNumber,const json11::Json&)>	mOnDecodedFrame;
@@ -146,7 +146,7 @@ public:
 
 private:
 	virtual bool	DecodeNextPacket() override;	//	returns true if more data to proccess
-	void			OnDecodedFrame(const SoyPixelsImpl& Pixels,size_t FrameNumber);
+	void			OnDecodedFrame(const SoyPixelsImpl& Pixels,size_t FrameNumber,const json11::Json&);
 	
 	void			OnInputBufferAvailible(int64_t BufferIndex);
 	void			OnOutputBufferAvailible(int64_t BufferIndex,const MediaBufferInfo_t& BufferMeta);

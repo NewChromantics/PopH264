@@ -10,6 +10,7 @@
 #include "SoyMedia.h"	//	TPixelBuffer
 #include "media/NdkImage.h"
 
+#include "json11.hpp"
 
 
 enum
@@ -795,9 +796,8 @@ void Android::TDecoder::GetNextInputData(ArrayBridge<uint8_t>&& PacketBuffer,Pop
 	*/
 }
 
-void Android::TDecoder::OnDecodedFrame(const SoyPixelsImpl& Pixels,size_t FrameNumber)
+void Android::TDecoder::OnDecodedFrame(const SoyPixelsImpl& Pixels,size_t FrameNumber,const json11::Json& Meta)
 {
-	json11::Json::object Meta;
 	PopH264::TDecoder::OnDecodedFrame(Pixels,FrameNumber,Meta);
 }
 
@@ -1171,7 +1171,12 @@ void Android::TOutputThread::PopOutputBuffer(const TOutputBufferMeta& BufferMeta
 		//	output pixels!
 		auto* BufferDataMutable = const_cast<uint8_t*>( BufferData );
 		SoyPixelsRemote NewPixels( BufferDataMutable, BufferSize, BufferMeta.mPixelMeta );
-		PushFrame( NewPixels, FrameTime );
+		
+		//	extra meta
+		json11::Json::object Meta;
+		Meta["AndroidBufferFlags"] = static_cast<int>(Flags);
+		
+		PushFrame( NewPixels, FrameTime, Meta );
 		ReleaseBuffer();
 	}
 	catch(std::exception& e)
@@ -1183,9 +1188,9 @@ void Android::TOutputThread::PopOutputBuffer(const TOutputBufferMeta& BufferMeta
 }
 
 
-void Android::TOutputThread::PushFrame(const SoyPixelsImpl& Pixels,size_t FrameNumber)
+void Android::TOutputThread::PushFrame(const SoyPixelsImpl& Pixels,size_t FrameNumber,const json11::Json& Meta)
 {
-	mOnDecodedFrame( Pixels, FrameNumber );
+	mOnDecodedFrame( Pixels, FrameNumber, Meta );
 }
 
 bool Android::TOutputThread::Iteration()
