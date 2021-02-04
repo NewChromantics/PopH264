@@ -34,25 +34,25 @@ public static class PopH264
 	[DllImport(PluginName, CallingConvention = CallingConvention.Cdecl)]
 	private static extern int	PopH264_GetVersion();
 
-    //  returns decoder instance id, 0 on error.
+	//	returns decoder instance id, 0 on error.
 	[DllImport(PluginName, CallingConvention = CallingConvention.Cdecl)]
 	private static extern int	PopH264_CreateDecoder(byte[] OptionsJson, [In, Out] byte[] ErrorBuffer, Int32 ErrorBufferLength);
 
 	[DllImport(PluginName, CallingConvention = CallingConvention.Cdecl)]
 	private static extern void PopH264_DestroyDecoder(int Instance);
 
-    //  returns 0 on success or -1 on error
+	//	returns 0 on success or -1 on error
 	[DllImport(PluginName, CallingConvention = CallingConvention.Cdecl)]
 	private static extern int	PopH264_PushData(int Instance,byte[] Data,int DataSize,int FrameNumber);
 
-    //  wrapper for PopH264_PushData(null) - send an EndOFStream packet to the decoder to make it finish off any unprocessed packets
-    [DllImport(PluginName, CallingConvention = CallingConvention.Cdecl)]
-    private static extern int   PopH264_PushEndOfStream(int Instance);
-    
+	//	wrapper for PopH264_PushData(null) - send an EndOFStream packet to the decoder to make it finish off any unprocessed packets
+	[DllImport(PluginName, CallingConvention = CallingConvention.Cdecl)]
+	private static extern int	PopH264_PushEndOfStream(int Instance);
+
 	[DllImport(PluginName, CallingConvention = CallingConvention.Cdecl)]
 	private static extern void	PopH264_PeekFrame(int Instance, byte[] JsonBuffer, int JsonBufferSize);
 
-    //  returns frame number or -1
+	//	returns frame number or -1
 	[DllImport(PluginName, CallingConvention = CallingConvention.Cdecl)]
 	private static extern int	PopH264_PopFrame(int Instance,byte[] Plane0,int Plane0Size,byte[] Plane1,int Plane1Size,byte[] Plane2,int Plane2Size);
 
@@ -134,12 +134,12 @@ public static class PopH264
 		//	print extra debug info (all decoders)
 		public bool VerboseDebug;
 
-        public bool AllowBuffering;             //  by default poph264 tries to reduce amount of buffering decoders do and deliver frames ASAP
-        public bool DoubleDecodeKeyframe;
-        public bool DrainOnKeyframe;
-        public bool LowPowerMode;
-        public bool DropBadFrames;
-    };
+		public bool AllowBuffering;			//	by default poph264 tries to reduce amount of buffering decoders do and deliver frames ASAP
+		public bool DoubleDecodeKeyframe;	//	Hack for broadway & MediaFoundation, process a keyframe twice to instantly decode instead of buffering
+		public bool DrainOnKeyframe;		//	Debug for MediaFoundation, trigger drain command on a keyfrae
+		public bool LowPowerMode;
+		public bool DropBadFrames;
+	};
 
 	public class Decoder : IDisposable
 	{
@@ -285,10 +285,10 @@ public static class PopH264
 					InputQueue.RemoveRange(0, 1);
 				}
 				var Length = (Frame.Bytes == null) ? 0 : Frame.Bytes.Length;
-                var Result = PopH264_PushData(Instance.Value, Frame.Bytes, Length, Frame.FrameNumber);
-                InputThreadResult = (Result==0);
-            }
-        }
+				var Result = PopH264_PushData(Instance.Value, Frame.Bytes, Length, Frame.FrameNumber);
+				InputThreadResult = (Result==0);
+			}
+		}
 
 		void CheckH264Frame(FrameInput Frame)
 		{
@@ -329,7 +329,7 @@ public static class PopH264
 			{
 				var Length = (Frame.Bytes==null) ? 0 : Frame.Bytes.Length;
 				var Result = PopH264_PushData(Instance.Value, Frame.Bytes, Length, Frame.FrameNumber);
-                return (Result == 0);
+				return (Result == 0);
 			}
 
 			if (InputThread == null )
@@ -358,11 +358,11 @@ public static class PopH264
 			return PushFrameData(NewFrame);
 		}
 
-        public bool PushEndOfStream()
-        {
-            var NewFrame = new FrameInput();
-            return PushFrameData(NewFrame);
-        }
+		public bool PushEndOfStream()
+		{
+			var NewFrame = new FrameInput();
+			return PushFrameData(NewFrame);
+		}
 
 		//	returns frame time
 		public int? GetNextFrame(ref List<Texture2D> Planes, ref List<PixelFormat> PixelFormats)
