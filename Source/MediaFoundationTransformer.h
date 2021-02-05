@@ -92,7 +92,7 @@ private:
 	bool			mInputFormatSet = false;
 	bool			mOutputFormatSet = false;
 	Soy::AutoReleasePtr<IMFMediaType>	mOutputMediaType;
-	std::shared_ptr<json11::Json>		mOutputMediaMetaCache;		//	reset with mOutputMediaType, shared ptr just to not include json11 in header
+	json11::Json::object	mOutputMediaMetaCache;		//	reset with mOutputMediaType
 
 	bool			mVerboseDebug = false;
 

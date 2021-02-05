@@ -1394,12 +1394,12 @@ IMFMediaType& MediaFoundation::TTransformer::GetOutputMediaType()
 	
 	json11::Json::object Meta;
 	GetMeta( Meta, *mOutputMediaType.mObject );
-	mOutputMediaMetaCache.reset(new json11::Json(Meta));
-
+	mOutputMediaMetaCache = Meta;
+	
 	return *mOutputMediaType.mObject;
 }
 
-bool MediaFoundation::TTransformer::PopFrame(ArrayBridge<uint8_t>&& Data,int64_t& FrameNumber, json11::Json& Meta)
+bool MediaFoundation::TTransformer::PopFrame(ArrayBridge<uint8_t>&& Data,int64_t& FrameNumber, json11::Json::object& Meta)
 {
 	if (!mTransformer)
 		throw Soy::AssertException("Transformer is null");
@@ -1492,7 +1492,7 @@ bool MediaFoundation::TTransformer::PopFrame(ArrayBridge<uint8_t>&& Data,int64_t
 		std::Debug << "Output sample size is " << Data.GetDataSize() << std::endl;
 
 	//	copy format meta
-	Meta = *mOutputMediaMetaCache;
+	Meta = mOutputMediaMetaCache;
 
 	try
 	{
