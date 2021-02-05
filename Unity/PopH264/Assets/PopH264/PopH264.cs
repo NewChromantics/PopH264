@@ -379,6 +379,7 @@ public static class PopH264
 		{
 			PopH264_PeekFrame(Instance.Value, JsonBuffer, JsonBuffer.Length);
 			var Json = GetString(JsonBuffer);
+			//Debug.Log("PopH264 frame meta: " + Json);
 			var Meta = JsonUtility.FromJson<FrameMeta>(Json);
 			var PlaneCount = Meta.PlaneCount;
 
