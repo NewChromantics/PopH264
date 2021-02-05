@@ -103,7 +103,17 @@ public static class PopH264
 
 		public bool				EndOfStream;
 		public int 				FrameNumber;
-		public int				FramesQueued;
+		public int				FramesQueued;	//	number of subsequent frames already decoded and buffered up
+
+        // optional meta output by decoder
+		public int				Rotation;   //  clockwise rotation in degrees
+		public string			YuvColourMatrixName;    //	todo: enum this
+		public int				AverageBitsPerSecondRate;
+		public int				RowStrideBytes;
+		public bool				Flipped;
+		public int				ImageWidth;
+		public int				ImageHeight;
+		public int[]			ImageRect;		//	some decoders will output an image aligned to say, 16 (macro blocks, or byte alignment etc) If the image is padded, we should have a [x,y,w,h] array here
 	};
 	
 	static public string GetString(byte[] Ascii)
