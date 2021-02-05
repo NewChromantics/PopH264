@@ -34,7 +34,8 @@ namespace PopH264
 	//	1.3.20	Added PopH264_PushEndOfStream API as a clear wrapper for PopH264_PushData(null)
 	//	1.3.21	Added AllowBuffering option to decoder so by default LowLatency mode is on for Mediafoundation, which reduces buffering
 	//	1.3.22	Version bump for github build
-	const Soy::TVersion	Version(1,3,22);
+	//	1.3.23	Added extra meta output from decoder (Just MediaFoundation initially)
+	const Soy::TVersion	Version(1,3,23);
 }
 
 
