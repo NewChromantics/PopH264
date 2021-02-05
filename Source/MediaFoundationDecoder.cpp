@@ -251,7 +251,7 @@ size_t MediaFoundation::TDecoder::PopFrames()
 		json11::Json::object Meta;
 		try
 		{
-			PopAgain = mTransformer->PopFrame(GetArrayBridge(OutFrame), PacketNumber);
+			PopAgain = mTransformer->PopFrame(GetArrayBridge(OutFrame), PacketNumber, Meta);
 		}
 		catch (std::exception& e)
 		{

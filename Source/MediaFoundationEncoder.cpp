@@ -255,10 +255,11 @@ bool MediaFoundation::TEncoder::FlushOutputFrame()
 {
 	try
 	{
+		json11::Json::object Meta;
 		PopH264::TPacket Packet;
 		Packet.mData.reset(new Array<uint8_t>());
 		int64_t FrameNumber = -1;
-		mTransformer->PopFrame(GetArrayBridge(*Packet.mData), FrameNumber);
+		mTransformer->PopFrame(GetArrayBridge(*Packet.mData), FrameNumber, Meta);
 
 		//	no packet
 		if (Packet.mData->IsEmpty())

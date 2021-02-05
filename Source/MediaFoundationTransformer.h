@@ -10,6 +10,9 @@
 #include <combaseapi.h>
 #include <mftransform.h>	//	can't forward declare _MFT_MESSAGE_TYPE
 
+#include "json11.hpp"
+
+
 class IMFAttributes;
 
 namespace MediaFoundation
@@ -56,7 +59,7 @@ public:
 	bool			PushFrame(const ArrayBridge<uint8_t>&& Data, int64_t FrameNumber);
 
 	//	returns true if we should call again (ie, there are more frames to get)
-	bool			PopFrame(ArrayBridge<uint8_t>&& Data,int64_t& FrameNumber);
+	bool			PopFrame(ArrayBridge<uint8_t>&& Data,int64_t& FrameNumber,json11::Json::object& Meta);
 	
 	void			ProcessCommand(MFT_MESSAGE_TYPE Command);
 
@@ -88,7 +91,9 @@ private:
 	DWORD			mOutputStreamId = 0;
 	bool			mInputFormatSet = false;
 	bool			mOutputFormatSet = false;
-	Soy::AutoReleasePtr<IMFMediaType> mOutputMediaType;
+	Soy::AutoReleasePtr<IMFMediaType>	mOutputMediaType;
+	std::shared_ptr<json11::Json>		mOutputMediaMetaCache;		//	reset with mOutputMediaType, shared ptr just to not include json11 in header
+
 	bool			mVerboseDebug = false;
 
 public:

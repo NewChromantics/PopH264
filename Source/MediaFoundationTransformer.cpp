@@ -5,6 +5,7 @@
 #include "SoyLib/src/SoyH264.h"
 #include "MagicEnum/include/magic_enum.hpp"
 #include "SoyFourcc.h"
+#include "json11.hpp"
 
 #include <mfapi.h>
 #include <mftransform.h>
@@ -39,6 +40,8 @@ namespace MediaFoundation
 	Soy::AutoReleasePtr<IMFMediaBuffer>	CreateBuffer(DWORD Size, DWORD Alignment);
 	Soy::AutoReleasePtr<IMFSample>		CreateSample(DWORD Size, DWORD Alignment);
 	void								ReadData(IMFSample& Sample,ArrayBridge<uint8_t>& Data);
+
+	void			GetMeta(json11::Json::object& Meta,IMFMediaType& Media);
 }
 
 
@@ -95,6 +98,180 @@ void MediaFoundation::IsOkay(HRESULT Result,const std::string& Context)
 	Platform::IsOkay(Result, Context.c_str());
 }
 
+float GetClockwiseRotation(IMFMediaType& Media)
+{
+	uint32_t Rot32 = 0;
+	auto Result = Media.GetUINT32(MF_MT_VIDEO_ROTATION, &Rot32);
+	MediaFoundation::IsOkay(Result, "MF_MT_VIDEO_ROTATION");
+
+	//	rotation is a counter-clockwise uint32
+	//	https://docs.microsoft.com/en-us/windows/win32/api/mfapi/ne-mfapi-mfvideorotationformat
+	//	we want it clockwise
+	switch (Rot32)
+	{
+	case MFVideoRotationFormat_0:	return 0;
+	case MFVideoRotationFormat_90:	return 270;
+	case MFVideoRotationFormat_180:	return 180;
+	case MFVideoRotationFormat_270:	return 90;
+	default:break;
+	}
+	std::stringstream Error;
+	Error << "Unhandled value from MFVideoRotationFormat: [" << Rot32 << "]";
+	throw Soy::AssertException(Error);
+}
+
+std::string GetYuvMatrixName(IMFMediaType& Media)
+{
+	uint32_t Value32 = 0;
+	auto Result = Media.GetUINT32(MF_MT_YUV_MATRIX, &Value32);
+	MediaFoundation::IsOkay(Result, "MF_MT_YUV_MATRIX");
+
+	//	rotation is a counter-clockwise uint32
+	//	https://docs.microsoft.com/en-us/windows/win32/api/mfapi/ne-mfapi-mfvideorotationformat
+	//	we want it clockwise
+	switch (Value32)
+	{
+	case MFVideoTransferMatrix_BT709:	return "BT709";
+	case MFVideoTransferMatrix_BT601:	return "BT601";
+	case MFVideoTransferMatrix_SMPTE240M:	return "SMPTE240M";
+	case MFVideoTransferMatrix_BT2020_10:	return "BT2020_10";
+	case MFVideoTransferMatrix_BT2020_12:	return "BT2020_12";
+	}
+	std::stringstream Error;
+	Error << "Unhandled value from MFVideoTransferMatrix: [" << Value32 << "]";
+	throw Soy::AssertException(Error);
+}
+
+int32_t GetStride(IMFMediaType& Media, bool& Flipped)
+{
+	//	stride is signed, but need to read as unsigned. 
+	//	A negative stride means the image is flipped
+	uint32_t Value32 = 0;
+	auto Result = Media.GetUINT32(MF_MT_DEFAULT_STRIDE, &Value32);
+	MediaFoundation::IsOkay(Result, "MF_MT_DEFAULT_STRIDE");
+
+	auto ValueSigned = *reinterpret_cast<int32_t*>(&Value32);
+	if (ValueSigned < 0)
+	{
+		Flipped = true;
+		return -ValueSigned;
+	}
+	else
+	{
+		Flipped = false;
+		return ValueSigned;
+	}
+}
+
+Soy::Rectx<float> GetCropRect(IMFMediaType& Media)
+{
+	MFVideoArea VideoArea = { 0 };
+	auto* VideoArea8 = reinterpret_cast<uint8_t*>(&VideoArea);
+	uint32_t BlobSize = 0;
+	auto Result = Media.GetBlob(MF_MT_MINIMUM_DISPLAY_APERTURE, VideoArea8, sizeof(VideoArea), &BlobSize );
+	MediaFoundation::IsOkay(Result, "MF_MT_MINIMUM_DISPLAY_APERTURE");
+
+	if (BlobSize != sizeof(VideoArea))
+	{
+		std::stringstream Error;
+		Error << "VideoArea rect blob from MF_MT_MINIMUM_DISPLAY_APERTURE size is " << BlobSize << " not expected " << sizeof(VideoArea);
+		throw Soy::AssertException(Error);
+	}
+
+	auto MfOffsetToFloat = [](MFOffset& Offset)
+	{
+		auto f = Offset.value + (Offset.fract / 65536.0f);
+		return f;
+	};
+
+	Soy::Rectx<float> Rect;
+	Rect.x = MfOffsetToFloat(VideoArea.OffsetX);
+	Rect.y = MfOffsetToFloat(VideoArea.OffsetY);
+	Rect.w = VideoArea.Area.cx;
+	Rect.h = VideoArea.Area.cy;
+
+	return Rect;
+}
+
+void MediaFoundation::GetMeta(json11::Json::object& Meta, IMFMediaType& Media)
+{
+	try
+	{
+		auto Rotation = GetClockwiseRotation(Media);
+		Meta["Rotation"] = Rotation;
+	}
+	catch (std::exception& e)
+	{
+		std::Debug << __PRETTY_FUNCTION__ << " exception; " << e.what() << std::endl;
+	}
+
+	try
+	{
+		auto YuvName = GetYuvMatrixName(Media);
+		Meta["YuvColourMatrixName"] = YuvName;
+	}
+	catch (std::exception& e)
+	{
+		std::Debug << __PRETTY_FUNCTION__ << " exception; " << e.what() << std::endl;
+	}
+	
+
+	try
+	{
+		uint32_t Value32 = 0;
+		auto Result = Media.GetUINT32(MF_MT_AVG_BITRATE, &Value32);
+		MediaFoundation::IsOkay(Result, "MF_MT_AVG_BITRATE");
+		Meta["AverageBitsPerSecondRate"] = Result;
+	}
+	catch (std::exception& e)
+	{
+		std::Debug << __PRETTY_FUNCTION__ << " exception; " << e.what() << std::endl;
+	}
+
+	try
+	{
+		bool Flipped = false;
+		int32_t Stride = GetStride(Media, Flipped);
+		Meta["RowStrideBytes"] = Stride;
+		Meta["Flipped"] = Flipped;
+	}
+	catch (std::exception& e)
+	{
+		std::Debug << __PRETTY_FUNCTION__ << " exception; " << e.what() << std::endl;
+	}
+
+	try
+	{
+		uint32_t Width = 0;
+		uint32_t Height = 0;
+		auto Result = MFGetAttributeSize(&Media, MF_MT_FRAME_SIZE, &Width, &Height);
+		IsOkay(Result, "GetOutputPixelMeta MFGetAttributeSize");
+		Meta["ImageWidth"] = static_cast<int>(Width);
+		Meta["ImageHeight"] = static_cast<int>(Height);
+	}
+	catch (std::exception& e)
+	{
+		std::Debug << __PRETTY_FUNCTION__ << " exception; " << e.what() << std::endl;
+	}
+
+
+	try
+	{
+		Soy::Rectx<float> Rect = GetCropRect(Media);
+		json11::Json::array RectArray;
+		RectArray.push_back(Rect.x);
+		RectArray.push_back(Rect.y);
+		RectArray.push_back(Rect.w);
+		RectArray.push_back(Rect.h);
+		Meta["ImageRect"] = RectArray;
+	}
+	catch (std::exception& e)
+	{
+		std::Debug << __PRETTY_FUNCTION__ << " exception; " << e.what() << std::endl;
+	}
+
+
+}
 
 
 
@@ -1185,9 +1362,9 @@ SoyPixelsMeta MediaFoundation::TTransformer::GetOutputPixelMeta()
 	auto Result = MFGetAttributeSize(&MediaType, MF_MT_FRAME_SIZE, &Width, &Height);
 	IsOkay(Result, "GetOutputPixelMeta MFGetAttributeSize");
 	
-	uint32_t Stride = 0;
-	Result = MediaType.GetUINT32( MF_MT_DEFAULT_STRIDE, &Stride );
-	IsOkay(Result, "GetOutputPixelMeta MFGetAttributeSize");
+	int32_t Stride = 0;
+	bool Flipped = false;
+	Stride = GetStride(MediaType, Flipped);
 
 	//	get format
 	GUID VideoFormatGuid;
@@ -1195,6 +1372,7 @@ SoyPixelsMeta MediaFoundation::TTransformer::GetOutputPixelMeta()
 	IsOkay(Result, "GetOutputPixelMeta MF_MT_SUBTYPE");
 	auto PixelFormat = GetPixelFormat(VideoFormatGuid);
 
+	//	gr: should be using stride for width here for alignment
 	return SoyPixelsMeta(Width, Height, PixelFormat);
 }
 
@@ -1214,10 +1392,14 @@ IMFMediaType& MediaFoundation::TTransformer::GetOutputMediaType()
 	if (!mOutputMediaType)
 		throw Soy::AssertException("GetOutputMediaType but output media type has not yet been set");
 	
+	json11::Json::object Meta;
+	GetMeta( Meta, *mOutputMediaType.mObject );
+	mOutputMediaMetaCache.reset(new json11::Json(Meta));
+
 	return *mOutputMediaType.mObject;
 }
 
-bool MediaFoundation::TTransformer::PopFrame(ArrayBridge<uint8_t>&& Data,int64_t& FrameNumber)
+bool MediaFoundation::TTransformer::PopFrame(ArrayBridge<uint8_t>&& Data,int64_t& FrameNumber, json11::Json& Meta)
 {
 	if (!mTransformer)
 		throw Soy::AssertException("Transformer is null");
@@ -1308,6 +1490,9 @@ bool MediaFoundation::TTransformer::PopFrame(ArrayBridge<uint8_t>&& Data,int64_t
 	ReadData(*output_buffer.pSample, Data);
 	if ( mVerboseDebug )
 		std::Debug << "Output sample size is " << Data.GetDataSize() << std::endl;
+
+	//	copy format meta
+	Meta = *mOutputMediaMetaCache;
 
 	try
 	{
