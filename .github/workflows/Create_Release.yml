@@ -82,12 +82,21 @@ jobs:
           os: ${{ matrix.config.os }}
           project: ${{ env.project }}
 
-      - name: Android
+      - name: Android Lib
         id: Android
         if: matrix.config.type == 'Android'
-        uses: NewChromantics/PopAction_BuildAndroid@v1
+        uses: NewChromantics/PopAction_BuildAndroid@v2
         with:
-          project: ${{ env.project }}
+          buildtargetname: ${{ env.project }}
+          buildpath: ${{ env.project }}.Android/lib${{ env.project }}
+
+      - name: Android TestApp
+        id: AndroidTestApp
+        if: matrix.config.type == 'Android'
+        uses: NewChromantics/PopAction_BuildAndroid@v2
+        with:
+          buildtargetname: ${{ env.project }}
+          buildpath: ${{ env.project }}.Android/${{ env.project }}TestApp
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
