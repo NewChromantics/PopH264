@@ -35,7 +35,8 @@ namespace PopH264
 	//	1.3.21	Added AllowBuffering option to decoder so by default LowLatency mode is on for Mediafoundation, which reduces buffering
 	//	1.3.22	Version bump for github build
 	//	1.3.23	Added extra meta output from decoder (Just MediaFoundation initially)
-	const Soy::TVersion	Version(1,3,23);
+	//	1.3.24	Version bump for github release
+	const Soy::TVersion	Version(1,3,24);
 }
 
 
