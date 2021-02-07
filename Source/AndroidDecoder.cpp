@@ -1177,12 +1177,31 @@ void Android::TOutputThread::PopOutputBuffer(const TOutputBufferMeta& BufferMeta
 	
 	auto FrameTime = BufferMeta.mMeta.presentationTimeUs;
 	auto Flags = BufferMeta.mMeta.flags; 
-	std::Debug << "Got OutputBuffer(" << BufferMeta.mBufferIndex << ") BufferSize=" << BufferSize << " BufferData=0x" << std::hex << (size_t)(BufferData) << std::dec << " FrameTime=" << FrameTime << " Flags=" << Flags << std::endl;
+	auto BufferDataOffset = BufferMeta.mMeta.offset;
+	auto BufferDataSize = BufferMeta.mMeta.size;
+	std::Debug << "Got OutputBuffer(" << BufferMeta.mBufferIndex << ") BufferSize=" << BufferSize << " BufferData=0x" << std::hex << (size_t)(BufferData) << std::dec << " FrameTime=" << FrameTime << " Flags=" << Flags << " offset=" << BufferDataOffset << " size=" << BufferDataSize << std::endl;
 	try
 	{
+		//	erroring here on samsung s7 with 
+		//	format= 1280x1616^Yuv_8_88
+		//	expected size = 3102720
+		//	real size = 3104768
+		//	https://stackoverflow.com/a/20707645/355753
+		//	suggests padding (luma)plane to 2kb boundry, or rather, chroma plane being on a boundary
+		//	BUT both real size and expected size align. (2048*1515 & 2048*1516)
+		//	just for no reason, an extra page.
+		//	gr: then realised, we're not using the buffer info offsets
+		auto OutputBufferSize = BufferSize;
+		auto PixelFormatBufferSize = BufferMeta.mPixelMeta.GetDataSize();
+		if ( OutputBufferSize > PixelFormatBufferSize )
+		{
+			std::Debug << "Clipping output pixel size from " << BufferSize << " to " << PixelFormatBufferSize << " for " << BufferMeta.mPixelMeta << std::endl;
+			OutputBufferSize = PixelFormatBufferSize;
+		}
+	
 		//	output pixels!
 		auto* BufferDataMutable = const_cast<uint8_t*>( BufferData );
-		SoyPixelsRemote NewPixels( BufferDataMutable, BufferSize, BufferMeta.mPixelMeta );
+		SoyPixelsRemote NewPixels( BufferDataMutable, OutputBufferSize, BufferMeta.mPixelMeta );
 		
 		//	extra meta
 		json11::Json::object Meta;
