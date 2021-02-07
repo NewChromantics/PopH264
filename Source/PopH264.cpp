@@ -36,7 +36,7 @@ namespace PopH264
 	//	1.3.22	Version bump for github build
 	//	1.3.23	Added extra meta output from decoder (Just MediaFoundation initially)
 	//	1.3.24	Version bump for github release
-	const Soy::TVersion	Version(1,3,24);
+	const Soy::TVersion	Version(1,3,25);
 }
 
 
