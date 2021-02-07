@@ -1140,8 +1140,18 @@ void Android::TOutputThread::PopOutputBuffer(const TOutputBufferMeta& BufferMeta
 10-15 06:49:51.632  1167  1167 E mediaserver: unlinkToDeath: removed reference to death recipient but */
 		if ( Released )
 			return;
-		auto Result = AMediaCodec_releaseOutputBuffer( mCodec, BufferIndex, Render );
-		IsOkay( Result, "MLMediaCodecReleaseOutputBuffer");
+			
+		//	gr: catch release errors as prev errors will probably just error here
+		//		but we do it just in case
+		try
+		{
+			auto Result = AMediaCodec_releaseOutputBuffer( mCodec, BufferIndex, Render );
+			IsOkay( Result, "MLMediaCodecReleaseOutputBuffer");
+		}
+		catch(std::exception& e)
+		{
+			std::Debug << "Caught ReleaseBuffer exception; " << e.what() << std::endl;
+		}
 		Released = true;
 	};
 
