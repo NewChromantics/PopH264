@@ -1191,16 +1191,20 @@ void Android::TOutputThread::PopOutputBuffer(const TOutputBufferMeta& BufferMeta
 		//	BUT both real size and expected size align. (2048*1515 & 2048*1516)
 		//	just for no reason, an extra page.
 		//	gr: then realised, we're not using the buffer info offsets
-		auto OutputBufferSize = BufferSize;
+		//auto OutputBufferSize = BufferSize;
+		auto OutputBufferSize = BufferDataSize;
 		auto PixelFormatBufferSize = BufferMeta.mPixelMeta.GetDataSize();
 		if ( OutputBufferSize > PixelFormatBufferSize )
 		{
-			std::Debug << "Clipping output pixel size from " << BufferSize << " to " << PixelFormatBufferSize << " for " << BufferMeta.mPixelMeta << std::endl;
+			std::Debug << "Clipping output pixel size from buffersize=" << BufferSize << " (meta buffer size=" << BufferDataSize <<" offset=" << BufferDataOffset <<") to " << PixelFormatBufferSize << " for " << BufferMeta.mPixelMeta << std::endl;
 			OutputBufferSize = PixelFormatBufferSize;
 		}
 	
 		//	output pixels!
+		//	gr: use buffer meta offset for when buffer isn't neccessarily aligned
+		//	gr: todo: be careful here and detect bad offsets going OOB
 		auto* BufferDataMutable = const_cast<uint8_t*>( BufferData );
+		BufferDataMutable += BufferDataOffset;
 		SoyPixelsRemote NewPixels( BufferDataMutable, OutputBufferSize, BufferMeta.mPixelMeta );
 		
 		//	extra meta
