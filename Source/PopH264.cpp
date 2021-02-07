@@ -36,7 +36,9 @@ namespace PopH264
 	//	1.3.22	Version bump for github build
 	//	1.3.23	Added extra meta output from decoder (Just MediaFoundation initially)
 	//	1.3.24	Version bump for github release
-	const Soy::TVersion	Version(1,3,25);
+	//	1.3.25	Android wasn't handling COLOR_FormatYUV420SemiPlanar from some devices (samsung s7), is now
+	//	1.3.26	Fixed android erroring with mis-aligned/padded buffers. 
+	const Soy::TVersion	Version(1,3,26);
 }
 
 
