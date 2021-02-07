@@ -7,6 +7,7 @@
 
 #include "media/NdkMediaCodec.h"
 //#include <NdkMediaError.h>
+#include "json11.hpp"
 
 
 //	NDK media formats
@@ -100,6 +101,9 @@ private:
 	*/
 	MediaCodec_t				mCodec = nullptr;
 	bool						mAsyncBuffers = false;
+
+public:
+	json11::Json::object		mOutputMeta;
 };
 
 
@@ -176,7 +180,8 @@ private:
 	//std::shared_ptr<TSurfaceTexture>	mSurfaceTexture;
 	
 	std::function<void()>	mOnStartThread;
-	TInputThread	mInputThread;
-	TOutputThread	mOutputThread;
-	SoyPixelsMeta	mOutputPixelMeta;
+	TInputThread			mInputThread;
+	TOutputThread			mOutputThread;
+	SoyPixelsMeta			mOutputPixelMeta;
+	json11::Json::object	mOutputMeta;
 };

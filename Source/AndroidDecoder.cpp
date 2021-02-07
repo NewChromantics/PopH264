@@ -84,7 +84,7 @@ namespace Android
 {
 	void					IsOkay(media_status_t Status,const char* Context);
 	void					EnumCodecs(std::function<void(const std::string&)> Enum);
-	SoyPixelsMeta			GetPixelMeta(MediaFormat_t Format,bool VerboseDebug=false);
+	SoyPixelsMeta			GetPixelMeta(MediaFormat_t Format,bool VerboseDebug,json11::Json::object& Meta);
 	SoyPixelsFormat::Type	GetPixelFormat(int32_t ColourFormat);
 
 	constexpr int32_t		Mode_NvidiaSoftware = 1;
@@ -193,7 +193,7 @@ SoyPixelsFormat::Type Android::GetPixelFormat(int32_t ColourFormat)
 }
 
 
-SoyPixelsMeta Android::GetPixelMeta(MediaFormat_t Format,bool VerboseDebug)
+SoyPixelsMeta Android::GetPixelMeta(MediaFormat_t Format,bool VerboseDebug,json11::Json::object& Meta)
 {
 	if ( VerboseDebug )
 	{
@@ -214,6 +214,17 @@ SoyPixelsMeta Android::GetPixelMeta(MediaFormat_t Format,bool VerboseDebug)
 		//IsOkay( Result, Key );
 		return Value;
 	};
+	auto GetKey_rect = [&](MLMediaFormatKey Key)
+	{
+		int32_t Left,Top,Right,Bottom;
+		auto Result = AMediaFormat_getRect( Format, Key, &Left, &Top, &Right, &Bottom );
+		if ( !Result )
+			throw Soy::AssertException( std::string("Failed to get MediaFormat key ") + Key );
+		//auto Result = MLMediaFormatGetKeyValueInt32( Format, Key, &Value );
+		//IsOkay( Result, Key );
+		Soy::Rectx<int> Rect( Left, Top, Right-Left, Bottom-Top);
+		return Rect;
+	};
 	/*
 	auto GetKey_String = [&](MLMediaFormat Key)
 	{
@@ -230,6 +241,19 @@ SoyPixelsMeta Android::GetPixelMeta(MediaFormat_t Format,bool VerboseDebug)
 		catch(std::exception& e)
 		{
 			std::Debug << "Format key " << Key << " error " << e.what() << std::endl;
+		}
+	};
+	
+	auto DebugKey_Rect = [&](MLMediaFormatKey Key)
+	{
+		try
+		{
+			auto Value = GetKey_rect(Key);
+			std::Debug << "Format key (rect) " << Key << "=" << Value << std::endl;
+		}
+		catch(std::exception& e)
+		{
+			std::Debug << "Format key (rect) " << Key << " error " << e.what() << std::endl;
 		}
 	};
 	
@@ -263,11 +287,48 @@ SoyPixelsMeta Android::GetPixelMeta(MediaFormat_t Format,bool VerboseDebug)
 		DebugKey(MLMediaFormat_Key_Width);
 		DebugKey(MLMediaFormat_Key_Height);
 		DebugKey(MLMediaFormat_Key_Color_Format);
+		DebugKey(AMEDIAFORMAT_KEY_DISPLAY_WIDTH);
+		DebugKey(AMEDIAFORMAT_KEY_DISPLAY_HEIGHT);
+		DebugKey_Rect(AMEDIAFORMAT_KEY_DISPLAY_CROP);
 		//DebugKey(MLMediaFormat_Key_Crop_Left);
 		//DebugKey(MLMediaFormat_Key_Crop_Right);
 		//DebugKey(MLMediaFormat_Key_Crop_Bottom);
 		//DebugKey(MLMediaFormat_Key_Crop_Top);
 		//GetKey_long(MLMediaFormat_Key_Repeat_Previous_Frame_After
+	}
+	
+	//	set metas
+	//	try and set crop rect from display w/h first (older system than crop)
+	try
+	{
+		auto DisplayWidth = GetKey_integer(AMEDIAFORMAT_KEY_DISPLAY_WIDTH);
+		auto DisplayHeight = GetKey_integer(AMEDIAFORMAT_KEY_DISPLAY_HEIGHT);
+		json11::Json::array RectArray;
+		RectArray.push_back(0);
+		RectArray.push_back(0);
+		RectArray.push_back(DisplayWidth);
+		RectArray.push_back(DisplayHeight);
+		Meta["ImageRect"] = RectArray;
+	}
+	catch(std::exception& e)
+	{
+		std::Debug << "Exception getting meta ImageRect (display w/h): " << e.what() << std::endl;
+	}
+
+	//	then try and get real crop rect and overwrite previous setting	
+	try
+	{
+		auto Rect = GetKey_rect(AMEDIAFORMAT_KEY_DISPLAY_CROP);
+		json11::Json::array RectArray;
+		RectArray.push_back(Rect.x);
+		RectArray.push_back(Rect.y);
+		RectArray.push_back(Rect.w);
+		RectArray.push_back(Rect.h);
+		Meta["ImageRect"] = RectArray;
+	}
+	catch(std::exception& e)
+	{
+		std::Debug << "Exception getting meta ImageRect (display crop): " << e.what() << std::endl;
 	}
 		
 	//	there's a colour format key, but totally undocumented
@@ -284,8 +345,8 @@ SoyPixelsMeta Android::GetPixelMeta(MediaFormat_t Format,bool VerboseDebug)
 		std::Debug << " PixelFormat=" << PixelFormat;
 		std::Debug << std::endl;
 	}
-	SoyPixelsMeta Meta( Width, Height, PixelFormat );
-	return Meta;
+	SoyPixelsMeta PixelMeta( Width, Height, PixelFormat );
+	return PixelMeta;
 }
 
 /*
@@ -907,7 +968,11 @@ void Android::TDecoder::OnOutputFormatChanged(MediaFormat_t NewFormat)
 		std::Debug << "Got new output format..." << std::endl;
 	try
 	{
-		mOutputPixelMeta = GetPixelMeta( NewFormat, mParams.mVerboseDebug );
+		mOutputPixelMeta = GetPixelMeta( NewFormat, mParams.mVerboseDebug, mOutputMeta );
+		
+		//	gr: update output thread meta. Might need to be careful about changing this at the right time
+		//		if we have a stream that changes format. It would need sending with each OnOutputBuffer meta (but lots of redundant json copy!)
+		mOutputThread.mOutputMeta = mOutputMeta;
 		//if ( mParams.mVerboseDebug )
 			std::Debug << "New output format is " << mOutputPixelMeta << std::endl;
 	}
@@ -1208,7 +1273,7 @@ void Android::TOutputThread::PopOutputBuffer(const TOutputBufferMeta& BufferMeta
 		SoyPixelsRemote NewPixels( BufferDataMutable, OutputBufferSize, BufferMeta.mPixelMeta );
 		
 		//	extra meta
-		json11::Json::object Meta;
+		json11::Json::object Meta = mOutputMeta;
 		Meta["AndroidBufferFlags"] = static_cast<int>(Flags);
 		
 		PushFrame( NewPixels, FrameTime, Meta );
