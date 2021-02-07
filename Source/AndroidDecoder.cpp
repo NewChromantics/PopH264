@@ -13,7 +13,7 @@
 #include "json11.hpp"
 
 
-enum
+enum AndroidColourFormat
 {
 	//	http://developer.android.com/reference/android/media/MediaCodecInfo.CodecCapabilities.html
 	COLOR_Format12bitRGB444	= 3,
@@ -170,6 +170,7 @@ SoyPixelsFormat::Type Android::GetPixelFormat(int32_t ColourFormat)
 	//AIMAGE_FORMAT_RGB_565
 	//case AIMAGE_FORMAT_RGBA_FP16:	return SoyPixelsFormat::HalfFloat4;
 	case COLOR_FormatYUV420Planar:	return SoyPixelsFormat::Yuv_8_8_8;
+	case COLOR_FormatYUV420SemiPlanar:	return SoyPixelsFormat::Yuv_8_88;
 	case AIMAGE_FORMAT_YUV_420_888:	return SoyPixelsFormat::Yuv_8_8_8;
 	//AIMAGE_FORMAT_JPEG
 	case AIMAGE_FORMAT_RAW16:		return SoyPixelsFormat::Depth16mm;
@@ -185,8 +186,9 @@ SoyPixelsFormat::Type Android::GetPixelFormat(int32_t ColourFormat)
 	//case COLOR_FormatYUV420Flexible:	//	could be one of many 420s
 	};
 	
+	auto AndColourFormat = (AndroidColourFormat)ColourFormat;
 	std::stringstream Error;
-	Error << "Unhandled colour format " << ColourFormat;
+	Error << "Unhandled colour format " << ColourFormat << "/" << magic_enum::enum_name(AndColourFormat);
 	throw Soy::AssertException(Error);
 }
 
