@@ -17,6 +17,10 @@ jobs:
       - uses: actions/checkout@v2
         with:
           submodules: "recursive"
+
+      - run: |
+          find Unity/PopH264/ -name \*.meta >> metaList
+
       - uses: NewChromantics/PopAction_BuildApple@v1.0.9
         with:
           BuildScheme: ${{ env.project }}_Universal
@@ -28,3 +32,16 @@ jobs:
           # tsdk: these env vars are set in each of the actions
           name: ${{ env.UPLOAD_NAME }}
           path: ${{ env.UPLOAD_DIR }}
+
+      - name: UnityPackage
+        uses: pCYSl5EDgo/create-unitypackage@master
+        with:
+          package-path: 'PopH264.unitypackage'
+          include-files: metaList
+          project-folder: 'Unity/PopH264'
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: 'PopH264.unitypackage'
+          path: 'PopH264.unitypackage'
