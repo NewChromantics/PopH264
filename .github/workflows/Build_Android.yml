@@ -18,13 +18,13 @@ jobs:
         submodules: 'recursive'
 
     - name: Build Android lib
-      uses: NewChromantics/PopAction_BuildAndroid@v2
+      uses: NewChromantics/PopAction_BuildAndroid@test
       with:
         buildtargetname: "PopH264"
         buildpath: "PopH264.Android/libPopH264"
         
     - name: Build Android test app
-      uses: NewChromantics/PopAction_BuildAndroid@v2
+      uses: NewChromantics/PopAction_BuildAndroid@test
       with:
         buildtargetname: "PopH264"
         buildpath: "PopH264.Android/PopH264TestApp"
