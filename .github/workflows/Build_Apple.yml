@@ -33,14 +33,14 @@ jobs:
       - name: Create Meta List
         run: |
           find * -name \*meta > metaList
-        working-directory: Unity/PopH264
+        working-directory: Unity/PopH264/Assets/PopH264
 
       - name: UnityPackage
         uses: pCYSl5EDgo/create-unitypackage@master
         with:
           package-path: 'PopH264.unitypackage'
-          include-files: 'Unity/PopH264/metaList'
-          project-folder: 'Unity/PopH264'
+          include-files: 'Unity/PopH264/Assets/PopH264/metaList'
+          project-folder: 'Unity/PopH264/Assets/PopH264'
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v2
