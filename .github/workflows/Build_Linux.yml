@@ -22,16 +22,25 @@ jobs:
             type: linux
             architecture: arm64
 
-          - os: Pi4
+          - os: ubuntu-latest
             type: linux
-            architecture: arm64
+            architecture: armv8
+            flag: pi
 
     steps:
       - uses: actions/checkout@v2
         with:
           submodules: "recursive"
       - name: Linux
-        uses: NewChromantics/PopAction_BuildLinux@v1
+        uses: NewChromantics/PopAction_BuildLinux@test
         with:
           os: ${{ matrix.config.os }}
           project: ${{ env.project }}
+          flag: ${{ matrix.config.flag }}
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          # tsdk: these env vars are set in each of the actions
+          name: ${{ env.UPLOAD_NAME }}
+          path: ${{ env.UPLOAD_DIR }}
