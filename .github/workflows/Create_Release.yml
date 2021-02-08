@@ -148,6 +148,25 @@ jobs:
           ls
           npm publish $NPM_PACKAGE_DRY_RUN
 
+      # Make Unity Package
+      - name: Create Meta List
+        run: |
+          find * -name \*meta > metaList
+        working-directory: ${{ env.project }}.Package/
+
+      - name: UnityPackage
+        uses: pCYSl5EDgo/create-unitypackage@master
+        with:
+          package-path: 'PopH264.unitypackage'
+          include-files: ${{ env.project }}.Package/metaList
+          project-folder: ${{ env.project }}.Package/
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: 'PopH264.unitypackage'
+          path: 'PopH264.unitypackage'
+
       # make a release
       # needs to be after the npm package cause this step tars and deletes all the files in the dir which breaks it!       
       - name: Make github release
