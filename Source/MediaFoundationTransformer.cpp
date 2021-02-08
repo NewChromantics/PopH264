@@ -1126,7 +1126,7 @@ Soy::AutoReleasePtr<IMFMediaBuffer> MediaFoundation::CreateBuffer(const ArrayBri
 	Soy::AutoReleasePtr<IMFMediaBuffer> pBuffer;
 	auto Result = MFCreateMemoryBuffer(Data.GetDataSize(), &pBuffer.mObject);
 	IsOkay(Result, "MFCreateMemoryBuffer");
-	pBuffer.Retain();
+	//pBuffer.Retain();
 
 	//	copy data
 	uint8_t* DestData = nullptr;
@@ -1175,9 +1175,10 @@ Soy::AutoReleasePtr<IMFSample> MediaFoundation::CreateSample(const ArrayBridge<u
 	Soy::AutoReleasePtr<IMFSample> pSample;
 	auto Result = MFCreateSample(&pSample.mObject);
 	IsOkay(Result, "MFCreateSample");
-	pSample.Retain();
+	//pSample.Retain();
 
 	Result = pSample.mObject->AddBuffer(Buffer.mObject);
+	Buffer.Release();
 	IsOkay(Result, "CreateSample - AddBuffer");
 
 	Result = pSample.mObject->SetSampleTime(SampleTime100Nano);
@@ -1197,7 +1198,7 @@ Soy::AutoReleasePtr<IMFSample> MediaFoundation::CreateSample(DWORD Size, DWORD A
 	Soy::AutoReleasePtr<IMFSample> pSample;
 	auto Result = MFCreateSample(&pSample.mObject);
 	IsOkay(Result, "MFCreateSample");
-	pSample.Retain();
+	//pSample.Retain();
 
 	Result = pSample.mObject->AddBuffer(Buffer.mObject);
 	IsOkay(Result, "AddBuffer");
