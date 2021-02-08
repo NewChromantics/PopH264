@@ -51,12 +51,12 @@ jobs:
           submodules: recursive
 
       - name: Configure Windows
-        if: matrix.config.os == 'windows'
+        if: matrix.config.os == 'windows-latest'
         uses: microsoft/setup-msbuild@v1.0.2
 
       - name: Windows
         id: Windows
-        if: matrix.config.os == 'windows'
+        if: matrix.config.os == 'windows-latest'
         uses: NewChromantics/PopAction_BuildWindows@v1
         with:
           BuildPlatform: x64
