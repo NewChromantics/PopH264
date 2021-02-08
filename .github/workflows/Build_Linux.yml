@@ -22,9 +22,10 @@ jobs:
             type: linux
             architecture: arm64
 
-          - os: Pi4
+          - os: ubuntu-latest
             type: linux
-            architecture: arm64
+            architecture: armv8
+            flag: pi
 
     steps:
       - uses: actions/checkout@v2
