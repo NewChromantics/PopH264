@@ -1116,6 +1116,43 @@ void MediaFoundation::TTransformer::SetInputFormat(IMFMediaType& MediaType)
 MediaFoundation::TTransformer::~TTransformer()
 {
 	std::Debug << __PRETTY_FUNCTION__ << std::endl;
+	if (mTransformer)
+	{
+		try
+		{
+			//	gr: none of this is releasing memory
+			ProcessCommand(MFT_MESSAGE_COMMAND_FLUSH);
+			ProcessCommand(MFT_MESSAGE_COMMAND_DRAIN);
+			ProcessCommand(MFT_MESSAGE_COMMAND_FLUSH_OUTPUT_STREAM);
+			ProcessCommand(MFT_MESSAGE_DROP_SAMPLES);
+			ProcessCommand(MFT_MESSAGE_NOTIFY_RELEASE_RESOURCES);
+
+			DWORD InputStreamCount = 0;
+			DWORD OutputStreamCount = 0;
+			auto Result = mTransformer->GetStreamCount(&InputStreamCount, &OutputStreamCount);
+			IsOkay(Result, "Cleanup GetStreamCount");
+
+			DWORD InputStreamIds[10] = { -1 };
+			DWORD OutputStreamIds[10] = { -1 };
+			Result = mTransformer->GetStreamIDs(std::size(InputStreamIds), InputStreamIds, std::size(OutputStreamIds), OutputStreamIds);
+			if (Result != E_NOTIMPL)
+			{
+				IsOkay(Result, "Cleanup GetStreamIDs");
+				for (int i = 0; i < InputStreamCount; i++)
+				{
+					auto StreamId = InputStreamIds[i];
+					Result = mTransformer->DeleteInputStream(StreamId);
+					IsOkay(Result, "DeleteInputStream");
+				}
+			}
+			//Result = mTransformer->DeleteInputStream(0);
+			//IsOkay(Result, "DeleteInputStream0");
+		}
+		catch (std::exception& e)
+		{
+			std::Debug << e.what() << std::endl;
+		}
+	}
 	mTransformer.Release();
 	mOutputMediaType.Release();
 }
@@ -1278,6 +1315,7 @@ bool MediaFoundation::TTransformer::PushFrame(const ArrayBridge<uint8_t>&& Data,
 
 	DWORD Flags = 0;
 	auto Result = Transformer.ProcessInput(mInputStreamId, pSample.mObject, Flags);
+	pSample.Release();
 	
 	//	gr: getting this result, even though status says "is accepting"
 	if (Result == MF_E_NOTACCEPTING)
@@ -1506,6 +1544,8 @@ bool MediaFoundation::TTransformer::PopFrame(ArrayBridge<uint8_t>&& Data,int64_t
 	{
 		std::Debug <<  e.what() << std::endl;
 	}
+
+	//output_buffer.pSample->Release();
 
 	//	assume there might be more packets
 	return true;
