@@ -44,7 +44,6 @@ jobs:
         package-path: 'PopH264.unitypackage'
         include-files: metaList
         project-folder: 'Unity/PopH264'
-      run: ls
 
     - name: Upload Artifacts
       uses: actions/upload-artifacts@v2
