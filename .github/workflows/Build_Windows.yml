@@ -17,7 +17,7 @@ jobs:
       with:
         submodules: 'recursive'
     - run: |
-        dir Unity/PopH264/ *.meta /b/s >> metaList
+        dir *.meta /b/s >> metaList
 
     - name: Add msbuild to PATH
       uses: microsoft/setup-msbuild@v1.0.2
