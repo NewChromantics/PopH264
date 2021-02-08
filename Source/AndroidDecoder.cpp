@@ -13,7 +13,7 @@
 #include "json11.hpp"
 
 
-enum
+enum AndroidColourFormat
 {
 	//	http://developer.android.com/reference/android/media/MediaCodecInfo.CodecCapabilities.html
 	COLOR_Format12bitRGB444	= 3,
@@ -84,7 +84,7 @@ namespace Android
 {
 	void					IsOkay(media_status_t Status,const char* Context);
 	void					EnumCodecs(std::function<void(const std::string&)> Enum);
-	SoyPixelsMeta			GetPixelMeta(MediaFormat_t Format,bool VerboseDebug=false);
+	SoyPixelsMeta			GetPixelMeta(MediaFormat_t Format,bool VerboseDebug,json11::Json::object& Meta);
 	SoyPixelsFormat::Type	GetPixelFormat(int32_t ColourFormat);
 
 	constexpr int32_t		Mode_NvidiaSoftware = 1;
@@ -170,6 +170,7 @@ SoyPixelsFormat::Type Android::GetPixelFormat(int32_t ColourFormat)
 	//AIMAGE_FORMAT_RGB_565
 	//case AIMAGE_FORMAT_RGBA_FP16:	return SoyPixelsFormat::HalfFloat4;
 	case COLOR_FormatYUV420Planar:	return SoyPixelsFormat::Yuv_8_8_8;
+	case COLOR_FormatYUV420SemiPlanar:	return SoyPixelsFormat::Yuv_8_88;
 	case AIMAGE_FORMAT_YUV_420_888:	return SoyPixelsFormat::Yuv_8_8_8;
 	//AIMAGE_FORMAT_JPEG
 	case AIMAGE_FORMAT_RAW16:		return SoyPixelsFormat::Depth16mm;
@@ -185,13 +186,14 @@ SoyPixelsFormat::Type Android::GetPixelFormat(int32_t ColourFormat)
 	//case COLOR_FormatYUV420Flexible:	//	could be one of many 420s
 	};
 	
+	auto AndColourFormat = (AndroidColourFormat)ColourFormat;
 	std::stringstream Error;
-	Error << "Unhandled colour format " << ColourFormat;
+	Error << "Unhandled colour format " << ColourFormat << "/" << magic_enum::enum_name(AndColourFormat);
 	throw Soy::AssertException(Error);
 }
 
 
-SoyPixelsMeta Android::GetPixelMeta(MediaFormat_t Format,bool VerboseDebug)
+SoyPixelsMeta Android::GetPixelMeta(MediaFormat_t Format,bool VerboseDebug,json11::Json::object& Meta)
 {
 	if ( VerboseDebug )
 	{
@@ -212,6 +214,17 @@ SoyPixelsMeta Android::GetPixelMeta(MediaFormat_t Format,bool VerboseDebug)
 		//IsOkay( Result, Key );
 		return Value;
 	};
+	auto GetKey_rect = [&](MLMediaFormatKey Key)
+	{
+		int32_t Left,Top,Right,Bottom;
+		auto Result = AMediaFormat_getRect( Format, Key, &Left, &Top, &Right, &Bottom );
+		if ( !Result )
+			throw Soy::AssertException( std::string("Failed to get MediaFormat key ") + Key );
+		//auto Result = MLMediaFormatGetKeyValueInt32( Format, Key, &Value );
+		//IsOkay( Result, Key );
+		Soy::Rectx<int> Rect( Left, Top, Right-Left, Bottom-Top);
+		return Rect;
+	};
 	/*
 	auto GetKey_String = [&](MLMediaFormat Key)
 	{
@@ -228,6 +241,19 @@ SoyPixelsMeta Android::GetPixelMeta(MediaFormat_t Format,bool VerboseDebug)
 		catch(std::exception& e)
 		{
 			std::Debug << "Format key " << Key << " error " << e.what() << std::endl;
+		}
+	};
+	
+	auto DebugKey_Rect = [&](MLMediaFormatKey Key)
+	{
+		try
+		{
+			auto Value = GetKey_rect(Key);
+			std::Debug << "Format key (rect) " << Key << "=" << Value << std::endl;
+		}
+		catch(std::exception& e)
+		{
+			std::Debug << "Format key (rect) " << Key << " error " << e.what() << std::endl;
 		}
 	};
 	
@@ -261,11 +287,48 @@ SoyPixelsMeta Android::GetPixelMeta(MediaFormat_t Format,bool VerboseDebug)
 		DebugKey(MLMediaFormat_Key_Width);
 		DebugKey(MLMediaFormat_Key_Height);
 		DebugKey(MLMediaFormat_Key_Color_Format);
+		DebugKey(AMEDIAFORMAT_KEY_DISPLAY_WIDTH);
+		DebugKey(AMEDIAFORMAT_KEY_DISPLAY_HEIGHT);
+		DebugKey_Rect(AMEDIAFORMAT_KEY_DISPLAY_CROP);
 		//DebugKey(MLMediaFormat_Key_Crop_Left);
 		//DebugKey(MLMediaFormat_Key_Crop_Right);
 		//DebugKey(MLMediaFormat_Key_Crop_Bottom);
 		//DebugKey(MLMediaFormat_Key_Crop_Top);
 		//GetKey_long(MLMediaFormat_Key_Repeat_Previous_Frame_After
+	}
+	
+	//	set metas
+	//	try and set crop rect from display w/h first (older system than crop)
+	try
+	{
+		auto DisplayWidth = GetKey_integer(AMEDIAFORMAT_KEY_DISPLAY_WIDTH);
+		auto DisplayHeight = GetKey_integer(AMEDIAFORMAT_KEY_DISPLAY_HEIGHT);
+		json11::Json::array RectArray;
+		RectArray.push_back(0);
+		RectArray.push_back(0);
+		RectArray.push_back(DisplayWidth);
+		RectArray.push_back(DisplayHeight);
+		Meta["ImageRect"] = RectArray;
+	}
+	catch(std::exception& e)
+	{
+		std::Debug << "Exception getting meta ImageRect (display w/h): " << e.what() << std::endl;
+	}
+
+	//	then try and get real crop rect and overwrite previous setting	
+	try
+	{
+		auto Rect = GetKey_rect(AMEDIAFORMAT_KEY_DISPLAY_CROP);
+		json11::Json::array RectArray;
+		RectArray.push_back(Rect.x);
+		RectArray.push_back(Rect.y);
+		RectArray.push_back(Rect.w);
+		RectArray.push_back(Rect.h);
+		Meta["ImageRect"] = RectArray;
+	}
+	catch(std::exception& e)
+	{
+		std::Debug << "Exception getting meta ImageRect (display crop): " << e.what() << std::endl;
 	}
 		
 	//	there's a colour format key, but totally undocumented
@@ -282,8 +345,8 @@ SoyPixelsMeta Android::GetPixelMeta(MediaFormat_t Format,bool VerboseDebug)
 		std::Debug << " PixelFormat=" << PixelFormat;
 		std::Debug << std::endl;
 	}
-	SoyPixelsMeta Meta( Width, Height, PixelFormat );
-	return Meta;
+	SoyPixelsMeta PixelMeta( Width, Height, PixelFormat );
+	return PixelMeta;
 }
 
 /*
@@ -905,7 +968,11 @@ void Android::TDecoder::OnOutputFormatChanged(MediaFormat_t NewFormat)
 		std::Debug << "Got new output format..." << std::endl;
 	try
 	{
-		mOutputPixelMeta = GetPixelMeta( NewFormat, mParams.mVerboseDebug );
+		mOutputPixelMeta = GetPixelMeta( NewFormat, mParams.mVerboseDebug, mOutputMeta );
+		
+		//	gr: update output thread meta. Might need to be careful about changing this at the right time
+		//		if we have a stream that changes format. It would need sending with each OnOutputBuffer meta (but lots of redundant json copy!)
+		mOutputThread.mOutputMeta = mOutputMeta;
 		//if ( mParams.mVerboseDebug )
 			std::Debug << "New output format is " << mOutputPixelMeta << std::endl;
 	}
@@ -1138,8 +1205,18 @@ void Android::TOutputThread::PopOutputBuffer(const TOutputBufferMeta& BufferMeta
 10-15 06:49:51.632  1167  1167 E mediaserver: unlinkToDeath: removed reference to death recipient but */
 		if ( Released )
 			return;
-		auto Result = AMediaCodec_releaseOutputBuffer( mCodec, BufferIndex, Render );
-		IsOkay( Result, "MLMediaCodecReleaseOutputBuffer");
+			
+		//	gr: catch release errors as prev errors will probably just error here
+		//		but we do it just in case
+		try
+		{
+			auto Result = AMediaCodec_releaseOutputBuffer( mCodec, BufferIndex, Render );
+			IsOkay( Result, "MLMediaCodecReleaseOutputBuffer");
+		}
+		catch(std::exception& e)
+		{
+			std::Debug << "Caught ReleaseBuffer exception; " << e.what() << std::endl;
+		}
 		Released = true;
 	};
 
@@ -1165,15 +1242,38 @@ void Android::TOutputThread::PopOutputBuffer(const TOutputBufferMeta& BufferMeta
 	
 	auto FrameTime = BufferMeta.mMeta.presentationTimeUs;
 	auto Flags = BufferMeta.mMeta.flags; 
-	std::Debug << "Got OutputBuffer(" << BufferMeta.mBufferIndex << ") BufferSize=" << BufferSize << " BufferData=0x" << std::hex << (size_t)(BufferData) << std::dec << " FrameTime=" << FrameTime << " Flags=" << Flags << std::endl;
+	auto BufferDataOffset = BufferMeta.mMeta.offset;
+	auto BufferDataSize = BufferMeta.mMeta.size;
+	std::Debug << "Got OutputBuffer(" << BufferMeta.mBufferIndex << ") BufferSize=" << BufferSize << " BufferData=0x" << std::hex << (size_t)(BufferData) << std::dec << " FrameTime=" << FrameTime << " Flags=" << Flags << " offset=" << BufferDataOffset << " size=" << BufferDataSize << std::endl;
 	try
 	{
+		//	erroring here on samsung s7 with 
+		//	format= 1280x1616^Yuv_8_88
+		//	expected size = 3102720
+		//	real size = 3104768
+		//	https://stackoverflow.com/a/20707645/355753
+		//	suggests padding (luma)plane to 2kb boundry, or rather, chroma plane being on a boundary
+		//	BUT both real size and expected size align. (2048*1515 & 2048*1516)
+		//	just for no reason, an extra page.
+		//	gr: then realised, we're not using the buffer info offsets
+		//auto OutputBufferSize = BufferSize;
+		auto OutputBufferSize = BufferDataSize;
+		auto PixelFormatBufferSize = BufferMeta.mPixelMeta.GetDataSize();
+		if ( OutputBufferSize > PixelFormatBufferSize )
+		{
+			std::Debug << "Clipping output pixel size from buffersize=" << BufferSize << " (meta buffer size=" << BufferDataSize <<" offset=" << BufferDataOffset <<") to " << PixelFormatBufferSize << " for " << BufferMeta.mPixelMeta << std::endl;
+			OutputBufferSize = PixelFormatBufferSize;
+		}
+	
 		//	output pixels!
+		//	gr: use buffer meta offset for when buffer isn't neccessarily aligned
+		//	gr: todo: be careful here and detect bad offsets going OOB
 		auto* BufferDataMutable = const_cast<uint8_t*>( BufferData );
-		SoyPixelsRemote NewPixels( BufferDataMutable, BufferSize, BufferMeta.mPixelMeta );
+		BufferDataMutable += BufferDataOffset;
+		SoyPixelsRemote NewPixels( BufferDataMutable, OutputBufferSize, BufferMeta.mPixelMeta );
 		
 		//	extra meta
-		json11::Json::object Meta;
+		json11::Json::object Meta = mOutputMeta;
 		Meta["AndroidBufferFlags"] = static_cast<int>(Flags);
 		
 		PushFrame( NewPixels, FrameTime, Meta );
