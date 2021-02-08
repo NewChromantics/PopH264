@@ -68,7 +68,7 @@ bool LoadDataFromFilename(const char* Filename,ArrayBridge<uint8_t>&& Data)
 //	gr: 1mb too big for windows on stack
 uint8_t TestDataBuffer[1 * 1024 * 1024];
 
-void DecoderTest(const char* TestDataName,CompareFunc_t* Compare,const char* DecoderName)
+void DecoderTest(const char* TestDataName,CompareFunc_t* Compare,const char* DecoderName,size_t DataRepeat=1)
 {
 	std::cout << "DecoderTest(" << (TestDataName?TestDataName:"<null>") << "," << (DecoderName?DecoderName:"<null>") << ")" << std::endl;
 	Array<uint8_t> TestData;
@@ -90,53 +90,57 @@ void DecoderTest(const char* TestDataName,CompareFunc_t* Compare,const char* Dec
 	OptionsStr << "{";
 	if ( DecoderName )
 		OptionsStr << "\"Decoder\":\"" << DecoderName << "\",";
-	OptionsStr << "\"VerboseDebug\":true";
+	//OptionsStr << "\"VerboseDebug\":true";
 	OptionsStr << "}";
 	auto OptionsString = OptionsStr.str();
 	auto* Options = OptionsString.c_str();
 	char ErrorBuffer[1024] = { 0 };
 	auto Handle = PopH264_CreateDecoder(Options,ErrorBuffer,std::size(ErrorBuffer));
 
-	int FirstFrameNumber = 9999;
-	auto Result = PopH264_PushData( Handle, TestData.GetArray(), TestData.GetDataSize(), FirstFrameNumber );
-	if ( Result < 0 )
-		throw std::runtime_error("DecoderTest: PushData error");
-	
-	//	gr: did we need to push twice to catch a bug in broadway?
-	//PopH264_PushData(Handle, TestData, TestDataSize, 0);
-	
-	//	flush
-	//	gr: frame number shouldn't matter here? clarify the API
-	PopH264_PushData(Handle, nullptr, 0, 0);
-//	PopH264_PushData(Handle, nullptr, 0, 0);
-	
-	//	wait for it to decode
-	for ( auto i=0;	i<100;	i++ )
+	int FirstFrameNumber = 9999 - 100;
+	for (auto Iteration = 0; Iteration < DataRepeat; Iteration++)
 	{
-		char MetaJson[1000];
-		PopH264_PeekFrame( Handle, MetaJson, std::size(MetaJson) );
-		static uint8_t Plane0[1024 * 1024];
-		static uint8_t Plane1[1024 * 1024];
-		static uint8_t Plane2[1024 * 1024];
-		auto FrameNumber = PopH264_PopFrame(Handle, Plane0, std::size(Plane0), Plane1, std::size(Plane1), Plane2, std::size(Plane2) );
-		std::stringstream Error;
-		Error << "Decoded testdata; " << MetaJson << " FrameNumber=" << FrameNumber << " Should be " << FirstFrameNumber;
-		DebugPrint(Error.str());
-		bool IsValid = FrameNumber >= 0;
-		if ( !IsValid )
+		auto LastIteration = Iteration == (DataRepeat - 1);
+		FirstFrameNumber += 100;
+		auto Result = PopH264_PushData(Handle, TestData.GetArray(), TestData.GetDataSize(), FirstFrameNumber);
+		if (Result < 0)
+			throw std::runtime_error("DecoderTest: PushData error");
+
+		//	gr: did we need to push twice to catch a bug in broadway?
+		//PopH264_PushData(Handle, TestData, TestDataSize, 0);
+
+		//	flush
+		if (LastIteration)
+			PopH264_PushEndOfStream(Handle);
+
+		//	wait for it to decode
+		for (auto i = 0; i < 100; i++)
 		{
-			std::this_thread::sleep_for(std::chrono::milliseconds(500));
-			continue;
+			char MetaJson[1000];
+			PopH264_PeekFrame(Handle, MetaJson, std::size(MetaJson));
+			static uint8_t Plane0[1024 * 1024];
+			static uint8_t Plane1[1024 * 1024];
+			static uint8_t Plane2[1024 * 1024];
+			auto FrameNumber = PopH264_PopFrame(Handle, Plane0, std::size(Plane0), Plane1, std::size(Plane1), Plane2, std::size(Plane2));
+			std::stringstream Error;
+			Error << "Decoded testdata; " << MetaJson << " FrameNumber=" << FrameNumber << " Should be " << FirstFrameNumber;
+			DebugPrint(Error.str());
+			bool IsValid = FrameNumber >= 0;
+			if (!IsValid)
+			{
+				std::this_thread::sleep_for(std::chrono::milliseconds(500));
+				continue;
+			}
+
+			if (FrameNumber != FirstFrameNumber)
+				throw std::runtime_error("Wrong frame number from decoder");
+
+			if (Compare)
+				Compare(MetaJson, Plane0, Plane1, Plane2);
+			break;
 		}
-		
-		if ( FrameNumber != FirstFrameNumber )
-			throw std::runtime_error("Wrong frame number from decoder");
-		
-		if ( Compare )
-			Compare( MetaJson, Plane0, Plane1, Plane2 );
-		break;
 	}
-	
+
 	PopH264_DestroyInstance(Handle);
 }
 
@@ -312,6 +316,11 @@ void android_main(struct android_app* state)
 
 int main()
 {
+	/* heavy duty test to find leaks
+	for ( auto d=0;	d<10;	d++)
+		DecoderTest("RainbowGradient.h264", nullptr, nullptr, 500);
+	return 0;
+	*/
 	std::cout << "main" << std::endl;
 	
 #if defined(TARGET_ANDROID)
@@ -328,7 +337,6 @@ int main()
 	//PopH264_UnitTests();
 	
 	//	depth data has iframe, pps, sps order
-	SafeDecoderTest("TestData/Depth.h264", nullptr, nullptr );
 	SafeDecoderTest("TestData/Depth.h264", nullptr, "Broadway" );
 	SafeDecoderTest("RainbowGradient.h264", CompareRainbow, "Broadway" );
 	SafeDecoderTest("RainbowGradient.h264", CompareRainbow, nullptr );
