@@ -36,6 +36,7 @@ jobs:
         with:
           os: ${{ matrix.config.os }}
           project: ${{ env.project }}
+          flag: ${{ matrix.config.flag }}
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
