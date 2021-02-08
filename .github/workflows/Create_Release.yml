@@ -36,7 +36,7 @@ jobs:
           #   type: linux
           #   architecture: arm64
 
-          - os: windows
+          - os: windows-latest
             type: x64
 
           - os: macOS
