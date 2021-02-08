@@ -46,7 +46,7 @@ jobs:
         project-folder: 'Unity/PopH264'
 
     - name: Upload Artifacts
-      uses: actions/upload-artifacts@v2
+      uses: actions/upload-artifact@v2
       with:
         name: 'PopH264.unitypackage'
         path: 'PopH264.unitypackage'
