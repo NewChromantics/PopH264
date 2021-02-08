@@ -28,3 +28,10 @@ jobs:
         # would be nice to extract this from visual studio
         BuildDirectory: Build\Release_x6
         project: ${{ env.project }}
+
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        # tsdk: these env vars are set in each of the actions
+        name: ${{ env.UPLOAD_NAME }}
+        path: ${{ env.UPLOAD_DIR }}
