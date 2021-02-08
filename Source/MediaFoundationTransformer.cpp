@@ -878,7 +878,7 @@ MediaFoundation::TTransformer::TTransformer(TransformerCategory::Type Category, 
 	//	activate a transformer
 	{
 		auto* Activate = Transform.mActivate.mObject;
-		auto Result = Activate->ActivateObject(IID_PPV_ARGS(&mTransformer));
+		auto Result = Activate->ActivateObject(IID_PPV_ARGS(&mTransformer.mObject));
 		IsOkay(Result, "Activate transform");
 	}
 
@@ -1115,7 +1115,9 @@ void MediaFoundation::TTransformer::SetInputFormat(IMFMediaType& MediaType)
 
 MediaFoundation::TTransformer::~TTransformer()
 {
-	
+	std::Debug << __PRETTY_FUNCTION__ << std::endl;
+	mTransformer.Release();
+	mOutputMediaType.Release();
 }
 
 

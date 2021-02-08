@@ -85,7 +85,7 @@ private:
 	void			LockTransformer(std::function<void()> Run);
 
 public:
-	IMFTransform*	mTransformer = nullptr;
+	Soy::AutoReleasePtr<IMFTransform>	mTransformer;
 private:
 	DWORD			mInputStreamId = 0;
 	DWORD			mOutputStreamId = 0;
