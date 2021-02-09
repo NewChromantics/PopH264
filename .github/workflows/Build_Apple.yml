@@ -21,3 +21,10 @@ jobs:
         with:
           BuildScheme: ${{ env.project }}_Universal
           project: ${{ env.project }}
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          # tsdk: these env vars are set in each of the actions
+          name: ${{ env.UPLOAD_NAME }}
+          path: ${{ env.UPLOAD_DIR }}

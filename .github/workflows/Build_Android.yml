@@ -28,3 +28,10 @@ jobs:
       with:
         buildtargetname: "PopH264"
         buildpath: "PopH264.Android/PopH264TestApp"
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        # tsdk: these env vars are set in each of the actions
+        name: ${{ env.UPLOAD_NAME }}
+        path: ${{ env.UPLOAD_DIR }}
