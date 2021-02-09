@@ -32,7 +32,7 @@ jobs:
         with:
           submodules: "recursive"
       - name: Linux
-        uses: NewChromantics/PopAction_BuildLinux@test
+        uses: NewChromantics/PopAction_BuildLinux@v1
         with:
           os: ${{ matrix.config.os }}
           project: ${{ env.project }}
