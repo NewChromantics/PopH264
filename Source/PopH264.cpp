@@ -39,7 +39,8 @@ namespace PopH264
 	//	1.3.25	Android wasn't handling COLOR_FormatYUV420SemiPlanar from some devices (samsung s7), is now
 	//	1.3.26	Fixed android erroring with mis-aligned/padded buffers. 
 	//	1.3.27	Android now outputting ImageRect (cropping rect) meta
-	const Soy::TVersion	Version(1,3,27);
+	//	1.3.28	Fixed various MediaFoundation memory leaks
+	const Soy::TVersion	Version(1,3,28);
 }
 
 
