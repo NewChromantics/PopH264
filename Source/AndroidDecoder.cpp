@@ -578,7 +578,7 @@ void Android::TDecoder::CreateCodec()
 		std::stringstream Error;
 		if ( !detail )
 			detail = "<null>";
-		Error "Async Error( " << GetStatusString(error) << ", actionCode=" << actionCode << ", detail=" << detail << ")";
+		Error << "Async Error( " << GetStatusString(error) << ", actionCode=" << actionCode << ", detail=" << detail << ")";
 		std::Debug << Error.str() << std::endl;
 		if ( userdata )
 		{

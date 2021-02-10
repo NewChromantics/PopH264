@@ -27,6 +27,11 @@ void PopH264::TDecoder::OnFrameError(const std::string& Error,FrameNumber_t Fram
 	mOnFrameError( Error, &FrameNumber );
 }
 
+void PopH264::TDecoder::OnDecoderError(const std::string& Error)
+{
+	mOnFrameError( Error, nullptr );
+}
+
 
 void PopH264::TDecoder::OnDecodedEndOfStream()
 {
