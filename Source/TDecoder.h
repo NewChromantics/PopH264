@@ -65,7 +65,7 @@ public:
 	void			PushEndOfStream();
 	
 protected:
-	void			OnError(const std::string& Error);		//	as this isn't frame-specific, we're assuming it's fatal
+	void			OnDecoderError(const std::string& Error);		//	as this isn't frame-specific, we're assuming it's fatal
 	void			OnFrameError(const std::string& Error,FrameNumber_t Frame);
 	void			OnDecodedFrame(const SoyPixelsImpl& Pixels,FrameNumber_t FrameNumber);
 	void			OnDecodedFrame(const SoyPixelsImpl& Pixels,FrameNumber_t FrameNumber,const json11::Json& Meta);	
