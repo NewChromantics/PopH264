@@ -47,8 +47,8 @@ void H264SwDecMemset(void *ptr, i32 value, u32 count)
 }
 */
 
-Broadway::TDecoder::TDecoder(PopH264::TDecoderParams Params,PopH264::OnDecodedFrame_t OnDecodedFrame,PopH264::OnError_t OnError) :
-	PopH264::TDecoder	( OnDecodedFrame, OnError ),
+Broadway::TDecoder::TDecoder(PopH264::TDecoderParams Params,PopH264::OnDecodedFrame_t OnDecodedFrame,PopH264::OnFrameError_t OnFrameError) :
+	PopH264::TDecoder	( OnDecodedFrame, OnFrameError ),
 	mParams				( Params )
 {
 	auto disableOutputReordering = false;

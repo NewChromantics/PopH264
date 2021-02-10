@@ -131,7 +131,7 @@ PopH264::TDecoderInstance::TDecoderInstance(json11::Json& Options)
 	{
 		try
 		{
-			mDecoder.reset(new Android::TDecoder(Params,OnFrameDecoded));
+			mDecoder.reset(new Android::TDecoder(Params,OnFrameDecoded,OnError));
 			return;
 		}
 		catch (std::exception& e)
@@ -168,7 +168,7 @@ PopH264::TDecoderInstance::TDecoderInstance(json11::Json& Options)
 	{
 		try
 		{
-			mDecoder.reset(new MagicLeap::TDecoder(Mode,OnFrameDecoded));
+			mDecoder.reset(new MagicLeap::TDecoder(Mode,OnFrameDecoded,OnError));
 			return;
 		}
 		catch (std::exception& e)
@@ -185,7 +185,7 @@ PopH264::TDecoderInstance::TDecoderInstance(json11::Json& Options)
 	{
 		try
 		{
-			mDecoder.reset(new MediaFoundation::TDecoder(Params,OnFrameDecoded));
+			mDecoder.reset(new MediaFoundation::TDecoder(Params,OnFrameDecoded,OnError));
 			return;
 		}
 		catch (std::exception& e)
@@ -201,7 +201,7 @@ PopH264::TDecoderInstance::TDecoderInstance(json11::Json& Options)
 	{
 		try
 		{
-			mDecoder.reset(new IntelMedia::TDecoder(OnFrameDecoded));
+			mDecoder.reset(new IntelMedia::TDecoder(OnFrameDecoded,OnError));
 			return;
 		}
 		catch (std::exception& e)

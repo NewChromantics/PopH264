@@ -437,8 +437,8 @@ void Avf::TDecompressor::Flush()
 
 
 	
-Avf::TDecoder::TDecoder(PopH264::OnDecodedFrame_t OnDecodedFrame,PopH264::OnError_t OnError) :
-	PopH264::TDecoder	( OnDecodedFrame, OnError )
+Avf::TDecoder::TDecoder(PopH264::OnDecodedFrame_t OnDecodedFrame,PopH264::OnFrameError_t OnFrameError) :
+	PopH264::TDecoder	( OnDecodedFrame, OnFrameError )
 {
 }
 

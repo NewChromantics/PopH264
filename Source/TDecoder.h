@@ -24,7 +24,7 @@ namespace PopH264
 	//	just shorthand names for cleaner constructors
 	typedef std::function<void(const SoyPixelsImpl&,FrameNumber_t,const ::json11::Json&)> OnDecodedFrame_t;
 	//	null frame number if not specific to a frame (ie. fatal decoder error)
-	typedef std::function<void(const std::string&,FrameNumber_t*)> OnError_t;
+	typedef std::function<void(const std::string&,FrameNumber_t*)> OnFrameError_t;
 }
 
 
@@ -57,7 +57,7 @@ public:
 class PopH264::TDecoder
 {
 public:
-	TDecoder(OnDecodedFrame_t OnDecodedFrame,OnError_t OnError);
+	TDecoder(OnDecodedFrame_t OnDecodedFrame,OnFrameError_t OnFrameError);
 	
 	void			Decode(ArrayBridge<uint8_t>&& PacketData,FrameNumber_t FrameNumber);
 
@@ -84,5 +84,5 @@ private:
 	bool					mPendingDataFinished = false;	//	when we know we're at EOS
 	
 	OnDecodedFrame_t	mOnDecodedFrame;
-	OnError_t			mOnError;
+	OnFrameError_t		mOnFrameError;
 };

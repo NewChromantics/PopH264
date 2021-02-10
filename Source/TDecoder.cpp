@@ -3,9 +3,9 @@
 #include "json11.hpp"
 
 
-PopH264::TDecoder::TDecoder(PopH264::OnDecodedFrame_t OnDecodedFrame,PopH264::OnError_t OnError) :
+PopH264::TDecoder::TDecoder(PopH264::OnDecodedFrame_t OnDecodedFrame,PopH264::OnFrameError_t OnFrameError) :
 	mOnDecodedFrame	( OnDecodedFrame ),
-	mOnError		( OnError )
+	mOnFrameError	( OnFrameError )
 {
 }
 
@@ -24,7 +24,7 @@ void PopH264::TDecoder::OnDecodedFrame(const SoyPixelsImpl& Pixels,FrameNumber_t
 
 void PopH264::TDecoder::OnFrameError(const std::string& Error,FrameNumber_t FrameNumber)
 {
-	mOnError( Error, &FrameNumber );
+	mOnFrameError( Error, &FrameNumber );
 }
 
 

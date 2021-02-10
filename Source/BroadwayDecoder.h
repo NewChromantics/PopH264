@@ -31,7 +31,7 @@ public:
 	static inline const char*	Name = "Broadway";
 
 public:
-	TDecoder(PopH264::TDecoderParams Params,PopH264::OnDecodedFrame_t OnDecodedFrame,PopH264::OnError_t OnError);
+	TDecoder(PopH264::TDecoderParams Params,PopH264::OnDecodedFrame_t OnDecodedFrame,PopH264::OnFrameError_t OnFrameError);
 	~TDecoder();
 
 private:

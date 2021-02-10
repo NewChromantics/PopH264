@@ -28,7 +28,7 @@ class Avf::TDecoder : public PopH264::TDecoder
 public:
 	static inline const char*	Name = "Avf";
 public:
-	TDecoder(PopH264::OnDecodedFrame_t OnDecodedFrame,PopH264::OnError_t OnError);
+	TDecoder(PopH264::OnDecodedFrame_t OnDecodedFrame,PopH264::OnFrameError_t OnFrameError);
 	~TDecoder();
 	
 private:

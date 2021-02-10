@@ -26,8 +26,8 @@ namespace MediaFoundation
 }
 
 
-MediaFoundation::TDecoder::TDecoder(PopH264::TDecoderParams& Params,PopH264::OnDecodedFrame_t OnDecodedFrame,PopH264::OnError_t OnError) :
-	PopH264::TDecoder	( OnDecodedFrame, OnError ),
+MediaFoundation::TDecoder::TDecoder(PopH264::TDecoderParams& Params,PopH264::OnDecodedFrame_t OnDecodedFrame,PopH264::OnFrameError_t OnFrameError) :
+	PopH264::TDecoder	( OnDecodedFrame, OnFrameError ),
 	mParams				( Params )
 {
 	Soy::TFourcc InputFourccs[] = { "H264" };
