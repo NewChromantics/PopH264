@@ -103,10 +103,24 @@ PopH264::TDecoderParams::TDecoderParams(json11::Json& Options)
 
 PopH264::TDecoderInstance::TDecoderInstance(json11::Json& Options)
 {
-	auto OnFrameDecoded = [this](const SoyPixelsImpl& Pixels,size_t FrameNumber,const json11::Json& Meta)
+	auto OnFrameDecoded = [this](const SoyPixelsImpl& Pixels,FrameNumber_t FrameNumber,const json11::Json& Meta)
 	{
 		auto& MetaJson = Meta.object_items();
 		this->PushFrame( Pixels, FrameNumber, MetaJson );
+	};
+	
+	auto OnError = [this](const std::string& Error,FrameNumber_t* FrameNumber)
+	{
+		//	No frame, so assuming fatal error
+		if ( !FrameNumber )
+		{
+			OnFatalError(Error);
+			return;
+		}
+		else
+		{
+			PushErrorFrame( Error, *FrameNumber );
+		}
 	};
 	
 	TDecoderParams Params(Options);
@@ -137,7 +151,7 @@ PopH264::TDecoderInstance::TDecoderInstance(json11::Json& Options)
 	{
 		try
 		{
-			mDecoder.reset(new Avf::TDecoder(OnFrameDecoded));
+			mDecoder.reset(new Avf::TDecoder(OnFrameDecoded,OnError));
 			return;
 		}
 		catch (std::exception& e)
@@ -203,7 +217,7 @@ PopH264::TDecoderInstance::TDecoderInstance(json11::Json& Options)
 #if defined(ENABLE_BROADWAY)
 	if ( AnyDecoder || Params.mDecoderName == Broadway::TDecoder::Name)
 	{
-		mDecoder.reset( new Broadway::TDecoder( Params, OnFrameDecoded ) );
+		mDecoder.reset( new Broadway::TDecoder( Params, OnFrameDecoded, OnError ) );
 		return;
 	}
 #endif
@@ -331,6 +345,24 @@ PopH264::TDecoderFrameMeta PopH264::TDecoderInstance::GetMeta()
 	}
 	return Meta;
 }
+
+void PopH264::TDecoderInstance::PushErrorFrame(const std::string& Error,PopH264::FrameNumber_t FrameNumber)
+{
+	//	invalid pixels
+	SoyPixels Pixels;
+	
+	//	maybe this should be a warning
+	json11::Json::object Meta;
+	Meta["Error"] = Error;
+	
+	PushFrame( Pixels, FrameNumber, Meta );
+}
+
+void PopH264::TDecoderInstance::OnFatalError(const std::string& Error)
+{
+	//	gr: 
+}
+
 
 void PopH264::TDecoderInstance::PushFrame(const SoyPixelsImpl& Frame,PopH264::FrameNumber_t FrameNumber,const json11::Json::object& Meta)
 {

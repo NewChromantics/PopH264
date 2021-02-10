@@ -26,8 +26,8 @@ namespace MediaFoundation
 }
 
 
-MediaFoundation::TDecoder::TDecoder(PopH264::TDecoderParams& Params,std::function<void(const SoyPixelsImpl&, size_t,const json11::Json&)> OnDecodedFrame) :
-	PopH264::TDecoder	( OnDecodedFrame ),
+MediaFoundation::TDecoder::TDecoder(PopH264::TDecoderParams& Params,PopH264::OnDecodedFrame_t OnDecodedFrame,PopH264::OnError_t OnError) :
+	PopH264::TDecoder	( OnDecodedFrame, OnError ),
 	mParams				( Params )
 {
 	Soy::TFourcc InputFourccs[] = { "H264" };

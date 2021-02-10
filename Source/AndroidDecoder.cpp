@@ -408,8 +408,8 @@ std::string MagicLeap::GetCodec(int32_t Mode,bool& HardwareSurface)
 */
 
 
-Android::TDecoder::TDecoder(PopH264::TDecoderParams Params,std::function<void(const SoyPixelsImpl&,size_t,const json11::Json&)> OnDecodedFrame) :
-	PopH264::TDecoder	( OnDecodedFrame ),
+Android::TDecoder::TDecoder(PopH264::TDecoderParams Params,PopH264::OnDecodedFrame_t OnDecodedFrame,PopH264::OnError_t OnError) :
+	PopH264::TDecoder	( OnDecodedFrame, OnError ),
 	mParams				( Params ),
 	mInputThread		( std::bind(&TDecoder::GetNextInputData, this, std::placeholders::_1, std::placeholders::_2 ), std::bind(&TDecoder::HasPendingData, this ) ),
 	mOutputThread		( std::bind(&TDecoder::OnDecodedFrame, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3 ) )

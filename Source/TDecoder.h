@@ -7,6 +7,12 @@
 
 class SoyPixelsImpl;
 
+
+namespace json11
+{
+	class Json;
+}
+
 namespace PopH264
 {
 	class TDecoder;
@@ -14,12 +20,13 @@ namespace PopH264
 
 	class TInputNaluPacket;
 	typedef uint32_t FrameNumber_t;
+	
+	//	just shorthand names for cleaner constructors
+	typedef std::function<void(const SoyPixelsImpl&,FrameNumber_t,const ::json11::Json&)> OnDecodedFrame_t;
+	//	null frame number if not specific to a frame (ie. fatal decoder error)
+	typedef std::function<void(const std::string&,FrameNumber_t*)> OnError_t;
 }
 
-namespace json11
-{
-	class Json;
-}
 
 class PopH264::TInputNaluPacket
 {
@@ -50,7 +57,7 @@ public:
 class PopH264::TDecoder
 {
 public:
-	TDecoder(std::function<void(const SoyPixelsImpl&,FrameNumber_t,const json11::Json&)> OnDecodedFrame);
+	TDecoder(OnDecodedFrame_t OnDecodedFrame,OnError_t OnError);
 	
 	void			Decode(ArrayBridge<uint8_t>&& PacketData,FrameNumber_t FrameNumber);
 
@@ -58,6 +65,8 @@ public:
 	void			PushEndOfStream();
 	
 protected:
+	void			OnError(const std::string& Error);		//	as this isn't frame-specific, we're assuming it's fatal
+	void			OnFrameError(const std::string& Error,FrameNumber_t Frame);
 	void			OnDecodedFrame(const SoyPixelsImpl& Pixels,FrameNumber_t FrameNumber);
 	void			OnDecodedFrame(const SoyPixelsImpl& Pixels,FrameNumber_t FrameNumber,const json11::Json& Meta);	
 	void			OnDecodedEndOfStream();
@@ -74,5 +83,6 @@ private:
 	Array<std::shared_ptr<TInputNaluPacket>>	mPendingDatas;
 	bool					mPendingDataFinished = false;	//	when we know we're at EOS
 	
-	std::function<void(const SoyPixelsImpl&,FrameNumber_t,const json11::Json&)>	mOnDecodedFrame;
+	OnDecodedFrame_t	mOnDecodedFrame;
+	OnError_t			mOnError;
 };

@@ -101,6 +101,8 @@ public static class PopH264
 		public List<PlaneMeta>	Planes;
 		public int				PlaneCount { get { return Planes!=null ? Planes.Count : 0; } }
 
+		public string			Error;
+
 		public bool				EndOfStream;
 		public int 				FrameNumber;
 		public int				FramesQueued;	//	number of subsequent frames already decoded and buffered up
@@ -382,6 +384,12 @@ public static class PopH264
 			//Debug.Log("PopH264 frame meta: " + Json);
 			var Meta = JsonUtility.FromJson<FrameMeta>(Json);
 			var PlaneCount = Meta.PlaneCount;
+
+			//	an error has been reported
+			//	gr: if there is no frame, we can assume it's a fatal error. but that is currently ambiguious against frame0 specific error
+			//	update this handling based on user feedback!
+			if ( !String.IsNullOrEmpty(Meta.Error) )
+				throw new System.Exception("PopH264 decode error: "+Meta.Error);
 
 			if (Meta.EndOfStream)
 				HadEndOfStream = true;
