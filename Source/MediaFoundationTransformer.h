@@ -18,6 +18,7 @@ class IMFAttributes;
 namespace MediaFoundation
 {
 	class TTransformer;
+	class TActivateMeta;
 
 	namespace TransformerCategory
 	{
@@ -47,6 +48,21 @@ std::ostream&	operator<<(std::ostream &out, const PROPVARIANT& in);
 
 class IMFTransform;
 class IMFMediaType;
+
+class MediaFoundation::TActivateMeta
+{
+public:
+	TActivateMeta() {}
+	TActivateMeta(IMFActivate& Activate);
+
+public:
+	std::string						mName;
+	bool							mHardwareAccelerated = false;
+	BufferArray<Soy::TFourcc, 20>	mInputs;
+	BufferArray<Soy::TFourcc, 20>	mOutputs;
+	Soy::AutoReleasePtr<IMFActivate>	mActivate;
+};
+
 
 class MediaFoundation::TTransformer
 {
@@ -97,5 +113,5 @@ private:
 	bool			mVerboseDebug = false;
 
 public:
-	Array<Soy::TFourcc>	mSupportedInputFormats;
+	TActivateMeta		mActivate;		//	gr: this is to store the IMFActivate so we can shutdown, but might be handy for the meta is has already extracted at bootup
 };

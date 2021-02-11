@@ -53,19 +53,6 @@ public:
 	~TContext();
 };
 
-class MediaFoundation::TActivateMeta
-{
-public:
-	TActivateMeta() {}
-	TActivateMeta(IMFActivate& Activate);
-
-public:
-	std::string						mName;
-	bool							mHardwareAccelerated = false;
-	BufferArray<Soy::TFourcc, 20>	mInputs;
-	BufferArray<Soy::TFourcc, 20>	mOutputs;
-	Soy::AutoReleasePtr<IMFActivate>	mActivate;
-};
 
 
 class MediaFoundation::TActivateList
@@ -873,7 +860,7 @@ MediaFoundation::TTransformer::TTransformer(TransformerCategory::Type Category, 
 	auto Transform = GetBestTransform(CategoryGuid, InputFormats, OutputFormats);
 	std::Debug << "Picked Transform " << Transform.mName << std::endl;
 
-	mSupportedInputFormats = Transform.mInputs;
+	mActivate = Transform;
 
 	//	activate a transformer
 	{
@@ -1120,6 +1107,14 @@ MediaFoundation::TTransformer::~TTransformer()
 	{
 		try
 		{
+			/*
+			auto FlushInputResult = mTransformer->FlushInputStream(0);
+			if (FlushInputResult != E_NOTIMPL)
+				IsOkay(FlushInputResult, "FlushInputStream");
+			auto FlushOutputResult = mTransformer->FlushOutputStream(0);
+			if (FlushOutputResult != E_NOTIMPL)
+				IsOkay(FlushOutputResult, "FlushOutputStream");
+			*/
 			//	gr: none of this is releasing memory
 			ProcessCommand(MFT_MESSAGE_COMMAND_FLUSH);
 			ProcessCommand(MFT_MESSAGE_COMMAND_DRAIN);
@@ -1153,8 +1148,19 @@ MediaFoundation::TTransformer::~TTransformer()
 			std::Debug << e.what() << std::endl;
 		}
 	}
+
+	try
+	{
+		auto Result = mActivate.mActivate->ShutdownObject();
+		IsOkay(Result, "~Transformer's activate shutdownobject()");
+	}
+	catch (std::exception& e)
+	{
+		std::Debug << e.what() << std::endl;
+	}
 	mTransformer.Release();
 	mOutputMediaType.Release();
+	mActivate.mActivate.Release();
 }
 
 

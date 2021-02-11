@@ -169,7 +169,7 @@ void MediaFoundation::TEncoder::SetInputFormat(SoyPixelsMeta PixelsMeta)
 
 	//	gr: check against supported formats, as error later could be vague
 	{
-		auto& SupportedFormats = mTransformer->mSupportedInputFormats;
+		auto& SupportedFormats = mTransformer->mActivate.mInputs;// mSupportedInputFormats;
 		if (!SupportedFormats.Find(InputFormat))
 		{
 			std::stringstream Error;
@@ -294,7 +294,8 @@ SoyPixelsFormat::Type MediaFoundation::TEncoder::GetInputFormat(SoyPixelsFormat:
 	{
 		auto Fourcc = MediaFoundation::GetFourcc(Format);
 		//	is it in the supported list?
-		if (Transformer.mSupportedInputFormats.Find(Fourcc))
+		auto& SupportedInputFormats = Transformer.mActivate.mInputs;
+		if (SupportedInputFormats.Find(Fourcc))
 			return Format;
 	}
 	catch (std::exception& e)
@@ -303,12 +304,12 @@ SoyPixelsFormat::Type MediaFoundation::TEncoder::GetInputFormat(SoyPixelsFormat:
 	}
 
 	//	convert to the first supported format (assuming first is best)
-	auto& SupportedFormats = Transformer.mSupportedInputFormats;
+	auto& SupportedFormats = Transformer.mActivate.mInputs;
 	for (auto i = 0; i < SupportedFormats.GetSize(); i++)
 	{
 		try
 		{
-			auto NewFourcc = Transformer.mSupportedInputFormats[i];
+			auto NewFourcc = SupportedFormats[i];
 			auto NewFormat = MediaFoundation::GetPixelFormat(NewFourcc);
 			return NewFormat;
 		}
