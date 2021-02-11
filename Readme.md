@@ -7,6 +7,37 @@ Build Status
 ![Build Android](https://github.com/NewChromantics/PopH264/workflows/Build%20Android/badge.svg)
 ![Create Release](https://github.com/NewChromantics/PopH264/workflows/Create%20Release/badge.svg)
 
+About
+============================
+PopH264 was created to provide simple & consistent access to low level/native H264 decoders and encoders across various platforms, for use in C-API apps (eg. PopEngine), and Unity. It is certainly not limited to these engines, but that is the bulk of the use.
+
+It is designed to be incredibly simple; does absolutely no syncronisation, no CPU heavy conversions (it specifically tries to use native paths which avoid ANY conversion) with the idea that the caller will implement this on GPU on demand instead, and intends to be purely data-in-data-out.
+It internally uses threads where we NEED to, but we try and avoid this, so Push-frame and Pop-frame functions are supposed to be synchronous (although the Pop-frame functions essentially just remove already-buffered data). Again, the intention is for the user to thread these for their own needs.
+
+It is also designed to expose all possible options (encoding and decoding) for obscure edge cases, and expose as much meta information as possible (including timestamps for various parts of encoding/decoding for profiling)
+
+History
+--------------------
+The project is basically a re-write of PopMovieTexture https://gitlab.com/NewChromantics/PopMovieTexture / http://popmovie.xyz which was a Unity plugin/lib which tried to decode Mp4s, handle audio streams, blit to RGB textures etc. 
+Since Unity implemented their own video player the need for a simple video player was wiped out. Whilst not perfect, it does handle 99% of use cases.
+
+PopH264 still has a niche to fill where users need very precise synchronisation, or access to raw YUV planes, custom YUV colour matrix implementation etc.
+
+Containers
+----------------
+PopH264 does not implement any extractors, neither the native ones (which vary in support from platform to platform), nor custom implementations. Because containers are usually so simple, yet vary so wildly with implementations, it became much more apparent a high-level (c#) decode was much more useful for debugging, workarounds with odd formats etc, when the H264 streams stayed the same.
+
+We have an MP4 decoder implementation here, https://github.com/NewChromantics/PopCodecs but you can implement your own, use libav/ffmpeg, use custom streams, etc etc. Many people use PopH264 with their own minimal container for low overheads, or simplicity.
+
+Future
+----------------
+Whilst the project is called PopH264, there is actually very little restriction in use of purely H264. The NALU splitting and specific handling of SPS/PPS is really the only restriction, (as well as the generic Broadway fallback).
+There is little holding back PopH264 from handling VP9, HEVC/H265 etc, but there isn't currently the demand, and H264 is still by far the most widely supported format.
+
+The other benefit of being specific to H264, is that the project does intend to extract other meta (Macroblock information, motion vectors) cross platform.
+
+PopH264 is unlikely to handle Audio.
+
 
 API Documentation
 =========================
