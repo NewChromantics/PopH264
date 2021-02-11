@@ -1158,6 +1158,14 @@ MediaFoundation::TTransformer::~TTransformer()
 	{
 		std::Debug << e.what() << std::endl;
 	}
+
+	//	hopefully these are 1 or less
+	auto TransformerRefCount = mTransformer.GetReferenceCount();
+	auto ActivateRefCount = mActivate.mActivate.GetReferenceCount();
+	std::Debug << __PRETTY_FUNCTION__ << " TransformerRefCount=" << TransformerRefCount << " ActivateRefCount=" << ActivateRefCount << std::endl;
+
+	
+	//	these should be redundant but helpful in case they crash
 	mTransformer.Release();
 	mOutputMediaType.Release();
 	mActivate.mActivate.Release();
