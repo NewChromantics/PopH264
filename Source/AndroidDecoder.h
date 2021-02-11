@@ -62,7 +62,7 @@ public:
 class Android::TOutputThread : public SoyWorkerThread
 {
 public:
-	TOutputThread(std::function<void(const SoyPixelsImpl& Pixels,size_t FrameNumber,const json11::Json&)> OnDecodedFrame);
+	TOutputThread(PopH264::OnDecodedFrame_t OnDecodedFrame,PopH264::OnFrameError_t OnFrameError);
 
 	virtual bool	Iteration() override;
 	virtual bool	CanSleep() override;
@@ -83,10 +83,12 @@ private:
 	void			ReleaseOutputTexture(MLHandle TextureHandle);
 	bool			IsAnyOutputTextureReady();
 	*/
-	void			PushFrame(const SoyPixelsImpl& Pixels,size_t FrameNumber,const json11::Json& Meta);
+	void			PushFrame(const SoyPixelsImpl& Pixels,PopH264::FrameNumber_t FrameNumber,const json11::Json& Meta);
+	void			OnFrameError(const std::string& Error,PopH264::FrameNumber_t FrameNumber);
 
 private:
-	std::function<void(const SoyPixelsImpl& Pixels,size_t FrameNumber,const json11::Json&)>	mOnDecodedFrame;
+	PopH264::OnDecodedFrame_t	mOnDecodedFrame;
+	PopH264::OnFrameError_t		mOnFrameError;
 
 	//	list of buffers with some pending output data
 	std::mutex					mOutputBuffersLock;
@@ -145,12 +147,11 @@ class Android::TDecoder : public PopH264::TDecoder
 public:
 	static inline const char*	Name = "Android";
 public:
-	TDecoder(PopH264::TDecoderParams Params,std::function<void(const SoyPixelsImpl&,size_t,const json11::Json&)> OnDecodedFrame);
+	TDecoder(PopH264::TDecoderParams Params,PopH264::OnDecodedFrame_t OnDecodedFrame,PopH264::OnFrameError_t OnFrameError);
 	~TDecoder();
 
 private:
 	virtual bool	DecodeNextPacket() override;	//	returns true if more data to proccess
-	void			OnDecodedFrame(const SoyPixelsImpl& Pixels,size_t FrameNumber,const json11::Json&);
 	
 	void			OnInputBufferAvailible(int64_t BufferIndex);
 	void			OnOutputBufferAvailible(int64_t BufferIndex,const MediaBufferInfo_t& BufferMeta);

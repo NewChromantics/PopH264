@@ -28,7 +28,7 @@
 class Avf::TDecompressor
 {
 public:
-	TDecompressor(const ArrayBridge<uint8_t>& Sps,const ArrayBridge<uint8_t>& Pps,std::function<void(std::shared_ptr<TPixelBuffer>,SoyTime)> OnFrame);
+	TDecompressor(const ArrayBridge<uint8_t>& Sps,const ArrayBridge<uint8_t>& Pps,std::function<void(std::shared_ptr<TPixelBuffer>,PopH264::FrameNumber_t)> OnFrame,std::function<void(const std::string&,PopH264::FrameNumber_t)> OnError);
 	~TDecompressor();
 	
 	void								Decode(ArrayBridge<uint8_t>&& Nalu,size_t FrameNumber);
@@ -41,7 +41,8 @@ public:
 	std::shared_ptr<AvfDecoderRenderer>	mDecoderRenderer;
 	CFPtr<VTDecompressionSessionRef>	mSession;
 	CFPtr<CMFormatDescriptionRef>		mInputFormat;
-	std::function<void(std::shared_ptr<TPixelBuffer>,SoyTime)>	mOnFrame;
+	std::function<void(std::shared_ptr<TPixelBuffer>,PopH264::FrameNumber_t)>		mOnFrame;
+	std::function<void(const std::string&,PopH264::FrameNumber_t)>	mOnError;
 };
 
 
@@ -74,9 +75,10 @@ SoyPixelsMeta GetFormatDescriptionPixelMeta(CMFormatDescriptionRef Format)
 }
 
 
-Avf::TDecompressor::TDecompressor(const ArrayBridge<uint8_t>& Sps,const ArrayBridge<uint8_t>& Pps,std::function<void(std::shared_ptr<TPixelBuffer>,SoyTime)> OnFrame) :
+Avf::TDecompressor::TDecompressor(const ArrayBridge<uint8_t>& Sps,const ArrayBridge<uint8_t>& Pps,std::function<void(std::shared_ptr<TPixelBuffer>,PopH264::FrameNumber_t)> OnFrame,std::function<void(const std::string&,PopH264::FrameNumber_t)> OnError) :
 	mDecoderRenderer	( new AvfDecoderRenderer() ),
-	mOnFrame			( OnFrame )
+	mOnFrame			( OnFrame ),
+	mOnError			( OnError )
 {
 	mInputFormat = Avf::GetFormatDescriptionH264( Sps, Pps, GetFormatNaluPrefixType() );
 		
@@ -194,12 +196,19 @@ void Avf::TDecompressor::OnDecodedFrame(OSStatus Status,CVImageBufferRef ImageBu
 	std::shared_ptr<TPixelBuffer> PixelBuffer( new CVPixelBuffer(ImageBuffer, Retain, mDecoderRenderer, Transform ) );
 	
 	auto Time = Soy::Platform::GetTime(PresentationTimeStamp);
-	mOnFrame( PixelBuffer, Time );
+	PopH264::FrameNumber_t FrameNumber = Time.mTime;
+	mOnFrame( PixelBuffer, FrameNumber );
 }
 
-void Avf::TDecompressor::OnDecodeError(const char* Error,CMTime PresentationTime)
+void Avf::TDecompressor::OnDecodeError(const char* Error,CMTime PresentationTimeStamp)
 {
+	if ( Error == nullptr )
+		Error = "<null>";
 	std::Debug << __PRETTY_FUNCTION__ << Error << std::endl;
+	std::string ErrorStr(Error);
+	auto Time = Soy::Platform::GetTime(PresentationTimeStamp);
+	PopH264::FrameNumber_t FrameNumber = Time.mTime;
+	mOnError( ErrorStr, FrameNumber );
 }
 
 H264::NaluPrefix::Type GetNaluPrefixType(CMFormatDescriptionRef Format)
@@ -428,8 +437,8 @@ void Avf::TDecompressor::Flush()
 
 
 	
-Avf::TDecoder::TDecoder(std::function<void(const SoyPixelsImpl&,size_t,const json11::Json&)> OnDecodedFrame) :
-	PopH264::TDecoder	( OnDecodedFrame )
+Avf::TDecoder::TDecoder(PopH264::OnDecodedFrame_t OnDecodedFrame,PopH264::OnFrameError_t OnFrameError) :
+	PopH264::TDecoder	( OnDecodedFrame, OnFrameError )
 {
 }
 
@@ -438,14 +447,13 @@ Avf::TDecoder::~TDecoder()
 	mDecompressor.reset();
 }
 
-void Avf::TDecoder::OnDecodedFrame(TPixelBuffer& PixelBuffer,SoyTime PresentationTime,const json11::Json& Meta)
+void Avf::TDecoder::OnDecodedFrame(TPixelBuffer& PixelBuffer,PopH264::FrameNumber_t FrameNumber,const json11::Json& Meta)
 {
 	BufferArray<SoyPixelsImpl*,4> Planes;
 	float3x3 Transform;
 	PixelBuffer.Lock( GetArrayBridge(Planes), Transform );
 	try
 	{
-		PopH264::FrameNumber_t FrameNumber = PresentationTime.mTime;
 		if ( Planes.GetSize() == 0 )
 		{
 			throw Soy::AssertException("No planes from pixel buffer");
@@ -477,11 +485,16 @@ void Avf::TDecoder::OnDecodedFrame(TPixelBuffer& PixelBuffer,SoyTime Presentatio
 
 void Avf::TDecoder::AllocDecoder()
 {
-	auto OnPacket = [this](std::shared_ptr<TPixelBuffer> pPixelBuffer,SoyTime PresentationTime)
+	auto OnPacket = [this](std::shared_ptr<TPixelBuffer> pPixelBuffer,PopH264::FrameNumber_t FrameNumber)
 	{
 		//std::Debug << "Decompressed pixel buffer " << PresentationTime << std::endl;
 		json11::Json::object Meta;
-		this->OnDecodedFrame( *pPixelBuffer, PresentationTime, Meta );
+		this->OnDecodedFrame( *pPixelBuffer, FrameNumber, Meta );
+	};
+	
+	auto OnError = [this](const std::string& Error,PopH264::FrameNumber_t FrameNumber)
+	{
+		this->OnFrameError(Error,FrameNumber);
 	};
 
 	if ( mDecompressor )
@@ -494,7 +507,7 @@ void Avf::TDecoder::AllocDecoder()
 	}
 	
 	//	gr: does decompressor need to wait for SPS&PPS?
-	mDecompressor.reset( new TDecompressor( GetArrayBridge(mNaluSps), GetArrayBridge(mNaluPps), OnPacket ) );
+	mDecompressor.reset( new TDecompressor( GetArrayBridge(mNaluSps), GetArrayBridge(mNaluPps), OnPacket, OnError ) );
 }
 
 bool Avf::TDecoder::DecodeNextPacket()

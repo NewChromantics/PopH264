@@ -78,6 +78,10 @@ enum AndroidColourFormat
 };
 
 
+auto InputThreadNotReadySleep = 1000;//12;
+auto InputThreadThrottle = 2;
+auto InputThreadErrorThrottle = 1000;
+auto OutputThreadErrorSleepMs = 500;
 
 
 namespace Android
@@ -408,11 +412,11 @@ std::string MagicLeap::GetCodec(int32_t Mode,bool& HardwareSurface)
 */
 
 
-Android::TDecoder::TDecoder(PopH264::TDecoderParams Params,std::function<void(const SoyPixelsImpl&,size_t,const json11::Json&)> OnDecodedFrame) :
-	PopH264::TDecoder	( OnDecodedFrame ),
+Android::TDecoder::TDecoder(PopH264::TDecoderParams Params,PopH264::OnDecodedFrame_t OnDecodedFrame,PopH264::OnFrameError_t OnFrameError) :
+	PopH264::TDecoder	( OnDecodedFrame, OnFrameError ),
 	mParams				( Params ),
 	mInputThread		( std::bind(&TDecoder::GetNextInputData, this, std::placeholders::_1, std::placeholders::_2 ), std::bind(&TDecoder::HasPendingData, this ) ),
-	mOutputThread		( std::bind(&TDecoder::OnDecodedFrame, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3 ) )
+	mOutputThread		( OnDecodedFrame, OnFrameError )
 {
 /*
 	//	see main thread/same thread comments
@@ -571,10 +575,16 @@ void Android::TDecoder::CreateCodec()
 		int32_t actionCode,
 		const char *detail)
 	{
-		auto& This = *reinterpret_cast<TDecoder*>(userdata);
+		std::stringstream Error;
 		if ( !detail )
 			detail = "<null>";
-		std::Debug << "OnError( " << GetStatusString(error) << ", actionCode=" << actionCode << ", detail=" << detail << ")" << std::endl;
+		Error << "Async Error( " << GetStatusString(error) << ", actionCode=" << actionCode << ", detail=" << detail << ")";
+		std::Debug << Error.str() << std::endl;
+		if ( userdata )
+		{
+			auto& This = *reinterpret_cast<TDecoder*>(userdata);
+			This.OnDecoderError(Error.str());
+		}
 	};
 	AMediaCodecOnAsyncNotifyCallback Callbacks = {0};
 	Callbacks.onAsyncInputAvailable = OnInputAvailible;
@@ -859,11 +869,6 @@ void Android::TDecoder::GetNextInputData(ArrayBridge<uint8_t>&& PacketBuffer,Pop
 	*/
 }
 
-void Android::TDecoder::OnDecodedFrame(const SoyPixelsImpl& Pixels,size_t FrameNumber,const json11::Json& Meta)
-{
-	PopH264::TDecoder::OnDecodedFrame(Pixels,FrameNumber,Meta);
-}
-
 
 void Android::TInputThread::PushInputBuffer(int64_t BufferIndex)
 {
@@ -879,7 +884,7 @@ void Android::TInputThread::PushInputBuffer(int64_t BufferIndex)
 	if ( Buffer == nullptr )
 	{
 		std::stringstream Error;
-		Error << "AMediaCodec_getInputBuffer gave us null buffer (size=" << BufferSize << ")";
+		Error << "AMediaCodec_getInputBuffer null buffer (size=" << BufferSize << ")";
 		throw Soy::AssertException(Error);
 	}
 
@@ -985,9 +990,10 @@ void Android::TDecoder::OnOutputFormatChanged(MediaFormat_t NewFormat)
 
 
 
-Android::TOutputThread::TOutputThread(std::function<void(const SoyPixelsImpl& Pixels,size_t FrameNumber,const json11::Json&)> OnDecodedFrame) :
+Android::TOutputThread::TOutputThread(PopH264::OnDecodedFrame_t OnDecodedFrame,PopH264::OnFrameError_t OnFrameError) :
 	SoyWorkerThread	("AndroidOutputThread", SoyWorkerWaitMode::Wake ),
-	mOnDecodedFrame	( OnDecodedFrame )
+	mOnDecodedFrame	( OnDecodedFrame ),
+	mOnFrameError	( OnFrameError )
 {
 	Start();
 }
@@ -1288,10 +1294,12 @@ void Android::TOutputThread::PopOutputBuffer(const TOutputBufferMeta& BufferMeta
 }
 
 
-void Android::TOutputThread::PushFrame(const SoyPixelsImpl& Pixels,size_t FrameNumber,const json11::Json& Meta)
+void Android::TOutputThread::PushFrame(const SoyPixelsImpl& Pixels,PopH264::FrameNumber_t FrameNumber,const json11::Json& Meta)
 {
 	mOnDecodedFrame( Pixels, FrameNumber, Meta );
 }
+
+
 
 bool Android::TOutputThread::Iteration()
 {
@@ -1335,11 +1343,23 @@ bool Android::TOutputThread::Iteration()
 		}
 		catch(std::exception& e)
 		{
+			bool TryAgain = false;
 			std::Debug << "Exception getting output buffer " << BufferMeta.mBufferIndex << "; " << e.what() << GetDebugState() << std::endl;
-			std::lock_guard<std::mutex> Lock(mOutputBuffersLock);
-			auto& ElementZero = *mOutputBuffers.InsertBlock(0,1);
-			ElementZero = BufferMeta;
-			std::this_thread::sleep_for( std::chrono::seconds(1) );
+			
+			{
+				PopH264::FrameNumber_t FrameTime = BufferMeta.mMeta.presentationTimeUs;
+				std::stringstream Error;
+				Error << "PopOutputBuffer error " << e.what();
+				mOnFrameError( Error.str(), &FrameTime );
+			}
+			
+			if ( TryAgain )
+			{
+				std::lock_guard<std::mutex> Lock(mOutputBuffersLock);
+				auto& ElementZero = *mOutputBuffers.InsertBlock(0,1);
+				ElementZero = BufferMeta;
+			}
+			std::this_thread::sleep_for( std::chrono::milliseconds(OutputThreadErrorSleepMs) );
 		}
 	}
 	
@@ -1355,9 +1375,6 @@ Android::TInputThread::TInputThread(std::function<void(ArrayBridge<uint8_t>&&,Po
 	Start();
 }
 
-auto InputThreadNotReadySleep = 1000;//12;
-auto InputThreadThrottle = 2;
-auto InputThreadErrorThrottle = 1000;
 
 bool Android::TInputThread::Iteration(std::function<void(std::chrono::milliseconds)> Sleep)
 {

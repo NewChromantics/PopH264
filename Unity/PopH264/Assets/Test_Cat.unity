@@ -162,7 +162,13 @@ MonoBehaviour:
       m_Calls: []
   DecodeToVideoTime: 0
   DecoderParams:
-    DecoderName: 
+    Decoder: 
+    VerboseDebug: 0
+    AllowBuffering: 0
+    DoubleDecodeKeyframe: 0
+    DrainOnKeyframe: 0
+    LowPowerMode: 0
+    DropBadFrames: 0
   DecodeOnSeperateThread: 1
   DecodeImagesPerFrame: 1
   DecodeSamplesPerFrame: 1
@@ -284,6 +290,7 @@ MonoBehaviour:
       m_Calls: []
   Filename: cat_baseline.mp4
   EnableOnPacket: 1
+  DebugEntireFileContents: 0
 --- !u!1 &498001949
 GameObject:
   m_ObjectHideFlags: 0
@@ -324,7 +331,13 @@ MonoBehaviour:
       m_Calls: []
   DecodeToVideoTime: 0
   DecoderParams:
-    DecoderName: 
+    Decoder: 
+    VerboseDebug: 0
+    AllowBuffering: 0
+    DoubleDecodeKeyframe: 0
+    DrainOnKeyframe: 0
+    LowPowerMode: 0
+    DropBadFrames: 0
   DecodeOnSeperateThread: 1
   DecodeImagesPerFrame: 1
   DecodeSamplesPerFrame: 1
@@ -541,7 +554,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1611006239
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -562,7 +575,13 @@ MonoBehaviour:
       m_Calls: []
   DecodeToVideoTime: 0
   DecoderParams:
-    DecoderName: 
+    Decoder: 
+    VerboseDebug: 0
+    AllowBuffering: 0
+    DoubleDecodeKeyframe: 0
+    DrainOnKeyframe: 0
+    LowPowerMode: 0
+    DropBadFrames: 0
   DecodeOnSeperateThread: 1
   DecodeImagesPerFrame: 1
   DecodeSamplesPerFrame: 1
@@ -684,6 +703,7 @@ MonoBehaviour:
       m_Calls: []
   Filename: Resources/cat_baseline.mp4.bytes
   EnableOnPacket: 1
+  DebugEntireFileContents: 0
 --- !u!1 &1681251356
 GameObject:
   m_ObjectHideFlags: 0
@@ -954,6 +974,88 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
+--- !u!1 &1791284959
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1791284962}
+  - component: {fileID: 1791284961}
+  - component: {fileID: 1791284960}
+  m_Layer: 0
+  m_Name: Raw h264 decoder
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1791284960
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1791284959}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 26afda202e6394b22a93c01d2c2b9c36, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ThreadedDecoding: 1
+  DecoderParams:
+    Decoder: 
+    VerboseDebug: 1
+    AllowBuffering: 0
+    DoubleDecodeKeyframe: 0
+    DrainOnKeyframe: 0
+    LowPowerMode: 0
+    DropBadFrames: 0
+--- !u!114 &1791284961
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1791284959}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bc5be6511bbc64e559e6694d659d8044, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  OnPacketRecieved:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1791284960}
+        m_MethodName: PushData
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  Filename: mn30_mx3000_rng10_05.PopCap
+  EnableOnPacket: 1
+  DebugEntireFileContents: 0
+--- !u!4 &1791284962
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1791284959}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 6
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1809756286
 GameObject:
   m_ObjectHideFlags: 0

@@ -64,6 +64,8 @@ public:
 	void									PopFrame(int32_t& FrameNumber,ArrayBridge<uint8_t>&& Plane0,ArrayBridge<uint8_t>&& Plane1,ArrayBridge<uint8_t>&& Plane2);
 	__exportfunc bool						PopFrame(TFrame& Frame);
 	void									PushFrame(const SoyPixelsImpl& Frame,PopH264::FrameNumber_t FrameNumber,const json11::Json::object& Meta);
+	void									OnFatalError(const std::string& Error);
+	void									PushErrorFrame(const std::string& Error,FrameNumber_t FrameNumber);
 	TDecoderFrameMeta						GetMeta();
 	
 public:
