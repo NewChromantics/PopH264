@@ -873,6 +873,7 @@ MediaFoundation::TTransformer::TTransformer(TransformerCategory::Type Category, 
 	auto& Transformer = *mTransformer;
 
 	//	debug attribs
+	if ( mVerboseDebug )
 	{
 		Soy::AutoReleasePtr<IMFAttributes> Attributes;
 		auto Result = Transformer.GetAttributes(&Attributes.mObject);
@@ -1468,6 +1469,11 @@ IMFMediaType& MediaFoundation::TTransformer::GetOutputMediaType()
 	
 	json11::Json::object Meta;
 	GetMeta( Meta, *mOutputMediaType.mObject );
+
+	//	add some other meta
+	Meta["Decoder"] = mActivate.mName;
+	Meta["HardwareAccelerated"] = mActivate.mHardwareAccelerated;
+
 	mOutputMediaMetaCache = Meta;
 	
 	return *mOutputMediaType.mObject;

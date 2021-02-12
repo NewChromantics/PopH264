@@ -102,7 +102,8 @@ public static class PopH264
 		public int				PlaneCount { get { return Planes!=null ? Planes.Count : 0; } }
 
 		public string			Error;
-
+		public string			Decoder;				//	internal name of codec (if provided by API/OS)
+		public bool				HardwareAccelerated;	//	are we using a hardware accelerated decoder. DO NOT rely on this information as if not provided cs defaults to false. Currently MediaFoundation only
 		public bool				EndOfStream;
 		public int 				FrameNumber;
 		public int				FramesQueued;	//	number of subsequent frames already decoded and buffered up
