@@ -40,7 +40,8 @@ namespace PopH264
 	//	1.3.26	Fixed android erroring with mis-aligned/padded buffers. 
 	//	1.3.27	Android now outputting ImageRect (cropping rect) meta
 	//	1.3.28	Fixed various MediaFoundation memory leaks
-	const Soy::TVersion	Version(1,3,28);
+	//	1.3.29	Fixed MediaFoundation memory leak. Added Decoder name to meta. Added Unity GetFrameAndMeta interface
+	const Soy::TVersion	Version(1,3,29);
 }
 
 
