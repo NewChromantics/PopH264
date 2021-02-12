@@ -867,6 +867,7 @@ MediaFoundation::TTransformer::TTransformer(TransformerCategory::Type Category, 
 		auto* Activate = Transform.mActivate.mObject;
 		auto Result = Activate->ActivateObject(IID_PPV_ARGS(&mTransformer.mObject));
 		IsOkay(Result, "Activate transform");
+		std::Debug << __PRETTY_FUNCTION__ << "ActivateObject: Transformer refcount now " << mTransformer.GetReferenceCount() << std::endl;
 	}
 
 	auto& Transformer = *mTransformer;
@@ -943,9 +944,11 @@ void MediaFoundation::TTransformer::LockTransformer(std::function<void()> Execut
 
 void MediaFoundation::TTransformer::SetLowLatencyMode(bool Enable)
 {
+	std::Debug << __PRETTY_FUNCTION__ << "start: Transformer refcount now " << mTransformer.GetReferenceCount() << std::endl;
+
 	//	get interface
-	ICodecAPI *mpCodecAPI = nullptr;
-	auto Result = mTransformer->QueryInterface(IID_PPV_ARGS(&mpCodecAPI));
+	Soy::AutoReleasePtr<ICodecAPI> mpCodecAPI;
+	auto Result = mTransformer->QueryInterface(IID_PPV_ARGS(&mpCodecAPI.mObject));
 	IsOkay(Result, "Failed to get CodecAPI interface");
 
 	VARIANT var; 
@@ -957,14 +960,16 @@ void MediaFoundation::TTransformer::SetLowLatencyMode(bool Enable)
 
 	Result = mpCodecAPI->SetValue(&CODECAPI_AVLowLatencyMode, &var);
 	IsOkay(Result, "Setting CODECAPI_AVLowLatencyMode");
+
+	std::Debug << __PRETTY_FUNCTION__ << "end: Transformer refcount now " << mTransformer.GetReferenceCount() << std::endl;
 }
 
 
 void MediaFoundation::TTransformer::SetLowPowerMode(bool Enable)
 {
 	//	get interface
-	ICodecAPI *mpCodecAPI = nullptr;
-	auto Result = mTransformer->QueryInterface(IID_PPV_ARGS(&mpCodecAPI));
+	Soy::AutoReleasePtr<ICodecAPI> mpCodecAPI;
+	auto Result = mTransformer->QueryInterface(IID_PPV_ARGS(&mpCodecAPI.mObject));
 	IsOkay(Result, "Failed to get CodecAPI interface");
 
 	//	0 = battery saving
@@ -981,9 +986,12 @@ void MediaFoundation::TTransformer::SetLowPowerMode(bool Enable)
 
 void MediaFoundation::TTransformer::SetDropBadFrameMode(bool Enable)
 {
+	if ( mVerboseDebug )
+		std::Debug << __PRETTY_FUNCTION__ << "start: Transformer refcount now " << mTransformer.GetReferenceCount() << std::endl;
+
 	//	get interface
-	ICodecAPI *mpCodecAPI = nullptr;
-	auto Result = mTransformer->QueryInterface(IID_PPV_ARGS(&mpCodecAPI));
+	Soy::AutoReleasePtr<ICodecAPI> mpCodecAPI;
+	auto Result = mTransformer->QueryInterface(IID_PPV_ARGS(&mpCodecAPI.mObject));
 	IsOkay(Result, "Failed to get CodecAPI interface");
 
 	VARIANT var;
@@ -991,10 +999,15 @@ void MediaFoundation::TTransformer::SetDropBadFrameMode(bool Enable)
 	var.ulVal = Enable;
 	Result = mpCodecAPI->SetValue(&CODECAPI_AVDecVideoDropPicWithMissingRef, &var);
 	IsOkay(Result, "Setting CODECAPI_AVDecVideoDropPicWithMissingRef");
+
+	if (mVerboseDebug)
+		std::Debug << __PRETTY_FUNCTION__ << "end: Transformer refcount now " << mTransformer.GetReferenceCount() << std::endl;
 }
 
 void MediaFoundation::TTransformer::SetOutputFormat(IMFMediaType& MediaType)
 {
+	if (mVerboseDebug)
+		std::Debug << __PRETTY_FUNCTION__ << "start: Transformer refcount now " << mTransformer.GetReferenceCount() << std::endl;
 	auto& Transformer = *this->mTransformer;
 	
 	auto Set = [&]()
@@ -1009,6 +1022,8 @@ void MediaFoundation::TTransformer::SetOutputFormat(IMFMediaType& MediaType)
 	LockTransformer(Set);
 
 	mOutputFormatSet = true;
+	if (mVerboseDebug)
+		std::Debug << __PRETTY_FUNCTION__ << "end: Transformer refcount now " << mTransformer.GetReferenceCount() << std::endl;
 }
 
 
@@ -1091,7 +1106,8 @@ void MediaFoundation::TTransformer::SetInputFormat(IMFMediaType& MediaType)
 	try
 	{
 		auto InputReady = IsInputFormatReady();
-		std::Debug << "IsInputFormatReady = " << InputReady << std::endl;
+		if (mVerboseDebug)
+			std::Debug << "IsInputFormatReady = " << InputReady << std::endl;
 	}
 	catch (std::exception& e)
 	{
@@ -1102,7 +1118,8 @@ void MediaFoundation::TTransformer::SetInputFormat(IMFMediaType& MediaType)
 
 MediaFoundation::TTransformer::~TTransformer()
 {
-	std::Debug << __PRETTY_FUNCTION__ << std::endl;
+	if (mVerboseDebug)
+		std::Debug << __PRETTY_FUNCTION__ << std::endl;
 	if (mTransformer)
 	{
 		try
@@ -1127,8 +1144,8 @@ MediaFoundation::TTransformer::~TTransformer()
 			auto Result = mTransformer->GetStreamCount(&InputStreamCount, &OutputStreamCount);
 			IsOkay(Result, "Cleanup GetStreamCount");
 
-			DWORD InputStreamIds[10] = { -1 };
-			DWORD OutputStreamIds[10] = { -1 };
+			DWORD InputStreamIds[10] = { 0xffffffff };
+			DWORD OutputStreamIds[10] = { 0xffffffff };
 			Result = mTransformer->GetStreamIDs(std::size(InputStreamIds), InputStreamIds, std::size(OutputStreamIds), OutputStreamIds);
 			if (Result != E_NOTIMPL)
 			{
@@ -1162,7 +1179,8 @@ MediaFoundation::TTransformer::~TTransformer()
 	//	hopefully these are 1 or less
 	auto TransformerRefCount = mTransformer.GetReferenceCount();
 	auto ActivateRefCount = mActivate.mActivate.GetReferenceCount();
-	std::Debug << __PRETTY_FUNCTION__ << " TransformerRefCount=" << TransformerRefCount << " ActivateRefCount=" << ActivateRefCount << std::endl;
+	if (mVerboseDebug)
+		std::Debug << __PRETTY_FUNCTION__ << " TransformerRefCount=" << TransformerRefCount << " ActivateRefCount=" << ActivateRefCount << std::endl;
 
 	
 	//	these should be redundant but helpful in case they crash
@@ -1314,7 +1332,8 @@ bool MediaFoundation::TTransformer::PushFrame(const ArrayBridge<uint8_t>&& Data,
 		try
 		{
 			IsOkay(Result, "GetOutputStatus");
-			std::Debug << "Output status is " << StatusFlags << std::endl;
+			if (mVerboseDebug)
+				std::Debug << "Output status is " << StatusFlags << std::endl;
 		}
 		catch (std::exception& e)
 		{
@@ -1515,7 +1534,8 @@ bool MediaFoundation::TTransformer::PopFrame(ArrayBridge<uint8_t>&& Data,int64_t
 	}
 	else if (Result == MF_E_TRANSFORM_STREAM_CHANGE)
 	{
-		std::Debug << "Stream changed, expecting 0 byte buffer..." << std::endl;
+		if (mVerboseDebug)
+			std::Debug << "Stream changed, expecting 0 byte buffer..." << std::endl;
 		//	reset output media type
 		mOutputMediaType.Release();
 
