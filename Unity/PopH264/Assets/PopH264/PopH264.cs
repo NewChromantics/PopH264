@@ -27,7 +27,7 @@ public static class PopH264
 	//private const string PluginExecutable = "PopH264_Osx.framework/Versions/A/PopH264_Osx";
 	private const string PluginName = PluginFrameworkPath+PluginExecutable;
 #elif UNITY_IPHONE
-	[DllImport("__Internal")]
+	private const string PluginName = "__Internal";
 #else
 	private const string PluginName = "PopH264";
 #endif
