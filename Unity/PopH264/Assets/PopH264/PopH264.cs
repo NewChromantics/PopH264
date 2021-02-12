@@ -377,8 +377,7 @@ public static class PopH264
 			return PushFrameData(NewFrame);
 		}
 
-		//	returns frame time
-		public int? GetNextFrame(ref List<Texture2D> Planes, ref List<PixelFormat> PixelFormats)
+		public FrameMeta? GetNextFrameAndMeta(ref List<Texture2D> Planes, ref List<PixelFormat> PixelFormats)
 		{
 			PopH264_PeekFrame(Instance.Value, JsonBuffer, JsonBuffer.Length);
 			var Json = GetString(JsonBuffer);
@@ -450,7 +449,19 @@ public static class PopH264
 				Planes[p].Apply();
 			}
 
-			return PopResult;
+			//	gr: this shouldn't have changed. But just in case...
+			Meta.FrameNumber = PopResult;
+			return Meta;
+		}
+
+		//	old interface. May be deprecated for GetNextFrameAndMeta entirely as the ImageRect can't really be ignored
+		public int? GetNextFrame(ref List<Texture2D> Planes, ref List<PixelFormat> PixelFormats)
+		{
+			var FrameMeta = GetNextFrameAndMeta( ref Planes, ref PixelFormats );
+			if (!FrameMeta.HasValue)
+				return null;
+
+			return FrameMeta.Value.FrameNumber;
 		}
 
 	}
