@@ -731,7 +731,6 @@
 				BF3225712445F0D100C74D4D /* X264Encoder.cpp */,
 				BF3225722445F0D200C74D4D /* X264Encoder.h */,
 				BF4D031C25CC6B6B003FF218 /* MediaFoundationDecoder.cpp */,
-				BF4D031E25CC6B6B003FF218 /* MediaFoundationDecoder.h */,
 			);
 			name = Source;
 			sourceTree = SOURCE_ROOT;
