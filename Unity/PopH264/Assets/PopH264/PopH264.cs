@@ -152,6 +152,7 @@ public static class PopH264
 		public bool DrainOnKeyframe;		//	Debug for MediaFoundation, trigger drain command on a keyfrae
 		public bool LowPowerMode;
 		public bool DropBadFrames;
+		public bool DecodeSei;
 	};
 
 	public class Decoder : IDisposable
