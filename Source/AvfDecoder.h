@@ -28,7 +28,7 @@ class Avf::TDecoder : public PopH264::TDecoder
 public:
 	static inline const char*	Name = "Avf";
 public:
-	TDecoder(PopH264::OnDecodedFrame_t OnDecodedFrame,PopH264::OnFrameError_t OnFrameError);
+	TDecoder(const PopH264::TDecoderParams& Params,PopH264::OnDecodedFrame_t OnDecodedFrame,PopH264::OnFrameError_t OnFrameError);
 	~TDecoder();
 	
 private:
@@ -42,6 +42,7 @@ private:
 	std::shared_ptr<TDecompressor>	mDecompressor;
 	Array<uint8_t>					mNaluSps;
 	Array<uint8_t>					mNaluPps;
+	Array<uint8_t>					mNaluSei;
 };
 
 

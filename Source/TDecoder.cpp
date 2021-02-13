@@ -3,6 +3,13 @@
 #include "json11.hpp"
 
 
+PopH264::TDecoder::TDecoder(const TDecoderParams& Params,PopH264::OnDecodedFrame_t OnDecodedFrame,PopH264::OnFrameError_t OnFrameError) :
+	mOnDecodedFrame	( OnDecodedFrame ),
+	mOnFrameError	( OnFrameError ),
+	mParams			( Params )
+{
+}
+
 PopH264::TDecoder::TDecoder(PopH264::OnDecodedFrame_t OnDecodedFrame,PopH264::OnFrameError_t OnFrameError) :
 	mOnDecodedFrame	( OnDecodedFrame ),
 	mOnFrameError	( OnFrameError )

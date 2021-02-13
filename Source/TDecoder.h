@@ -39,6 +39,7 @@ public:
 class PopH264::TDecoderParams
 {
 public:
+	TDecoderParams(){};
 	TDecoderParams(json11::Json& Params);
 
 public:
@@ -51,13 +52,16 @@ public:
 	bool		mDrainOnKeyframe = false;
 	bool		mLowPowerMode = false;
 	bool		mDropBadFrames = false;
+	bool		mDecodeSei = false;			//	SEI on Avf gives us an error, so we skip it
+	bool		mAsyncDecompression = false;	//	Avf experimental async decompression, which may or may not go on a background thread 
 };
 
 
 class PopH264::TDecoder
 {
 public:
-	TDecoder(OnDecodedFrame_t OnDecodedFrame,OnFrameError_t OnFrameError);
+	__deprecated_prefix TDecoder(OnDecodedFrame_t OnDecodedFrame,OnFrameError_t OnFrameError) __deprecated;
+	TDecoder(const TDecoderParams& Params,OnDecodedFrame_t OnDecodedFrame,OnFrameError_t OnFrameError);
 	
 	void			Decode(ArrayBridge<uint8_t>&& PacketData,FrameNumber_t FrameNumber);
 
@@ -76,6 +80,9 @@ protected:
 	void			PeekHeaderNalus(ArrayBridge<uint8_t>&& SpsBuffer,ArrayBridge<uint8_t>&& PpsBuffer);
 	bool			PopNalu(ArrayBridge<uint8_t>&& Buffer,FrameNumber_t& FrameNumber);
 	void			UnpopNalu(ArrayBridge<uint8_t>&& Buffer,FrameNumber_t FrameNumber);
+
+protected:
+	TDecoderParams		mParams;
 	
 private:
 	std::mutex				mPendingDataLock;

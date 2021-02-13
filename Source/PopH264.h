@@ -46,6 +46,7 @@ __export int32_t			PopH264_GetTestData(const char* Name,uint8_t* Buffer,int32_t 
 #define POPH264_DECODER_KEY_DRAINONKEYFRAME			"DrainOnKeyframe"		//	Mediafoundation test
 #define POPH264_DECODER_KEY_LOWPOWERMODE			"LowPowerMode"
 #define POPH264_DECODER_KEY_DROPBADFRAMES			"DropBadFrames"
+#define POPH264_DECODER_KEY_DECODESEI				"DecodeSei"				//	mac/ios skip decoding SEI packets as they cause an error
 
 
 //	All options are optional

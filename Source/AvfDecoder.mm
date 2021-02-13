@@ -28,7 +28,7 @@
 class Avf::TDecompressor
 {
 public:
-	TDecompressor(const ArrayBridge<uint8_t>& Sps,const ArrayBridge<uint8_t>& Pps,std::function<void(std::shared_ptr<TPixelBuffer>,PopH264::FrameNumber_t)> OnFrame,std::function<void(const std::string&,PopH264::FrameNumber_t)> OnError);
+	TDecompressor(const PopH264::TDecoderParams& Params,const ArrayBridge<uint8_t>& Sps,const ArrayBridge<uint8_t>& Pps,std::function<void(std::shared_ptr<TPixelBuffer>,PopH264::FrameNumber_t)> OnFrame,std::function<void(const std::string&,PopH264::FrameNumber_t)> OnError);
 	~TDecompressor();
 	
 	void								Decode(ArrayBridge<uint8_t>&& Nalu,size_t FrameNumber);
@@ -43,6 +43,7 @@ public:
 	CFPtr<CMFormatDescriptionRef>		mInputFormat;
 	std::function<void(std::shared_ptr<TPixelBuffer>,PopH264::FrameNumber_t)>		mOnFrame;
 	std::function<void(const std::string&,PopH264::FrameNumber_t)>	mOnError;
+	PopH264::TDecoderParams				mParams;
 };
 
 
@@ -75,10 +76,11 @@ SoyPixelsMeta GetFormatDescriptionPixelMeta(CMFormatDescriptionRef Format)
 }
 
 
-Avf::TDecompressor::TDecompressor(const ArrayBridge<uint8_t>& Sps,const ArrayBridge<uint8_t>& Pps,std::function<void(std::shared_ptr<TPixelBuffer>,PopH264::FrameNumber_t)> OnFrame,std::function<void(const std::string&,PopH264::FrameNumber_t)> OnError) :
+Avf::TDecompressor::TDecompressor(const PopH264::TDecoderParams& Params,const ArrayBridge<uint8_t>& Sps,const ArrayBridge<uint8_t>& Pps,std::function<void(std::shared_ptr<TPixelBuffer>,PopH264::FrameNumber_t)> OnFrame,std::function<void(const std::string&,PopH264::FrameNumber_t)> OnError) :
 	mDecoderRenderer	( new AvfDecoderRenderer() ),
 	mOnFrame			( OnFrame ),
-	mOnError			( OnError )
+	mOnError			( OnError ),
+	mParams				( Params )
 {
 	mInputFormat = Avf::GetFormatDescriptionH264( Sps, Pps, GetFormatNaluPrefixType() );
 		
@@ -330,18 +332,18 @@ void Avf::TDecompressor::Decode(ArrayBridge<uint8_t>&& Nalu, size_t FrameNumber)
 	VTDecodeInfoFlags FlagsOut = 0;
 	
 	//	gr: temporal means frames (may?) will be output in display order, OS will hold onto decoded frames
-	bool OutputFramesInOrder = false;
+	bool OutputFramesInOrder = mParams.mAllowBuffering;
 	if ( OutputFramesInOrder )
 		Flags |= kVTDecodeFrame_EnableTemporalProcessing;
 	
 	//	gr: async means frames may or may not be decoded in the background
 	//	gr: also we may have issues with sample buffer lifetime in async
-	bool AsyncDecompression = false;
+	bool AsyncDecompression = mParams.mAsyncDecompression;
 	if ( AsyncDecompression )
 		Flags |= kVTDecodeFrame_EnableAsynchronousDecompression;
 	
 	//	1x/low power mode means it WONT try and decode faster than 1x
-	bool LowPowerDecoding = false;
+	bool LowPowerDecoding = mParams.mLowPowerMode;
 	if ( LowPowerDecoding )
 		Flags |= kVTDecodeFrame_1xRealTimePlayback;
 	
@@ -435,10 +437,9 @@ void Avf::TDecompressor::Flush()
 	IsOkay(Error,"VTDecompressionSessionWaitForAsynchronousFrames");
 }
 
-
 	
-Avf::TDecoder::TDecoder(PopH264::OnDecodedFrame_t OnDecodedFrame,PopH264::OnFrameError_t OnFrameError) :
-	PopH264::TDecoder	( OnDecodedFrame, OnFrameError )
+Avf::TDecoder::TDecoder(const PopH264::TDecoderParams& Params,PopH264::OnDecodedFrame_t OnDecodedFrame,PopH264::OnFrameError_t OnFrameError) :
+	PopH264::TDecoder	( Params, OnDecodedFrame, OnFrameError )
 {
 }
 
@@ -507,7 +508,7 @@ void Avf::TDecoder::AllocDecoder()
 	}
 	
 	//	gr: does decompressor need to wait for SPS&PPS?
-	mDecompressor.reset( new TDecompressor( GetArrayBridge(mNaluSps), GetArrayBridge(mNaluPps), OnPacket, OnError ) );
+	mDecompressor.reset( new TDecompressor( mParams, GetArrayBridge(mNaluSps), GetArrayBridge(mNaluPps), OnPacket, OnError ) );
 }
 
 bool Avf::TDecoder::DecodeNextPacket()
@@ -520,6 +521,8 @@ bool Avf::TDecoder::DecodeNextPacket()
 	//	store latest sps & pps, need to cache these so we can create decoder
 	auto H264PacketType = H264::GetPacketType(GetArrayBridge(Nalu));
 
+	//	do not push SPS, PPS or SEI packets to decoder
+	//	SEI gives -12349 error
 	if ( H264PacketType == H264NaluContent::SequenceParameterSet )
 	{
 		mNaluSps = Nalu;
@@ -529,6 +532,14 @@ bool Avf::TDecoder::DecodeNextPacket()
 	{
 		mNaluPps = Nalu;
 		return true;
+	}
+	else if ( H264PacketType == H264NaluContent::SupplimentalEnhancementInformation )
+	{
+		if ( !mParams.mDecodeSei )
+		{
+			mNaluSei = Nalu;
+			return true;
+		}
 	}
 
 	//	make sure we have a decoder

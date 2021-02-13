@@ -151,7 +151,7 @@ PopH264::TDecoderInstance::TDecoderInstance(json11::Json& Options)
 	{
 		try
 		{
-			mDecoder.reset(new Avf::TDecoder(OnFrameDecoded,OnError));
+			mDecoder.reset(new Avf::TDecoder(Params,OnFrameDecoded,OnError));
 			return;
 		}
 		catch (std::exception& e)
