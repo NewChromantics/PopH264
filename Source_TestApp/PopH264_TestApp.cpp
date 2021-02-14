@@ -47,10 +47,17 @@ int fopen_s(FILE **f, const char *name, const char *mode)
 }
 #endif
 
-bool LoadDataFromFilename(const char* Filename,ArrayBridge<uint8_t>&& Data)
+#include "SoyFilesystem.h"
+
+bool LoadDataFromFilename(const char* DataFilename,ArrayBridge<uint8_t>&& Data)
 {
+	std::stringstream FilePath;
+	FilePath << Platform::GetAppResourcesDirectory() << DataFilename;
+
+	auto Filename = FilePath.str();
+
 	FILE* File = nullptr;
-	auto Error = fopen_s(&File,Filename, "rb");
+	auto Error = fopen_s(&File,Filename.c_str(), "rb");
 	if (!File)
 		return false;
 	fseek(File, 0, SEEK_SET);
@@ -90,7 +97,7 @@ void DecoderTest(const char* TestDataName,CompareFunc_t* Compare,const char* Dec
 	OptionsStr << "{";
 	if ( DecoderName )
 		OptionsStr << "\"Decoder\":\"" << DecoderName << "\",";
-	//OptionsStr << "\"VerboseDebug\":true";
+	OptionsStr << "\"VerboseDebug\":true";
 	OptionsStr << "}";
 	auto OptionsString = OptionsStr.str();
 	auto* Options = OptionsString.c_str();
@@ -137,7 +144,7 @@ void DecoderTest(const char* TestDataName,CompareFunc_t* Compare,const char* Dec
 
 			if (Compare)
 				Compare(MetaJson, Plane0, Plane1, Plane2);
-			break;
+			//break;
 		}
 	}
 
@@ -337,6 +344,9 @@ int main()
 	//PopH264_UnitTests();
 	
 	//	depth data has iframe, pps, sps order
+	SafeDecoderTest("TestData/Main5.h264", nullptr, nullptr );
+	SafeDecoderTest("TestData/Colour.h264", nullptr, nullptr );
+	SafeDecoderTest("TestData/Depth.h264", nullptr, nullptr );
 	SafeDecoderTest("TestData/Depth.h264", nullptr, "Broadway" );
 	SafeDecoderTest("RainbowGradient.h264", CompareRainbow, "Broadway" );
 	SafeDecoderTest("RainbowGradient.h264", CompareRainbow, nullptr );
