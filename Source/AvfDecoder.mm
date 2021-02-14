@@ -520,6 +520,8 @@ bool Avf::TDecoder::DecodeNextPacket()
 
 	//	store latest sps & pps, need to cache these so we can create decoder
 	auto H264PacketType = H264::GetPacketType(GetArrayBridge(Nalu));
+	if ( mParams.mVerboseDebug )
+		std::Debug << "Popped Nalu " << H264PacketType << " x" << Nalu.GetDataSize() << "bytes" << std::endl;
 
 	//	do not push SPS, PPS or SEI packets to decoder
 	//	SEI gives -12349 error
@@ -548,7 +550,8 @@ bool Avf::TDecoder::DecodeNextPacket()
 	//	no decompressor yet, drop packet
 	if ( !mDecompressor )
 	{
-		std::Debug << "Dropping H264 frame (" << magic_enum::enum_name(H264PacketType) << ") as decompressor isn't ready (waiting for sps/pps)" << std::endl;
+		if ( mParams.mVerboseDebug )
+			std::Debug << "Dropping H264 frame (" << magic_enum::enum_name(H264PacketType) << ") as decompressor isn't ready (waiting for sps/pps)" << std::endl;
 		return true;
 	}
 	
