@@ -600,15 +600,26 @@ void Android::TDecoder::CreateCodec()
 	mAsyncBuffers = true;
 	#endif 
 
-	auto Width = 123;
-	auto Height = 456;
-
+	auto Width = mParams.mWidthHint;
+	auto Height = mParams.mHeightHint;
+	auto InputSize = mParams.mInputSizeHint;
+	
 	//	create format
 	//	https://android.googlesource.com/platform/cts/+/fb9023359a546eaa93d7753c0c1af37f8d859111/tests/tests/media/libmediandkjni/native-media-jni.cpp#525
 	AMediaFormat* Format = AMediaFormat_new();
 	AMediaFormat_setString( Format, AMEDIAFORMAT_KEY_MIME, MimeType );
-	AMediaFormat_setInt32( Format, AMEDIAFORMAT_KEY_HEIGHT, Width );
-	AMediaFormat_setInt32( Format, AMEDIAFORMAT_KEY_WIDTH, Height );
+	
+	std::Debug << "Setting MediaFormat hints; (0=skipped) Width=" << Width << " Height=" << Height << " InputSize=" << InputSize << std::endl;
+	
+	//	gr: made all these optional for testing bad cases, but by default w&h should be something (as per decode params)
+	if ( Width > 0 )
+		AMediaFormat_setInt32( Format, AMEDIAFORMAT_KEY_WIDTH, Width );
+	if ( Height > 0 )
+		AMediaFormat_setInt32( Format, AMEDIAFORMAT_KEY_HEIGHT, Height );
+	if ( InputSize > 0 )
+		AMediaFormat_setInt32( Format, AMEDIAFORMAT_KEY_MAX_INPUT_SIZE, InputSize );
+	
+	
 	//AMEDIAFORMAT_KEY_LEVEL
 	//AMEDIAFORMAT_KEY_PROFILE
 	//

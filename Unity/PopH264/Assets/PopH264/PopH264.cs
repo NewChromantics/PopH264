@@ -153,6 +153,11 @@ public static class PopH264
 		public bool LowPowerMode;
 		public bool DropBadFrames;
 		public bool DecodeSei;
+		
+		//	gr: only set these for testing. 0 means no hint will be set
+		//public int	Width;
+		//public int	Height;
+		//public int	InputSize;
 	};
 
 	public class Decoder : IDisposable

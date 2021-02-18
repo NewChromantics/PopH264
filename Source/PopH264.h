@@ -48,6 +48,9 @@ __export int32_t			PopH264_GetTestData(const char* Name,uint8_t* Buffer,int32_t 
 #define POPH264_DECODER_KEY_DROPBADFRAMES			"DropBadFrames"
 #define POPH264_DECODER_KEY_DECODESEI				"DecodeSei"				//	mac/ios skip decoding SEI packets as they cause an error
 
+#define POPH264_DECODER_KEY_WIDTHHINT				"Width"					//	dimensions passed to android decoder to dictate input buffer sizes
+#define POPH264_DECODER_KEY_HEIGHTHINT				"Height"
+#define POPH264_DECODER_KEY_INPUTSIZEHINT			"InputSize"
 
 //	All options are optional
 //	returns an instance id. 0 on error.

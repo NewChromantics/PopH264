@@ -88,6 +88,14 @@ PopH264::TDecoderParams::TDecoderParams(json11::Json& Options)
 		Value = Handle.bool_value();
 		return true;
 	};
+	auto SetInt = [&](const char* Name, int32_t& Value)
+	{
+		auto& Handle = Options[Name];
+		if (!Handle.is_number())
+			return false;
+		Value = Handle.int_value();
+		return true;
+	};
 	
 	mDecoderName = Options[std::string(POPH264_DECODER_KEY_DECODERNAME)].string_value();
 	SetBool( POPH264_DECODER_KEY_VERBOSEDEBUG, mVerboseDebug );
@@ -98,6 +106,9 @@ PopH264::TDecoderParams::TDecoderParams(json11::Json& Options)
 	SetBool( POPH264_DECODER_KEY_DROPBADFRAMES, mDropBadFrames );
 	SetBool( POPH264_DECODER_KEY_DECODESEI, mDecodeSei );
 
+	SetInt( POPH264_DECODER_KEY_WIDTHHINT, mWidthHint );
+	SetInt( POPH264_DECODER_KEY_HEIGHTHINT, mHeightHint );
+	SetInt( POPH264_DECODER_KEY_INPUTSIZEHINT, mInputSizeHint );
 }
 
 
