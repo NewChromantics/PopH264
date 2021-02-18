@@ -41,8 +41,9 @@ namespace PopH264
 	//	1.3.27	Android now outputting ImageRect (cropping rect) meta
 	//	1.3.28	Fixed various MediaFoundation memory leaks
 	//	1.3.29	Fixed MediaFoundation memory leak. Added Decoder name to meta. Added Unity GetFrameAndMeta interface
-	//	1.3.30	Avf (Mac & ios) no longer try and decode SEI nalus (causes -12349 error). Added option to disable this 
-	const Soy::TVersion	Version(1,3,30);
+	//	1.3.30	Avf (Mac & ios) no longer try and decode SEI nalus (causes -12349 error). Added option to disable this
+	//	1.3.31	Added width/height/inputsize hints for android to try and get bigger input buffers; issue #48
+	const Soy::TVersion	Version(1,3,31);
 }
 
 
