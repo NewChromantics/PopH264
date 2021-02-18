@@ -114,6 +114,7 @@ $(SRC)/Source_TestApp/PopH264_TestApp.cpp \
 # soy lib files
 LOCAL_SRC_FILES  += \
 $(SOY_PATH)/src/SoyTypes.cpp \
+$(SOY_PATH)/src/SoyFilesystem.cpp \
 
 
 #$(warning Build executable)	#	debug
