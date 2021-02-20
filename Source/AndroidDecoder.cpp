@@ -608,9 +608,25 @@ void Android::TDecoder::CreateCodec()
 	//	https://android.googlesource.com/platform/cts/+/fb9023359a546eaa93d7753c0c1af37f8d859111/tests/tests/media/libmediandkjni/native-media-jni.cpp#525
 	AMediaFormat* Format = AMediaFormat_new();
 	AMediaFormat_setString( Format, AMEDIAFORMAT_KEY_MIME, MimeType );
+
+	//	if no width/height hint provided, try and extract from SPS
+	if ( !Width || !Height )
+	{
+		try
+		{
+			auto Sps = H264::ParseSps( GetArrayBridge(mPendingSps) );
+			std::Debug << "Extracted size " << Sps.mWidth << "x" << Sps.mHeight << " from sps (frame_crop_left_offset=" << Sps.frame_crop_left_offset << " frame_crop_right_offset=" << Sps.frame_crop_right_offset << " frame_crop_top_offset=" << Sps.frame_crop_top_offset << " frame_crop_bottom_offset=" << Sps.frame_crop_bottom_offset << std::endl;
+			Width = Sps.mWidth;
+			Height = Sps.mHeight;
+		}
+		catch(std::exception& e)
+		{
+			std::Debug << "Exception extracting SPS width & height; " << e.what() << std::endl;
+		}
+	}
 	
 	std::Debug << "Setting MediaFormat hints; (0=skipped) Width=" << Width << " Height=" << Height << " InputSize=" << InputSize << std::endl;
-	
+
 	//	gr: made all these optional for testing bad cases, but by default w&h should be something (as per decode params)
 	if ( Width > 0 )
 		AMediaFormat_setInt32( Format, AMEDIAFORMAT_KEY_WIDTH, Width );
