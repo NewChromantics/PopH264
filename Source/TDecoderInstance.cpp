@@ -290,6 +290,8 @@ void PopH264::TDecoderInstance::PopFrame(int32_t& FrameNumber,ArrayBridge<uint8_
 		return;
 	}
 	
+	Soy::TScopeTimerPrint Timer3("PopH264::TDecoderInstance::PopFrame Split&Copy planes",2);
+		
 	//	if we don't set the correct time the c# thinks we have a bad frame!
 	FrameNumber = Frame.mFrameNumber;
 	
@@ -325,12 +327,18 @@ void PopH264::TDecoderInstance::PopFrame(int32_t& FrameNumber,ArrayBridge<uint8_
 
 bool PopH264::TDecoderInstance::PopFrame(TFrame& Frame)
 {
+	Soy::TScopeTimerPrint Timer1("PopH264::TDecoderInstance::PopFrame",2);
 	std::lock_guard<std::mutex> Lock(mFramesLock);
 	if ( mFrames.IsEmpty() )
 		return false;
 	
+	Soy::TScopeTimerPrint Timer2("PopH264::TDecoderInstance::PopFrame copy",2);
 	Frame = mFrames[0];
+	Timer2.Stop();
+
+	Soy::TScopeTimerPrint Timer3("PopH264::TDecoderInstance::PopFrame remove block",2);
 	mFrames.RemoveBlock(0,1);
+	Timer3.Stop();
 	return true;
 }
 
@@ -391,12 +399,18 @@ void PopH264::TDecoderInstance::PushFrame(const SoyPixelsImpl& Frame,PopH264::Fr
 	else
 	{
 		//	todo: get rid of the copy here, maybe swap for a lockable TPixelBuffer so it can be pooled
+		Soy::TScopeTimerPrint Timer1("PopH264::TDecoderInstance::PushFrame CopyPixels",2);
 		NewFrame.mPixels.reset( new SoyPixels( Frame ) );
 	}
 
 	{
+		Soy::TScopeTimerPrint Timer2("PopH264::TDecoderInstance::PushFrame lock",2);
 		std::lock_guard<std::mutex> Lock(mFramesLock);
+		Timer2.Stop();
+
+		Soy::TScopeTimerPrint Timer3("PopH264::TDecoderInstance::PushFrame PushBack frame",2);
 		mFrames.PushBack(NewFrame);
+		Timer3.Stop();
 		
 		//	gr: don't overwrite cached meta with an invalid one!
 		//		but do update it, in case something has changed
@@ -406,7 +420,10 @@ void PopH264::TDecoderInstance::PushFrame(const SoyPixelsImpl& Frame,PopH264::Fr
 		//std::Debug << __PRETTY_FUNCTION__ << mFrames.GetSize() << " frames pending" << std::endl;
 	}
 	if ( mOnNewFrame )
+	{
+		Soy::TScopeTimerPrint Timer3("PopH264::TDecoderInstance::PushFrame mOnNewFrame",1);
 		mOnNewFrame();
+	}
 }
 
 void PopH264::TDecoderInstance::AddOnNewFrameCallback(std::function<void()> Callback)

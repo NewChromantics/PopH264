@@ -1227,6 +1227,7 @@ void Android::TOutputThread::PopOutputBuffer(const TOutputBufferMeta& BufferMeta
 		//		but we do it just in case
 		try
 		{
+			Soy::TScopeTimerPrint Timer("Android::TOutputThread::PopOutputBuffer AMediaCodec_releaseOutputBuffer",1);
 			auto Result = AMediaCodec_releaseOutputBuffer( mCodec, BufferIndex, Render );
 			IsOkay( Result, "MLMediaCodecReleaseOutputBuffer");
 		}
@@ -1247,8 +1248,10 @@ void Android::TOutputThread::PopOutputBuffer(const TOutputBufferMeta& BufferMeta
 	*/
 
 	size_t BufferSize = -1;
+	Soy::TScopeTimerPrint Timer2("Android::TOutputThread::PopOutputBuffer AMediaCodec_getOutputBuffer",1);
 	uint8_t* BufferData = AMediaCodec_getOutputBuffer( mCodec, BufferIndex, &BufferSize ); 
-		
+	Timer2.Stop();
+	
 	//	if data is null, then output is a surface
 	if ( BufferData == nullptr || BufferSize == 0 )
 	{
@@ -1292,8 +1295,11 @@ void Android::TOutputThread::PopOutputBuffer(const TOutputBufferMeta& BufferMeta
 		//	extra meta
 		json11::Json::object Meta = mOutputMeta;
 		Meta["AndroidBufferFlags"] = static_cast<int>(Flags);
-		
-		PushFrame( NewPixels, FrameTime, Meta );
+	
+		{	
+			Soy::TScopeTimerPrint Timer3("Android::TOutputThread::PopOutputBuffer PushFrame",1);
+			PushFrame( NewPixels, FrameTime, Meta );
+		}
 		ReleaseBuffer();
 	}
 	catch(std::exception& e)
