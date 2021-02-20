@@ -628,10 +628,13 @@ void Android::TDecoder::CreateCodec()
 	std::Debug << "Setting MediaFormat hints; (0=skipped) Width=" << Width << " Height=" << Height << " InputSize=" << InputSize << std::endl;
 
 	//	gr: made all these optional for testing bad cases, but by default w&h should be something (as per decode params)
+	//	gr: if these are not set, the decoder doesnt work. (Need to get some logs, did this fail to decode, or fail to configure)
 	if ( Width > 0 )
 		AMediaFormat_setInt32( Format, AMEDIAFORMAT_KEY_WIDTH, Width );
 	if ( Height > 0 )
 		AMediaFormat_setInt32( Format, AMEDIAFORMAT_KEY_HEIGHT, Height );
+		
+	//	doesn't seem to do anything
 	if ( InputSize > 0 )
 		AMediaFormat_setInt32( Format, AMEDIAFORMAT_KEY_MAX_INPUT_SIZE, InputSize );
 	
