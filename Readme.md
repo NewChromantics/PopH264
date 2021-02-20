@@ -23,7 +23,7 @@ Since Unity implemented their own video player the need for a simple video playe
 
 PopH264 still has a niche to fill where users need very precise synchronisation, or access to raw YUV planes, custom YUV colour matrix implementation etc.
 
-Containers
+Video Containers
 ----------------
 PopH264 does not implement any extractors, neither the native ones (which vary in support from platform to platform), nor custom implementations. Because containers are usually so simple, yet vary so wildly with implementations, it became much more apparent a high-level (c#) decode was much more useful for debugging, workarounds with odd formats etc, when the H264 streams stayed the same.
 
@@ -37,6 +37,19 @@ There is little holding back PopH264 from handling VP9, HEVC/H265 etc, but there
 The other benefit of being specific to H264, is that the project does intend to extract other meta (Macroblock information, motion vectors) cross platform.
 
 PopH264 is unlikely to handle Audio.
+
+Sponsorship/Funding
+----------------------
+Whilst we do happily accept money, we currently haven't setup github sponsoring. If you wish to sponsor via a particular method, send bitcoin, leave an issue or get in touch; (graham@newchromantics.com)[mailto:graham@newchromantics.com] / (@soylentgraham)[http://www.twitter.com/soylentgraham]
+
+Rather than any trickle payments, we do encourage people to ask for commissioned new features/improvements/platform support. 
+Feel free to ask for them in issues, even if you have no budget. (But please submit bugs regardless!)
+
+Financial Contributers (Thank you!)
+-----------------------------
+These people have already contributed money towards the project. (Get in touch ASAP if I have missed you out!)
+- https://www.condensereality.com/
+
 
 
 API Documentation
