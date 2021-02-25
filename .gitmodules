@@ -3,7 +3,7 @@
 	url = https://github.com/SoylentGraham/SoyLib.git
 [submodule "Source/Broadway"]
 	path = Source/Broadway
-	url = https://github.com/mbebenita/Broadway.git
+	url = https://github.com/SoylentGraham/Broadway.git
 [submodule "Unity/PopH264/Assets/PopCodecs"]
 	path = Unity/PopH264/Assets/PopCodecs
 	url = https://github.com/NewChromantics/PopCodecs.git
