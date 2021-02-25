@@ -14,8 +14,8 @@ jobs:
     
     steps:
     - name: Setup Emscripten
-        uses: mymindstorm/setup-emsdk@v7
-        with:
+      uses: mymindstorm/setup-emsdk@v7
+      with:
           version: "latest" #"1.39.15"
 
     - name: Verify Emscripten
