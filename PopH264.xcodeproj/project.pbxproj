@@ -396,6 +396,8 @@
 		BFDBAB8624BCC4AB00E8BCE1 /* PopH264.Linux */ = {isa = PBXFileReference; lastKnownFileType = folder; path = PopH264.Linux; sourceTree = "<group>"; };
 		BFE7AAD625D943EA006F48F1 /* PopH264_TestAppIos_Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; name = PopH264_TestAppIos_Info.plist; path = Source_TestApp/PopH264_TestAppIos_Info.plist; sourceTree = SOURCE_ROOT; };
 		BFE7BCCD258A9D7E0021932B /* TestData */ = {isa = PBXFileReference; lastKnownFileType = folder; path = TestData; sourceTree = "<group>"; };
+		BFE87C1C25E7B1AD00224AB0 /* PopH264.Emscripten */ = {isa = PBXFileReference; lastKnownFileType = folder; path = PopH264.Emscripten; sourceTree = "<group>"; };
+		BFE87C1D25E7E85E00224AB0 /* PopH264_WasmBroadwayDecoder.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = PopH264_WasmBroadwayDecoder.c; path = Source/PopH264_WasmBroadwayDecoder.c; sourceTree = "<group>"; };
 		BFEF6A19246992CE000A1F88 /* SoyAvf.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = SoyAvf.mm; path = Source/SoyLib/src/SoyAvf.mm; sourceTree = "<group>"; };
 		BFEF6A1A246992CE000A1F88 /* SoyAvf.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SoyAvf.h; path = Source/SoyLib/src/SoyAvf.h; sourceTree = "<group>"; };
 		BFEF6A2024699955000A1F88 /* SoyVector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SoyVector.h; path = Source/SoyLib/src/SoyVector.h; sourceTree = "<group>"; };
@@ -520,6 +522,7 @@
 		BF4A6A0B1EA16D7C00613A64 = {
 			isa = PBXGroup;
 			children = (
+				BFE87C1C25E7B1AD00224AB0 /* PopH264.Emscripten */,
 				BF4D032225CC85DA003FF218 /* android-ndk */,
 				BFE7BCCD258A9D7E0021932B /* TestData */,
 				BF65D708256573A700B3EE9A /* License.md */,
@@ -732,6 +735,7 @@
 				BF8AB63A21F20CD9008E7E76 /* Broadway */,
 				BF8AB63B21F20D4C008E7E76 /* Broadway */,
 				BFF1C6E822E3C65800AFDFD5 /* BroadwayAll.c */,
+				BFE87C1D25E7E85E00224AB0 /* PopH264_WasmBroadwayDecoder.c */,
 				BF8AB69F21F21F07008E7E76 /* BroadwayDecoder.cpp */,
 				BF8AB6A021F21F07008E7E76 /* BroadwayDecoder.h */,
 				BF18268E24226111006FEB93 /* Json11 */,
@@ -850,6 +854,20 @@
 			name = PopH264_AndroidTestApp;
 			passBuildSettingsInEnvironment = 1;
 			productName = PopH264Android;
+		};
+		BFE87C1825E7B19300224AB0 /* PopH264_Wasm */ = {
+			isa = PBXLegacyTarget;
+			buildArgumentsString = "PopH264.Emscripten/ $(ACTION)";
+			buildConfigurationList = BFE87C1B25E7B19400224AB0 /* Build configuration list for PBXLegacyTarget "PopH264_Wasm" */;
+			buildPhases = (
+			);
+			buildToolPath = PopH264.Emscripten/Build.sh;
+			buildWorkingDirectory = "";
+			dependencies = (
+			);
+			name = PopH264_Wasm;
+			passBuildSettingsInEnvironment = 1;
+			productName = PopH264_Wasm;
 		};
 		BFF1C6DE22E3769B00AFDFD5 /* PopH264_Android */ = {
 			isa = PBXLegacyTarget;
@@ -985,6 +1003,11 @@
 						DevelopmentTeam = X52DR36JY2;
 						ProvisioningStyle = Automatic;
 					};
+					BFE87C1825E7B19300224AB0 = {
+						CreatedOnToolsVersion = 12.2;
+						DevelopmentTeam = X52DR36JY2;
+						ProvisioningStyle = Automatic;
+					};
 					BFF1C6DE22E3769B00AFDFD5 = {
 						CreatedOnToolsVersion = 10.1;
 					};
@@ -1011,6 +1034,7 @@
 				BF51B8C2256A7DBA004DE4C7 /* PopH264_Universal */,
 				BF66C6E325C34B28007A01B4 /* PopH264_AndroidTestApp */,
 				BF23A41025D9415D0060DE06 /* PopH264_TestAppIos */,
+				BFE87C1825E7B19300224AB0 /* PopH264_Wasm */,
 			);
 		};
 /* End PBXProject section */
@@ -1420,6 +1444,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				BUILD_LIBRARY_FOR_DISTRIBUTION = NO;
+				BUILD_TARGET_NAME = PopH264;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
 				CLANG_CXX_LIBRARY = "libc++";
@@ -1472,6 +1497,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				BUILD_LIBRARY_FOR_DISTRIBUTION = NO;
+				BUILD_TARGET_NAME = PopH264;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
 				CLANG_CXX_LIBRARY = "libc++";
@@ -1556,7 +1582,6 @@
 			buildSettings = {
 				ANDROID_ABI_ONLY = "armeabi-v7a";
 				ANDROID_NDK_HOME = "/usr/local/share/android-ndk";
-				BUILD_TARGET_NAME = PopH264;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				UNITY_ASSET_PLUGIN_PATH = "$(UNITY_OUTPUT_PATH)/Android";
 			};
@@ -1568,7 +1593,6 @@
 			buildSettings = {
 				ANDROID_ABI_ONLY = "armeabi-v7a";
 				ANDROID_NDK_HOME = "/usr/local/share/android-ndk";
-				BUILD_TARGET_NAME = PopH264;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				UNITY_ASSET_PLUGIN_PATH = "$(UNITY_OUTPUT_PATH)/Android";
 			};
@@ -1613,6 +1637,67 @@
 				GCC_PREPROCESSOR_DEFINITIONS = TARGET_OSX;
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				PRODUCT_NAME = PopH264_TestApp;
+			};
+			name = Release;
+		};
+		BFE87C1925E7B19300224AB0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_STYLE = Automatic;
+				DEBUGGING_SYMBOLS = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = X52DR36JY2;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		BFE87C1A25E7B19300224AB0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_STYLE = Automatic;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = X52DR36JY2;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				MTL_FAST_MATH = YES;
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
 		};
@@ -1709,6 +1794,15 @@
 			buildConfigurations = (
 				BFC4717524474FFA00A2DA70 /* Debug */,
 				BFC4717624474FFA00A2DA70 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		BFE87C1B25E7B19400224AB0 /* Build configuration list for PBXLegacyTarget "PopH264_Wasm" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BFE87C1925E7B19300224AB0 /* Debug */,
+				BFE87C1A25E7B19300224AB0 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
