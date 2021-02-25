@@ -77,7 +77,8 @@ function Build()
 	#make
 	# build .js and .wasm output
 	
-	ExportedFunctions=("_PopH264_GetVersion" "_broadwayGetMajorVersion")
+	#ExportedFunctions=("_PopH264_GetVersion" "HEAP8" "HEAP16" "HEAP32" "_broadwayGetMajorVersion" "_broadwayGetMinorVersion" "_broadwayInit" "_broadwayExit" "_broadwayCreateStream" "_broadwayPlayStream" "_broadwayOnHeadersDecoded" "_broadwayOnPictureDecoded")
+	ExportedFunctions=("_PopH264_GetVersion" "_broadwayGetMajorVersion" "_broadwayGetMinorVersion" "_broadwayInit" "_broadwayExit" "_broadwayCreateStream" "_broadwayPlayStream" "_broadwayOnHeadersDecoded" "_broadwayOnPictureDecoded")
 	ExportsJoined=$(printf ",\"%s\"" "${ExportedFunctions[@]}")
 	Exports=${ExportsJoined:1}	# substring after first character
 	echo Exports: $Exports
@@ -95,7 +96,9 @@ function Build()
 	SourcePath=.
 	Flags="--no-entry -O3"
 	Flags="${Flags} -I${SourcePath}/Source/Broadway/Decoder -I${SourcePath}/Source/Broadway/Decoder/inc"
-	Flags="${Flags} -s EXPORTED_FUNCTIONS=[$Exports]"
+	Flags="${Flags} -s EXPORTED_FUNCTIONS=[$Exports] -s WASM=1 -s ASSERTIONS=1 "
+	Flags="${Flags} -s ALIASING_FUNCTION_POINTERS=1 -s NO_FILESYSTEM=1 -s DISABLE_EXCEPTION_CATCHING=1"
+	Flags="${Flags} --js-library PopH264.Emscripten/library.js"
 	echo Flags: $Flags
 	#emcc Source/BroadwayAll.c Source/PopH264_WasmBroadwayDecoder.c $Flags -o $BUILD_TARGET_NAME.js
 	emcc $SourcePath/Source/BroadwayAll.c $SourcePath/Source/Broadway/Decoder/src/Decoder.c $SourcePath/Source/PopH264_WasmBroadwayDecoder.c $Flags -o $OutputFilename
