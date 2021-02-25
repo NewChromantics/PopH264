@@ -27,6 +27,9 @@ jobs:
           - os: ubuntu-latest
             type: linux
             architecture: x86_64
+            
+          - os: ubuntu-latest
+            type: Wasm
 
           - os: Nvidia
             type: linux
@@ -97,6 +100,21 @@ jobs:
         with:
           buildtargetname: ${{ env.project }}
           buildpath: ${{ env.project }}.Android/${{ env.project }}TestApp
+
+      - name: Wasm setup emscripten
+        if: matrix.config.type == 'Wasm'
+        uses: mymindstorm/setup-emsdk@v7
+        with:
+          version: "latest" #"1.39.15"
+
+      - name: Wasm build
+        id: Wasm
+        if: matrix.config.type == 'Wasm'
+        env: 
+          BUILD_TARGET_NAME: PopH264
+          UPLOAD_NAME: PopH264.Wasm
+          UPLOAD_DIR: PopH264.Emscripten/Build
+        run: PopH264.Emscripten/Build.sh PopH264.Emscripten/ release
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
