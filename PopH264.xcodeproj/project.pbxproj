@@ -398,6 +398,7 @@
 		BFE7BCCD258A9D7E0021932B /* TestData */ = {isa = PBXFileReference; lastKnownFileType = folder; path = TestData; sourceTree = "<group>"; };
 		BFE87C1C25E7B1AD00224AB0 /* PopH264.Emscripten */ = {isa = PBXFileReference; lastKnownFileType = folder; path = PopH264.Emscripten; sourceTree = "<group>"; };
 		BFE87C1D25E7E85E00224AB0 /* PopH264_WasmBroadwayDecoder.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = PopH264_WasmBroadwayDecoder.c; path = Source/PopH264_WasmBroadwayDecoder.c; sourceTree = "<group>"; };
+		BFE87C1E25E7EE9E00224AB0 /* .github */ = {isa = PBXFileReference; lastKnownFileType = folder; path = .github; sourceTree = "<group>"; };
 		BFEF6A19246992CE000A1F88 /* SoyAvf.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = SoyAvf.mm; path = Source/SoyLib/src/SoyAvf.mm; sourceTree = "<group>"; };
 		BFEF6A1A246992CE000A1F88 /* SoyAvf.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SoyAvf.h; path = Source/SoyLib/src/SoyAvf.h; sourceTree = "<group>"; };
 		BFEF6A2024699955000A1F88 /* SoyVector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SoyVector.h; path = Source/SoyLib/src/SoyVector.h; sourceTree = "<group>"; };
@@ -522,6 +523,7 @@
 		BF4A6A0B1EA16D7C00613A64 = {
 			isa = PBXGroup;
 			children = (
+				BFE87C1E25E7EE9E00224AB0 /* .github */,
 				BFE87C1C25E7B1AD00224AB0 /* PopH264.Emscripten */,
 				BF4D032225CC85DA003FF218 /* android-ndk */,
 				BFE7BCCD258A9D7E0021932B /* TestData */,
@@ -857,7 +859,7 @@
 		};
 		BFE87C1825E7B19300224AB0 /* PopH264_Wasm */ = {
 			isa = PBXLegacyTarget;
-			buildArgumentsString = "PopH264.Emscripten/ $(ACTION)";
+			buildArgumentsString = "PopH264.Emscripten $(ACTION)";
 			buildConfigurationList = BFE87C1B25E7B19400224AB0 /* Build configuration list for PBXLegacyTarget "PopH264_Wasm" */;
 			buildPhases = (
 			);

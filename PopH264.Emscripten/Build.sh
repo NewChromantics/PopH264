@@ -82,16 +82,25 @@ function Build()
 	Exports=${ExportsJoined:1}	# substring after first character
 	echo Exports: $Exports
 	
-	SourcePath=/Volumes/Code/Poph264
+	OutputDirectory=$BUILD_PROJECT_FOLDER/Build
+	mkdir -p $OutputDirectory
+	RESULT=$?
+	if [[ $RESULT -ne 0 ]]; then
+		exit $RESULT
+	fi
+
+	OutputFilename=$OutputDirectory/$BUILD_TARGET_NAME.js
+	echo OutputFilename:$OutputFilename
+	
+	SourcePath=.
 	Flags="--no-entry -O3"
 	Flags="${Flags} -I${SourcePath}/Source/Broadway/Decoder -I${SourcePath}/Source/Broadway/Decoder/inc"
 	Flags="${Flags} -s EXPORTED_FUNCTIONS=[$Exports]"
 	echo Flags: $Flags
 	#emcc Source/BroadwayAll.c Source/PopH264_WasmBroadwayDecoder.c $Flags -o $BUILD_TARGET_NAME.js
-	emcc Source/BroadwayAll.c Source/Broadway/Decoder/src/Decoder.c Source/PopH264_WasmBroadwayDecoder.c $Flags -o $BUILD_TARGET_NAME.js
+	emcc $SourcePath/Source/BroadwayAll.c $SourcePath/Source/Broadway/Decoder/src/Decoder.c $SourcePath/Source/PopH264_WasmBroadwayDecoder.c $Flags -o $OutputFilename
 
 	RESULT=$?
-
 	if [[ $RESULT -ne 0 ]]; then
 		exit $RESULT
 	fi
