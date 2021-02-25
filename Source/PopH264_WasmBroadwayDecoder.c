@@ -11,5 +11,5 @@ __export const char* PopH264_GetVersion()
 	};
 	return SafeCall( Function, __func__, -1 );
 	*/
-	return "1.3.32";
+	return "1.3.33";
 }
