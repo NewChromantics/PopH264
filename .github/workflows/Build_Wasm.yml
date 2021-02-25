@@ -26,8 +26,10 @@ jobs:
         submodules: 'recursive'
         
     - name: Build wasm
+      env: 
+        BUILD_TARGET_NAME: PopH264
       run: PopH264.Emscripten/Build.sh PopH264.Emscripten/ release
-
+      
     - name: Upload Artifacts
       uses: actions/upload-artifact@v2
       with:
