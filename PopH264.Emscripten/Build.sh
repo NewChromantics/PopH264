@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # gr: this should have been set by brew on osx
 #export ANDROID_NDK_HOME="/usr/local/share/android-ndk"
 
