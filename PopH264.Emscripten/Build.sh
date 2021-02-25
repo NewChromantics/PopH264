@@ -68,6 +68,13 @@ function CopyBuildFilesToUnity()
 	#fi
 }
 
+function CheckResult()
+{
+	RESULT=$1
+	if [[ $RESULT -ne 0 ]]; then
+		exit $RESULT
+	fi
+}
 
 function Build()
 {
@@ -85,28 +92,40 @@ function Build()
 	
 	OutputDirectory=$BUILD_PROJECT_FOLDER/Build
 	mkdir -p $OutputDirectory
-	RESULT=$?
-	if [[ $RESULT -ne 0 ]]; then
-		exit $RESULT
-	fi
+	CheckResult $?
 
-	OutputFilename=$OutputDirectory/$BUILD_TARGET_NAME.js
-	echo OutputFilename:$OutputFilename
-	
 	SourcePath=.
+
+	PreDecoderFilename=${SourcePath}/Source/Broadway/templates/DecoderPre.js
+	ModuleFilename=$OutputDirectory/$BUILD_TARGET_NAME.js
+	PostDecoderFilename=${SourcePath}/Source/Broadway/templates/DecoderPost.js
+	DecoderFilename=$OutputDirectory/Decoder.js
+	WasmFilename=$OutputDirectory/$BUILD_TARGET_NAME.wasm
+	echo PreDecoderFilename:$PreDecoderFilename
+	echo ModuleFilename:$ModuleFilename
+	echo PostDecoderFilename:$PostDecoderFilename
+	echo DecoderFilename:$DecoderFilename
+	echo WasmFilename:$WasmFilename
+	
 	Flags="--no-entry -O3"
 	Flags="${Flags} -I${SourcePath}/Source/Broadway/Decoder -I${SourcePath}/Source/Broadway/Decoder/inc"
 	Flags="${Flags} -s EXPORTED_FUNCTIONS=[$Exports] -s WASM=1 -s ASSERTIONS=1 "
 	Flags="${Flags} -s ALIASING_FUNCTION_POINTERS=1 -s NO_FILESYSTEM=1 -s DISABLE_EXCEPTION_CATCHING=1"
-	Flags="${Flags} --js-library PopH264.Emscripten/library.js"
+	Flags="${Flags} --js-library ${SourcePath}/Source/Broadway/Decoder/library.js"
 	echo Flags: $Flags
 	#emcc Source/BroadwayAll.c Source/PopH264_WasmBroadwayDecoder.c $Flags -o $BUILD_TARGET_NAME.js
-	emcc $SourcePath/Source/BroadwayAll.c $SourcePath/Source/Broadway/Decoder/src/Decoder.c $SourcePath/Source/PopH264_WasmBroadwayDecoder.c $Flags -o $OutputFilename
+	emcc $SourcePath/Source/BroadwayAll.c $SourcePath/Source/Broadway/Decoder/src/Decoder.c $SourcePath/Source/PopH264_WasmBroadwayDecoder.c $Flags -o $ModuleFilename
+	CheckResult $?
 
-	RESULT=$?
-	if [[ $RESULT -ne 0 ]]; then
-		exit $RESULT
-	fi
+	#	build final decoder js
+	cat $PreDecoderFilename > $DecoderFilename
+	CheckResult $?
+
+	cat $ModuleFilename >> $DecoderFilename
+	CheckResult $?
+
+	cat $PostDecoderFilename >> $DecoderFilename
+	CheckResult $?
 
 	CopyAdditionalBuildFiles $TARGET_NAME
 }

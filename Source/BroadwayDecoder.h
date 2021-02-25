@@ -17,7 +17,7 @@ extern "C"
 
 //	from broadway
 //extern "C" void broadwayOnHeadersDecoded();
-//extern "C" void broadwayOnPictureDecoded(u8 *buffer, u32 width, u32 height);
+//extern "C" void broadwayOnPictureDecoded(u8 *buffer, u32 width, u32 height, u32 framenumber);
 
 namespace Broadway
 {
