@@ -15,6 +15,19 @@
 //#include <Windows.h>
 #endif
 
+
+#if defined(TARGET_WINDOWS)//||defined(TARGET_LINUX)||defined(TARGET_ANDROID)
+//	instead of building SoyFilesystem.cpp
+namespace Platform
+{
+	std::string	GetAppResourcesDirectory();
+}
+std::string Platform::GetAppResourcesDirectory()
+{
+	return "";
+}
+#endif
+
 #include <thread>
 
 extern void MakeGreyscalePng(const char* Filename);
