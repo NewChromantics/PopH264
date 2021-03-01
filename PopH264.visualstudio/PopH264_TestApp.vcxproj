@@ -57,12 +57,7 @@
     <ClInclude Include="..\Source\SoyLib\src\SoyArray.h" />
     <ClInclude Include="..\Source\SoyLib\src\SoyAssert.h" />
     <ClInclude Include="..\Source\SoyLib\src\SoyDebug.h" />
-    <ClInclude Include="..\Source\SoyLib\src\SoyFilesystem.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </ClInclude>
+    <ClInclude Include="..\Source\SoyLib\src\SoyFilesystem.h" />
     <ClInclude Include="..\Source\SoyLib\src\SoyPixels.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>

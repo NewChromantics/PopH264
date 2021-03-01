@@ -111,8 +111,10 @@ Any empty platforms are generally planned, but not yet implemented.
 | Android x86_64 | Broadway          | NdkMediaCodec        |                   |                   |              |
 | Android arm64-v8a | Broadway       | NdkMediaCodec            |                   |                   |              |
 | Magic Leap/Luma (Linux x86) | Broadway  | MLMediaCodec Google,Nvidia|      |                   |              |
-| Web            | Broadway.js       |                   |                   |                   |              |
+| Web            | [Broadway.js*](https://github.com/SoylentGraham/Broadway)   |                   |                   |                   |              |
 | Unity WebGL    |                   |                   |                   |                   |              |
+
+* Broadway.js is now with a fork for various bug fixes and optimisations; https://github.com/SoylentGraham/Broadway
 
 Todo:
 - List Android min-api/OS level

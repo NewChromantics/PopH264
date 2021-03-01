@@ -112,9 +112,13 @@ jobs:
         if: matrix.config.type == 'Wasm'
         env: 
           BUILD_TARGET_NAME: PopH264
-          UPLOAD_NAME: PopH264.Wasm
-          UPLOAD_DIR: PopH264.Emscripten/Build
         run: PopH264.Emscripten/Build.sh PopH264.Emscripten/ release
+
+      - name: Wasm set artifact env vars
+        if: matrix.config.type == 'Wasm'
+        run: |
+          echo "UPLOAD_NAME=PopH264.Wasm" >> $GITHUB_ENV
+          echo "UPLOAD_DIR=PopH264.Emscripten/Build" >> $GITHUB_ENV 
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
