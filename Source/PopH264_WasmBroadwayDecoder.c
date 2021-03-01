@@ -1,3 +1,6 @@
+/*
+	gr: this is really a minimal test .c file for wasm compiling/symbol exporting etc
+*/
 #define __export
 
 typedef int int32_t;
