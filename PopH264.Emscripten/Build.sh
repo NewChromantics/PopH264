@@ -8,6 +8,7 @@
 # require param
 #BUILD_PROJECT_FOLDER=$BUILD_TARGET_NAME.Android
 BUILD_PROJECT_FOLDER="$1"
+OUTPUT_DIRECTORY=$BUILD_PROJECT_FOLDER/Build
 
 ACTION="$2"
 
@@ -27,20 +28,17 @@ if [ "$BUILD_TARGET_NAME" == "" ]; then
 fi
 
 
-#ADDITIONAL_BUILD_FILES=(Source/PopH264.h)
-ADDITIONAL_BUILD_FILES=
+ADDITIONAL_BUILD_FILES=(Source_Wasm/PopH264WebApi.js Source_Wasm/Player.js)
 
 
 
 function CopyAdditionalBuildFiles()
 {
-	ANDROID_ABI=$1
-	BUILD_PATH="$BUILD_PROJECT_FOLDER/libs/$ANDROID_ABI/"
-	echo "CopyAdditionalBuildFiles to $BUILD_PATH"
+	echo "CopyAdditionalBuildFiles to $OUTPUT_DIRECTORY"
 
 	for Filename in ${ADDITIONAL_BUILD_FILES[@]}; do
-		echo "cp $Filename $BUILD_PATH"
-		cp $Filename $BUILD_PATH
+		echo "cp $Filename $OUTPUT_DIRECTORY"
+		cp $Filename $OUTPUT_DIRECTORY
 		RESULT=$?
 		if [[ $RESULT -ne 0 ]]; then
 			exit $RESULT
@@ -50,7 +48,7 @@ function CopyAdditionalBuildFiles()
 
 function CopyBuildFilesToUnity()
 {
-	SRC_PATH="$BUILD_PROJECT_FOLDER/libs/"
+	SRC_PATH="$OUTPUT_DIRECTORY"
 
 	#if [ -z "$UNITY_ASSET_PLUGIN_PATH" ]; then
 	#	echo "UNITY_ASSET_PLUGIN_PATH not set, skipping post-build copy of $SRC_PATH"
@@ -90,17 +88,17 @@ function Build()
 	Exports=${ExportsJoined:1}	# substring after first character
 	echo Exports: $Exports
 	
-	OutputDirectory=$BUILD_PROJECT_FOLDER/Build
-	mkdir -p $OutputDirectory
+	
+	mkdir -p $OUTPUT_DIRECTORY
 	CheckResult $?
 
 	SourcePath=.
 
 	PreDecoderFilename=${SourcePath}/Source/Broadway/templates/DecoderPre.js
-	ModuleFilename=$OutputDirectory/$BUILD_TARGET_NAME.js
+	ModuleFilename=$OUTPUT_DIRECTORY/$BUILD_TARGET_NAME.js
 	PostDecoderFilename=${SourcePath}/Source/Broadway/templates/DecoderPost.js
-	DecoderFilename=$OutputDirectory/Decoder.js
-	WasmFilename=$OutputDirectory/$BUILD_TARGET_NAME.wasm
+	DecoderFilename=$OUTPUT_DIRECTORY/Decoder.js
+	WasmFilename=$OUTPUT_DIRECTORY/$BUILD_TARGET_NAME.wasm
 	echo PreDecoderFilename:$PreDecoderFilename
 	echo ModuleFilename:$ModuleFilename
 	echo PostDecoderFilename:$PostDecoderFilename
