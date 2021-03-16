@@ -31,9 +31,9 @@ if [ -z "$ANDROID_API" ]; then
 	ANDROID_API="28"
 fi
 
-
-if [ -z "$ANDROID_PLATFORM" ]; then
 # tsdk: 24 is Minimum platform that supports ifaddrs
+# PLATFORM affects the __ANDROIDAPI__ in c++
+if [ -z "$ANDROID_PLATFORM" ]; then
 	ANDROID_PLATFORM="28"
 fi
 
