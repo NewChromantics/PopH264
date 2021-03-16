@@ -26,15 +26,11 @@ if [ "$BUILD_TARGET_NAME" == "" ]; then
 	exit 1;
 fi
 
-
-if [ -z "$ANDROID_API" ]; then
-	ANDROID_API="28"
-fi
-
-# tsdk: 24 is Minimum platform that supports ifaddrs
-# PLATFORM affects the __ANDROIDAPI__ in c++
+# tsdk: This is a terrible misleading variable name it in fact refers to the API version
+# https://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels
+# 24 is Minimum API that supports ifaddrs, 26 = Android 8.0
 if [ -z "$ANDROID_PLATFORM" ]; then
-	ANDROID_PLATFORM="28"
+	ANDROID_PLATFORM="26"
 fi
 
 MAXCONCURRENTBUILDS=1
