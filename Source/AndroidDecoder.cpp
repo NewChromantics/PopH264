@@ -12,6 +12,11 @@
 
 #include "json11.hpp"
 
+//	supporting api level 28
+#if __ANDROID_API__ < 29
+const char* AMEDIAFORMAT_KEY_CSD_AVC = AMEDIAFORMAT_KEY_CSD;
+#endif
+
 
 enum AndroidColourFormat
 {
@@ -658,7 +663,7 @@ void Android::TDecoder::CreateCodec()
     AMEDIAFORMAT_KEY_CSD_AVC; # var introduced=29
     AMEDIAFORMAT_KEY_CSD_HEVC; # var introduced=29
     */
-    	//	gr: this isn't making a different (same profile, same level, same dimensions)
+		//	gr: this isn't making a different (same profile, same level, same dimensions)
 		AMediaFormat_setBuffer( Format, AMEDIAFORMAT_KEY_CSD_AVC, SpsAndPps.GetArray(), SpsAndPps.GetDataSize() );
 	}
 

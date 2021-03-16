@@ -52,3 +52,5 @@ PopH264Test_*.png
 *.Android/**/obj/
 
 
+# dont accidentally commit new build files
+Unity/PopH264/Assets/PopH264/
