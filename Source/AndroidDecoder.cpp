@@ -196,7 +196,7 @@ SoyPixelsFormat::Type Android::GetPixelFormat(int32_t ColourFormat)
 	throw Soy::AssertException(Error);
 }
 
-
+#if __ANDROID_API__ >= 28
 SoyPixelsMeta Android::GetPixelMeta(MediaFormat_t Format,bool VerboseDebug,json11::Json::object& Meta)
 {
 	if ( VerboseDebug )
@@ -352,7 +352,7 @@ SoyPixelsMeta Android::GetPixelMeta(MediaFormat_t Format,bool VerboseDebug,json1
 	SoyPixelsMeta PixelMeta( Width, Height, PixelFormat );
 	return PixelMeta;
 }
-
+#endif
 /*
 void MagicLeap::EnumCodecs(std::function<void(const std::string&)> EnumCodec)
 {
@@ -994,6 +994,7 @@ void Android::TDecoder::OnOutputTextureWritten(int64_t PresentationTime)
 	mOutputThread.OnOutputTextureWritten(PresentationTime);
 }
 */
+#if __ANDROID_API__ >= 28
 void Android::TDecoder::OnOutputFormatChanged(MediaFormat_t NewFormat)
 {
 	//	gr: we should do this like a queue for the output thread
@@ -1016,7 +1017,7 @@ void Android::TDecoder::OnOutputFormatChanged(MediaFormat_t NewFormat)
 		std::Debug << __PRETTY_FUNCTION__ << " Exception " << e.what() << std::endl;
 	}
 }
-
+#endif
 
 
 
