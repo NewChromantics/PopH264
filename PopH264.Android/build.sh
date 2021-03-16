@@ -34,7 +34,7 @@ fi
 
 if [ -z "$ANDROID_PLATFORM" ]; then
 # tsdk: 24 is Minimum platform that supports ifaddrs
-	ANDROID_PLATFORM="29"
+	ANDROID_PLATFORM="28"
 fi
 
 MAXCONCURRENTBUILDS=1
