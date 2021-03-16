@@ -116,8 +116,9 @@ Any empty platforms are generally planned, but not yet implemented.
 
 * Broadway.js is now with a fork for various bug fixes and optimisations; https://github.com/SoylentGraham/Broadway
 
-Todo:
-- List Android min-api/OS level
+Android
+---------------------
+- Minimum Android9/Api level 28 (This can probably be reduced further)
 
 
 Unity Decoder Support
