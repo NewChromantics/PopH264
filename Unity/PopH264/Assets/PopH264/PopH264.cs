@@ -216,8 +216,16 @@ public static class PopH264
 
 		public void Dispose()
 		{
-			//	stop thread before killing decoder
-			InputQueue = null;
+			//	stop thread by nulling input queue before killing decoder
+			if ( InputQueue != null )
+			{
+				//	gr: wait for thread to finish lock on queue before nulling
+				lock(InputQueue)
+				{
+					InputQueue = null;
+				}
+			}
+
 			if (InputThread != null)
 			{
 				//	I think we can safely abort, might need to check. If we don't, depending on how much data we've thrown at the decoder, this could take ages to finish
@@ -284,28 +292,53 @@ public static class PopH264
 				Array.Add(default(T));
 		}
 
-		void ThreadPushQueue()
+		FrameInput? PopFrameInput()
 		{
-			while (InputQueue != null)
+			if ( InputQueue == null )
+				return null;
+				
+			//	gr: I think in c# we can still have a race condition here, where the queue is null'd before the lock?
+			//		in which case we should have a lock object that is never nulled
+			lock(InputQueue)
 			{
 				if (InputQueue.Count == 0)
-				{
-					System.Threading.Thread.Sleep(100);
-					//	make thread idle properly
-					//PushByteThread.Suspend();
-					continue;
-				}
+					return null;
+					
+				var Frame = InputQueue[0];
+				InputQueue.RemoveRange(0, 1);
+				return Frame;
+			}
+		}
 
-				//	pop off the data
-				FrameInput Frame;
-				lock (InputQueue)
+		void ThreadPushQueue()
+		{
+			//	null input queue = "stop thread"
+			while (InputQueue != null)
+			{
+				//	catch exceptions so we don't bring the app down with unhandled exception
+				try
 				{
-					Frame = InputQueue[0];
-					InputQueue.RemoveRange(0, 1);
+					var FrameMaybe = PopFrameInput();
+					if ( !FrameMaybe.hasValue )
+					{
+						System.Threading.Thread.Sleep(100);
+						//	todo: make thread idle properly if inputqueue hasn't been nulled
+						//PushByteThread.Suspend();
+						continue;
+					}
+
+					var Frame = FrameMaybe.Value;
+					var Length = (Frame.Bytes == null) ? 0 : Frame.Bytes.Length;
+					//	gr: Instance.Value will be okay here as dispose() waits for this thread to exit, but we should be more careful!
+					var Result = PopH264_PushData(Instance.Value, Frame.Bytes, Length, Frame.FrameNumber);
+					InputThreadResult = (Result==0);
 				}
-				var Length = (Frame.Bytes == null) ? 0 : Frame.Bytes.Length;
-				var Result = PopH264_PushData(Instance.Value, Frame.Bytes, Length, Frame.FrameNumber);
-				InputThreadResult = (Result==0);
+				catch(System.Exception e)
+				{
+					Debug.LogError("PopH264 Input thread exception, exiting thread");
+					Debug.LogException(e);
+					break;
+				}
 			}
 		}
 
