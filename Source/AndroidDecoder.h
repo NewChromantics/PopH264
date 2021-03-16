@@ -3,7 +3,7 @@
 #include "TDecoder.h"
 #include "SoyThread.h"
 #include "SoyPixels.h"
-
+#include "SoyRuntimeLibrary.h"
 
 #include "media/NdkMediaCodec.h"
 //#include <NdkMediaError.h>
@@ -185,4 +185,6 @@ private:
 	TOutputThread			mOutputThread;
 	SoyPixelsMeta			mOutputPixelMeta;
 	json11::Json::object	mOutputMeta;
+    
+    std::shared_ptr<Soy::TRuntimeLibrary> mMediaCodecDll;
 };

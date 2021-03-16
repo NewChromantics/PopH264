@@ -13,8 +13,10 @@
 #include "json11.hpp"
 
 //	supporting api level 28
-#if __ANDROID_API__ < 29
+#if __ANDROID_API__ == 29
 const char* AMEDIAFORMAT_KEY_CSD_AVC = AMEDIAFORMAT_KEY_CSD;
+#else
+const char* AMEDIAFORMAT_KEY_CSD_AVC = "csd-0";
 #endif
 
 
@@ -423,6 +425,14 @@ Android::TDecoder::TDecoder(PopH264::TDecoderParams Params,PopH264::OnDecodedFra
 	mInputThread		( std::bind(&TDecoder::GetNextInputData, this, std::placeholders::_1, std::placeholders::_2 ), std::bind(&TDecoder::HasPendingData, this ) ),
 	mOutputThread		( OnDecodedFrame, OnFrameError )
 {
+    mMediaCodecDll.reset( new Soy::TRuntimeLibrary("libmediandk.so") );
+
+//    AMEDIAFORMAT_KEY_CSD = mMediaCodecDll->GetSymbol("AMEDIAFORMAT_KEY_CSD");
+//    AMEDIAFORMAT_KEY_DISPLAY_WIDTH = mMediaCodecDll->GetSymbol("AMEDIAFORMAT_KEY_DISPLAY_WIDTH");
+//    AMEDIAFORMAT_KEY_DISPLAY_HEIGHT = mMediaCodecDll->GetSymbol("AMEDIAFORMAT_KEY_DISPLAY_HEIGHT");
+//    AMEDIAFORMAT_KEY_ROTATION = mMediaCodecDll->GetSymbol("AMEDIAFORMAT_KEY_ROTATION");
+//    AMEDIAFORMAT_KEY_ROTATION = mMediaCodecDll->GetSymbol("AMEDIAFORMAT_KEY_DISPLAY_CROP");
+
 /*
 	//	see main thread/same thread comments
 	//	http://stackoverflow.com/questions/32772854/android-ndk-crash-in-androidmediacodec#

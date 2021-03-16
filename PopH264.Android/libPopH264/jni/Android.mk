@@ -127,6 +127,8 @@ $(SOY_PATH)/src/SoyThread.cpp \
 $(SOY_PATH)/src/SoyJava.cpp \
 $(SOY_PATH)/src/SoyStream.cpp \
 $(SOY_PATH)/src/SoyMediaFormat.cpp \
+$(SOY_PATH)/src/SoyRuntimeLibrary.cpp \
+$(SOY_PATH)/src/SoyPlatform.cpp \
 
 #$(SOY_PATH)/src/SoyOpengl.cpp \
 #$(SOY_PATH)/src/SoyOpenglContext.cpp \
