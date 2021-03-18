@@ -130,7 +130,7 @@ namespace Android
     std::function<media_status_t (AMediaCodec*, AMediaCodecOnAsyncNotifyCallback callback, void *userdata)> AMediaCodec_setAsyncNotifyCallback =
     [](AMediaCodec*, AMediaCodecOnAsyncNotifyCallback callback, void *userdata)
     {
-        std::Debug << "AMediaCodecOnAsyncNotifyCallback missing on this platform " << std::endl;
+        std::Debug << "AMediaCodec_setAsyncNotifyCallback missing on this platform " << std::endl;
         return AMEDIA_ERROR_UNSUPPORTED;
     };
 #endif
