@@ -26,15 +26,11 @@ if [ "$BUILD_TARGET_NAME" == "" ]; then
 	exit 1;
 fi
 
-
-if [ -z "$ANDROID_API" ]; then
-	ANDROID_API="28"
-fi
-
-
+# tsdk: This is a terrible misleading variable name it in fact refers to the API version
+# https://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels
+# 24 is Minimum API that supports ifaddrs, 26 = Android 8.0
 if [ -z "$ANDROID_PLATFORM" ]; then
-# tsdk: 24 is Minimum platform that supports ifaddrs
-	ANDROID_PLATFORM="28"
+	ANDROID_PLATFORM="21"
 fi
 
 MAXCONCURRENTBUILDS=1
@@ -59,11 +55,12 @@ ADDITIONAL_BUILD_FILES=(Source/PopH264.h)
 
 function InstallAndRunTestExecutable()
 {
-	#adb push ./PopH264 /data/local/tmp && adb push ./libc++_shared.so /data/local/tmp && adb shell "cd /data/local/tmp && chmod +x ./PopH264 && ./PopH264"
-	adb push ./PopH264 /data/local/tmp
+	adb push ./PopH264TestApp /data/local/tmp
 	adb push ./libc++_shared.so /data/local/tmp
-	adb shell "cd /data/local/tmp && chmod +x ./PopH264 && ./PopH264"
-	
+	adb push ./PopH264.h /data/local/tmp
+	adb push ./libPopH264.so /data/local/tmp
+	adb shell "cd /data/local/tmp && chmod +x ./PopH264TestApp && ./PopH264TestApp"
+
 	RESULT=$?
 	if [[ $RESULT -ne 0 ]]; then
 		exit $RESULT
