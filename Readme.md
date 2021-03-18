@@ -119,7 +119,7 @@ Any empty platforms are generally planned, but not yet implemented.
 Android
 ---------------------
 - Minimum Android9/Api level 28 (This can probably be reduced further)
-
+- To support lower Api levels need to implment a non async mode
 
 Unity Decoder Support
 -----------------------
@@ -165,6 +165,21 @@ Android
   - Use this docker container https://hub.docker.com/r/simplatex/android-lightweight
   - based on this article: https://medium.com/@simplatex/how-to-build-a-lightweight-docker-container-for-android-build-c52e4e68997e
   - If needed we can build out own / modify this one but at the moment it works with no issues
+
+To debug issues there is a script in `PopH264.Android` called `InstallAndRunTestExecutable.sh`
+
+To test call this passing in the architecture of the phone that you are testing:
+``` sh
+./InstallAndRunTestExecutable.sh armeabi-v7a
+```
+
+If you get a `No such file or directory` then you are probably building for the wrong architecture
+
+For API Levels below 28 (Android 9) Symbols are resolved from the shared lib `libmediandk.so` at runtime.
+
+For older phones that do not have the neccessary Symbols these error messages will be caught:
+- <Missing Symbol> not found in libmediandk.so
+- <Missing Symbol> missing on this platform
 
 Unity Development
 ==================
