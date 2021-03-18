@@ -168,12 +168,14 @@ Android
 
 To debug issues there is a script in `PopH264.Android` called `InstallAndRunTestExecutable.sh`
 
-To test call this passing in the architecture of the phone that you are testing:
+To test attach your phone and call this script, it will automatically try to find the ABI of your phone
 ``` sh
-./InstallAndRunTestExecutable.sh armeabi-v7a
+./InstallAndRunTestExecutable.sh 
 ```
 
-If you get a `No such file or directory` then you are probably building for the wrong architecture
+if this doesnt work you can pass in your ABI directly as a parameter to the script.
+
+If you get a `No such file or directory` then you are probably building for the wrong architecture.
 
 For API Levels below 28 (Android 9) Symbols are resolved from the shared lib `libmediandk.so` at runtime.
 
