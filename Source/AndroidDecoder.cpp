@@ -118,7 +118,7 @@ namespace Android
     const char*             AMEDIAFORMAT_KEY_DISPLAY_HEIGHT = "display-height";
     const char*             AMEDIAFORMAT_KEY_ROTATION = "rotation-degrees";
     const char*             AMEDIAFORMAT_KEY_DISPLAY_CROP = "crop";
-    const char*             AMEDIAFORMAT_KEY_COLOR_RANGE = "2";
+    const char*             AMEDIAFORMAT_KEY_COLOR_RANGE = "color-range";
 
     std::function<bool (AMediaFormat*, const char *name, int32_t *left, int32_t *top, int32_t *right, int32_t *bottom)> AMediaFormat_getRect =
     [](AMediaFormat*, const char *name, int32_t *left, int32_t *top, int32_t *right, int32_t *bottom)
