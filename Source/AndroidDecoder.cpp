@@ -12,9 +12,6 @@
 
 #include "json11.hpp"
 
-std::function<bool (AMediaFormat*, const char *name,
-        int32_t *left, int32_t *top, int32_t *right, int32_t *bottom)> AMediaFormat_getRect;
-
 enum AndroidColourFormat
 {
 	//	http://developer.android.com/reference/android/media/MediaCodecInfo.CodecCapabilities.html
@@ -113,15 +110,29 @@ namespace Android
 	//MLMediaFormatKey		MLMediaFormat_Key_CSD0 = "csd-0";
 
     void                    ResolveSymbols(Soy::TRuntimeLibrary& Dll);
-#if __ANDROID_API__ == 29
-    const char* AMEDIAFORMAT_KEY_CSD_AVC = AMEDIAFORMAT_KEY_CSD;
+#if __ANDROID_API__ == 28
+    const char*             AMEDIAFORMAT_KEY_CSD_AVC = AMEDIAFORMAT_KEY_CSD;
 #elif __ANDROID_API__ < 28
-    const char*             AMEDIAFORMAT_KEY_CSD_AVC;
-    const char*             AMEDIAFORMAT_KEY_DISPLAY_WIDTH;
-    const char*             AMEDIAFORMAT_KEY_DISPLAY_HEIGHT;
-    const char*             AMEDIAFORMAT_KEY_ROTATION;
-    const char*             AMEDIAFORMAT_KEY_DISPLAY_CROP;
-    const char*             AMEDIAFORMAT_KEY_COLOR_RANGE;
+    const char*             AMEDIAFORMAT_KEY_CSD_AVC = "csd-0";
+    const char*             AMEDIAFORMAT_KEY_DISPLAY_WIDTH = "display-width";
+    const char*             AMEDIAFORMAT_KEY_DISPLAY_HEIGHT = "display-height";
+    const char*             AMEDIAFORMAT_KEY_ROTATION = "rotation-degrees";
+    const char*             AMEDIAFORMAT_KEY_DISPLAY_CROP = "crop";
+    const char*             AMEDIAFORMAT_KEY_COLOR_RANGE = "2";
+
+    std::function<bool (AMediaFormat*, const char *name, int32_t *left, int32_t *top, int32_t *right, int32_t *bottom)> AMediaFormat_getRect =
+    [](AMediaFormat*, const char *name, int32_t *left, int32_t *top, int32_t *right, int32_t *bottom)
+    {
+        std::Debug << "AMediaFormat_getRect missing on this platform " << std::endl;
+        return false;
+    };
+
+    std::function<media_status_t (AMediaCodec*, AMediaCodecOnAsyncNotifyCallback callback, void *userdata)> AMediaCodec_setAsyncNotifyCallback =
+    [](AMediaCodec*, AMediaCodecOnAsyncNotifyCallback callback, void *userdata)
+    {
+        std::Debug << "AMediaCodecOnAsyncNotifyCallback missing on this platform " << std::endl;
+        return AMEDIA_ERROR_UNSUPPORTED;
+    };
 #endif
 
 }
@@ -180,27 +191,34 @@ void Android::IsOkay(media_status_t Status,const char* Context)
 
 void Android::ResolveSymbols(Soy::TRuntimeLibrary& Dll)
 {
-    if ( !AMEDIAFORMAT_KEY_CSD_AVC )
-        AMEDIAFORMAT_KEY_CSD_AVC = (const char*)Dll.GetSymbol("AMEDIAFORMAT_KEY_CSD");
-    
-    if ( !AMEDIAFORMAT_KEY_DISPLAY_WIDTH )
-        AMEDIAFORMAT_KEY_DISPLAY_WIDTH = (const char*)Dll.GetSymbol("AMEDIAFORMAT_KEY_DISPLAY_WIDTH");
-    
-    if ( !AMEDIAFORMAT_KEY_DISPLAY_HEIGHT )
-        AMEDIAFORMAT_KEY_DISPLAY_HEIGHT = (const char*)Dll.GetSymbol("AMEDIAFORMAT_KEY_DISPLAY_HEIGHT");
-    
-    if ( !AMEDIAFORMAT_KEY_ROTATION )
-        AMEDIAFORMAT_KEY_ROTATION = (const char*)Dll.GetSymbol("AMEDIAFORMAT_KEY_ROTATION");
-    
-    if ( !AMEDIAFORMAT_KEY_DISPLAY_CROP )
-        AMEDIAFORMAT_KEY_DISPLAY_CROP = (const char*)Dll.GetSymbol("AMEDIAFORMAT_KEY_DISPLAY_CROP");
-    
-    if ( !AMEDIAFORMAT_KEY_COLOR_RANGE )
-        AMEDIAFORMAT_KEY_COLOR_RANGE = (const char*)Dll.GetSymbol("AMEDIAFORMAT_KEY_COLOR_RANGE");
-    
-    Dll.SetFunction(AMediaFormat_getRect,"AMediaFormat_getRect");
-}
+    try {
+        if ( !AMEDIAFORMAT_KEY_CSD_AVC )
+            AMEDIAFORMAT_KEY_CSD_AVC = (const char*)Dll.GetSymbol("AMEDIAFORMAT_KEY_CSD");
+        
+        if ( !AMEDIAFORMAT_KEY_DISPLAY_WIDTH )
+            AMEDIAFORMAT_KEY_DISPLAY_WIDTH = (const char*)Dll.GetSymbol("AMEDIAFORMAT_KEY_DISPLAY_WIDTH");
+        
+        if ( !AMEDIAFORMAT_KEY_DISPLAY_HEIGHT )
+            AMEDIAFORMAT_KEY_DISPLAY_HEIGHT = (const char*)Dll.GetSymbol("AMEDIAFORMAT_KEY_DISPLAY_HEIGHT");
+        
+        if ( !AMEDIAFORMAT_KEY_ROTATION )
+            AMEDIAFORMAT_KEY_ROTATION = (const char*)Dll.GetSymbol("AMEDIAFORMAT_KEY_ROTATION");
+        
+        if ( !AMEDIAFORMAT_KEY_DISPLAY_CROP )
+            AMEDIAFORMAT_KEY_DISPLAY_CROP = (const char*)Dll.GetSymbol("AMEDIAFORMAT_KEY_DISPLAY_CROP");
+        
+        if ( !AMEDIAFORMAT_KEY_COLOR_RANGE )
+            AMEDIAFORMAT_KEY_COLOR_RANGE = (const char*)Dll.GetSymbol("AMEDIAFORMAT_KEY_COLOR_RANGE");
+        
+#if __ANDROID_API__ < 28
+        Dll.SetFunction(AMediaFormat_getRect,"AMediaFormat_getRect");
+        Dll.SetFunction(AMediaCodec_setAsyncNotifyCallback, "AMediaCodec_setAsyncNotifyCallback");
+#endif
 
+    } catch (std::exception& e) {
+        std::Debug << e.what() << std::endl;
+    }
+}
 
 SoyPixelsFormat::Type Android::GetPixelFormat(int32_t ColourFormat)
 {
@@ -318,19 +336,20 @@ SoyPixelsMeta Android::GetPixelMeta(MediaFormat_t Format,bool VerboseDebug,json1
 	auto ColourFormat = GetKey_integer(MLMediaFormat_Key_Color_Format);
 	if ( VerboseDebug )
 	{
+        DebugKey( AMEDIAFORMAT_KEY_CSD_AVC );
 		DebugKey( MLMediaFormat_Key_Duration);
 		DebugKey( MLMediaFormat_Key_Stride );
 		//GetKey<string>(MLMediaFormat_Key_Mime
 		DebugKey(MLMediaFormat_Key_Frame_Rate);
 		DebugKey(MLMediaFormat_Key_Color_Format);
 		DebugKey(Key_ColourRange);
-		DebugKey(Key_Rotation);
+        DebugKey(Key_Rotation);
 		DebugKey(MLMediaFormat_Key_Width);
 		DebugKey(MLMediaFormat_Key_Height);
 		DebugKey(MLMediaFormat_Key_Color_Format);
-		DebugKey(AMEDIAFORMAT_KEY_DISPLAY_WIDTH);
-		DebugKey(AMEDIAFORMAT_KEY_DISPLAY_HEIGHT);
-		DebugKey_Rect(AMEDIAFORMAT_KEY_DISPLAY_CROP);
+        DebugKey(AMEDIAFORMAT_KEY_DISPLAY_WIDTH);
+        DebugKey(AMEDIAFORMAT_KEY_DISPLAY_HEIGHT);
+        DebugKey(AMEDIAFORMAT_KEY_DISPLAY_CROP);
 		//DebugKey(MLMediaFormat_Key_Crop_Left);
 		//DebugKey(MLMediaFormat_Key_Crop_Right);
 		//DebugKey(MLMediaFormat_Key_Crop_Bottom);
@@ -460,12 +479,6 @@ Android::TDecoder::TDecoder(PopH264::TDecoderParams Params,PopH264::OnDecodedFra
     mMediaCodecDll.reset( new Soy::TRuntimeLibrary("libmediandk.so") );
     Android::ResolveSymbols(*mMediaCodecDll);
 #endif
-
-//    AMEDIAFORMAT_KEY_CSD = mMediaCodecDll->GetSymbol("AMEDIAFORMAT_KEY_CSD");
-//    AMEDIAFORMAT_KEY_DISPLAY_WIDTH = mMediaCodecDll->GetSymbol("AMEDIAFORMAT_KEY_DISPLAY_WIDTH");
-//    AMEDIAFORMAT_KEY_DISPLAY_HEIGHT = mMediaCodecDll->GetSymbol("AMEDIAFORMAT_KEY_DISPLAY_HEIGHT");
-//    AMEDIAFORMAT_KEY_ROTATION = mMediaCodecDll->GetSymbol("AMEDIAFORMAT_KEY_ROTATION");
-//    AMEDIAFORMAT_KEY_ROTATION = mMediaCodecDll->GetSymbol("AMEDIAFORMAT_KEY_DISPLAY_CROP");
 
 /*
 	//	see main thread/same thread comments
@@ -643,11 +656,10 @@ void Android::TDecoder::CreateCodec()
 
 
 	media_status_t Status = AMEDIA_OK;
-	#if __ANDROID_API__ >= 28
+
 	Status = AMediaCodec_setAsyncNotifyCallback( mCodec, Callbacks, this );
 	IsOkay(Status,"AMediaCodec_setAsyncNotifyCallback");
 	mAsyncBuffers = true;
-	#endif 
 
 	auto Width = mParams.mWidthHint;
 	auto Height = mParams.mHeightHint;
@@ -1043,7 +1055,7 @@ void Android::TDecoder::OnOutputTextureWritten(int64_t PresentationTime)
 	mOutputThread.OnOutputTextureWritten(PresentationTime);
 }
 */
-#if __ANDROID_API__ >= 28
+
 void Android::TDecoder::OnOutputFormatChanged(MediaFormat_t NewFormat)
 {
 	//	gr: we should do this like a queue for the output thread
@@ -1066,7 +1078,6 @@ void Android::TDecoder::OnOutputFormatChanged(MediaFormat_t NewFormat)
 		std::Debug << __PRETTY_FUNCTION__ << " Exception " << e.what() << std::endl;
 	}
 }
-#endif
 
 
 

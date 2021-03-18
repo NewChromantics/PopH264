@@ -30,7 +30,7 @@ fi
 # https://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels
 # 24 is Minimum API that supports ifaddrs, 26 = Android 8.0
 if [ -z "$ANDROID_PLATFORM" ]; then
-	ANDROID_PLATFORM="26"
+	ANDROID_PLATFORM="21"
 fi
 
 MAXCONCURRENTBUILDS=1
