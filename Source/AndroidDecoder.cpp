@@ -12,13 +12,8 @@
 
 #include "json11.hpp"
 
-//	supporting api level 28
-#if __ANDROID_API__ == 29
-const char* AMEDIAFORMAT_KEY_CSD_AVC = AMEDIAFORMAT_KEY_CSD;
-#else
-const char* AMEDIAFORMAT_KEY_CSD_AVC = "csd-0";
-#endif
-
+std::function<bool (AMediaFormat*, const char *name,
+        int32_t *left, int32_t *top, int32_t *right, int32_t *bottom)> AMediaFormat_getRect;
 
 enum AndroidColourFormat
 {
@@ -116,6 +111,19 @@ namespace Android
 	//	not in the ML api
 	//	https://forum.magicleap.com/hc/en-us/community/posts/360048067552-Setting-csd-0-byte-buffer-using-MLMediaFormatSetKeyByteBuffer
 	//MLMediaFormatKey		MLMediaFormat_Key_CSD0 = "csd-0";
+
+    void                    ResolveSymbols(Soy::TRuntimeLibrary& Dll);
+#if __ANDROID_API__ == 29
+    const char* AMEDIAFORMAT_KEY_CSD_AVC = AMEDIAFORMAT_KEY_CSD;
+#elif __ANDROID_API__ < 28
+    const char*             AMEDIAFORMAT_KEY_CSD_AVC;
+    const char*             AMEDIAFORMAT_KEY_DISPLAY_WIDTH;
+    const char*             AMEDIAFORMAT_KEY_DISPLAY_HEIGHT;
+    const char*             AMEDIAFORMAT_KEY_ROTATION;
+    const char*             AMEDIAFORMAT_KEY_DISPLAY_CROP;
+    const char*             AMEDIAFORMAT_KEY_COLOR_RANGE;
+#endif
+
 }
 
 std::string GetStatusString(media_status_t Status)
@@ -170,6 +178,29 @@ void Android::IsOkay(media_status_t Status,const char* Context)
 	throw Soy::AssertException(Error);
 }
 
+void Android::ResolveSymbols(Soy::TRuntimeLibrary& Dll)
+{
+    if ( !AMEDIAFORMAT_KEY_CSD_AVC )
+        AMEDIAFORMAT_KEY_CSD_AVC = (const char*)Dll.GetSymbol("AMEDIAFORMAT_KEY_CSD");
+    
+    if ( !AMEDIAFORMAT_KEY_DISPLAY_WIDTH )
+        AMEDIAFORMAT_KEY_DISPLAY_WIDTH = (const char*)Dll.GetSymbol("AMEDIAFORMAT_KEY_DISPLAY_WIDTH");
+    
+    if ( !AMEDIAFORMAT_KEY_DISPLAY_HEIGHT )
+        AMEDIAFORMAT_KEY_DISPLAY_HEIGHT = (const char*)Dll.GetSymbol("AMEDIAFORMAT_KEY_DISPLAY_HEIGHT");
+    
+    if ( !AMEDIAFORMAT_KEY_ROTATION )
+        AMEDIAFORMAT_KEY_ROTATION = (const char*)Dll.GetSymbol("AMEDIAFORMAT_KEY_ROTATION");
+    
+    if ( !AMEDIAFORMAT_KEY_DISPLAY_CROP )
+        AMEDIAFORMAT_KEY_DISPLAY_CROP = (const char*)Dll.GetSymbol("AMEDIAFORMAT_KEY_DISPLAY_CROP");
+    
+    if ( !AMEDIAFORMAT_KEY_COLOR_RANGE )
+        AMEDIAFORMAT_KEY_COLOR_RANGE = (const char*)Dll.GetSymbol("AMEDIAFORMAT_KEY_COLOR_RANGE");
+    
+    Dll.SetFunction(AMediaFormat_getRect,"AMediaFormat_getRect");
+}
+
 
 SoyPixelsFormat::Type Android::GetPixelFormat(int32_t ColourFormat)
 {
@@ -203,7 +234,6 @@ SoyPixelsFormat::Type Android::GetPixelFormat(int32_t ColourFormat)
 	throw Soy::AssertException(Error);
 }
 
-#if __ANDROID_API__ >= 28
 SoyPixelsMeta Android::GetPixelMeta(MediaFormat_t Format,bool VerboseDebug,json11::Json::object& Meta)
 {
 	if ( VerboseDebug )
@@ -359,7 +389,7 @@ SoyPixelsMeta Android::GetPixelMeta(MediaFormat_t Format,bool VerboseDebug,json1
 	SoyPixelsMeta PixelMeta( Width, Height, PixelFormat );
 	return PixelMeta;
 }
-#endif
+
 /*
 void MagicLeap::EnumCodecs(std::function<void(const std::string&)> EnumCodec)
 {
@@ -425,7 +455,11 @@ Android::TDecoder::TDecoder(PopH264::TDecoderParams Params,PopH264::OnDecodedFra
 	mInputThread		( std::bind(&TDecoder::GetNextInputData, this, std::placeholders::_1, std::placeholders::_2 ), std::bind(&TDecoder::HasPendingData, this ) ),
 	mOutputThread		( OnDecodedFrame, OnFrameError )
 {
+    
+#if __ANDROID_API__ < 28
     mMediaCodecDll.reset( new Soy::TRuntimeLibrary("libmediandk.so") );
+    Android::ResolveSymbols(*mMediaCodecDll);
+#endif
 
 //    AMEDIAFORMAT_KEY_CSD = mMediaCodecDll->GetSymbol("AMEDIAFORMAT_KEY_CSD");
 //    AMEDIAFORMAT_KEY_DISPLAY_WIDTH = mMediaCodecDll->GetSymbol("AMEDIAFORMAT_KEY_DISPLAY_WIDTH");
