@@ -129,7 +129,7 @@ jobs:
 
   publish-gpr:
     needs: Build
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     steps:
       # Download artifacts into Packaging dir
       - uses: actions/checkout@v2
@@ -148,6 +148,9 @@ jobs:
         env:
           PACKAGE_DIR: ${{ env.project }}.Package/
 
+      - name: Test xcframework code signing
+        run: |
+          codesign -vvvv $PACKAGE_DIR/${{ env.project }}.xcframework/macos-x86_64/${{ env.project }}_Osx.framework
       # setup node for npm packaging
       - name: Make github package
         uses: actions/setup-node@v1
