@@ -118,18 +118,17 @@ Any empty platforms are generally planned, but not yet implemented.
 
 Android
 ---------------------
-- Minimum Android9/Api level 28 (This can probably be reduced further)
-- To support lower Api levels need to implment a non async mode
+- The minimum android API version supported by this binary is 21 (android 8.0), dictated by the `ANDROID_PLATFORM` env var in `/PopH264.Android/Build.sh`.
+- But, android 8.0 doesn't support async buffers, and we haven't yet implemented non-async buffer access. See issue #52 https://github.com/NewChromantics/PopH264/issues/52
+- We support old & new apis by building for the old platform, then loading `libmediandk.so` at runtime (which is already loaded, not yet lazy-loaded) and finding android 9/10 symbols that we use.
 
 Unity Decoder Support
 -----------------------
-- Included is a c# CAPI wrapper with threading support, texture2D output wrapper.
-- Turning this into a package is WIP.
+- Included is a c# CAPI wrapper with the option to run on a thread, (Can also be used synchronously) with texture2D output wrapper.
 
 Unity Encoder Support
 -----------------------
 - Still todo, but is a CAPI which can be easily implemented 
-- Turning this into a package is WIP.
 
 Unreal Support
 ------------------
@@ -158,30 +157,21 @@ Linux
 Android
 ----------------
 - Build on OSX by pre-installing the android-ndk with brew
-  - `brew install homebrew/cask/android-ndk` note: `android-ndk` seems to be stuck on r13b which doesn't support `-std=c++17`
-  - Then build the android scheme in the `xcodeproj`
+ - `brew install homebrew/cask/android-ndk` note: `android-ndk` seems to be stuck on r13b which doesn't support `-std=c++17`
+ - Then build the android scheme in the `xcodeproj`
   
 - Build on linux
-  - Use this docker container https://hub.docker.com/r/simplatex/android-lightweight
-  - based on this article: https://medium.com/@simplatex/how-to-build-a-lightweight-docker-container-for-android-build-c52e4e68997e
-  - If needed we can build out own / modify this one but at the moment it works with no issues
+ - Use this docker container https://hub.docker.com/r/simplatex/android-lightweight
+ - based on this article: https://medium.com/@simplatex/how-to-build-a-lightweight-docker-container-for-android-build-c52e4e68997e
+ - If needed we can build out own / modify this one but at the moment it works with no issues
 
-To debug issues there is a script in `PopH264.Android` called `InstallAndRunTestExecutable.sh`
-
-To test attach your phone and call this script, it will automatically try to find the ABI of your phone
-``` sh
-./InstallAndRunTestExecutable.sh 
-```
-
-if this doesnt work you can pass in your ABI directly as a parameter to the script.
-
-If you get a `No such file or directory` then you are probably building for the wrong architecture.
-
-For API Levels below 28 (Android 9) Symbols are resolved from the shared lib `libmediandk.so` at runtime.
-
-For older phones that do not have the neccessary Symbols these error messages will be caught:
-- <Missing Symbol> not found in libmediandk.so
-- <Missing Symbol> missing on this platform
+- Test run
+ - To debug issues there is a script in `/PopH264.Android/` called `InstallAndRunTestExecutable.sh`
+ - To test attach your phone and call this script, it will automatically try to find the ABI of your phone `sh ./InstallAndRunTestExecutable.sh`
+ - If the ABI isn't automatically detected, you can pass it as the first argument `sh ./InstallAndRunTestExecutable.sh armv7`
+ - If you get a `No such file or directory` when trying to use the executable binary then you are probably building for the wrong architecture.
+ - If there are API version mismatches with the phone, you should see [runtime] link errors
+  - `CANNOT LINK EXECUTABLE "./PopH264TestApp": cannot locate symbol "AMEDIAFORMAT_KEY_CSD_AVC" referenced by "/data/local/tmp/libPopH264.so"...`
 
 Unity Development
 ==================
