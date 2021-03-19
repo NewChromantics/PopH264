@@ -151,7 +151,7 @@ jobs:
 
       - name: Test xcframework code signing
         run: |
-          codesign -vvvv "$PACKAGE_DIR/${{ env.project }}.xcframework/macos-x86_64/${{ env.project }}_Osx.framework"
+          codesign -vvvv ${{ env.project }}.Package/${{ env.project }}.xcframework/macos-x86_64/${{ env.project }}_Osx.framework
 
       # setup node for npm packaging
       - name: Make github package
