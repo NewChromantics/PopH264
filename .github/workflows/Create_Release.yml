@@ -24,16 +24,16 @@ jobs:
     strategy:
       matrix:
         config:
-          - os: ubuntu-latest
+          - os: ubuntu-18.04
             type: linux
-            architecture: x86_64
+            arch: x86_64
             
           - os: ubuntu-latest
             type: Wasm
 
           - os: Nvidia
             type: linux
-            architecture: arm64
+            arch: arm64
 
           # - os: Pi4
           #   type: linux
@@ -84,6 +84,7 @@ jobs:
         with:
           os: ${{ matrix.config.os }}
           project: ${{ env.project }}
+          arch: ${{ matrix.config.arch }}
 
       - name: Android Lib
         id: Android
