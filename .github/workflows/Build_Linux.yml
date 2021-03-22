@@ -31,11 +31,13 @@ jobs:
       - uses: actions/checkout@v2
         with:
           submodules: "recursive"
+          
       - name: Linux
         uses: NewChromantics/PopAction_BuildLinux@v1
         with:
           os: ${{ matrix.config.os }}
           project: ${{ env.project }}
+          arch: ${{ matix.config.arch }}
           flag: ${{ matrix.config.flag }}
 
       - name: Upload artifacts
