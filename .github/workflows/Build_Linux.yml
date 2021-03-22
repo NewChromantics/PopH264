@@ -16,15 +16,15 @@ jobs:
         config:
           - os: ubuntu-18.04
             type: linux
-            architecture: x86_64
+            arch: x86_64
 
           - os: Nvidia
             type: linux
-            architecture: arm64
+            arch: arm64
 
-          - os: ubuntu-latest
+          - os: ubuntu-18.04
             type: linux
-            architecture: armv8
+            arch: armv8
             flag: pi
 
     steps:
