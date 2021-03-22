@@ -129,7 +129,7 @@ jobs:
 
   publish-gpr:
     needs: Build
-    runs-on: linux-latest
+    runs-on: ubuntu-latest
     steps:
       # Download artifacts into Packaging dir
       - uses: actions/checkout@v2
