@@ -37,7 +37,7 @@ jobs:
         with:
           os: ${{ matrix.config.os }}
           project: ${{ env.project }}
-          arch: ${{ matix.config.arch }}
+          arch: ${{ matrix.config.arch }}
           flag: ${{ matrix.config.flag }}
 
       - name: Upload artifacts
