@@ -129,7 +129,7 @@ jobs:
 
   publish-gpr:
     needs: Build
-    runs-on: macos-latest
+    runs-on: linux-latest
     steps:
       # Download artifacts into Packaging dir
       - uses: actions/checkout@v2
