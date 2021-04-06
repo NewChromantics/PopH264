@@ -650,6 +650,11 @@ void Avf::TEncoder::Encode(const SoyPixelsImpl& Pixels,const std::string& Meta,b
 
 	AllocEncoder( Pixels.GetMeta() );
 
+	if ( Pixels.GetFormat() == SoyPixelsFormat::Greyscale )
+	{
+		std::Debug << __PRETTY_FUNCTION__ << " Warning, encoding greyscale image which seems to come out pure grey regardless of data on ios (ipad 2020 ios14)" << std::endl;
+	}
+
 	auto PixelBuffer = Avf::PixelsToPixelBuffer(Pixels);
 	auto FrameNumber = PushFrameMeta(Meta);
 	

@@ -127,6 +127,13 @@ void PopH264::TEncoderInstance::EndOfStream()
 	mEncoder->FinishEncoding();
 }
 
+static SoyPixels DummyPixels;
+SoyPixelsImpl& GetDummyPixels(SoyPixelsMeta Meta)
+{
+	DummyPixels.Init(Meta);
+	return DummyPixels;
+}
+
 void PopH264::TEncoderInstance::PushFrame(const std::string& Meta,const uint8_t* LumaData,const uint8_t* ChromaUData,const uint8_t* ChromaVData)
 {
 	std::string ParseError;
@@ -177,8 +184,39 @@ void PopH264::TEncoderInstance::PushFrame(const std::string& Meta,const uint8_t*
 					throw Soy::AssertException(std::string("Unrecognised pixel format ") + FormatName);
 			}
 		}
-		SoyPixelsRemote Pixels(const_cast<uint8_t*>(LumaData), Width, Height, LumaSize, PixelFormat );
-		mEncoder->Encode(Pixels, Meta, Keyframe);
+
+		SoyPixelsRemote LumaPixels(const_cast<uint8_t*>(LumaData), Width, Height, LumaSize, PixelFormat );
+		
+		#if defined(TARGET_IOS)
+		{
+			//	gr: ios seems to encode this pure grey, so pad with fake buffers;
+			//		osx seems to encode greyscale without fuss?
+			//	gr: that Encode() isn't implemented, turn into yuv
+			if ( PixelFormat == SoyPixelsFormat::Greyscale )
+			{
+				SoyPixels YuvPixels(LumaPixels);
+				YuvPixels.SetFormat( SoyPixelsFormat::Yuv_8_88 );
+				mEncoder->Encode( YuvPixels, Meta, Keyframe);
+				return;
+				/*
+				//	gr: ios seems to encode this pure grey, so pad with fake buffers;
+				#if defined(TARGET_IOS)
+				{
+					SoyPixelsMeta ChromaPlaneMeta( Width/2, Height/2, SoyPixelsFormat::Greyscale );
+					auto& ChromaXPlane = GetDummyPixels(ChromaPlaneMeta);
+					mEncoder->Encode( LumaPixels, ChromaXPlane, ChromaXPlane, Meta, Keyframe );
+				}
+				#else
+				{
+					mEncoder->Encode( LumaPixels, Meta, Keyframe);
+				}
+				#endif
+				*/
+			}
+		}
+		#endif
+
+		mEncoder->Encode( LumaPixels, Meta, Keyframe);
 		return;
 	}
 
