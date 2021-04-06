@@ -46,7 +46,8 @@ namespace PopH264
 	//	1.3.32	Added extra timer debug. Android, if given 0 as size hints, will try and extract hint sizes from SPS
 	//	1.3.33	First wasm version of broadway compiled from our repository
 	//	1.3.34	Added some extra macos/ios version number settings for mac-swift app compatibility
-	const Soy::TVersion	Version(1,3,38);
+	//	1.3.39	Ios now converts greyscale to YUV. Greyscale is blank on ios (fine on osx)
+	const Soy::TVersion	Version(1,3,39);
 }
 
 
