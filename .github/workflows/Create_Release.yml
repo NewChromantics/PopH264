@@ -24,16 +24,16 @@ jobs:
     strategy:
       matrix:
         config:
-          - os: ubuntu-latest
+          - os: ubuntu-18.04
             type: linux
-            architecture: x86_64
+            arch: x86_64
             
           - os: ubuntu-latest
             type: Wasm
 
           - os: Nvidia
             type: linux
-            architecture: arm64
+            arch: arm64
 
           # - os: Pi4
           #   type: linux
@@ -84,6 +84,7 @@ jobs:
         with:
           os: ${{ matrix.config.os }}
           project: ${{ env.project }}
+          arch: ${{ matrix.config.arch }}
 
       - name: Android Lib
         id: Android
@@ -144,9 +145,15 @@ jobs:
          echo Copying files into $PACKAGE_DIR
          echo Project is ${{ env.project }}
          cp Readme.md $PACKAGE_DIR
-         rsync -aP Unity/PopH264/Assets/PopH264/ $PACKAGE_DIR
+         rsync -avP --exclude PopH264.xcframework/* Unity/PopH264/Assets/PopH264/ $PACKAGE_DIR
         env:
           PACKAGE_DIR: ${{ env.project }}.Package/
+
+      # Disabled for now as its giving the error
+      # PopH264.Package/PopH264.xcframework/macos-x86_64/PopH264_Osx.framework: bundle format is ambiguous (could be app or framework)
+      # - name: Test xcframework code signing
+      #   run: |
+      #     codesign -vvvv ${{ env.project }}.Package/${{ env.project }}.xcframework/macos-x86_64/${{ env.project }}_Osx.framework
 
       # setup node for npm packaging
       - name: Make github package

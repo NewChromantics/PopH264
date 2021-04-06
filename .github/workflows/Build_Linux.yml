@@ -14,28 +14,30 @@ jobs:
     strategy:
       matrix:
         config:
-          - os: ubuntu-latest
+          - os: ubuntu-18.04
             type: linux
-            architecture: x86_64
+            arch: x86_64
 
           - os: Nvidia
             type: linux
-            architecture: arm64
+            arch: arm64
 
-          - os: ubuntu-latest
+          - os: ubuntu-18.04
             type: linux
-            architecture: armv8
+            arch: armv8
             flag: pi
 
     steps:
       - uses: actions/checkout@v2
         with:
           submodules: "recursive"
+          
       - name: Linux
         uses: NewChromantics/PopAction_BuildLinux@v1
         with:
           os: ${{ matrix.config.os }}
           project: ${{ env.project }}
+          arch: ${{ matrix.config.arch }}
           flag: ${{ matrix.config.flag }}
 
       - name: Upload artifacts
