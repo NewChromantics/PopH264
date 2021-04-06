@@ -132,13 +132,13 @@ void PopH264::TEncoderInstance::PushFrame(const std::string& Meta,const uint8_t*
 	std::string ParseError;
 	auto Json = json11::Json::parse( Meta, ParseError );
 	//	these return 0 if missing
-	auto Width = Json["Width"].int_value();
-	auto Height = Json["Height"].int_value();
-	auto LumaSize = Json["LumaSize"].int_value();
-	auto ChromaUSize = Json["ChromaUSize"].int_value();
-	auto ChromaVSize = Json["ChromaVSize"].int_value();
-	auto Keyframe = Json["Keyframe"].bool_value();
-	auto FormatName = Json["Format"].string_value();
+	auto Width = Json[POPH264_ENCODEFRAME_KEY_WIDTH].int_value();
+	auto Height = Json[POPH264_ENCODEFRAME_KEY_HEIGHT].int_value();
+	auto LumaSize = Json[POPH264_ENCODEFRAME_KEY_LUMASIZE].int_value();
+	auto ChromaUSize = Json[POPH264_ENCODEFRAME_KEY_CHROMAUSIZE].int_value();
+	auto ChromaVSize = Json[POPH264_ENCODEFRAME_KEY_CHROMAVSIZE].int_value();
+	auto Keyframe = Json[POPH264_ENCODEFRAME_KEY_KEYFRAME].bool_value();
+	auto FormatName = Json[POPH264_ENCODEFRAME_KEY_FORMAT].string_value();
 
 	//	check for data/size mismatch
 	if ( LumaData && LumaSize==0 )

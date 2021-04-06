@@ -116,6 +116,15 @@ __export void				PopH264_DecoderAddOnNewFrameCallback(int32_t Instance,PopH264_C
 #define POPH264_ENCODER_KEY_CONSTANTBITRATE		"ConstantBitRate"	//	else variable
 #define POPH264_ENCODER_KEY_SLICELEVELENCODING	"SliceLevelEncoding"
 
+#define POPH264_ENCODEFRAME_KEY_KEYFRAME	"Keyframe"		//	tell encoder to encode this as a keyframe
+#define POPH264_ENCODEFRAME_KEY_WIDTH		"Width"			
+#define POPH264_ENCODEFRAME_KEY_HEIGHT		"Height"		
+#define POPH264_ENCODEFRAME_KEY_LUMASIZE	"LumaSize"		//	buffer size	
+#define POPH264_ENCODEFRAME_KEY_CHROMAUSIZE	"ChromaUSize"	//	buffer size
+#define POPH264_ENCODEFRAME_KEY_CHROMAVSIZE	"ChromaVSize"	//	buffer size
+#define POPH264_ENCODEFRAME_KEY_FORMAT		"Format"		//	string
+
+
 
 //	All options are optional
 //	.Encoder = "avf"|"x264"
