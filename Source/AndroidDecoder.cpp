@@ -658,8 +658,11 @@ void Android::TDecoder::CreateCodec()
 	media_status_t Status = AMEDIA_OK;
 
 	Status = AMediaCodec_setAsyncNotifyCallback( mCodec, Callbacks, this );
-	IsOkay(Status,"AMediaCodec_setAsyncNotifyCallback");
-	mAsyncBuffers = true;
+	if ( Status == AMEDIA_OK ) {
+		mAsyncBuffers = true;
+	} else {
+		std::Debug << "AMediaCodec_setAsyncNotifyCallback failed, using non-async mode" << std::endl;
+	}
 
 	auto Width = mParams.mWidthHint;
 	auto Height = mParams.mHeightHint;
@@ -840,6 +843,18 @@ Android::TDecoder::~TDecoder()
 
 void Android::TDecoder::DequeueInputBuffers()
 {
+	while (true) {
+		int inIndex = AMediaCodec_dequeueInputBuffer(mCodec, 0);
+		if (inIndex >= 0)
+		{
+			this->OnInputBufferAvailible(inIndex);
+		} else {
+			break;
+		}
+	}
+
+	return;
+
 	//		and stick in the queue
 	//		this should trigger the input queue to start grabbing data
 	while(true)
@@ -866,6 +881,26 @@ void Android::TDecoder::DequeueInputBuffers()
 
 void Android::TDecoder::DequeueOutputBuffers()
 {
+	AMediaCodecBufferInfo info;
+	while (true) {
+		int outIndex = AMediaCodec_dequeueOutputBuffer(mCodec, &info, 0);
+		if (outIndex >= 0) {
+			try
+			{
+				this->OnOutputBufferAvailible(outIndex, info);
+			}
+			catch(std::exception& e)
+			{
+				std::Debug << "DequeueOutputBuffers(" << outIndex << ") exception; " << e.what() << std::endl;
+			}
+		} else if (outIndex == AMEDIACODEC_INFO_OUTPUT_FORMAT_CHANGED) {
+			std::Debug << "DequeueOutputBuffers: AMEDIACODEC_INFO_OUTPUT_FORMAT_CHANGED" << std::endl;
+			this->OnOutputFormatChanged(AMediaCodec_getOutputFormat(mCodec));
+		} else {
+			break;
+		}
+	}
+
 /*
 	//		and stick in the queue
 	//		this should trigger the input queue to start grabbing data
@@ -924,6 +959,16 @@ bool Android::TDecoder::DecodeNextPacket()
 	//	even if we didn't get a frame, try to decode again as we processed a packet
 	//return true;
 	return false;
+}
+
+void Android::TDecoder::CheckUpdates()
+{
+	if ( mCodec && !mAsyncBuffers )
+	{
+		//std::Debug << "CheckUpdates() " << GetDebugState() << std::endl;
+		DequeueInputBuffers();
+		DequeueOutputBuffers();
+	}
 }
 
 void Android::TDecoder::GetNextInputData(ArrayBridge<uint8_t>&& PacketBuffer,PopH264::FrameNumber_t& FrameNumber)
@@ -1425,7 +1470,7 @@ bool Android::TOutputThread::Iteration()
 	{
 		//	read a buffer
 		TOutputBufferMeta BufferMeta;
-		if ( mAsyncBuffers )
+		if ( true )
 		{
 			std::lock_guard<std::mutex> Lock(mOutputBuffersLock);
 			BufferMeta = mOutputBuffers.PopAt(0);
@@ -1495,7 +1540,7 @@ bool Android::TInputThread::Iteration(std::function<void(std::chrono::millisecon
 	{
 		//std::Debug << __PRETTY_FUNCTION__ << " Reading a buffer" << std::endl;
 	}
-	bool DequeueNextIndex = !mAsyncBuffers;
+	bool DequeueNextIndex = false; // !mAsyncBuffers;
 
 	//	read a buffer
 	int64_t BufferIndex = -1;
@@ -1512,16 +1557,13 @@ bool Android::TInputThread::Iteration(std::function<void(std::chrono::millisecon
 			int Timeout = 0;
 			//	gr: this returns -1000 in async mode (see logcat MediaCodec)
 			BufferIndex = AMediaCodec_dequeueInputBuffer( mCodec, Timeout );
-			if ( BufferIndex < 0 )
+			if ( BufferIndex >= 0 )
 			{
-				std::stringstream Error;
-				Error << "AMediaCodec_dequeueInputBuffer returned buffer index " << BufferIndex;
-				throw Soy::AssertException(Error);
+				PushInputBuffer( BufferIndex );
 			}
-			std::lock_guard<std::mutex> Lock(mInputBuffersLock);
-			mInputBuffers.Remove(BufferIndex);
+		} else {
+			PushInputBuffer( BufferIndex );
 		}
-		PushInputBuffer( BufferIndex );
 	}
 	catch(std::exception& e)
 	{

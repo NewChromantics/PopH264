@@ -78,6 +78,7 @@ __export void				PopH264_PeekFrame(int32_t Instance,char* JsonBuffer,int32_t Jso
 __export int32_t			PopH264_PushData(int32_t Instance,uint8_t* Data,int32_t DataSize,int32_t FrameNumber);
 //	wrapper for PopH264_PushData() with null as the data
 __export int32_t			PopH264_PushEndOfStream(int32_t Instance);
+__export int32_t			PopH264_CheckDecoderUpdates(int32_t Instance);
 
 //	returns frame number. -1 on error
 __export int32_t			PopH264_PopFrame(int32_t Instance,uint8_t* Plane0,int32_t Plane0Size,uint8_t* Plane1,int32_t Plane1Size,uint8_t* Plane2,int32_t Plane2Size);

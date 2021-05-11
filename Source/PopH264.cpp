@@ -150,6 +150,11 @@ __export int32_t PopH264_PushEndOfStream(int32_t Instance)
 	return PopH264_PushData(Instance, nullptr, 0, 0);
 }
 
+__export int32_t PopH264_CheckDecoderUpdates(int32_t Instance)
+{
+	return PopH264_PushData(Instance, nullptr, 0, 1);
+}
+
 
 json11::Json::object GetMetaJson(json11::Json::object& MetaJson,const SoyPixelsMeta& Meta)
 {

@@ -152,6 +152,7 @@ public:
 
 private:
 	virtual bool	DecodeNextPacket() override;	//	returns true if more data to proccess
+	virtual void	CheckUpdates() override;
 	
 	void			OnInputBufferAvailible(int64_t BufferIndex);
 	void			OnOutputBufferAvailible(int64_t BufferIndex,const MediaBufferInfo_t& BufferMeta);

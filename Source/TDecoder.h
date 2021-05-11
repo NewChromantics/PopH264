@@ -73,6 +73,7 @@ public:
 
 	//	gr: this has a callback because of flushing old packets. Need to overhaul the framenumber<->packet relationship
 	void			PushEndOfStream();
+	void			CheckDecoderUpdates();
 	
 protected:
 	void			OnDecoderError(const std::string& Error);		//	as this isn't frame-specific, we're assuming it's fatal
@@ -81,6 +82,7 @@ protected:
 	void			OnDecodedFrame(const SoyPixelsImpl& Pixels,FrameNumber_t FrameNumber,const json11::Json& Meta);	
 	void			OnDecodedEndOfStream();
 	virtual bool	DecodeNextPacket()=0;	//	returns true if more data to proccess
+	virtual void	CheckUpdates() {};
 	
 	bool			HasPendingData()		{	return !mPendingDatas.IsEmpty();	}
 	void			PeekHeaderNalus(ArrayBridge<uint8_t>&& SpsBuffer,ArrayBridge<uint8_t>&& PpsBuffer);

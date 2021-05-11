@@ -245,7 +245,11 @@ void PopH264::TDecoderInstance::PushData(const uint8_t* Data,size_t DataSize,siz
 	//	if user passes null, we want to end stream/flush
 	if ( Data == nullptr )
 	{
-		mDecoder->PushEndOfStream();
+		if (FrameNumber == 1) {
+			mDecoder->CheckDecoderUpdates();
+		} else {
+			mDecoder->PushEndOfStream();
+		}
 		return;
 	}
 	

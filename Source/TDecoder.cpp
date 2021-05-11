@@ -60,6 +60,11 @@ void PopH264::TDecoder::PushEndOfStream()
 	Decode( GetArrayBridge(DataArray), 0 );
 }
 
+void PopH264::TDecoder::CheckDecoderUpdates()
+{
+	CheckUpdates();
+}
+
 void PopH264::TDecoder::Decode(ArrayBridge<uint8_t>&& PacketData,FrameNumber_t FrameNumber)
 {
 	//	gr: maybe we should split when we PopNalu to move this work away from caller thread
