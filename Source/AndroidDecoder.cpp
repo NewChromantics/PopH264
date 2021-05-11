@@ -801,11 +801,11 @@ Android::TDecoder::~TDecoder()
 	{
 		try
 		{
-			auto Result = AMediaCodec_stop( mCodec );
-			IsOkay( Result, "AMediaCodec_stop" );
-		
-			Result = AMediaCodec_flush( mCodec );
+			auto Result = AMediaCodec_flush( mCodec );
 			IsOkay( Result, "AMediaCodec_flush" );
+
+			Result = AMediaCodec_stop( mCodec );
+			IsOkay( Result, "AMediaCodec_stop" );
 		}
 		catch(std::exception& e)
 		{
