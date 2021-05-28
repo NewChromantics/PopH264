@@ -132,7 +132,7 @@ Unity Encoder Support
 
 Unreal Support
 ------------------
-- Not currently planned, but CAPI which hopefully lends itself well to being a class.
+- Work-in-progress plugin is here https://github.com/NewChromantics/PopH264_UnrealPlugin
 
 Build Instructions
 =======================
