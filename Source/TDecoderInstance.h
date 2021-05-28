@@ -53,6 +53,7 @@ class PopH264::TDecoderInstance
 {
 public:
 	TDecoderInstance(json11::Json& Options);
+	~TDecoderInstance();
 	
 	void									AddOnNewFrameCallback(std::function<void()> Callback);
 

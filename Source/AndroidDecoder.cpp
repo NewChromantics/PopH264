@@ -472,7 +472,7 @@ Android::TDecoder::TDecoder(PopH264::TDecoderParams Params,PopH264::OnDecodedFra
 	PopH264::TDecoder	( OnDecodedFrame, OnFrameError ),
 	mParams				( Params ),
 	mInputThread		( std::bind(&TDecoder::GetNextInputData, this, std::placeholders::_1, std::placeholders::_2 ), std::bind(&TDecoder::HasPendingData, this ) ),
-	mOutputThread		( OnDecodedFrame, OnFrameError )
+	mOutputThread		( std::bind(&TDecoder::LockCodecCallback, this, std::placeholders::_1 ), OnDecodedFrame, OnFrameError )
 {
     
 #if __ANDROID_API__ < 28
@@ -540,6 +540,8 @@ Android::TDecoder::TDecoder(PopH264::TDecoderParams Params,PopH264::OnDecodedFra
 	Start();
 	*/
 }
+
+	void			LockCodecCallback(std::function<void(MediaCodec_t)> Callback);
 
 
 //	return true if ready, return false if not ready (try again!). Exception on error
@@ -799,13 +801,20 @@ Android::TDecoder::~TDecoder()
 	std::Debug << __PRETTY_FUNCTION__ << std::endl;
 	if ( mCodec )
 	{
+		//	remove reference so we know we're destructing
+		auto Codec = mCodec;
+		
 		try
 		{
-			auto Result = AMediaCodec_flush( mCodec );
-			IsOkay( Result, "AMediaCodec_flush" );
+			std::Debug << __PRETTY_FUNCTION__ << " locking codec..." << std::endl;
+			std::lock_guard<std::mutex> Lock(mCodecLock);
+			mCodec = nullptr;
+			//auto Result = AMediaCodec_flush( mCodec );
+			//IsOkay( Result, "AMediaCodec_flush" );
 
-			Result = AMediaCodec_stop( mCodec );
+			auto Result = AMediaCodec_stop( Codec );
 			IsOkay( Result, "AMediaCodec_stop" );
+			std::Debug << __PRETTY_FUNCTION__ << " codec stopped" << std::endl; 
 		}
 		catch(std::exception& e)
 		{
@@ -824,14 +833,13 @@ Android::TDecoder::~TDecoder()
 			//	gr: I seem to recall it's safe to destroy the codec if the threads arent finished, 
 			//		they will error internally need to make sure. Find some reference to thread safety in the docs/code!
 			std::Debug << "AMediaCodec_destroy" << std::endl;
-			auto Result = AMediaCodec_delete( mCodec );
+			auto Result = AMediaCodec_delete( Codec );
 			IsOkay( Result, "AMediaCodec_delete" );
 		}
 		catch(std::exception& e)
 		{
 			std::Debug << __PRETTY_FUNCTION__ << " exception; " << e.what() << std::endl;
 		}
-		mCodec = nullptr;
 	}
 	
 	//	make sure threads are stopped regardless
@@ -840,6 +848,16 @@ Android::TDecoder::~TDecoder()
 	mOutputThread.WaitToFinish();
 }
 
+void Android::TDecoder::LockCodecCallback(std::function<void(MediaCodec_t)> Callback)
+{
+	std::lock_guard<std::mutex> Lock(mCodecLock);
+	if ( !mCodec )
+	{
+		std::Debug << __PRETTY_FUNCTION__ << " codec is null (destructing), callback skipped" << std::endl;
+		return;
+	}
+	Callback(mCodec);
+}
 
 void Android::TDecoder::DequeueInputBuffers()
 {
@@ -1126,10 +1144,11 @@ void Android::TDecoder::OnOutputFormatChanged(MediaFormat_t NewFormat)
 
 
 
-Android::TOutputThread::TOutputThread(PopH264::OnDecodedFrame_t OnDecodedFrame,PopH264::OnFrameError_t OnFrameError) :
+Android::TOutputThread::TOutputThread(std::function<void(std::function<void(MediaCodec_t)>)> LockCodec,PopH264::OnDecodedFrame_t OnDecodedFrame,PopH264::OnFrameError_t OnFrameError) :
 	SoyWorkerThread	("AndroidOutputThread", SoyWorkerWaitMode::Wake ),
 	mOnDecodedFrame	( OnDecodedFrame ),
-	mOnFrameError	( OnFrameError )
+	mOnFrameError	( OnFrameError ),
+	mLockCodec		( LockCodec )
 {
 	Start();
 }
@@ -1323,6 +1342,15 @@ Soy_AssertTodo();
 }
 */
 void Android::TOutputThread::PopOutputBuffer(const TOutputBufferMeta& BufferMeta)
+{
+	auto Callback = [&](MediaCodec_t LockedCodec)
+	{
+		this->PopOutputBuffer( LockedCodec, BufferMeta );
+	};
+	mLockCodec(Callback);
+}
+
+void Android::TOutputThread::PopOutputBuffer(MediaCodec_t LockedCodec,const TOutputBufferMeta& BufferMeta)
 {
 	//	gr: hold onto pointer and don't release buffer until it's been read,to avoid a copy
 	//		did this on android and it was a boost

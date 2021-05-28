@@ -62,7 +62,7 @@ public:
 class Android::TOutputThread : public SoyWorkerThread
 {
 public:
-	TOutputThread(PopH264::OnDecodedFrame_t OnDecodedFrame,PopH264::OnFrameError_t OnFrameError);
+	TOutputThread(std::function<void(std::function<void(MediaCodec_t)>)> LockCodec,PopH264::OnDecodedFrame_t OnDecodedFrame,PopH264::OnFrameError_t OnFrameError);
 
 	virtual bool	Iteration() override;
 	virtual bool	CanSleep() override;
@@ -76,6 +76,7 @@ public:
 */
 private:
 	void			PopOutputBuffer(const TOutputBufferMeta& BufferMeta);
+	void			PopOutputBuffer(MediaCodec_t LockedCodec,const TOutputBufferMeta& BufferMeta);
 	/*
 	void			RequestOutputTexture();
 	void			PushOutputTextures();
@@ -102,6 +103,7 @@ private:
 	size_t						mOutputTextureCounter = 0;	//	for debug colour output
 	*/
 	MediaCodec_t				mCodec = nullptr;
+	std::function<void(std::function<void(MediaCodec_t)>)>	mLockCodec;
 	bool						mAsyncBuffers = false;
 
 public:
@@ -171,12 +173,15 @@ private:
 	//	input thread pulling data
 	void			GetNextInputData(ArrayBridge<uint8_t>&& PacketBuffer,PopH264::FrameNumber_t& FrameNumber);
 
+	void			LockCodecCallback(std::function<void(MediaCodec_t)> Callback);
+
 private:
 	//	need SPS & PPS to create format, before we can create codec
 	Array<uint8_t>	mPendingSps;
 	Array<uint8_t>	mPendingPps;	
 	//std::shared_ptr<JniMediaFormat>		mFormat;	//	format for codec!
 	MediaCodec_t	mCodec = nullptr;
+	std::mutex		mCodecLock;
 	bool			mAsyncBuffers = false;
 	PopH264::TDecoderParams	mParams;
 	//std::shared_ptr<TSurfaceTexture>	mSurfaceTexture;
@@ -186,6 +191,6 @@ private:
 	TOutputThread			mOutputThread;
 	SoyPixelsMeta			mOutputPixelMeta;
 	json11::Json::object	mOutputMeta;
-    
-    std::shared_ptr<Soy::TRuntimeLibrary> mMediaCodecDll;
+
+	std::shared_ptr<Soy::TRuntimeLibrary> mMediaCodecDll;
 };

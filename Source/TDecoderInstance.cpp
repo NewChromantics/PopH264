@@ -239,6 +239,14 @@ PopH264::TDecoderInstance::TDecoderInstance(json11::Json& Options)
 	throw Soy::AssertException(Error);
 }
 
+PopH264::TDecoderInstance::~TDecoderInstance()
+{
+	//	make sure decoder destroys before lock
+	Soy::TScopeTimerPrint Timer3(__PRETTY_FUNCTION__,0);
+	std::Debug << __PRETTY_FUNCTION__ << " Destroying decoder..." <<std::endl;
+	mDecoder.reset();
+	std::Debug << __PRETTY_FUNCTION__ << " decoder destroyed." <<std::endl;
+}
 
 void PopH264::TDecoderInstance::PushData(const uint8_t* Data,size_t DataSize,size_t FrameNumber)
 {
