@@ -173,6 +173,13 @@
 			remoteGlobalIDString = BF151FD82384786600A70EBF;
 			remoteInfo = PopH264_Ios;
 		};
+		BFEB724F26668742000CB207 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BF4A6A0C1EA16D7C00613A64 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = BFF1C6DE22E3769B00AFDFD5;
+			remoteInfo = PopH264_Android;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -1116,6 +1123,7 @@
 			buildToolPath = PopH264.Android/build.sh;
 			buildWorkingDirectory = "";
 			dependencies = (
+				BFEB725026668742000CB207 /* PBXTargetDependency */,
 			);
 			name = PopH264_AndroidTestApp;
 			passBuildSettingsInEnvironment = 1;
@@ -1497,6 +1505,11 @@
 			isa = PBXTargetDependency;
 			target = BF151FD82384786600A70EBF /* PopH264_Ios */;
 			targetProxy = BFE7AAD925D94514006F48F1 /* PBXContainerItemProxy */;
+		};
+		BFEB725026668742000CB207 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = BFF1C6DE22E3769B00AFDFD5 /* PopH264_Android */;
+			targetProxy = BFEB724F26668742000CB207 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
