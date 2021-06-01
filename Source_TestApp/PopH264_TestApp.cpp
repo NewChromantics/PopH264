@@ -90,12 +90,13 @@ uint8_t TestDataBuffer[1 * 1024 * 1024];
 
 void DecoderTest(const char* TestDataName,CompareFunc_t* Compare,const char* DecoderName,size_t DataRepeat=1)
 {
-	std::cout << "DecoderTest(" << (TestDataName?TestDataName:"<null>") << "," << (DecoderName?DecoderName:"<null>") << ")" << std::endl;
+	std::Debug << "DecoderTest(" << (TestDataName?TestDataName:"<null>") << "," << (DecoderName?DecoderName:"<null>") << ")" << std::endl;
 	Array<uint8_t> TestData;
 
 	if (!LoadDataFromFilename(TestDataName, GetArrayBridge(TestData)))
 	{
-		auto TestDataSize = PopH264_GetTestData(TestDataName, TestDataBuffer, std::size(TestDataBuffer));
+		//	gr: using int (auto) here, causes some resolve problem with GetRemoteArray below
+		size_t TestDataSize = PopH264_GetTestData(TestDataName, TestDataBuffer, std::size(TestDataBuffer));
 		if ( TestDataSize < 0 )
 			throw std::runtime_error("Missing test data");
 		if ( TestDataSize == 0 )
@@ -106,9 +107,12 @@ void DecoderTest(const char* TestDataName,CompareFunc_t* Compare,const char* Dec
 			Debug << "Buffer for test data (" << TestDataSize << ") not big enough";
 			throw std::runtime_error(Debug.str());
 		}
+		//	gr: debug here as on Android GetRemoteArray with TestDataSize=auto was making a remote array of zero bytes
+		//std::Debug << "making TestDataArray..." << std::endl;
 		auto TestDataArray = GetRemoteArray(TestDataBuffer, TestDataSize, TestDataSize);
-		std::cout << "TestDataSize=" << TestDataSize << " TestDataArray.GetSize=" << TestDataArray.GetDataSize() << std::endl;
+		//std::Debug << "TestDataSize=" << TestDataSize << " TestDataArray.GetSize=" << TestDataArray.GetDataSize() << std::endl;
 		TestData.PushBackArray(TestDataArray);
+		//std::Debug << "TestData.PushBackArray() " << TestData.GetDataSize() << std::endl;
 	}
 
 	std::stringstream OptionsStr;
@@ -120,6 +124,7 @@ void DecoderTest(const char* TestDataName,CompareFunc_t* Compare,const char* Dec
 	auto OptionsString = OptionsStr.str();
 	auto* Options = OptionsString.c_str();
 	char ErrorBuffer[1024] = { 0 };
+	std::Debug << "PopH264_CreateDecoder()" << std::endl;
 	auto Handle = PopH264_CreateDecoder(Options,ErrorBuffer,std::size(ErrorBuffer));
 
 	std::Debug << "TestData (" << (TestDataName?TestDataName:"<null>") << ") Size: " << TestData.GetDataSize() << std::endl;
@@ -345,7 +350,7 @@ int main()
 {
 #if defined(TARGET_ANDROID)
 	//	android hides STDERR, so reading debug from CLI is hard
-	Debug::EnablePrint_Cout = true;
+	//Debug::EnablePrint_Cout = true;
 #endif
 
 	// heavy duty test to find leaks
