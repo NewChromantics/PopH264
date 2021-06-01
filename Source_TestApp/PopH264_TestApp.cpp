@@ -96,6 +96,10 @@ void DecoderTest(const char* TestDataName,CompareFunc_t* Compare,const char* Dec
 	if (!LoadDataFromFilename(TestDataName, GetArrayBridge(TestData)))
 	{
 		auto TestDataSize = PopH264_GetTestData(TestDataName, TestDataBuffer, std::size(TestDataBuffer));
+		if ( TestDataSize < 0 )
+			throw std::runtime_error("Missing test data");
+		if ( TestDataSize == 0 )
+			throw std::runtime_error("PopH264_GetTestData unexpectedly returned zero-length test data");
 		if (TestDataSize > std::size(TestDataBuffer))
 		{
 			std::stringstream Debug;
@@ -103,6 +107,7 @@ void DecoderTest(const char* TestDataName,CompareFunc_t* Compare,const char* Dec
 			throw std::runtime_error(Debug.str());
 		}
 		auto TestDataArray = GetRemoteArray(TestDataBuffer, TestDataSize, TestDataSize);
+		std::cout << "TestDataSize=" << TestDataSize << " TestDataArray.GetSize=" << TestDataArray.GetDataSize() << std::endl;
 		TestData.PushBackArray(TestDataArray);
 	}
 
@@ -117,6 +122,8 @@ void DecoderTest(const char* TestDataName,CompareFunc_t* Compare,const char* Dec
 	char ErrorBuffer[1024] = { 0 };
 	auto Handle = PopH264_CreateDecoder(Options,ErrorBuffer,std::size(ErrorBuffer));
 
+	std::Debug << "TestData (" << (TestDataName?TestDataName:"<null>") << ") Size: " << TestData.GetDataSize() << std::endl;
+	
 	int FirstFrameNumber = 9999 - 100;
 	for (auto Iteration = 0; Iteration < DataRepeat; Iteration++)
 	{
@@ -336,11 +343,16 @@ void android_main(struct android_app* state)
 
 int main()
 {
-	/* heavy duty test to find leaks
+#if defined(TARGET_ANDROID)
+	//	android hides STDERR, so reading debug from CLI is hard
+	Debug::EnablePrint_Cout = true;
+#endif
+
+	// heavy duty test to find leaks
 	for ( auto d=0;	d<10;	d++)
 		DecoderTest("RainbowGradient.h264", nullptr, nullptr, 500);
 	return 0;
-	*/
+	
 	std::cout << "main" << std::endl;
 	
 #if defined(TARGET_ANDROID)
@@ -361,8 +373,8 @@ int main()
 	SafeDecoderTest("TestData/Colour.h264", nullptr, nullptr );
 	SafeDecoderTest("TestData/Depth.h264", nullptr, nullptr );
 	SafeDecoderTest("TestData/Depth.h264", nullptr, "Broadway" );
-	SafeDecoderTest("RainbowGradient.h264", CompareRainbow, "Broadway" );
 	SafeDecoderTest("RainbowGradient.h264", CompareRainbow, nullptr );
+	SafeDecoderTest("RainbowGradient.h264", CompareRainbow, "Broadway" );
 	SafeDecoderTest("../TestData/Colour.h264", nullptr, nullptr );
 	SafeDecoderTest("../TestData/Colour.h264", nullptr, "Broadway" );
 	//SafeDecoderTest("RainbowGradient.h264", CompareRainbow);
