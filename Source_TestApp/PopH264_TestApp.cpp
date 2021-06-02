@@ -160,7 +160,8 @@ void DecoderTest(const char* TestDataName,CompareFunc_t* Compare,const char* Dec
 			bool IsValid = FrameNumber >= 0;
 			if (!IsValid)
 			{
-				std::this_thread::sleep_for(std::chrono::milliseconds(500));
+				//std::this_thread::sleep_for(std::chrono::milliseconds(500));
+				std::this_thread::sleep_for(std::chrono::milliseconds(5));
 				continue;
 			}
 
@@ -169,10 +170,87 @@ void DecoderTest(const char* TestDataName,CompareFunc_t* Compare,const char* Dec
 
 			if (Compare)
 				Compare(MetaJson, Plane0, Plane1, Plane2);
-			//break;
+			break;
 		}
 	}
 
+	PopH264_DestroyInstance(Handle);
+}
+
+
+
+void LoadTestData(Array<uint8_t>& TestData,const char* TestDataName)
+{
+	if ( LoadDataFromFilename(TestDataName, GetArrayBridge(TestData)) )
+		return;
+		
+	//	gr: using int (auto) here, causes some resolve problem with GetRemoteArray below
+	size_t TestDataSize = PopH264_GetTestData(TestDataName, TestDataBuffer, std::size(TestDataBuffer));
+	if ( TestDataSize < 0 )
+		throw std::runtime_error("Missing test data");
+	if ( TestDataSize == 0 )
+		throw std::runtime_error("PopH264_GetTestData unexpectedly returned zero-length test data");
+	if (TestDataSize > std::size(TestDataBuffer))
+	{
+		std::stringstream Debug;
+		Debug << "Buffer for test data (" << TestDataSize << ") not big enough";
+		throw std::runtime_error(Debug.str());
+	}
+	//	gr: debug here as on Android GetRemoteArray with TestDataSize=auto was making a remote array of zero bytes
+	//std::Debug << "making TestDataArray..." << std::endl;
+	auto TestDataArray = GetRemoteArray(TestDataBuffer, TestDataSize, TestDataSize);
+	//std::Debug << "TestDataSize=" << TestDataSize << " TestDataArray.GetSize=" << TestDataArray.GetDataSize() << std::endl;
+	TestData.PushBackArray(TestDataArray);
+	//std::Debug << "TestData.PushBackArray() " << TestData.GetDataSize() << std::endl;
+}
+
+//	give the decoder loads of data to decode, then try and destroy the decoder
+//	whilst its still decoding (to crash android)
+void DestroyMidDecodeTest(const char* TestDataName,CompareFunc_t* Compare,const char* DecoderName)
+{
+	std::Debug << __PRETTY_FUNCTION__ << "(" << (TestDataName?TestDataName:"<null>") << "," << (DecoderName?DecoderName:"<null>") << ")" << std::endl;
+	Array<uint8_t> TestData;
+	LoadTestData(TestData,TestDataName);
+
+	std::stringstream OptionsStr;
+	OptionsStr << "{";
+	if ( DecoderName )
+		OptionsStr << "\"Decoder\":\"" << DecoderName << "\",";
+	OptionsStr << "\"VerboseDebug\":true";
+	OptionsStr << "}";
+	auto OptionsString = OptionsStr.str();
+	auto* Options = OptionsString.c_str();
+	char ErrorBuffer[1024] = { 0 };
+	std::Debug << "PopH264_CreateDecoder()" << std::endl;
+	auto Handle = PopH264_CreateDecoder(Options,ErrorBuffer,std::size(ErrorBuffer));
+
+	std::Debug << "TestData (" << (TestDataName?TestDataName:"<null>") << ") Size: " << TestData.GetDataSize() << std::endl;
+	
+	size_t DataRepeat = 500;
+	int FirstFrameNumber = 9999 - 100;
+	for (auto Iteration = 0; Iteration < DataRepeat; Iteration++)
+	{
+		auto LastIteration = Iteration == (DataRepeat - 1);
+		FirstFrameNumber += 100;
+		auto Result = PopH264_PushData(Handle, TestData.GetArray(), TestData.GetDataSize(), FirstFrameNumber);
+		if (Result < 0)
+			throw std::runtime_error("DecoderTest: PushData error");
+
+		if ( Iteration == 100 )
+		{
+		/*
+			std::Debug << __PRETTY_FUNCTION__ << " PopH264_DestroyInstance(" << Handle << ")" << std::endl;
+			PopH264_DestroyInstance(Handle);
+			*/
+		}
+/*
+		if (LastIteration)
+			PopH264_PushEndOfStream(Handle);
+			*/
+	}
+
+	//	hoping we push so fast that its still decoding here
+	std::Debug << __PRETTY_FUNCTION__ << " PopH264_DestroyInstance(" << Handle << ")" << std::endl;
 	PopH264_DestroyInstance(Handle);
 }
 
@@ -348,14 +426,17 @@ void android_main(struct android_app* state)
 
 int main()
 {
-#if defined(TARGET_ANDROID)
-	//	android hides STDERR, so reading debug from CLI is hard
-	//Debug::EnablePrint_Cout = true;
-#endif
-
+	//	trying to crash android
+	for ( auto d=0;	d<300;	d++)
+	{
+		std::Debug << "DestroyMidDecodeTest #" << d << std::endl;
+		DestroyMidDecodeTest("RainbowGradient.h264", nullptr, nullptr);
+	}
+/*	
 	// heavy duty test to find leaks
 	for ( auto d=0;	d<10;	d++)
 		DecoderTest("RainbowGradient.h264", nullptr, nullptr, 500);
+		*/
 	return 0;
 	
 	std::cout << "main" << std::endl;
