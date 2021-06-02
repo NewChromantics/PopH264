@@ -218,3 +218,7 @@ Broadway
 - Similarly, you can submit an IDR/keyframe twice and get that frame immediately output.
 - SPS & PPS need to be sent before other packets, or we will get no output. #20
 - If you try and decode an intra-frame before keyframe, the decoder will stop with no error and get no frame output. #21
+
+Android
+---------------
+- Input & output buffers are not threadsafe, in that when you destroy a codec (or flush), the buffer memory is immediately invalidated and reads/writes will seg fault mid-read/write. The android decoder now has a lock to wait for threads before destroying codec.
