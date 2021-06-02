@@ -102,7 +102,8 @@ private:
 	
 	size_t						mOutputTextureCounter = 0;	//	for debug colour output
 	*/
-	MediaCodec_t				mCodec = nullptr;
+	//	should remove codec variable and try and exclusively use LockCodec() as buffers are unstable when codec is destroyed
+	MediaCodec_t				mCodec = nullptr;		
 	std::function<void(std::function<void(MediaCodec_t)>)>	mLockCodec;
 	bool						mAsyncBuffers = false;
 
@@ -116,7 +117,7 @@ public:
 class Android::TInputThread : public SoyWorkerThread
 {
 public:
-	TInputThread(std::function<void(ArrayBridge<uint8_t>&&,PopH264::FrameNumber_t&)> PopPendingData,std::function<bool()> HasPendingData);
+	TInputThread(std::function<void(std::function<void(MediaCodec_t)>)> LockCodec,std::function<void(ArrayBridge<uint8_t>&&,PopH264::FrameNumber_t&)> PopPendingData,std::function<bool()> HasPendingData);
 	
 	virtual bool	Iteration() override	{	return true;	}
 	virtual bool	Iteration(std::function<void(std::chrono::milliseconds)> Sleep) override;
@@ -128,10 +129,12 @@ public:
 	void			OnInputSubmitted(int32_t PresentationTime)	{}
 	
 private:
-	void			PushInputBuffer(int64_t BufferIndex);
+	void			PushInputBuffer(int64_t BufferIndex,MediaCodec_t CodecHandle);
 	
 private:
+	//	should remove codec variable and try and exclusively use LockCodec() as buffers are unstable when codec is destroyed
 	MediaCodec_t	mCodec = nullptr;
+	std::function<void(std::function<void(MediaCodec_t)>)>	mLockCodec;
 	bool			mAsyncBuffers = false;
 
 	std::function<void(ArrayBridge<uint8_t>&&,PopH264::FrameNumber_t&)>	mPopPendingData;

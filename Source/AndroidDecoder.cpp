@@ -471,13 +471,13 @@ std::string MagicLeap::GetCodec(int32_t Mode,bool& HardwareSurface)
 Android::TDecoder::TDecoder(PopH264::TDecoderParams Params,PopH264::OnDecodedFrame_t OnDecodedFrame,PopH264::OnFrameError_t OnFrameError) :
 	PopH264::TDecoder	( OnDecodedFrame, OnFrameError ),
 	mParams				( Params ),
-	mInputThread		( std::bind(&TDecoder::GetNextInputData, this, std::placeholders::_1, std::placeholders::_2 ), std::bind(&TDecoder::HasPendingData, this ) ),
+	mInputThread		( std::bind(&TDecoder::LockCodecCallback, this, std::placeholders::_1 ), std::bind(&TDecoder::GetNextInputData, this, std::placeholders::_1, std::placeholders::_2 ), std::bind(&TDecoder::HasPendingData, this ) ),
 	mOutputThread		( std::bind(&TDecoder::LockCodecCallback, this, std::placeholders::_1 ), OnDecodedFrame, OnFrameError )
 {
-    
+
 #if __ANDROID_API__ < 28
-    mMediaCodecDll.reset( new Soy::TRuntimeLibrary("libmediandk.so") );
-    Android::ResolveSymbols(*mMediaCodecDll);
+	mMediaCodecDll.reset( new Soy::TRuntimeLibrary("libmediandk.so") );
+	Android::ResolveSymbols(*mMediaCodecDll);
 #endif
 
 /*
@@ -859,41 +859,26 @@ void Android::TDecoder::LockCodecCallback(std::function<void(MediaCodec_t)> Call
 	Callback(mCodec);
 }
 
+
 void Android::TDecoder::DequeueInputBuffers()
 {
-	while (true) {
-		int inIndex = AMediaCodec_dequeueInputBuffer(mCodec, 0);
+	//	for non-async mode, refresh a list of all buffers currently availible
+	auto TimeoutImmediateReturn = 0;
+	auto TimeoutBlock = -1;
+	long TimeoutMicroSecs = TimeoutImmediateReturn;
+	
+	//	safe loop
+	for ( auto i=0;	i<100;	i++ )
+	{
+		int inIndex = AMediaCodec_dequeueInputBuffer(mCodec, TimeoutMicroSecs);
 		if (inIndex >= 0)
 		{
 			this->OnInputBufferAvailible(inIndex);
-		} else {
-			break;
-		}
-	}
-
-	return;
-
-	//		and stick in the queue
-	//		this should trigger the input queue to start grabbing data
-	while(true)
-	{
-		auto TimeoutImmediateReturn = 0;
-		auto TimeoutBlock = -1;
-		long TimeoutUs = TimeoutImmediateReturn;
-			
-			Soy_AssertTodo();
-			/*
-		//	this throws when not started... okay, but maybe cleaner not to. or as it's multithreaded...wait
-		int InputBufferId = mCodec->CallIntMethod("dequeueInputBuffer", TimeoutUs );
-		if ( InputBufferId < 0 )
+		} 
+		else 
 		{
-			//Java::IsOkay("Failed to get codec input buffer");
-			//std::Debug << "Failed to get codec input buffer" << std::endl;
-			//return false;
 			break;
 		}
-		OnInputBufferAvailible(InputBufferId);
-		*/
 	}
 }
 
@@ -1024,7 +1009,7 @@ void Android::TDecoder::GetNextInputData(ArrayBridge<uint8_t>&& PacketBuffer,Pop
 }
 
 
-void Android::TInputThread::PushInputBuffer(int64_t BufferIndex)
+void Android::TInputThread::PushInputBuffer(int64_t BufferIndex,MediaCodec_t Codec)
 {
 	//	gr: we can grab a buffer without submitted it, so this is okay if we fail here
 	std::Debug << "Pushing to input buffer #" << BufferIndex << std::endl;
@@ -1032,7 +1017,7 @@ void Android::TInputThread::PushInputBuffer(int64_t BufferIndex)
 	//auto BufferHandle = static_cast<MLHandle>( BufferIndex );
 	uint8_t* Buffer = nullptr;
 	size_t BufferSize = 0;
-	Buffer = AMediaCodec_getInputBuffer( mCodec, BufferIndex, &BufferSize );
+	Buffer = AMediaCodec_getInputBuffer( Codec, BufferIndex, &BufferSize );
 	//auto Result = MLMediaCodecGetInputBufferPointer( mHandle, BufferHandle, &Buffer, &BufferSize );
 	//IsOkay( Result, "MLMediaCodecGetInputBufferPointer" );
 	if ( Buffer == nullptr )
@@ -1063,7 +1048,7 @@ void Android::TInputThread::PushInputBuffer(int64_t BufferIndex)
 	//Flags |= MLMediaCodecBufferFlag_KeyFrame;
 	//Flags |= MLMediaCodecBufferFlag_CodecConfig;
 	//Flags |= MLMediaCodecBufferFlag_EOS;
-	auto Result = AMediaCodec_queueInputBuffer( mCodec, BufferIndex, DataOffset, BufferWrittenSize, PresentationTimeMicroSecs, Flags );
+	auto Result = AMediaCodec_queueInputBuffer( Codec, BufferIndex, DataOffset, BufferWrittenSize, PresentationTimeMicroSecs, Flags );
 	IsOkay( Result, "AMediaCodec_queueInputBuffer" );
 	
 	OnInputSubmitted( PresentationTimeMicroSecs );
@@ -1537,9 +1522,10 @@ bool Android::TOutputThread::Iteration()
 }
 
 
-Android::TInputThread::TInputThread(std::function<void(ArrayBridge<uint8_t>&&,PopH264::FrameNumber_t&)> PopPendingData,std::function<bool()> HasPendingData) :
+Android::TInputThread::TInputThread(std::function<void(std::function<void(MediaCodec_t)>)> LockCodec,std::function<void(ArrayBridge<uint8_t>&&,PopH264::FrameNumber_t&)> PopPendingData,std::function<bool()> HasPendingData) :
 	mPopPendingData	( PopPendingData ),
 	mHasPendingData	( HasPendingData ),
+	mLockCodec		( LockCodec ),
 	SoyWorkerThread	("Android::TInputThread", SoyWorkerWaitMode::Wake )
 {
 	Start();
@@ -1580,18 +1566,25 @@ bool Android::TInputThread::Iteration(std::function<void(std::chrono::millisecon
 	
 	try
 	{
-		if ( DequeueNextIndex )
+		auto PushWithCodec = [&](MediaCodec_t LockedCodec)
 		{
-			int Timeout = 0;
-			//	gr: this returns -1000 in async mode (see logcat MediaCodec)
-			BufferIndex = AMediaCodec_dequeueInputBuffer( mCodec, Timeout );
-			if ( BufferIndex >= 0 )
+			if ( DequeueNextIndex )
 			{
-				PushInputBuffer( BufferIndex );
+				int Timeout = 0;
+				//	gr: this returns -1000 in async mode (see logcat MediaCodec)
+				BufferIndex = AMediaCodec_dequeueInputBuffer( LockedCodec, Timeout );
+				if ( BufferIndex >= 0 )
+				{
+					PushInputBuffer( BufferIndex, LockedCodec );
+				}
+			} 
+			else 
+			{
+				PushInputBuffer( BufferIndex, LockedCodec );
 			}
-		} else {
-			PushInputBuffer( BufferIndex );
-		}
+		};
+		//	gr: if this doesn't run, we should re-place buffer index (in catch) but decoder probably ending anyway
+		mLockCodec(PushWithCodec);	
 	}
 	catch(std::exception& e)
 	{
@@ -1606,6 +1599,7 @@ bool Android::TInputThread::Iteration(std::function<void(std::chrono::millisecon
 	}
 	
 	//	throttle the thread
+	//	gr: only throttle in non-async mode, right?
 	Sleep( std::chrono::milliseconds(InputThreadThrottle) );
 	
 	return true;
