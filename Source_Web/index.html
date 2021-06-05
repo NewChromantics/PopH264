@@ -1,0 +1,26 @@
+<html>
+<head>
+</head>
+<body>
+<canvas />
+
+<script type=module>
+import * as PopH264 from './PopH264.js'
+
+async function DecodeTestData()
+{
+	const H264Data = PopH264.GetTestData('Rainbow.h264');
+	const Decoder = PopH264.CreateDecoder();
+	Decoder.PushData(H264Data);
+	
+	while ( true )
+	{
+		const NewFrame = await Decoder.WaitForNextFrame();
+		console.log(`NewFrame: `, NewFrame);
+	}
+}
+DecodeTestData();
+</script>
+</body>
+</html>
+
