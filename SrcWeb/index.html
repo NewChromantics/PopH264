@@ -8,12 +8,37 @@
 <!-- locahost:8008 -->
 <meta http-equiv="origin-trial" content="Amw746zqUkwtRtAM0l0UPaCiceQqxz2frbE7P3+uwCbs/niY/AyABItpOvPzitXzScjT7kriDTkUJ9zyxQkamQoAAABMeyJvcmlnaW4iOiJodHRwOi8vbG9jYWxob3N0OjgwMDgiLCJmZWF0dXJlIjoiV2ViQ29kZWNzIiwiZXhwaXJ5IjoxNjI2MjIwNzk5fQ==" />
 
+<style>
+#Error
+{
+	background:		#f99;
+	color:			#fff;
+	font-size:		10vmin;
+	font-weight:	heavy;
+	font-family:	sans-serif;
+	padding:		3vmin;
+	text-align:		center;
+}
+
+#Error:empty
+{
+	display:	none;
+}
+</style>
+
 </head>
 <body>
+<div id=Error></div>
 <canvas />
 
 <script type=module>
 import * as PopH264 from './PopH264.js'
+
+function OnError(Error)
+{
+	const Box = document.querySelector('#Error');
+	Box.innerText = Error;
+}
 
 async function DecodeTestData()
 {
@@ -23,7 +48,7 @@ async function DecodeTestData()
 	
 	const Canvas = document.querySelector('canvas');
 	const CanvasContext = Canvas.getContext('2d');
-	
+
 	while ( true )
 	{
 		const NewFrame = await Decoder.WaitForNextFrame();
@@ -33,7 +58,8 @@ async function DecodeTestData()
 		CanvasContext.drawImage(NewFrame,0,0);
 	}
 }
-DecodeTestData();
+DecodeTestData().catch(OnError);
+
 </script>
 </body>
 </html>
