@@ -44,14 +44,44 @@ class WebcodecDecoder extends DecoderBase
 		const DecoderOptions = {};
 		DecoderOptions.output = this.OnFrame.bind(this);
 		DecoderOptions.error = this.OnError.bind(this);
-		this.Decoder = new VideoDecoder( DecoderOptions ); 
+		this.Decoder = new VideoDecoder( DecoderOptions );
+		
+		//	https://stackoverflow.com/questions/16363167/html5-video-tag-codecs-attribute
+		//	codec needs more than just codec name
+		const H264 = 'avc1';
+		//	gr: these are hex
+		//	42,4D,64 = IDC in SPS
+		//	01 = constraint flags
+		//	1E = 30
+		const Baseline30 = '42E01E';
+		const Main30 = '4D401E';
+		const High30 = '64001E';
+		const Config = 
+		{
+			codec: `${H264}.${High30}`,
+			//codedWidth: 640,
+			//codedHeight: 480
+		};
+		this.Decoder.configure(Config);
 	}
 	
-	PushData(H264Packet)
+	PushData(H264Packet,FrameTime)
 	{
+		if ( FrameTime === undefined )
+			throw `Invalid packet FrameTime(${FrameTime})`;
+			
 		try
 		{
-			this.Decoder.decode(H264Packet);
+			const Duration = 16;
+			const IsKeyframe = false;
+			
+			const Packet = {};
+			Packet.type = IsKeyframe ? 'key' : 'delta';
+			Packet.timestamp = FrameTime;
+			Packet.duration = Duration;
+			Packet.data = H264Packet;
+			const Chunk = new EncodedVideoChunk(Packet);
+			this.Decoder.decode(Chunk);
 		}
 		catch(e)
 		{
