@@ -9,9 +9,9 @@ import * as PopH264 from './PopH264.js'
 
 async function DecodeTestData()
 {
-	const H264Data = PopH264.GetTestData('Rainbow.h264');
+	const H264Data = PopH264.GetTestData('RainbowGradient.h264');
 	const Decoder = PopH264.CreateDecoder();
-	Decoder.PushData(H264Data);
+	Decoder.PushData(H264Data,0);
 	
 	while ( true )
 	{
