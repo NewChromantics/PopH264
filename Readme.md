@@ -207,7 +207,8 @@ Web Integration
 ==============
 - Include `PopH264.js` as a module. It has been designed to not require any preprocessing.
 - Example (published straight from this repository via github pages, demonstrating no need for pre-process) [SrcWeb/](SrcWeb/) (Awkward foldername because of github/jekyll publishing problems)
-
+- Currently webcodecs is under origin trial (or enabled by a flag in chrome). Register here https://developer.chrome.com/origintrials/#/view_trial/-7811493553674125311
+- WebCodecs only works under `https` (except localhost which can be http, but still requires an origin trial, with port! the example page has localhost original trial `<meta>`s)
 
 Misc Notes
 ============================
