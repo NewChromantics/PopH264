@@ -1,5 +1,5 @@
 theme: jekyll-theme-slate
 exclude:
   - Source
-include:
-  - Source_Web
+include: ['Source_Web']
+
