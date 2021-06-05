@@ -447,7 +447,7 @@
 		BF1826A624228C43006FEB93 /* SoyPng.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SoyPng.cpp; path = Source/SoyLib/src/SoyPng.cpp; sourceTree = "<group>"; };
 		BF1826AC24228D31006FEB93 /* SoyFourcc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SoyFourcc.h; path = Source/SoyLib/src/SoyFourcc.h; sourceTree = "<group>"; };
 		BF1826AD24228D31006FEB93 /* SoyFourcc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SoyFourcc.cpp; path = Source/SoyLib/src/SoyFourcc.cpp; sourceTree = "<group>"; };
-		BF1A4329266B93B1004BA276 /* SourceWeb */ = {isa = PBXFileReference; lastKnownFileType = folder; path = SourceWeb; sourceTree = "<group>"; };
+		BF1A4329266B93B1004BA276 /* PopH264Js */ = {isa = PBXFileReference; lastKnownFileType = folder; path = PopH264Js; sourceTree = "<group>"; };
 		BF21AEA824D5807F0046A434 /* BufferArray.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = BufferArray.hpp; path = Source/SoyLib/src/BufferArray.hpp; sourceTree = "<group>"; };
 		BF21AEAB24D74F010046A434 /* PopH264.Package */ = {isa = PBXFileReference; lastKnownFileType = folder; path = PopH264.Package; sourceTree = "<group>"; };
 		BF23A41125D9415D0060DE06 /* PopH264_TestAppIos.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PopH264_TestAppIos.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -815,7 +815,7 @@
 				BF0A19C21EA428F4007EBC95 /* Unity */,
 				BFD6076D1EA16ED20035C814 /* Source */,
 				BFC471782447506B00A2DA70 /* Source_TestApp */,
-				BF1A4329266B93B1004BA276 /* SourceWeb */,
+				BF1A4329266B93B1004BA276 /* PopH264Js */,
 				BF004B6424FD3CAC00DC6A90 /* Source_Osx */,
 				BF151FDA2384786600A70EBF /* Source_Ios */,
 				BF4A6A151EA16D7D00613A64 /* Products */,
