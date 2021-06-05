@@ -31,16 +31,20 @@ We have an MP4 decoder implementation here, https://github.com/NewChromantics/Po
 
 Future
 ----------------
-Whilst the project is called PopH264, there is actually very little restriction in use of purely H264. The NALU splitting and specific handling of SPS/PPS is really the only restriction, (as well as the generic Broadway fallback).
-There is little holding back PopH264 from handling VP9, HEVC/H265 etc, but there isn't currently the demand, and H264 is still by far the most widely supported format.
+- Whilst the project is called PopH264, there is actually very little restriction in use of purely H264. The NALU splitting and specific handling of SPS/PPS is really the only restriction, (as well as the generic Broadway fallback).
+- There is little holding back PopH264 from handling VP9, HEVC/H265 etc, but there isn't currently the demand, and H264 is still by far the most widely supported format.
 
-The other benefit of being specific to H264, is that the project does intend to extract other meta (Macroblock information, motion vectors) cross platform.
+- The other benefit of being specific to H264, is that the project does intend to extract other meta (Macroblock information, motion vectors) cross platform.
 
-PopH264 is unlikely to handle Audio.
+- PopH264 is unlikely to handle Audio.
+
+- Web build is being redone in a few ways (rewrite of the interface to broadway) and planned implementation of [WebCodecs](https://www.w3.org/TR/webcodecs/) and abusing WebRTC for a decoding loopback (no YUV output support though!)
+
+- Web via Unity is very low down on my list personally, if anyone who is experienced in this field want's to help and/or guide me how to bridge js modules, interfacing and unity's integration/build, get in touch. (I have never used unity for a web build)
 
 Sponsorship/Funding
 ----------------------
-Whilst we do happily accept money, we currently haven't setup github sponsoring. If you wish to sponsor via a particular method, send bitcoin, leave an issue or get in touch; (graham@newchromantics.com)[mailto:graham@newchromantics.com] / (@soylentgraham)[http://www.twitter.com/soylentgraham]
+Whilst we do happily accept money, we currently haven't setup github sponsoring. If you wish to sponsor via a particular method, send bitcoin, leave an issue or get in touch; [graham@newchromantics.com](mailto:graham@newchromantics.com) / [@soylentgraham](http://www.twitter.com/soylentgraham)
 
 Rather than any trickle payments, we do encourage people to ask for commissioned new features/improvements/platform support. 
 Feel free to ask for them in issues, even if you have no budget. (But please submit bugs regardless!)
@@ -48,7 +52,7 @@ Feel free to ask for them in issues, even if you have no budget. (But please sub
 Financial Contributers (Thank you!)
 -----------------------------
 These people have already contributed money towards the project. (Get in touch ASAP if I have missed you out!)
-- https://www.condensereality.com/
+- [Condense Reality](https://www.condensereality.com/)
 
 
 
@@ -92,29 +96,30 @@ Platform Support
 =======================
 Any empty platforms are generally planned, but not yet implemented.
 
-| Platform       | Software Decoding | Hardware Decoding | Software Encoding | Hardware Encoding | Build Status | 
-|----------------|-------------------|-------------------|-------------------|-------------------|--------------|
-| Windows x86    |                   |                   |                   |                   |              |
-| Windows x64    | Broadway          | MediaFoundation   |                   | MediaFoundation   |              |
-| Windows UWP Hololens1 |            |                   |                   |                   |              |
-| Windows UWP Hololens2 |            |                   |                   |                   |              |
-| Linux arm64 for Nvidia Jetson Nano | Broadway |        | x264              | V4L2 (Nvidia)     |              |
-| Linux arm for Raspberry PI 1,2,Zero (untested) | Broadway |    | x264      |                   |              |
-| Linux arm for Raspberry PI 3 | Broadway |              | x264              |                   |              |
-| Linux x64 ubuntu | Broadway        |                   | x264              |                   |              |
-| Osx Intel      | Broadway          | AvFoundation      | x264              | AvFoundation      |              |
-| Osx Arm64      | Broadway          | AvFoundation      |                  | AvFoundation      |              |
-| Ios            | Broadway          | AvFoundation      |               | AvFoundation      |              |
-| Ios Simulator  | Untested          | Untested          | Untested          | Untested          |              |
-| Android armeabi-v7a | Broadway     | NdkMediaCodec          |                   |                   |              |
-| Android x86    | Broadway          | NdkMediaCodec            |                   |                   |              |
-| Android x86_64 | Broadway          | NdkMediaCodec        |                   |                   |              |
-| Android arm64-v8a | Broadway       | NdkMediaCodec            |                   |                   |              |
-| Magic Leap/Luma (Linux x86) | Broadway  | MLMediaCodec Google,Nvidia|      |                   |              |
-| Web            | [Broadway.js*](https://github.com/SoylentGraham/Broadway)   |                   |                   |                   |              |
-| Unity WebGL    |                   |                   |                   |                   |              |
+| Platform       | Software Decoding | Hardware Decoding | Software Encoding | Hardware Encoding |
+|----------------|-------------------|-------------------|-------------------|-------------------|
+| Windows x86    |                   |                   |                   |                   |
+| Windows x64    | Broadway          | MediaFoundation   |                   | MediaFoundation   |
+| Windows UWP Hololens1 |            |                   |                   |                   |
+| Windows UWP Hololens2 |            |                   |                   |                   |
+| Linux arm64 for Nvidia Jetson Nano | Broadway |        | x264              | V4L2 (Nvidia)     |
+| Linux arm for Raspberry PI 1,2,Zero (untested) | Broadway |    | x264      |                   |
+| Linux arm for Raspberry PI 3 | Broadway |              | x264              |                   |
+| Linux x64 ubuntu | Broadway        |                   | x264              |                   |
+| Osx Intel      | Broadway          | AvFoundation      | x264              | AvFoundation      |
+| Osx Arm64      | Broadway          | AvFoundation      |                   | AvFoundation      |
+| Ios            | Broadway          | AvFoundation      |                   | AvFoundation      |
+| Ios Simulator  | Untested          | Untested          | Untested          | Untested          |
+| Android armeabi-v7a | Broadway     | NdkMediaCodec     |                   |                   |
+| Android x86    | Broadway          | NdkMediaCodec     |                   |                   |
+| Android x86_64 | Broadway          | NdkMediaCodec     |                   |                   |
+| Android arm64-v8a | Broadway       | NdkMediaCodec     |                   |                   |
+| Magic Leap/Luma (Linux x86) | Broadway| MLMediaCodec Google,Nvidia|        |                   |
+| Web            | [Broadway.js*](https://github.com/SoylentGraham/Broadway) | | |               |
+| Unity WebGL    |                   |                   |                   |                   |
 
 * Broadway.js is now with a fork for various bug fixes and optimisations; https://github.com/SoylentGraham/Broadway
+
 
 Android
 ---------------------
@@ -213,3 +218,7 @@ Broadway
 - Similarly, you can submit an IDR/keyframe twice and get that frame immediately output.
 - SPS & PPS need to be sent before other packets, or we will get no output. #20
 - If you try and decode an intra-frame before keyframe, the decoder will stop with no error and get no frame output. #21
+
+Android
+---------------
+- Input & output buffers are not threadsafe, in that when you destroy a codec (or flush), the buffer memory is immediately invalidated and reads/writes will seg fault mid-read/write. The android decoder now has a lock to wait for threads before destroying codec.
