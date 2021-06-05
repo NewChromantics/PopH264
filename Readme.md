@@ -203,6 +203,12 @@ Unity Integration
 - Push h264 data with your own reference frame number/time (normally you would extract this from an mp4/webm/ts/etc container, but it can be just an incrementing number)
 - Check your decoder every frame for a new frame
 
+Web Integration
+==============
+- Include `PopH264.js` as a module. It has been designed to not require any preprocessing.
+- Example (published straight from this repository via github pages, demonstrating no need for pre-process) [Source_Web/](Source_Web/)
+
+
 Misc Notes
 ============================
 The following are various notes which PopH264 handles. (Or at least, it should handle and there should be an issue covering it if not).
