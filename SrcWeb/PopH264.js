@@ -29,6 +29,7 @@ class DecoderBase
 	}
 };
 
+
 /*
 	Decoder that uses webcodecs
 */
@@ -46,23 +47,146 @@ class WebcodecDecoder extends DecoderBase
 		DecoderOptions.error = this.OnError.bind(this);
 		this.Decoder = new VideoDecoder( DecoderOptions );
 		
+		this.ConfigureDecoder();
+		//this.TestEncoder();
+	}
+	
+	ConfigureDecoder()
+	{
+		//	we try a few different codecs as we're having to guess support
+		const CodecNames = this.GetCodecNames();
+		const Errors = [];
+		for ( let CodecName of CodecNames )
+		{
+			try
+			{
+				const Config = 
+				{
+					codec: CodecName,
+					//	hints not required
+					//codedWidth: 640,	
+					//codedHeight: 480
+				};
+				//	configure and if doesn't throw, we've succeeded
+				this.Decoder.configure(Config);
+				return;
+			}
+			catch(e)
+			{
+				const Error = `${CodecName}:${e}`;
+				Errors.push(Error);
+			}
+		}
+		
+		//	throw a collective error
+		const Error = Errors.join('\n');
+		throw Error;
+	}
+	
+	async TestEncoder()
+	{
+		function OnChunk(Chunk)
+		{
+			console.log(`Chunk`,Chunk);
+		}
+		const Config = {
+			codec: 'avc1.42E01E',
+			width: 640,
+			height: 480,
+			bitrate: 8_000_000,     // 8 Mbps
+			framerate: 30,
+		};
+
+		const Options = {};
+		Options.error = console.error;
+		Options.output = OnChunk;
+		const Encoder = new VideoEncoder(Options);
+		Encoder.configure(Config);
+		
+		const FrameImage = new ImageData(640,480);
+		const Bitmap = await createImageBitmap(FrameImage);
+		const Frame = new VideoFrame(Bitmap, { timestamp: 0 });
+
+		Encoder.encode(Frame, { keyFrame: true });
+		await Encoder.flush();
+		console.log(`Encoder output`);
+	}
+	
+	GetCodecNames()
+	{
+		const CodecNames = [];
+		
 		//	https://stackoverflow.com/questions/16363167/html5-video-tag-codecs-attribute
 		//	codec needs more than just codec name
-		const H264 = 'avc1';
 		//	gr: these are hex
 		//	42,4D,64 = IDC in SPS
 		//	01 = constraint flags
 		//	1E = 30
-		const Baseline30 = '42E01E';
-		const Main30 = '4D401E';
-		const High30 = '64001E';
-		const Config = 
+		function IntToHexString(Integer)
 		{
-			codec: `${H264}.${High30}`,
-			//codedWidth: 640,
-			//codedHeight: 480
+			return (Integer).toString(16).toUpperCase();
+		}
+		//	chromium constant names to aid googling
+		const ProfileIntegers =
+		{
+			H264PROFILE_BASELINE:			66,
+			H264PROFILE_MAIN:				77,
+			H264PROFILE_SCALABLEBASELINE:	83,
+			H264PROFILE_SCALABLEHIGH:		86,
+			H264PROFILE_EXTENDED:			88,
+			H264PROFILE_HIGH:				100,
+			H264PROFILE_HIGH10PROFILE:		110,
+			H264PROFILE_MULTIVIEWHIGH:		118,
+			H264PROFILE_HIGH422PROFILE:		122,
+			H264PROFILE_STEREOHIGH:			128,
+			H264PROFILE_HIGH444PREDICTIVEPROFILE:	244,
 		};
-		this.Decoder.configure(Config);
+
+		const Profiles = Object.values(ProfileIntegers).map(IntToHexString);
+	
+		const Level30 = IntToHexString(30);	//	1E
+		const Level40 = IntToHexString(40);	//	28
+		
+		
+		//	constraints are bits
+		const Constraints00 = '00';
+		const Constraints01 = '01';	//	will fail, as bottom 3 bits are reserved
+		const ConstraintsE0 = 'E0';
+		const Baseline30 = `42${Constraints00}${Level30}`;//42E01E
+		const Main30 = '4D401E';
+		const High30 = '64001E';		
+		
+		//	codec string registry
+		//	https://www.w3.org/TR/webcodecs-codec-registry/
+		/*
+		//	working on mac	
+		CodecNames.push(`avc1.${High30}`);
+		CodecNames.push(`avc1.${Main30}`);
+		CodecNames.push(`avc1.${Baseline30}`);
+		*/
+		for ( let CodecName of ['avc1'] )
+		{
+			for ( let Profile of Profiles )
+			{
+				for ( let Constraint of [Constraints00] )
+				{
+					for ( let Level of [Level30,Level40] )
+					{
+						const Codec = `${CodecName}.${Profile}${Constraint}${Level}`;
+						CodecNames.push(Codec);
+						/*
+						CodecNames.push(`avcC.${Baseline}${Constraints00}${Level30}`);
+						CodecNames.push(`avcC.${Baseline}${Constraints00}${Level40}`);
+						CodecNames.push(`avcC.${Main}00${Level30}`);
+						CodecNames.push(`avcC.${Main}00${Level40}`);
+						CodecNames.push(`avcC.${High}00${Level30}`);
+						CodecNames.push(`avcC.${High}00${Level40}`);
+						*/
+					}
+				}
+			}
+		}
+		return CodecNames;
 	}
 	
 	PushData(H264Packet,FrameTime)
