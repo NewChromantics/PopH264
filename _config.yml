@@ -1,2 +1,6 @@
 theme: jekyll-theme-slate
+exclude:
+  - Source
+include: 
+  - SrcWeb
 

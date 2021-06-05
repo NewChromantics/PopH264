@@ -206,7 +206,7 @@ Unity Integration
 Web Integration
 ==============
 - Include `PopH264.js` as a module. It has been designed to not require any preprocessing.
-- Example (published straight from this repository via github pages, demonstrating no need for pre-process) [Source_Web/](Source_Web/)
+- Example (published straight from this repository via github pages, demonstrating no need for pre-process) [SrcWeb/](SrcWeb/) (Awkward foldername because of github/jekyll publishing problems)
 
 
 Misc Notes
