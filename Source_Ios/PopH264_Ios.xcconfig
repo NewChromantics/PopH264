@@ -18,9 +18,11 @@ BROADWAY_PATH = $(SRCROOT)/Source/Broadway/Decoder
 HEADER_SEARCH_PATHS = $(HEADER_SEARCH_PATHS) $(inherited) $(BROADWAY_PATH)/inc
 LIBRARY_SEARCH_PATHS = $(LIBRARY_SEARCH_PATHS) $(inherited)
 
-OTHER_CFLAGS = -Wno-ambiguous-macro
+//	this should add bitcode, but doesnt without BITCODE_GENERATION_MODE
+OTHER_CFLAGS = -Wno-ambiguous-macro -fembed-bitcode
+OTHER_LDFLAGS = -fembed-bitcode;
 
 ENABLE_BITCODE = YES
-
+BITCODE_GENERATION_MODE = bitcode
 BUILD_LIBRARY_FOR_DISTRIBUTION = YES
 
