@@ -228,4 +228,4 @@ Broadway
 
 Android
 ---------------
-- Input & output buffers are not threadsafe, in that when you destroy a codec (or flush), the buffer memory is immediately invalidated and reads/writes will seg fault mid-read/write. The android decoder now has a lock to wait for threads before destroying codec.
+- Android's input & output buffers are NOT threadsafe, in that when you destroy a codec (or flush), the buffer memory is immediately invalidated and reads/writes will seg fault mid-read/write. The PopH264 android decoder now has a lock to wait for threads before destroying codec, and also with read/write threads See #57. Although it is now safe, there may be a chance we've introduced some pauses with locks. (These were all tested by making and destroying 1000's of decoders and frames in the test app)
