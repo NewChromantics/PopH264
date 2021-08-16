@@ -30,7 +30,6 @@ $(SRC_PATH)/TDecoderInstance.cpp \
 $(SRC_PATH)/TEncoder.cpp \
 $(SRC_PATH)/TEncoderInstance.cpp \
 $(SRC_PATH)/Json11/json11.cpp \
-$(SRC_PATH)/X264Encoder.cpp
 
 # soy lib files
 LIB_SRC_FILES  += \
@@ -60,17 +59,27 @@ LIB_DEFINES = \
 # -g stops symbol stripping
 # -f[lag] PIC position independent code (for dyanmically loaded code)
 # -rpath $ORIGIN makes the shared object runtimepath be same place as executable
-CFLAGS = -c $(LIB_DEFINES) $(LIB_INCLUDES) -std=gnu++17 -fPIC -g
+# std c++17 for clang, gnu++17 for gcc... great.
+CFLAGS = -c $(LIB_DEFINES) $(LIB_INCLUDES) -std=c++17 -fPIC -g
 LDFLAGS = -pthread
 LDFLAGS += '-Wl,-rpath,$$ORIGIN'
 LDFLAGS += '-Wl,-rpath-link=$(BUILD_DIR)'
 
+
 LIB_LINK_FLAGS = $(LDFLAGS) -shared
 APP_LINK_FLAGS = $(LDFLAGS)
 
-# gr: maybe this should include the os lib dir for x264
-LIB_LINK_LIBS = \
--lx264
+LIB_LINK_LIBS = -lstdc++fs
+APP_LINK_LIBS = -lstdc++fs
+
+ifdef $(ENABLE_X264)
+LIB_SRC_FILES += $(SRC_PATH)/X264Encoder.cpp
+LIB_INCLUDES += -I$(SRC_PATH)/X264/include
+LIB_DEFINES += -DENABLE_X264
+LIB_LINK_LIBS += -lx264
+LIB_LINK_LIBS += -L"$(SRC_PATH)/X264/include"
+endif
+
 
 ifeq ($(osTarget),Nvidia)
 	# from nvidia samples Rules.mk
@@ -149,7 +158,7 @@ $(OUT_FILES): $(OUT_FILE_SOURCES)
 $(OUT_APP): $(APP_OBJECTS) $(OUT_LIB)
 	$(info Building test app $(OUT_APP))
 	mkdir -p $(BUILD_DIR)
-	$(CC) $(APP_LINK_FLAGS) $(APP_OBJECTS) -o $@ -L$(BUILD_DIR) -l$(LIB_NAME)
+	$(CC) $(APP_LINK_FLAGS) $(APP_OBJECTS) -o $@ -L$(BUILD_DIR) -l$(LIB_NAME) $(APP_LINK_LIBS)
 
 $(OUT_LIB): $(LIB_OBJECTS) $(OUT_FILES)
 	$(info Building library $(OUT_LIB))

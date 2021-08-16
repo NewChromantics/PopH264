@@ -4,9 +4,19 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"label": "Build",
+			"label": "Build Nvidia",
 			"type": "shell",
 			"command": "(cd PopH264.Linux && make osTarget=Nvidia)",
+			"problemMatcher": [],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
+		},
+		{
+			"label": "Build Pi",
+			"type": "shell",
+			"command": "(cd PopH264.Linux && make osTarget=Pi compiler=clang++-9)",
 			"problemMatcher": [],
 			"group": {
 				"kind": "build",

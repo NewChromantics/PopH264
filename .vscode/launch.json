@@ -7,12 +7,22 @@
 		{
 			"type": "vgdb",
 			"request": "launch",
-			"name": "Debug vgdb",
+			"name": "Debug vgdb Pi",
 			"program": "./Build/PopH264TestApp",
 			"args": [],
 			"cwd": "${workspaceRoot}",
 			"useAbsoluteFilePaths":true,
-			"preLaunchTask": "Build"
+			"preLaunchTask": "Build Pi"
+		},
+		{
+			"type": "vgdb",
+			"request": "launch",
+			"name": "Debug vgdb Nvidia",
+			"program": "./Build/PopH264TestApp",
+			"args": [],
+			"cwd": "${workspaceRoot}",
+			"useAbsoluteFilePaths":true,
+			"preLaunchTask": "Build Nvidia"
 		},
 		{
 			"name": "Debug gdb",
