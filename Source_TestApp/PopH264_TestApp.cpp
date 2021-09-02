@@ -289,7 +289,7 @@ void EncoderGreyscaleTest()
 }
 
 
-void EncoderYuv8_88Test(const char* EncoderName="")
+void EncoderYuv8_88Test(int Width,int Height,const char* EncoderName="")
 {
 	std::stringstream EncoderOptionsJson;
 	EncoderOptionsJson << "{\n";
@@ -303,18 +303,19 @@ void EncoderYuv8_88Test(const char* EncoderName="")
 	Debug << "PopH264_CreateEncoder EncoderName=" << EncoderName << " handle=" << Handle << " error=" << ErrorBuffer;
 	DebugPrint(Debug.str());
 
-	SoyPixels Yuv( SoyPixelsMeta(640,480,SoyPixelsFormat::Yuv_8_88));
+	SoyPixels Yuv( SoyPixelsMeta(Width,Height,SoyPixelsFormat::Yuv_8_88));
 	auto Size = Yuv.GetPixelsArray().GetDataSize();
-	const char* TestMetaJson =
-	R"V0G0N(
-	{
-		"Width":640,
-		"Height":480,
-		"LumaSize":460800,
-		"Format":"Yuv_8_88",
-		"TestMeta":"PurpleMonkeyDishwasher"
-	}
-	)V0G0N";
+	std::stringstream TestMetaJsonStr;
+	TestMetaJsonStr << "{";
+	TestMetaJsonStr << "\"Width\":" << Width << ",";
+	TestMetaJsonStr << "\"Height\":" << Height << ",";
+	TestMetaJsonStr << "\"LumaSize\":" << Yuv.GetMeta().GetDataSize() << ",";
+	TestMetaJsonStr << "\"Format\":\"" << SoyPixelsFormat::Yuv_8_88 << "\",";
+	TestMetaJsonStr << "\"TestMeta\":\"PurpleMonkeyDishwasher\"";
+	TestMetaJsonStr << "}";
+	auto TestMetaJsons = TestMetaJsonStr.str();
+	const char* TestMetaJson = TestMetaJsons.c_str();//	unsafe!
+
 	PopH264_EncoderPushFrame(Handle, TestMetaJson, Yuv.GetPixelsArray().GetArray(), nullptr, nullptr, ErrorBuffer, std::size(ErrorBuffer));
 	PopH264_EncoderPushFrame(Handle, TestMetaJson, Yuv.GetPixelsArray().GetArray(), nullptr, nullptr, ErrorBuffer, std::size(ErrorBuffer));
 	PopH264_EncoderPushFrame(Handle, TestMetaJson, Yuv.GetPixelsArray().GetArray(), nullptr, nullptr, ErrorBuffer, std::size(ErrorBuffer));
@@ -426,6 +427,9 @@ void android_main(struct android_app* state)
 
 int main()
 {
+	EncoderGreyscaleTest();
+	EncoderYuv8_88Test(1280,480);
+
 	//	trying to crash android
 	for ( auto d=0;	d<300;	d++)
 	{
