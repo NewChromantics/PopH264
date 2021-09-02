@@ -1528,6 +1528,8 @@ bool MediaFoundation::TTransformer::PopFrame(ArrayBridge<uint8_t>&& Data,int64_t
 	//	handle some special returns
 	if (Result == MF_E_TRANSFORM_NEED_MORE_INPUT)
 	{
+		if (mVerboseDebug)
+			std::Debug << "PopFrame() MF_E_TRANSFORM_NEED_MORE_INPUT" << std::endl;
 		return false;
 	}
 	else if (Result == E_UNEXPECTED)
@@ -1535,7 +1537,10 @@ bool MediaFoundation::TTransformer::PopFrame(ArrayBridge<uint8_t>&& Data,int64_t
 		//	on an async transform, we should only call ProcessOutput on response to a METransformHaveOutput event
 		//			If the client calls ProcessOutput at any other time, the method returns E_UNEXPECTED.
 		//	therefore, if we get this result, there just isnt one ready?
-		std::Debug << "Unexpected ProcessOutput - this is BAD if not async" << std::endl;
+		//	gr: we get this error alongside actual output, so it's okay in non-async mode...
+		//		where do we store that info?
+		if ( mVerboseDebug )
+			std::Debug << "PopFrame() E_UNEXPECTED ProcessOutput - this is BAD if not async" << std::endl;
 		return false;
 	}
 	else if (Result == MF_E_TRANSFORM_STREAM_CHANGE)
