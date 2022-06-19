@@ -186,6 +186,7 @@
 		BF53E82F22EDCABB008253CD /* TDecoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF53E82D22EDC989008253CD /* TDecoder.cpp */; };
 		BF587C7A244B57A2000745B9 /* SoyTypes.mm in Sources */ = {isa = PBXBuildFile; fileRef = BF587C79244B57A2000745B9 /* SoyTypes.mm */; };
 		BF587C7B244B57A2000745B9 /* SoyTypes.mm in Sources */ = {isa = PBXBuildFile; fileRef = BF587C79244B57A2000745B9 /* SoyTypes.mm */; };
+		BF80AE8E2851F74500B4DE71 /* libPopH264.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BF1D95E02850CB69008E3758 /* libPopH264.dylib */; };
 		BFAE46022850BBFF00C0646D /* AvfDecoder.mm in Sources */ = {isa = PBXBuildFile; fileRef = BFFBE97B245DB65000E9BE1B /* AvfDecoder.mm */; };
 		BFAE46032850BC0300C0646D /* AvfEncoder.mm in Sources */ = {isa = PBXBuildFile; fileRef = BFC471812447523000A2DA70 /* AvfEncoder.mm */; };
 		BFAE46042850BC0700C0646D /* BroadwayAll.c in Sources */ = {isa = PBXBuildFile; fileRef = BFF1C6E822E3C65800AFDFD5 /* BroadwayAll.c */; };
@@ -203,7 +204,6 @@
 		BFBD253125D9562E0076C307 /* TestData in CopyFiles */ = {isa = PBXBuildFile; fileRef = BFE7BCCD258A9D7E0021932B /* TestData */; };
 		BFBD253325D95B540076C307 /* TestData in Resources */ = {isa = PBXBuildFile; fileRef = BFE7BCCD258A9D7E0021932B /* TestData */; };
 		BFC4717B2447509600A2DA70 /* PopH264_TestApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFC471792447509600A2DA70 /* PopH264_TestApp.cpp */; };
-		BFC4717F244751BF00A2DA70 /* PopH264.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BF459CD521F7D5C700CED59D /* PopH264.framework */; };
 		BFC471842447523100A2DA70 /* AvfEncoder.mm in Sources */ = {isa = PBXBuildFile; fileRef = BFC471812447523000A2DA70 /* AvfEncoder.mm */; };
 		BFC471852447523100A2DA70 /* AvfEncoder.mm in Sources */ = {isa = PBXBuildFile; fileRef = BFC471812447523000A2DA70 /* AvfEncoder.mm */; };
 		BFC4718B2447625000A2DA70 /* AvfPixelBuffer.h in Headers */ = {isa = PBXBuildFile; fileRef = BFC471862447624F00A2DA70 /* AvfPixelBuffer.h */; };
@@ -793,8 +793,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BF80AE8E2851F74500B4DE71 /* libPopH264.dylib in Frameworks */,
 				BFFBE9762458390900E9BE1B /* AppKit.framework in Frameworks */,
-				BFC4717F244751BF00A2DA70 /* PopH264.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2018,6 +2018,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				LD_RUNPATH_SEARCH_PATHS = .;
 				MAGIC_LEAP_SDK_PATH = /Volumes/Code/MagicLeap/mlsdk/v0.22.0/;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				OBJROOT = "$(SYMROOT)$(EFFECTIVE_PLATFORM_NAME)";
@@ -2065,6 +2066,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				LD_RUNPATH_SEARCH_PATHS = .;
 				MAGIC_LEAP_SDK_PATH = /Volumes/Code/MagicLeap/mlsdk/v0.22.0/;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				OBJROOT = "$(SYMROOT)$(EFFECTIVE_PLATFORM_NAME)";
