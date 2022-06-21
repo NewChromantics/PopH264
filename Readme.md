@@ -106,7 +106,7 @@ Any empty platforms are generally planned, but not yet implemented.
 | Linux arm for Raspberry PI 1,2,Zero (untested) | Broadway |    | x264      |                   |
 | Linux arm for Raspberry PI 3 | Broadway |              | x264              |                   |
 | Linux x64 ubuntu | Broadway        |                   | x264              |                   |
-| Osx Intel      | Broadway          | AvFoundation      | x264              | AvFoundation      |
+| Osx Intel      | Broadway          | AvFoundation      | x264[disabled for arm]| AvFoundation      |
 | Osx Arm64      | Broadway          | AvFoundation      |                   | AvFoundation      |
 | Ios            | Broadway          | AvFoundation      |                   | AvFoundation      |
 | Ios Simulator  | Untested          | Untested          | Untested          | Untested          |

@@ -5,7 +5,8 @@
 #include "PopH264.h"
 
 #if defined(TARGET_OSX) && defined(TARGET_ARCH_INTEL64)
-#define OSX_X264_SUPPORT
+//	gr: removed in x64 too as we're doing universal builds
+//#define OSX_X264_SUPPORT
 #endif
 
 

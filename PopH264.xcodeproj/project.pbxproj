@@ -110,21 +110,17 @@
 		BF1D95BF2850C105008E3758 /* SoyTypes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB6BA21F228B8008E7E76 /* SoyTypes.cpp */; };
 		BF1D95C02850C105008E3758 /* SoyPng.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF1826A624228C43006FEB93 /* SoyPng.cpp */; };
 		BF1D95C12850C1EB008E3758 /* SoyTypes.mm in Sources */ = {isa = PBXBuildFile; fileRef = BF587C79244B57A2000745B9 /* SoyTypes.mm */; };
-		BF1D95C32850C258008E3758 /* libx264.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BF1D95C22850C257008E3758 /* libx264.a */; };
-		BF1D95C42850C258008E3758 /* libx264.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BF1D95C22850C257008E3758 /* libx264.a */; };
 		BF1D95E42850CBF7008E3758 /* PopH264.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB63821F20C41008E7E76 /* PopH264.cpp */; };
 		BF1D95E52850CBFE008E3758 /* AvfDecoder.mm in Sources */ = {isa = PBXBuildFile; fileRef = BFFBE97B245DB65000E9BE1B /* AvfDecoder.mm */; };
 		BF1D95E62850CC00008E3758 /* AvfEncoder.mm in Sources */ = {isa = PBXBuildFile; fileRef = BFC471812447523000A2DA70 /* AvfEncoder.mm */; };
 		BF1D95E72850CC03008E3758 /* BroadwayAll.c in Sources */ = {isa = PBXBuildFile; fileRef = BFF1C6E822E3C65800AFDFD5 /* BroadwayAll.c */; };
 		BF1D95E82850CC06008E3758 /* BroadwayDecoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB69F21F21F07008E7E76 /* BroadwayDecoder.cpp */; };
 		BF1D95E92850CC09008E3758 /* json11.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF18269024226126006FEB93 /* json11.cpp */; };
-		BF1D95EA2850CC0E008E3758 /* libx264.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BF1D95C22850C257008E3758 /* libx264.a */; };
 		BF1D95EB2850CC21008E3758 /* PopH264TestData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFBE95324582ED000E9BE1B /* PopH264TestData.cpp */; };
 		BF1D95EC2850CC24008E3758 /* TDecoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF53E82D22EDC989008253CD /* TDecoder.cpp */; };
 		BF1D95ED2850CC27008E3758 /* TDecoderInstance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF32256C2445ECD800C74D4D /* TDecoderInstance.cpp */; };
 		BF1D95EE2850CC2A008E3758 /* TEncoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF3225772445F8DD00C74D4D /* TEncoder.cpp */; };
 		BF1D95EF2850CC2C008E3758 /* TEncoderInstance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF3225692445EC9F00C74D4D /* TEncoderInstance.cpp */; };
-		BF1D95F02850CC31008E3758 /* X264Encoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF3225712445F0D100C74D4D /* X264Encoder.cpp */; };
 		BF1D95F12850CC40008E3758 /* AvfPixelBuffer.mm in Sources */ = {isa = PBXBuildFile; fileRef = BFC471892447625000A2DA70 /* AvfPixelBuffer.mm */; };
 		BF1D95F22850CC43008E3758 /* memheap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB6B421F22817008E7E76 /* memheap.cpp */; };
 		BF1D95F32850CC45008E3758 /* SoyArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFF1C70F22E3CF8B00AFDFD5 /* SoyArray.cpp */; };
@@ -159,10 +155,8 @@
 		BF32256B2445EC9F00C74D4D /* TEncoderInstance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF3225692445EC9F00C74D4D /* TEncoderInstance.cpp */; };
 		BF32256D2445ECD800C74D4D /* TDecoderInstance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF32256C2445ECD800C74D4D /* TDecoderInstance.cpp */; };
 		BF32256E2445ECD800C74D4D /* TDecoderInstance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF32256C2445ECD800C74D4D /* TDecoderInstance.cpp */; };
-		BF3225732445F0D200C74D4D /* X264Encoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF3225712445F0D100C74D4D /* X264Encoder.cpp */; };
 		BF3225782445F8DD00C74D4D /* TEncoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF3225772445F8DD00C74D4D /* TEncoder.cpp */; };
 		BF3225792445F8DD00C74D4D /* TEncoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF3225772445F8DD00C74D4D /* TEncoder.cpp */; };
-		BF32257B244609C700C74D4D /* libx264.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BF32257A244609C700C74D4D /* libx264.a */; };
 		BF44AAB2249FB65500C9D982 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BF44AAB1249FB65500C9D982 /* AVFoundation.framework */; };
 		BF459CE221F7D60500CED59D /* PopH264Framework.h in Headers */ = {isa = PBXBuildFile; fileRef = BF459CDE21F7D60500CED59D /* PopH264Framework.h */; };
 		BF459CE921F7D70000CED59D /* PopH264.h in Headers */ = {isa = PBXBuildFile; fileRef = BF8AB63721F20C41008E7E76 /* PopH264.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -198,7 +192,6 @@
 		BFAE460A2850BCC000C0646D /* TDecoderInstance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF32256C2445ECD800C74D4D /* TDecoderInstance.cpp */; };
 		BFAE460B2850BCC300C0646D /* TEncoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF3225772445F8DD00C74D4D /* TEncoder.cpp */; };
 		BFAE460C2850BCC600C0646D /* TEncoderInstance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF3225692445EC9F00C74D4D /* TEncoderInstance.cpp */; };
-		BFAE460D2850BCCD00C0646D /* X264Encoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF3225712445F0D100C74D4D /* X264Encoder.cpp */; };
 		BFBC07F02386C0BC0070BCB4 /* SoyThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFBC07ED2386C0B50070BCB4 /* SoyThread.cpp */; };
 		BFBC07F12386C0BC0070BCB4 /* SoyThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFBC07ED2386C0B50070BCB4 /* SoyThread.cpp */; };
 		BFBD253125D9562E0076C307 /* TestData in CopyFiles */ = {isa = PBXBuildFile; fileRef = BFE7BCCD258A9D7E0021932B /* TestData */; };
@@ -750,7 +743,6 @@
 			files = (
 				BF1D960C2850CCE0008E3758 /* CoreMedia.framework in Frameworks */,
 				BF1D960A2850CCD7008E3758 /* AVFoundation.framework in Frameworks */,
-				BF1D95EA2850CC0E008E3758 /* libx264.a in Frameworks */,
 				BF1D960B2850CCDC008E3758 /* VideoToolbox.framework in Frameworks */,
 				BF1D960D2850CCE4008E3758 /* CoreVideo.framework in Frameworks */,
 			);
@@ -772,8 +764,6 @@
 				BFC4719524477DE500A2DA70 /* VideoToolbox.framework in Frameworks */,
 				BFC4719324477DDE00A2DA70 /* CoreVideo.framework in Frameworks */,
 				BF459D1A21F7DB9900CED59D /* CoreMedia.framework in Frameworks */,
-				BF32257B244609C700C74D4D /* libx264.a in Frameworks */,
-				BF1D95C32850C258008E3758 /* libx264.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -783,7 +773,6 @@
 			files = (
 				BF1D95A82850C0AB008E3758 /* VideoToolbox.framework in Frameworks */,
 				BF1D95A62850C0A1008E3758 /* CoreMedia.framework in Frameworks */,
-				BF1D95C42850C258008E3758 /* libx264.a in Frameworks */,
 				BF1D95A52850C09A008E3758 /* AVFoundation.framework in Frameworks */,
 				BF1D95A72850C0A4008E3758 /* CoreVideo.framework in Frameworks */,
 			);
@@ -1607,7 +1596,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BF1D95F02850CC31008E3758 /* X264Encoder.cpp in Sources */,
 				BF1D95ED2850CC27008E3758 /* TDecoderInstance.cpp in Sources */,
 				BF1D96092850CC7D008E3758 /* SoyVector.cpp in Sources */,
 				BF1D95FE2850CC61008E3758 /* SoyPlatform.mm in Sources */,
@@ -1681,7 +1669,6 @@
 				BF459CFD21F7DB4400CED59D /* SoyString.cpp in Sources */,
 				BF51B8AB256A7141004DE4C7 /* SoyPlatform.cpp in Sources */,
 				BF459CF521F7DB1E00CED59D /* BroadwayDecoder.cpp in Sources */,
-				BF3225732445F0D200C74D4D /* X264Encoder.cpp in Sources */,
 				BFFBE95524582ED000E9BE1B /* PopH264TestData.cpp in Sources */,
 				BF459CFE21F7DB4400CED59D /* SoyPixels.cpp in Sources */,
 				BFEF6A2424699955000A1F88 /* SoyVector.cpp in Sources */,
@@ -1708,7 +1695,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				BF1D95B82850C105008E3758 /* SoyVector.cpp in Sources */,
-				BFAE460D2850BCCD00C0646D /* X264Encoder.cpp in Sources */,
 				BFAE460A2850BCC000C0646D /* TDecoderInstance.cpp in Sources */,
 				BF1D95B42850C105008E3758 /* SoyRuntimeLibrary.cpp in Sources */,
 				BFAE46032850BC0300C0646D /* AvfEncoder.mm in Sources */,
