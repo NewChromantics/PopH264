@@ -544,7 +544,7 @@
 		BF32257C244609D100C74D4D /* libx264.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libx264.a; path = Source/X264/Ios/lib/libx264.a; sourceTree = "<group>"; };
 		BF44AAB1249FB65500C9D982 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS12.1.sdk/System/Library/Frameworks/AVFoundation.framework; sourceTree = DEVELOPER_DIR; };
 		BF459C7F21F7C97400CED59D /* TDecoderInstance.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TDecoderInstance.h; path = Source/TDecoderInstance.h; sourceTree = "<group>"; };
-		BF459CD521F7D5C700CED59D /* PopH264.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = PopH264.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		BF459CD521F7D5C700CED59D /* PopH264_Osx.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = PopH264_Osx.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		BF459CDD21F7D60500CED59D /* PopH264_Osx_Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = PopH264_Osx_Info.plist; sourceTree = "<group>"; };
 		BF459CDE21F7D60500CED59D /* PopH264Framework.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PopH264Framework.h; path = Source/PopH264Framework.h; sourceTree = "<group>"; };
 		BF459CED21F7D73B00CED59D /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
@@ -930,7 +930,7 @@
 		BF4A6A151EA16D7D00613A64 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				BF459CD521F7D5C700CED59D /* PopH264.framework */,
+				BF459CD521F7D5C700CED59D /* PopH264_Osx.framework */,
 				BF151FD92384786600A70EBF /* PopH264_Ios.framework */,
 				BFC4717124474FFA00A2DA70 /* PopH264_TestApp */,
 				BF23A41125D9415D0060DE06 /* PopH264_TestAppIos.app */,
@@ -1360,7 +1360,7 @@
 			);
 			name = PopH264_Osx;
 			productName = PopH264Framework;
-			productReference = BF459CD521F7D5C700CED59D /* PopH264.framework */;
+			productReference = BF459CD521F7D5C700CED59D /* PopH264_Osx.framework */;
 			productType = "com.apple.product-type.framework";
 		};
 		BFAE45FA2850BA8200C0646D /* PopH264_MacosBundle */ = {
@@ -1947,6 +1947,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = X52DR36JY2;
 				INFOPLIST_FILE = "$(SRCROOT)/Source_Osx/PopH264_Osx_Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
 		};
@@ -1958,6 +1959,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = X52DR36JY2;
 				INFOPLIST_FILE = "$(SRCROOT)/Source_Osx/PopH264_Osx_Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
 		};
