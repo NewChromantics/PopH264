@@ -48,7 +48,7 @@ jobs:
           - os: macos-latest
             type: macos_dylib
 
-          - os: ubuntu-16.04
+          - os: ubuntu-latest
             type: Android
 
     steps:
