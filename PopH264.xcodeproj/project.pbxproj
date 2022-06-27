@@ -1416,7 +1416,7 @@
 					BF151FD82384786600A70EBF = {
 						CreatedOnToolsVersion = 10.1;
 						DevelopmentTeam = X52DR36JY2;
-						ProvisioningStyle = Automatic;
+						ProvisioningStyle = Manual;
 					};
 					BF1D95DF2850CB69008E3758 = {
 						CreatedOnToolsVersion = 12.2;
@@ -1431,7 +1431,7 @@
 					BF459CD421F7D5C700CED59D = {
 						CreatedOnToolsVersion = 10.1;
 						DevelopmentTeam = X52DR36JY2;
-						ProvisioningStyle = Automatic;
+						ProvisioningStyle = Manual;
 					};
 					BF51B8C2256A7DBA004DE4C7 = {
 						CreatedOnToolsVersion = 12.0;
@@ -1443,7 +1443,7 @@
 					BFAE45FA2850BA8200C0646D = {
 						CreatedOnToolsVersion = 12.2;
 						DevelopmentTeam = X52DR36JY2;
-						ProvisioningStyle = Automatic;
+						ProvisioningStyle = Manual;
 					};
 					BFC4717024474FFA00A2DA70 = {
 						CreatedOnToolsVersion = 10.1;
@@ -1784,8 +1784,8 @@
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_IDENTITY = "Apple Distribution";
+				CODE_SIGN_STYLE = Manual;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = X52DR36JY2;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
@@ -1800,6 +1800,7 @@
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.NewChromantics.PopH264;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
 				SUPPORTS_MACCATALYST = NO;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1824,8 +1825,8 @@
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_IDENTITY = "Apple Distribution";
+				CODE_SIGN_STYLE = Manual;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = X52DR36JY2;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
@@ -1839,6 +1840,7 @@
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.NewChromantics.PopH264;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
 				SUPPORTS_MACCATALYST = NO;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1943,11 +1945,12 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = BF004B6724FD3CAC00DC6A90 /* PopH264_Osx.xcconfig */;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "Mac Developer";
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_IDENTITY = "Apple Distribution";
+				CODE_SIGN_STYLE = Manual;
 				DEVELOPMENT_TEAM = X52DR36JY2;
 				INFOPLIST_FILE = "$(SRCROOT)/Source_Osx/PopH264_Osx_Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 			};
 			name = Debug;
 		};
@@ -1955,11 +1958,12 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = BF004B6724FD3CAC00DC6A90 /* PopH264_Osx.xcconfig */;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "Mac Developer";
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_IDENTITY = "Apple Distribution";
+				CODE_SIGN_STYLE = Manual;
 				DEVELOPMENT_TEAM = X52DR36JY2;
 				INFOPLIST_FILE = "$(SRCROOT)/Source_Osx/PopH264_Osx_Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 			};
 			name = Release;
 		};
@@ -2129,10 +2133,12 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = BF004B6724FD3CAC00DC6A90 /* PopH264_Osx.xcconfig */;
 			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_IDENTITY = "Apple Distribution";
+				CODE_SIGN_STYLE = Manual;
 				DEVELOPMENT_TEAM = X52DR36JY2;
 				INFOPLIST_FILE = "$(SRCROOT)/Source_Osx/PopH264_OsxBundle_Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = YES;
 				WRAPPER_EXTENSION = bundle;
 			};
@@ -2142,10 +2148,12 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = BF004B6724FD3CAC00DC6A90 /* PopH264_Osx.xcconfig */;
 			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_IDENTITY = "Apple Distribution";
+				CODE_SIGN_STYLE = Manual;
 				DEVELOPMENT_TEAM = X52DR36JY2;
 				INFOPLIST_FILE = "$(SRCROOT)/Source_Osx/PopH264_OsxBundle_Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = YES;
 				WRAPPER_EXTENSION = bundle;
 			};
