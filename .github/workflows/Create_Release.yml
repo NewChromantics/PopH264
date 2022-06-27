@@ -43,6 +43,10 @@ jobs:
             type: x64
 
           - os: macos-latest
+            type: apple_xcframework
+          
+          - os: macos-latest
+            type: macos_dylib
 
           - os: ubuntu-16.04
             type: Android
@@ -78,13 +82,21 @@ jobs:
 
       - name: Apple
         id: Apple
-        if: matrix.config.os == 'macos-latest'
-        # tsdk: set specific version to aviod a cache? where is this? can we clean it?
+        if: matrix.config.type == 'apple_xcframework'
         uses: NewChromantics/PopAction_BuildApple@v1.0.9
         with:
           BuildScheme: ${{ env.project }}_Universal
           project: ${{ env.project }}
-          
+
+      - name: Macos Dylib
+		id: MacosDylib
+        if: matrix.config.type == 'macos_dylib'
+        uses: NewChromantics/PopAction_BuildApple@v1.0.9
+        with:
+          BuildScheme: ${{ env.project }}_MacosDylib
+          project: ${{ env.project }}
+
+
       - name: Linux
         id: Linux
         if: matrix.config.type == 'linux'
