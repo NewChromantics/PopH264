@@ -29,7 +29,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "BF459CD421F7D5C700CED59D"
-               BuildableName = "PopH264.framework"
+               BuildableName = "PopH264_Osx.framework"
                BlueprintName = "PopH264_Osx"
                ReferencedContainer = "container:PopH264.xcodeproj">
             </BuildableReference>
