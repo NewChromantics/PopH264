@@ -47,7 +47,7 @@ namespace PopH264
 	//	1.3.33	First wasm version of broadway compiled from our repository
 	//	1.3.34	Added some extra macos/ios version number settings for mac-swift app compatibility
 	//	1.3.39	Ios now converts greyscale to YUV. Greyscale is blank on ios (fine on osx)
-	const Soy::TVersion	Version(1,3,40);
+	const Soy::TVersion	Version(VERSION_MAJOR,VERSION_MINOR,VERSION_PATCH);
 }
 
 
