@@ -14,14 +14,7 @@ jobs:
     name: Universal
     runs-on: macos-latest
     steps:
-      - name: "Import Mac Signing Certificate"
-        uses: devbotsxyz/xcode-import-certificate@master
-        with:
-          certificate-data: ${{ secrets.APPLE_DIST_NEWCHROMANTICS_P12 }}
-          certificate-passphrase: ${{ secrets.APPLE_DIST_NEWCHROMANTICS_PASSWORD }}
-          keychain-password: "Hello"
-             
-      - name: "Import Ios Signing Certificate"
+      - name: "Import Apple-Distriubution NewChromantics Signing Certificate"
         uses: devbotsxyz/xcode-import-certificate@master
         with:
           certificate-data: ${{ secrets.APPLE_DIST_NEWCHROMANTICS_P12 }}
