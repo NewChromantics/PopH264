@@ -45,8 +45,8 @@ jobs:
           - os: macos-latest
             type: apple_xcframework
           
-          - os: macos-latest
-            type: macos_dylib
+          #- os: macos-latest
+          #  type: macos_dylib
 
           - os: ubuntu-latest
             type: Android
