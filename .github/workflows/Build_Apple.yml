@@ -19,14 +19,14 @@ jobs:
         with:
           certificate-data: ${{ secrets.NEWCHROMANTICS_GRAHAMREEVES_MAC_P12 }}
           certificate-passphrase: ${{ secrets.NEWCHROMANTICS_GRAHAMREEVES_PASSWORD_P12 }}
-          keychain-password: ${{ secrets.KEYCHAIN_PASSWORD }
+          keychain-password: ${{ secrets.KEYCHAIN_PASSWORD }}
              
       - name: "Import Ios Signing Certificate"
         uses: devbotsxyz/xcode-import-certificate@master
         with:
           certificate-data: ${{ secrets.NEWCHROMANTICS_GRAHAMREEVES_IPHONE_P12 }}
           certificate-passphrase: ${{ secrets.NEWCHROMANTICS_GRAHAMREEVES_PASSWORD_P12 }}
-          keychain-password: ${{ secrets.KEYCHAIN_PASSWORD }
+          keychain-password: ${{ secrets.KEYCHAIN_PASSWORD }}
              
       - uses: actions/checkout@v2
         with:
