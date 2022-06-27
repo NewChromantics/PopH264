@@ -12,7 +12,7 @@ on:
 jobs:
   Test:
     name: Universal
-    runs-on: macOS
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
         with:
