@@ -43,10 +43,13 @@ jobs:
             type: x64
 
           - os: macos-latest
-            type: apple_xcframework
+            scheme: ${{ env.project }}_Universal
           
-          #- os: macos-latest
-          #  type: macos_dylib
+          - os: macos-latest
+            scheme: ${{ env.project }}_MacosStatic
+
+          - os: macos-latest
+            scheme: ${{ env.project }}_MacosDylib
 
           - os: ubuntu-latest
             type: Android
@@ -80,22 +83,13 @@ jobs:
           certificate-passphrase: ${{ secrets.APPLE_DIST_NEWCHROMANTICS_PASSWORD }}
           keychain-password: "Hello"
 
-      - name: Apple
+      - name: Apple ${{matrix.config.scheme}}
         id: Apple
-        if: matrix.config.type == 'apple_xcframework'
+        if: matrix.config.scheme != ''
         uses: NewChromantics/PopAction_BuildApple@v1.0.9
         with:
-          BuildScheme: ${{ env.project }}_Universal
+          BuildScheme: ${{matrix.config.scheme}}
           project: ${{ env.project }}
-
-      - name: Macos Dylib
-        id: MacosDylib
-        if: matrix.config.type == 'macos_dylib'
-        uses: NewChromantics/PopAction_BuildApple@v1.0.9
-        with:
-          BuildScheme: ${{ env.project }}_MacosDylib
-          project: ${{ env.project }}
-
 
       - name: Linux
         id: Linux
