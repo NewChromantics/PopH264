@@ -1,0 +1,19 @@
+#include "Version.xcconfig"
+
+
+//:configuration = Release
+STRIP_INSTALLED_PRODUCT = YES
+
+//:configuration = Release
+COPY_PHASE_STRIP = YES
+
+//:configuration = Release
+DEAD_CODE_STRIPPING = YES
+
+//	3 + small
+//:configuration = Release
+GCC_OPTIMIZATION_LEVEL = s
+
+//	link time optimisation
+//:configuration = Release
+LLVM_LTO = YES
