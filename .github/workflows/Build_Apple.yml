@@ -26,13 +26,13 @@ jobs:
           submodules: "recursive"
 
       - name: Build Macos Static
-        uses: NewChromantics/PopAction_BuildApple@v1.0.9
+        uses: NewChromantics/PopAction_BuildApple@v1.0.11
         with:
           BuildScheme: ${{ env.project }}_MacosStatic
           project: ${{ env.project }}
 
       - name: Build Universal
-        uses: NewChromantics/PopAction_BuildApple@v1.0.9
+        uses: NewChromantics/PopAction_BuildApple@v1.0.11
         with:
           BuildScheme: ${{ env.project }}_Universal
           project: ${{ env.project }}
