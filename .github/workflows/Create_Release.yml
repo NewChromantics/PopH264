@@ -43,13 +43,13 @@ jobs:
             type: x64
 
           - os: macos-latest
-            scheme: ${{ env.project }}_Universal
+            scheme: PopH264_Universal
           
           - os: macos-latest
-            scheme: ${{ env.project }}_MacosStatic
+            scheme: PopH264_MacosStatic
 
           - os: macos-latest
-            scheme: ${{ env.project }}_MacosDylib
+            scheme: PopH264_MacosDylib
 
           - os: ubuntu-latest
             type: Android
@@ -86,7 +86,7 @@ jobs:
       - name: Apple ${{matrix.config.scheme}}
         id: Apple
         if: matrix.config.scheme != ''
-        uses: NewChromantics/PopAction_BuildApple@v1.0.9
+        uses: NewChromantics/PopAction_BuildApple@v1.0.11
         with:
           BuildScheme: ${{matrix.config.scheme}}
           project: ${{ env.project }}
