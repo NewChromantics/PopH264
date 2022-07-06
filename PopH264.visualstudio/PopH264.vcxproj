@@ -9,28 +9,37 @@
       <Configuration>Release</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="Static|x64">
+      <Configuration>Static</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Source\AndroidMovieDecoder.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Static|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\Source\BroadwayDecoder.cpp" />
     <ClCompile Include="..\Source\Broadway\Decoder\src\Broadway.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Static|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\Source\Broadway\Decoder\src\Decoder.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Static|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\Source\Broadway\Decoder\src\DecTestBench.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Static|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\Source\Broadway\Decoder\src\EvaluationTestBench.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Static|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\Source\Broadway\Decoder\src\extraFlags.c" />
     <ClCompile Include="..\Source\Broadway\Decoder\src\h264bsd_byte_stream.c" />
@@ -51,6 +60,7 @@
     <ClCompile Include="..\Source\Broadway\Decoder\src\h264bsd_sei.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Static|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\Source\Broadway\Decoder\src\h264bsd_seq_param_set.c" />
     <ClCompile Include="..\Source\Broadway\Decoder\src\h264bsd_slice_data.c" />
@@ -66,10 +76,12 @@
     <ClCompile Include="..\Source\Broadway\Decoder\src\TestBenchMultipleInstance.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Static|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\Source\IntelMediaDecoder.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Static|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\Source\Json11\json11.cpp" />
     <ClCompile Include="..\Source\MediaFoundationDecoder.cpp" />
@@ -84,6 +96,7 @@
     <ClCompile Include="..\Source\SoyLib\src\SoyEvent.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Static|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\Source\SoyLib\src\SoyFilesystem.cpp" />
     <ClCompile Include="..\Source\SoyLib\src\SoyFourcc.cpp" />
@@ -92,22 +105,27 @@
     <ClCompile Include="..\Source\SoyLib\src\SoyJson.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Static|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\Source\SoyLib\src\SoyMath.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Static|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\Source\SoyLib\src\SoyMedia.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Static|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\Source\SoyLib\src\SoyMediaFormat.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Static|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\Source\SoyLib\src\SoyMediaFoundation.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Static|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\Source\SoyLib\src\SoyPixels.cpp" />
     <ClCompile Include="..\Source\SoyLib\src\SoyPlatform.cpp" />
@@ -121,6 +139,7 @@
     <ClCompile Include="..\Source\SoyLib\src\SoyWave.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Static|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\Source\TDecoder.cpp" />
     <ClCompile Include="..\Source\TDecoderInstance.cpp" />
@@ -133,6 +152,7 @@
     <ClInclude Include="..\Source\AndroidMovieDecoder.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Static|x64'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="..\Source\AvfEncoder.h" />
     <ClInclude Include="..\Source\BroadwayDecoder.h" />
@@ -237,19 +257,23 @@
     <None Include="..\Source\Broadway\Decoder\src\EvaluationTestBench.x">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Static|x64'">true</ExcludedFromBuild>
     </None>
     <None Include="..\Source\InstanceManager.inc" />
     <None Include="..\Source\SoyAvf.mm" />
     <CopyFileToFolders Include="..\Source\X264\bin\x64\x264.dll">
       <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Static|x64'">true</ExcludedFromBuild>
     </CopyFileToFolders>
     <None Include="..\Source\X264\bin\x86\x264.dll">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Static|x64'">true</ExcludedFromBuild>
     </None>
     <None Include="..\Source\X264\lib\x86\x264.pdb">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Static|x64'">true</ExcludedFromBuild>
     </None>
     <None Include="..\Unity\PopH264\Assets\PopH264\PopH264.cs" />
   </ItemGroup>
@@ -257,19 +281,25 @@
     <Library Include="..\Source\X264\lib\x64\libx264.lib">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Static|x64'">true</ExcludedFromBuild>
     </Library>
-    <Library Include="..\Source\X264\lib\x64\x264.lib" />
+    <Library Include="..\Source\X264\lib\x64\x264.lib">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Static|x64'">true</ExcludedFromBuild>
+    </Library>
     <Library Include="..\Source\X264\lib\x86\x264.lib">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Static|x64'">true</ExcludedFromBuild>
     </Library>
     <Library Include="C:\Program Files (x86)\IntelSWTools\Intel(R) Media SDK 2019 R1\Software Development Kit\lib\x64\libmfx.lib">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Static|x64'">true</ExcludedFromBuild>
     </Library>
     <Library Include="C:\Program Files (x86)\IntelSWTools\Intel(R) Media SDK 2019 R1\Software Development Kit\lib\x64\libmfx_vs2015.lib">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Static|x64'">true</ExcludedFromBuild>
     </Library>
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -290,6 +320,11 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Static|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
@@ -306,11 +341,21 @@
     <Import Project="Release.props" />
     <Import Project="IntelMediaSdk.props" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Static|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="PopH264.props" />
+    <Import Project="Release.props" />
+    <Import Project="IntelMediaSdk.props" />
+    <Import Project="Static.props" />
+  </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)..\Build\$(Configuration)_$(Platform)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(SolutionDir)..\Build\$(Configuration)_$(Platform)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Static|x64'">
     <OutDir>$(SolutionDir)..\Build\$(Configuration)_$(Platform)\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -326,6 +371,17 @@
     <PostBuildEvent />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+    </ClCompile>
+    <Link />
+    <Link />
+    <PostBuildEvent />
+    <Link />
+    <PostBuildEvent />
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Static|x64'">
     <ClCompile>
       <PrecompiledHeader>
       </PrecompiledHeader>
