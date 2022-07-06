@@ -24,7 +24,15 @@ jobs:
       - uses: actions/checkout@v2
         with:
           submodules: "recursive"
-      - uses: NewChromantics/PopAction_BuildApple@v1.0.9
+
+      - name: Build Macos Static
+        uses: NewChromantics/PopAction_BuildApple@v1.0.9
+        with:
+          BuildScheme: ${{ env.project }}_MacosStatic
+          project: ${{ env.project }}
+
+      - name: Build Universal
+        uses: NewChromantics/PopAction_BuildApple@v1.0.9
         with:
           BuildScheme: ${{ env.project }}_Universal
           project: ${{ env.project }}
