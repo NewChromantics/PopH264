@@ -12,7 +12,7 @@ on:
 jobs:
   Test:
     name: Universal
-    runs-on: macos-latest
+    runs-on: macos-12
     steps:
       - name: "Import Apple-Distriubution NewChromantics Signing Certificate"
         uses: devbotsxyz/xcode-import-certificate@master
