@@ -2,6 +2,8 @@
 //#include "PopApp.xcconfig"
 #include "../Source/Version.xcconfig"
 
+SDKROOT = iphoneos
+
 
 //	gr: move to soy xcconfig
 TARGET_ARCH[arch=i386] = TARGET_ARCH_INTEL
