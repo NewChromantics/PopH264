@@ -3,6 +3,7 @@
 #include "../Source/Version.xcconfig"
 
 SDKROOT = iphoneos
+IPHONEOS_DEPLOYMENT_TARGET = 13.0
 
 
 //	gr: move to soy xcconfig
