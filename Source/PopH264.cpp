@@ -552,4 +552,23 @@ void PopH264::Shutdown(bool FromDllExit)
 }
 
 
+__export void PopH264_GetDebugStatsJson(char* JsonBuffer,int32_t JsonBufferSize)
+{
+	try
+	{
+		json11::Json::object Meta;
+		Meta["DecoderInstanceCount"] = static_cast<int>(PopH264::DecoderInstanceManager.GetInstanceCount());
+		Meta["EncoderInstanceCount"] = static_cast<int>(PopH264::EncoderInstanceManager.GetInstanceCount());
+		
+		auto Json = json11::Json(Meta).dump();
+		Soy::StringToBuffer(Json, JsonBuffer, JsonBufferSize);
+	}
+	catch (std::exception& e)
+	{
+		json11::Json::object Meta;
+		Meta["Error"] = e.what();
 
+		auto Json = json11::Json(Meta).dump();
+		Soy::StringToBuffer(Json, JsonBuffer, JsonBufferSize);
+	}
+}

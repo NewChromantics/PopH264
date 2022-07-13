@@ -26,6 +26,7 @@ typedef void PopH264_Callback(void* Meta);
 
 
 __export int32_t			PopH264_GetVersion();
+__export void				PopH264_GetDebugStatsJson(char* JsonBuffer,int32_t JsonBufferSize);
 
 //	cleanup all resources (on some platforms this may need to be called to prevent a crash on exit/dll unload)
 __export void				PopH264_Shutdown();
