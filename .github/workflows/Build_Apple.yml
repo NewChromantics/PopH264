@@ -15,7 +15,7 @@ jobs:
     runs-on: macos-12
     steps:
       - name: "Import Apple-Distriubution NewChromantics Signing Certificate"
-        uses: NewChromantics/xcode-import-certificate@v1.0.1
+        uses: NewChromantics/import-signing-certificate@v1.0.1
         with:
           certificate-data: ${{ secrets.APPLE_DIST_NEWCHROMANTICS_P12 }}
           certificate-passphrase: ${{ secrets.APPLE_DIST_NEWCHROMANTICS_PASSWORD }}
