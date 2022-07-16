@@ -42,7 +42,7 @@ jobs:
           - os: windows-latest
             type: x64
 
-          - os: macos-latest
+          - os: macos-12
             scheme: PopH264_Universal
           
           - os: macos-latest
@@ -76,7 +76,7 @@ jobs:
           project: ${{ env.project }}
 
       - name: "Import Apple-Distriubution NewChromantics Signing Certificate"
-        if: matrix.config.os == 'macos-latest'
+        if: startsWith(matrix.config.os,'macos')
         uses: NewChromantics/import-signing-certificate@v1.0.2
         with:
           certificate-data: ${{ secrets.APPLE_DIST_NEWCHROMANTICS_P12 }}
