@@ -77,7 +77,7 @@ jobs:
 
       - name: "Import Apple-Distriubution NewChromantics Signing Certificate"
         if: matrix.config.os == 'macos-latest'
-        uses: devbotsxyz/xcode-import-certificate@master
+        uses: NewChromantics/import-signing-certificate@v1.0.1
         with:
           certificate-data: ${{ secrets.APPLE_DIST_NEWCHROMANTICS_P12 }}
           certificate-passphrase: ${{ secrets.APPLE_DIST_NEWCHROMANTICS_PASSWORD }}
