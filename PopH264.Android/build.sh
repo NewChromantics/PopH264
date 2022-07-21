@@ -55,19 +55,6 @@ fi
 ADDITIONAL_BUILD_FILES=(Source/PopH264.h)
 
 
-function InstallAndRunTestExecutable()
-{
-	adb push ./PopH264TestApp /data/local/tmp
-	adb push ./libc++_shared.so /data/local/tmp
-	adb push ./PopH264.h /data/local/tmp
-	adb push ./libPopH264.so /data/local/tmp
-	adb shell "cd /data/local/tmp && chmod +x ./PopH264TestApp && ./PopH264TestApp"
-
-	RESULT=$?
-	if [[ $RESULT -ne 0 ]]; then
-		exit $RESULT
-	fi
-}
 
 function CopyAdditionalBuildFiles()
 {
