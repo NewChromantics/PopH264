@@ -13,6 +13,10 @@ ACTION="$2"
 
 DEFAULT_ACTION="release"
 
+#	gr this was 1 for... debugging? 10 is much faster.
+MAXCONCURRENTBUILDS=10
+
+
 if [ "$ACTION" == "" ]; then
 	echo "Defaulting build ACTION to $DEFAULT_ACTION"
 	ACTION=$DEFAULT_ACTION
@@ -32,8 +36,6 @@ fi
 if [ -z "$ANDROID_PLATFORM" ]; then
 	ANDROID_PLATFORM="21"
 fi
-
-MAXCONCURRENTBUILDS=1
 
 # set android NDK dir
 if [ -z "$ANDROID_NDK_HOME" ]; then
@@ -107,10 +109,10 @@ function BuildAbi()
 {
 	ANDROID_ABI=$1	
 	
-	#if [ ! -z "$ANDROID_ABI_ONLY" && "$ANDROID_ABI_ONLY"!="$ANDROID_ABI" ]; then
-	#	echo "Skipping ABI [$ANDROID_ABI] (ANDROID_ABI_ONLY=$ANDROID_ABI_ONLY)"
-	#	return 0
-	#fi
+	if [ ! -z "$ANDROID_ABI_ONLY" && "$ANDROID_ABI_ONLY"!="$ANDROID_ABI" ]; then
+		echo "Skipping ABI [$ANDROID_ABI] (ANDROID_ABI_ONLY=$ANDROID_ABI_ONLY)"
+		return 0
+	fi
 	
 	ENABLE_DEBUG_SYMBOLS=$2
 	echo "ndk-build $ANDROID_ABI... DEBUG_SYMBOLS=$ENABLE_DEBUG_SYMBOLS"

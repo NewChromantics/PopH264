@@ -65,19 +65,6 @@ $(LOCAL_PATH)/$(SRC)/Source/Json11	\
 #LOCAL_STATIC_LIBRARIES += android-ndk-profiler
 
 
-#LOCAL_LDLIBS	+= -lGLESv3			# OpenGL ES 3.0
-#LOCAL_LDLIBS	+= -lEGL			# GL platform interface
-LOCAL_LDLIBS  	+= -llog			# logging
-#LOCAL_LDLIBS  	+= -landroid		# native windows
-#LOCAL_LDLIBS	+= -lz				# For minizip
-#LOCAL_LDLIBS	+= -lOpenSLES		# audio
-LOCAL_LDLIBS += -lmediandk			# native/ndk mediacodec
-
-
-# gr: when the test app executable tries to run, it can't find the c++shared.so next to it
-#	use this to alter the rpath so it finds it
-#LOCAL_LDFLAGS	+= -rdynamic
-LOCAL_LDFLAGS	+= -Wl,-rpath,.
 
 # project files
 # todo: generate from input from xcode
@@ -127,8 +114,11 @@ $(SOY_PATH)/src/SoyPlatform.cpp \
 #$(SOY_PATH)/src/SoyGraphics.cpp \
 
 
+#$(call import-module,android-ndk-profiler)
+
+
 LOCAL_MODULE := $(APP_MODULE)_static
-LOCAL_MODULE_FILENAME := $(APP_MODULE)	# outputs libNAME.a
+LOCAL_MODULE_FILENAME := lib$(APP_MODULE)	# outputs libNAME.a
 include $(BUILD_STATIC_LIBRARY)
 
 
@@ -136,11 +126,86 @@ include $(BUILD_STATIC_LIBRARY)
 
 #	build shared library from the static library we just built
 include $(CLEAR_VARS)
+
+#LOCAL_LDLIBS	+= -lGLESv3			# OpenGL ES 3.0
+#LOCAL_LDLIBS	+= -lEGL			# GL platform interface
+LOCAL_LDLIBS  	+= -llog			# logging
+#LOCAL_LDLIBS  	+= -landroid		# native windows
+#LOCAL_LDLIBS	+= -lz				# For minizip
+#LOCAL_LDLIBS	+= -lOpenSLES		# audio
+LOCAL_LDLIBS += -lmediandk			# native/ndk mediacodec
+
+
+#/Volumes/Code/PopH264/clang++:1:1: no such file or directory: '/Volumes/Code/PopH264/PopH264.Android/libPopH264/jni/PopH264'
+#LOCAL_LDLIBS += $(LOCAL_PATH)/$(APP_MODULE)
+
+# gr: i think this is the correct way to do it, but it's added to the .so link as -shared poph264.a
+#	and producdes NO symbols in the output
+#	LOCAL_WHOLE_STATIC_LIBRARIES though, works!
+#LOCAL_STATIC_LIBRARIES += $(APP_MODULE)_static
+LOCAL_WHOLE_STATIC_LIBRARIES += $(APP_MODULE)_static
+
+
+LOCAL_STRIP_MODE := none
+cmd-strip :=
+
+# gr: when the test app executable tries to run, it can't find the c++shared.so next to it
+#	use this to alter the rpath so it finds it
+#LOCAL_LDFLAGS	+= -rdynamic
+LOCAL_LDFLAGS	+= -Wl,-rpath,.
+
 LOCAL_MODULE := $(APP_MODULE)_shared
 LOCAL_MODULE_FILENAME := $(APP_MODULE) # outputs NAME.so
-LOCAL_STATIC_LIBRARIES := $(APP_MODULE)_static
+
 include $(BUILD_SHARED_LIBRARY)
 
 
 
-#$(call import-module,android-ndk-profiler)
+#	build test app
+include $(CLEAR_VARS)
+
+LOCAL_C_INCLUDES += \
+$(LOCAL_PATH)/$(SOY_PATH)/src	\
+$(LOCAL_PATH)/$(SRC)/Source/
+
+# missing
+#LOCAL_WHOLE_STATIC_LIBRARIES += libsigchain
+#LOCAL_LDFLAGS += \
+#	-Wl,--export-dynamic \
+#	-Wl,--version-script,art/sigchainlib/version-script.txt
+# gr: missing, which means JNI_CreateJavaVM is missing :/
+#LOCAL_LDLIBS  	+= -ljvm			# java
+
+# native glue support (hoping this starts JVM)
+LOCAL_STATIC_LIBRARIES += android_native_app_glue
+#LOCAL_STATIC_LIBRARIES += ndk_helper
+#LOCAL_STATIC_LIBRARIES += $(APP_MODULE)_static	# maybe should use shared?
+LOCAL_SHARED_LIBRARIES += $(APP_MODULE)_shared	# use shared to determine if any symbols are missing
+
+#LOCAL_STATIC_LIBRARIES += android-ndk-profiler
+#LOCAL_SHARED_LIBRARIES := libPopH264
+
+LOCAL_LDLIBS  	+= -llog			# logging
+
+# gr: when the test app executable tries to run, it can't find the c++shared.so next to it
+#	use this to alter the rpath so it finds it
+#LOCAL_LDFLAGS	+= -rdynamic
+LOCAL_LDFLAGS	+= -Wl,-rpath,.
+
+LOCAL_SRC_FILES  := \
+$(SRC)/Source_TestApp/PopH264_TestApp.cpp \
+
+# soy lib files
+LOCAL_SRC_FILES  += \
+$(SOY_PATH)/src/SoyTypes.cpp \
+$(SOY_PATH)/src/SoyFilesystem.cpp \
+
+LOCAL_MODULE := $(APP_MODULE)_testapp
+LOCAL_MODULE_FILENAME := $(APP_MODULE)TestApp	# may have a better place to get this target name from
+
+include $(BUILD_EXECUTABLE)
+
+#	this declares the module so we can use it above
+$(call import-module,android/native_app_glue)
+
+
