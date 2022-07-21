@@ -52,3 +52,8 @@ APP_USE_CPP0X := true
 # gcc 4.9 doesnt fix regex :(
 #NDK_TOOLCHAIN_VERSION = 4.9
 NDK_TOOLCHAIN_VERSION = clang
+
+# Need this otherwise static library wont build
+#	https://stackoverflow.com/a/15239050/355753
+APP_MODULES = $(BUILD_TARGET_NAME)_static
+APP_MODULES += $(BUILD_TARGET_NAME)_shared

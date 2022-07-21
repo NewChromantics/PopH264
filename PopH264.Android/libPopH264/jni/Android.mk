@@ -51,12 +51,8 @@ LOCAL_CFLAGS	+= -O3
 
 SOY_PATH = $(SRC)/Source/SoyLib
 
-#--------------------------------------------------------
-# Unity plugin
-#--------------------------------------------------------
 include $(CLEAR_VARS)
 
-LOCAL_MODULE := $(APP_MODULE)
 
 LOCAL_C_INCLUDES += \
 $(LOCAL_PATH)/$(SRC)/Source/Broadway/Decoder	\
@@ -69,7 +65,6 @@ $(LOCAL_PATH)/$(SRC)/Source/Json11	\
 # use warning as echo
 #$(warning $(LOCAL_C_INCLUDES))
 
-LOCAL_STATIC_LIBRARIES :=
 #LOCAL_STATIC_LIBRARIES += android-ndk-profiler
 
 
@@ -139,8 +134,20 @@ $(SOY_PATH)/src/SoyPlatform.cpp \
 #$(SOY_PATH)/src/SoyGraphics.cpp \
 
 
+LOCAL_MODULE := $(APP_MODULE)_static
+LOCAL_MODULE_FILENAME := $(APP_MODULE)	# outputs libNAME.a
+include $(BUILD_STATIC_LIBRARY)
 
+
+
+
+#	build shared library from the static library we just built
+include $(CLEAR_VARS)
+LOCAL_MODULE := $(APP_MODULE)_shared
+LOCAL_MODULE_FILENAME := $(APP_MODULE) # outputs NAME.so
+LOCAL_STATIC_LIBRARIES := $(APP_MODULE)_static
 include $(BUILD_SHARED_LIBRARY)
+
 
 
 #$(call import-module,android-ndk-profiler)
