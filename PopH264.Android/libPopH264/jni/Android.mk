@@ -1,28 +1,28 @@
 # gr: make path absolute so errors have full path
 #		this makes them jump in xcode
 LOCAL_PATH := $(abspath $(call my-dir))
+APP_MODULE := $(BUILD_TARGET_NAME)
 
 
 # extra ../ as jni is always prepended
 SRC := ../../..
 #$(warning $(LOCAL_PATH))	#	debug
 
-# gr: get this from env var
-APP_MODULE := $(BUILD_TARGET_NAME)
+
+
+
+include $(CLEAR_VARS)
 
 # full speed arm instead of thumb
 LOCAL_ARM_MODE  := arm
 
 #include cflags.mk
 
-# This file is included in all .mk files to ensure their compilation flags are in sync
-# across debug and release builds.
+#LOCAL_CFLAGS	+= -pg -DNDK_PROFILE # compile with profiling
+#LOCAL_CFLAGS	+= -mfpu=neon		# ARM NEON support
+LOCAL_CFLAGS	+= -DTARGET_ANDROID
 
-# NOTE: this is not part of import_vrlib.mk because VRLib itself needs to have these flags
-# set, but VRLib's make file cannot include import_vrlib.mk or it would be importing itself.
-
-LOCAL_CFLAGS	:= -DANDROID_NDK
-LOCAL_CFLAGS	+= -Werror			# error on warnings
+#LOCAL_CFLAGS	+= -Werror			# error on warnings
 LOCAL_CFLAGS	+= -Wall
 LOCAL_CFLAGS	+= -Wextra
 #LOCAL_CFLAGS	+= -Wlogical-op		# not part of -Wall or -Wextra
@@ -30,17 +30,17 @@ LOCAL_CFLAGS	+= -Wextra
 LOCAL_CFLAGS	+= -Wno-strict-aliasing		# TODO: need to rewrite some code
 LOCAL_CFLAGS	+= -Wno-unused-parameter
 LOCAL_CFLAGS	+= -Wno-missing-field-initializers	# warns on this: SwipeAction	ret = {}
+LOCAL_CFLAGS	+= -Wno-reorder-ctor
 LOCAL_CFLAGS	+= -Wno-multichar	# used in internal Android headers:  DISPLAY_EVENT_VSYNC = 'vsyn',
 LOCAL_CFLAGS	+= -Wno-invalid-source-encoding
-#LOCAL_CFLAGS	+= -pg -DNDK_PROFILE # compile with profiling
-#LOCAL_CFLAGS	+= -mfpu=neon		# ARM NEON support
-LOCAL_CPPFLAGS	:= -Wno-type-limits
-LOCAL_CPPFLAGS	+= -Wno-invalid-offsetof
-
-LOCAL_CFLAGS     := -Werror -DANDROID_NDK
-LOCAL_CFLAGS	 += -Wno-multichar	# used in internal Android headers:  DISPLAY_EVENT_VSYNC = 'vsyn',
-
-LOCAL_CFLAGS     := -Werror -DTARGET_ANDROID
+LOCAL_CFLAGS	+= -Wno-ignored-qualifiers
+LOCAL_CFLAGS	+= -Wno-unknown-pragmas	# ignore windows pragmas
+LOCAL_CFLAGS	+= -Wno-deprecated-copy-with-user-provided-copy
+LOCAL_CFLAGS	+= -Wno-type-limits
+LOCAL_CFLAGS	+= -Wno-invalid-offsetof
+LOCAL_CFLAGS	+= -Wno-unused-but-set-variable
+LOCAL_CFLAGS	+= -Wno-sign-compare
+LOCAL_CFLAGS	+= -Wno-unused-variable	# wouldnt normally exclude this, but one specific case which would be messy to ifdef around
 
 #ifeq ($(OVR_DEBUG),1)
 #LOCAL_CFLAGS	+= -DOVR_BUILD_DEBUG=1 -O0 -g
@@ -51,15 +51,12 @@ LOCAL_CFLAGS	+= -O3
 
 SOY_PATH = $(SRC)/Source/SoyLib
 
-include $(CLEAR_VARS)
-
 
 LOCAL_C_INCLUDES += \
 $(LOCAL_PATH)/$(SRC)/Source/Broadway/Decoder	\
 $(LOCAL_PATH)/$(SRC)/Source/Broadway/Decoder/inc	\
 $(LOCAL_PATH)/$(SOY_PATH)/src	\
 $(LOCAL_PATH)/$(SRC)/Source/Json11	\
-
 
 
 # use warning as echo
@@ -74,11 +71,7 @@ LOCAL_LDLIBS  	+= -llog			# logging
 #LOCAL_LDLIBS  	+= -landroid		# native windows
 #LOCAL_LDLIBS	+= -lz				# For minizip
 #LOCAL_LDLIBS	+= -lOpenSLES		# audio
-
-
-# native/ndk mediacodec
-LOCAL_LDLIBS += -lmediandk
-
+LOCAL_LDLIBS += -lmediandk			# native/ndk mediacodec
 
 
 # gr: when the test app executable tries to run, it can't find the c++shared.so next to it

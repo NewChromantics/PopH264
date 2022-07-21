@@ -5,10 +5,11 @@ APP_PLATFORM 	:= $(APP_PLATFORM)
 # Error: selected processor does not support ARM mode `ldrex r0,[r3]'
 APP_ABI 		:= $(ANDROID_ABI)
 
-# set some defines
+# set some defines from GCC_PREPROCESSOR_DEFINITIONS
+#	which come from xcode config, this obviously wont apply to a build on linux
+#	so maybe we should not use it?
 # gr: the code below goes wrong if GCC_PREPROCESSOR_DEFINITIONS is empty (ends up with -D-std)
 #		and as we need to set TARGET_ANDROID, just do it here and two birds.
-#APP_CPPFLAGS += -DTARGET_ANDROID
 GCC_PREPROCESSOR_DEFINITIONS += TARGET_ANDROID
 
 # parse the preprocessor settings from xcode(env var->-DXXX=Y)
