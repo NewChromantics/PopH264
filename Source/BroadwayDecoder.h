@@ -32,7 +32,7 @@ public:
 
 public:
 	TDecoder(PopH264::TDecoderParams Params,PopH264::OnDecodedFrame_t OnDecodedFrame,PopH264::OnFrameError_t OnFrameError);
-	~TDecoder();
+	virtual ~TDecoder();
 
 private:
 	void			OnMeta(const H264SwDecInfo& Meta);

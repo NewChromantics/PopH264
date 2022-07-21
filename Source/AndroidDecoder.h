@@ -153,7 +153,7 @@ public:
 	static inline const char*	Name = "Android";
 public:
 	TDecoder(PopH264::TDecoderParams Params,PopH264::OnDecodedFrame_t OnDecodedFrame,PopH264::OnFrameError_t OnFrameError);
-	~TDecoder();
+	virtual ~TDecoder();
 
 private:
 	virtual bool	DecodeNextPacket() override;	//	returns true if more data to proccess
