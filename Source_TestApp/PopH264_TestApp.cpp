@@ -427,22 +427,33 @@ void android_main(struct android_app* state)
 
 int main()
 {
-	EncoderGreyscaleTest();
-	EncoderYuv8_88Test(1280,480);
-
-	//	trying to crash android
-	for ( auto d=0;	d<300;	d++)
+	//if ( false )
 	{
-		std::Debug << "DestroyMidDecodeTest #" << d << std::endl;
-		DestroyMidDecodeTest("RainbowGradient.h264", nullptr, nullptr);
+		EncoderGreyscaleTest();
 	}
-/*	
-	// heavy duty test to find leaks
-	for ( auto d=0;	d<10;	d++)
-		DecoderTest("RainbowGradient.h264", nullptr, nullptr, 500);
-		*/
-	return 0;
+
+	if ( false )
+	{
+		EncoderYuv8_88Test(1280,480);
+	}
+
+	if ( false )
+	{
+		//	trying to crash android
+		for ( auto d=0;	d<300;	d++)
+		{
+			std::Debug << "DestroyMidDecodeTest #" << d << std::endl;
+			DestroyMidDecodeTest("RainbowGradient.h264", nullptr, nullptr);
+		}
+	}
 	
+	if ( false )
+	{
+		// heavy duty test to find leaks
+		for ( auto d=0;	d<10;	d++)
+			DecoderTest("RainbowGradient.h264", nullptr, nullptr, 500);
+	}
+
 	std::cout << "main" << std::endl;
 	
 #if defined(TARGET_ANDROID)
