@@ -472,7 +472,7 @@ Android::TDecoder::TDecoder(PopH264::TDecoderParams Params,PopH264::OnDecodedFra
 	PopH264::TDecoder	( OnDecodedFrame, OnFrameError ),
 	mParams				( Params ),
 	mInputThread		( std::bind(&TDecoder::LockCodecCallback, this, std::placeholders::_1 ), std::bind(&TDecoder::GetNextInputData, this, std::placeholders::_1, std::placeholders::_2 ), std::bind(&TDecoder::HasPendingData, this ) ),
-	mOutputThread		( std::bind(&TDecoder::LockCodecCallback, this, std::placeholders::_1 ), OnDecodedFrame, OnFrameError )
+	mOutputThread		( std::bind(&TDecoder::LockCodecCallback, this, std::placeholders::_1 ), OnDecodedFrame, [this](){this->OnDecodedEndOfStream();}, OnFrameError )
 {
 
 #if __ANDROID_API__ < 28
@@ -1035,12 +1035,21 @@ void Android::TInputThread::PushInputBuffer(int64_t BufferIndex,MediaCodec_t Cod
 	auto BufferArray = GetRemoteArray( Buffer, BufferSize, BufferWrittenSize );
 	PopH264::FrameNumber_t PacketTime = 0;
 	mPopPendingData( GetArrayBridge(BufferArray), PacketTime );
-
+	
+	auto H264PacketType = H264::GetPacketType(GetArrayBridge(BufferArray));
+		
 	//	process buffer
 	int64_t DataOffset = 0;
 	uint64_t PresentationTimeMicroSecs = PacketTime;
 
 	int Flags = 0;
+	
+	if ( H264PacketType == H264NaluContent::EndOfStream )
+	{
+		std::Debug << "Android input EndOfStream" << std::endl;;
+		Flags |= AMEDIACODEC_BUFFER_FLAG_END_OF_STREAM;
+	}
+
   	//	AMEDIACODEC_BUFFER_FLAG_PARTIAL_FRAME
 	//Flags |= MLMediaCodecBufferFlag_KeyFrame;
 	//Flags |= AMEDIACODEC_BUFFER_FLAG_CODEC_CONFIG;
@@ -1052,8 +1061,17 @@ void Android::TInputThread::PushInputBuffer(int64_t BufferIndex,MediaCodec_t Cod
 	IsOkay( Result, "AMediaCodec_queueInputBuffer" );
 	
 	OnInputSubmitted( PresentationTimeMicroSecs );
+	
+	std::Debug << "AMediaCodec_queueInputBuffer( BufferIndex=" << BufferIndex << " DataSize=" << BufferWrittenSize << "/" << BufferSize << " presentationtime=" << PresentationTimeMicroSecs << " Flags=" << Flags <<") success" << std::endl;
 
-	std::Debug << "AMediaCodec_queueInputBuffer( BufferIndex=" << BufferIndex << " DataSize=" << BufferWrittenSize << "/" << BufferSize << " presentationtime=" << PresentationTimeMicroSecs << ") success" << std::endl;
+#if __ANDROID_API__ >= 26
+	if ( H264PacketType == H264NaluContent::EndOfStream )
+	{
+		std::Debug << "AMediaCodec_signalEndOfInputStream()" << std::endl;
+		Result = AMediaCodec_signalEndOfInputStream(Codec);
+		IsOkay( Result, "AMediaCodec_signalEndOfInputStream" );
+	}
+#endif
 }
 
 
@@ -1129,11 +1147,12 @@ void Android::TDecoder::OnOutputFormatChanged(MediaFormat_t NewFormat)
 
 
 
-Android::TOutputThread::TOutputThread(std::function<void(std::function<void(MediaCodec_t)>)> LockCodec,PopH264::OnDecodedFrame_t OnDecodedFrame,PopH264::OnFrameError_t OnFrameError) :
-	SoyWorkerThread	("AndroidOutputThread", SoyWorkerWaitMode::Wake ),
-	mOnDecodedFrame	( OnDecodedFrame ),
-	mOnFrameError	( OnFrameError ),
-	mLockCodec		( LockCodec )
+Android::TOutputThread::TOutputThread(std::function<void(std::function<void(MediaCodec_t)>)> LockCodec,PopH264::OnDecodedFrame_t OnDecodedFrame,std::function<void()> OnDecodedEndOfStream,PopH264::OnFrameError_t OnFrameError) :
+	SoyWorkerThread			("AndroidOutputThread", SoyWorkerWaitMode::Wake ),
+	mOnDecodedFrame			( OnDecodedFrame ),
+	mOnDecodedEndOfStream	( OnDecodedEndOfStream ),
+	mOnFrameError			( OnFrameError ),
+	mLockCodec				( LockCodec )
 {
 	Start();
 }
@@ -1389,19 +1408,29 @@ void Android::TOutputThread::PopOutputBuffer(MediaCodec_t LockedCodec,const TOut
 	Soy::TScopeTimerPrint Timer2("Android::TOutputThread::PopOutputBuffer AMediaCodec_getOutputBuffer",1);
 	uint8_t* BufferData = AMediaCodec_getOutputBuffer( mCodec, BufferIndex, &BufferSize ); 
 	Timer2.Stop();
-	
+
+	auto FrameTime = BufferMeta.mMeta.presentationTimeUs;
+	auto Flags = BufferMeta.mMeta.flags;
+	auto BufferDataOffset = BufferMeta.mMeta.offset;
+	auto BufferDataSize = BufferMeta.mMeta.size;
+
 	//	if data is null, then output is a surface
+	//	gr: OR it's an EOF frame with no data (see flags!)
 	if ( BufferData == nullptr || BufferSize == 0 )
 	{
-		std::Debug << "Got Invalid OutputBuffer(" << BufferMeta.mBufferIndex << ") BufferSize=" << BufferSize << " BufferData=0x" << std::hex << (size_t)(BufferData) << std::dec << std::endl;
+		std::Debug << "Got Invalid OutputBuffer(" << BufferMeta.mBufferIndex << ") BufferSize=" << BufferSize << " BufferData=0x" << std::hex << (size_t)(BufferData) << std::dec << " FrameTime=" << FrameTime << " Flags=" << Flags << " offset=" << BufferDataOffset << " size=" << BufferDataSize << std::endl;
+		
+		auto EndOfStream = (Flags & AMEDIACODEC_BUFFER_FLAG_END_OF_STREAM)!=0;
+		if ( EndOfStream )
+		{
+			std::Debug << "Android output EndOfStream" << std::endl;
+			OnDecodedEndOfStream();
+		}
+		
 		ReleaseBuffer();
 		return;
 	}
 	
-	auto FrameTime = BufferMeta.mMeta.presentationTimeUs;
-	auto Flags = BufferMeta.mMeta.flags; 
-	auto BufferDataOffset = BufferMeta.mMeta.offset;
-	auto BufferDataSize = BufferMeta.mMeta.size;
 	std::Debug << "Got OutputBuffer(" << BufferMeta.mBufferIndex << ") BufferSize=" << BufferSize << " BufferData=0x" << std::hex << (size_t)(BufferData) << std::dec << " FrameTime=" << FrameTime << " Flags=" << Flags << " offset=" << BufferDataOffset << " size=" << BufferDataSize << std::endl;
 	try
 	{
@@ -1432,11 +1461,15 @@ void Android::TOutputThread::PopOutputBuffer(MediaCodec_t LockedCodec,const TOut
 		
 		//	extra meta
 		json11::Json::object Meta = mOutputMeta;
+		
+		auto EndOfStream = (Flags & AMEDIACODEC_BUFFER_FLAG_END_OF_STREAM)!=0;
+		if ( EndOfStream )
+			std::Debug << "Android output EndOfStream" << std::endl;;
 		Meta["AndroidBufferFlags"] = static_cast<int>(Flags);
 	
 		{	
 			Soy::TScopeTimerPrint Timer3("Android::TOutputThread::PopOutputBuffer PushFrame",1);
-			PushFrame( NewPixels, FrameTime, Meta );
+			PushFrame( NewPixels, FrameTime, Meta, EndOfStream );
 		}
 		ReleaseBuffer();
 	}
@@ -1449,9 +1482,16 @@ void Android::TOutputThread::PopOutputBuffer(MediaCodec_t LockedCodec,const TOut
 }
 
 
-void Android::TOutputThread::PushFrame(const SoyPixelsImpl& Pixels,PopH264::FrameNumber_t FrameNumber,const json11::Json& Meta)
+void Android::TOutputThread::PushFrame(const SoyPixelsImpl& Pixels,PopH264::FrameNumber_t FrameNumber,const json11::Json& Meta,bool EndOfStream)
 {
 	mOnDecodedFrame( Pixels, FrameNumber, Meta );
+	if ( EndOfStream )
+		OnDecodedEndOfStream();
+}
+
+void Android::TOutputThread::OnDecodedEndOfStream()
+{
+	mOnDecodedEndOfStream();
 }
 
 

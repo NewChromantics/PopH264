@@ -62,7 +62,7 @@ public:
 class Android::TOutputThread : public SoyWorkerThread
 {
 public:
-	TOutputThread(std::function<void(std::function<void(MediaCodec_t)>)> LockCodec,PopH264::OnDecodedFrame_t OnDecodedFrame,PopH264::OnFrameError_t OnFrameError);
+	TOutputThread(std::function<void(std::function<void(MediaCodec_t)>)> LockCodec,PopH264::OnDecodedFrame_t OnDecodedFrame,std::function<void()> OnDecodedEndOfStream,PopH264::OnFrameError_t OnFrameError);
 
 	virtual bool	Iteration() override;
 	virtual bool	CanSleep() override;
@@ -84,11 +84,13 @@ private:
 	void			ReleaseOutputTexture(MLHandle TextureHandle);
 	bool			IsAnyOutputTextureReady();
 	*/
-	void			PushFrame(const SoyPixelsImpl& Pixels,PopH264::FrameNumber_t FrameNumber,const json11::Json& Meta);
+	void			PushFrame(const SoyPixelsImpl& Pixels,PopH264::FrameNumber_t FrameNumber,const json11::Json& Meta,bool EndOfStream);
+	void			OnDecodedEndOfStream();
 	void			OnFrameError(const std::string& Error,PopH264::FrameNumber_t FrameNumber);
 
 private:
 	PopH264::OnDecodedFrame_t	mOnDecodedFrame;
+	std::function<void()>		mOnDecodedEndOfStream;
 	PopH264::OnFrameError_t		mOnFrameError;
 
 	//	list of buffers with some pending output data
