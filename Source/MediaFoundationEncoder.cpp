@@ -259,7 +259,11 @@ bool MediaFoundation::TEncoder::FlushOutputFrame()
 		PopH264::TPacket Packet;
 		Packet.mData.reset(new Array<uint8_t>());
 		int64_t FrameNumber = -1;
-		mTransformer->PopFrame(GetArrayBridge(*Packet.mData), FrameNumber, Meta);
+		bool EndOfStream = false;
+		mTransformer->PopFrame(GetArrayBridge(*Packet.mData), FrameNumber, Meta, EndOfStream);
+
+		if (EndOfStream)
+			throw std::runtime_error("Todo: handle EndOfStream");
 
 		//	no packet
 		if (Packet.mData->IsEmpty())

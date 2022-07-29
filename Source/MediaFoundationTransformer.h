@@ -73,9 +73,10 @@ public:
 public:
 	//	this returns false if the data was not pushed (where we need to unpop the data, as to not lose it)
 	bool			PushFrame(const ArrayBridge<uint8_t>&& Data, int64_t FrameNumber);
+	void			PushEndOfStream();
 
 	//	returns true if we should call again (ie, there are more frames to get)
-	bool			PopFrame(ArrayBridge<uint8_t>&& Data,int64_t& FrameNumber,json11::Json::object& Meta);
+	bool			PopFrame(ArrayBridge<uint8_t>&& Data,int64_t& FrameNumber,json11::Json::object& Meta,bool& EndOfStream);
 	
 	void			ProcessCommand(MFT_MESSAGE_TYPE Command);
 
@@ -95,6 +96,7 @@ public:
 	void			SetLowPowerMode(bool Enable);
 	void			SetDropBadFrameMode(bool Enable);
 
+
 private:
 	void			SetOutputFormat();
 	void			ProcessNextOutputPacket();
@@ -107,6 +109,7 @@ private:
 	DWORD			mOutputStreamId = 0;
 	bool			mInputFormatSet = false;
 	bool			mOutputFormatSet = false;
+	bool			mInputSentEof = false;
 	Soy::AutoReleasePtr<IMFMediaType>	mOutputMediaType;
 	json11::Json::object	mOutputMediaMetaCache;		//	reset with mOutputMediaType
 

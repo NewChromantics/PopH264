@@ -714,7 +714,7 @@ void Test_Decoder_DecodeTestFile(const char* TestDataName, const char* DecoderNa
 			PopH264_PushEndOfStream(Handle);
 
 		//	wait for it to decode
-		for (auto i = 0; i < 100; i++)
+		for (auto i = 0; i < 1000; i++)
 		{
 			char MetaJson[1000];
 			PopH264_PeekFrame(Handle, MetaJson, std::size(MetaJson));
@@ -752,7 +752,8 @@ void Test_Decoder_DecodeTestFile(const char* TestDataName, const char* DecoderNa
 			if (Compare)
 				Compare(MetaJson, Plane0, Plane1, Plane2);
 				*/
-			break;
+			if ( HadEof )
+				break;
 		}
 	}
 

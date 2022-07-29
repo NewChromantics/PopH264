@@ -1298,6 +1298,29 @@ void MediaFoundation::ReadData(IMFSample& Sample, ArrayBridge<uint8_t>& Data)
 	Buffer.Unlock();
 }
 
+void MediaFoundation::TTransformer::PushEndOfStream()
+{
+	//	flush ditches pending inputs!
+	//mTransformer->ProcessCommand(MFT_MESSAGE_COMMAND_FLUSH);
+
+	//	"Requests a Media Foundation transform (MFT) to that streaming is about to end."
+	//mTransformer->ProcessCommand(MFT_MESSAGE_NOTIFY_END_STREAMING);
+
+	//	gr: to flush, we just need _DRAIN
+	//		with Picked Transform Microsoft H264 Video Decoder MFT
+	
+	//	notify there will be no more input
+	ProcessCommand(MFT_MESSAGE_NOTIFY_END_OF_STREAM);
+
+	//DoDrain = true;
+
+	//mTransformer->ProcessCommand(MFT_MESSAGE_COMMAND_FLUSH_OUTPUT_STREAM)
+
+	ProcessCommand(MFT_MESSAGE_COMMAND_DRAIN);
+
+	mInputSentEof = true;
+}
+
 
 
 bool MediaFoundation::TTransformer::PushFrame(const ArrayBridge<uint8_t>&& Data,int64_t FrameNumber)
@@ -1476,8 +1499,10 @@ IMFMediaType& MediaFoundation::TTransformer::GetOutputMediaType()
 	return *mOutputMediaType.mObject;
 }
 
-bool MediaFoundation::TTransformer::PopFrame(ArrayBridge<uint8_t>&& Data,int64_t& FrameNumber, json11::Json::object& Meta)
+bool MediaFoundation::TTransformer::PopFrame(ArrayBridge<uint8_t>&& Data,int64_t& FrameNumber, json11::Json::object& Meta,bool& EndOfStream)
 {
+	EndOfStream = false;
+
 	if (!mTransformer)
 		throw Soy::AssertException("Transformer is null");
 
@@ -1522,11 +1547,28 @@ bool MediaFoundation::TTransformer::PopFrame(ArrayBridge<uint8_t>&& Data,int64_t
 	DWORD Status = 0;
 	Result = Transformer.ProcessOutput( Flags, 1, &output_buffer, &Status );
 
+	if (mVerboseDebug)
+	{
+		auto ResultString = Platform::GetErrorString(Result);
+		if (Result == S_OK && ResultString.empty())
+			ResultString = "S_OK";
+		std::Debug << "PopFrame() Transformer.ProcessOutput -> " << ResultString << " status=" << Status << " SentEof=" << mInputSentEof << std::endl;
+	}
+
+
 	//	handle some special returns
 	if (Result == MF_E_TRANSFORM_NEED_MORE_INPUT)
 	{
 		if (mVerboseDebug)
 			std::Debug << "PopFrame() MF_E_TRANSFORM_NEED_MORE_INPUT" << std::endl;
+
+		//	gr: as far as I can tell we never get any "stream has ended" notification
+		//		but if we have "need more input" and we've sent the EOF, we know it's
+		//		done with all our input
+		// https://docs.microsoft.com/en-us/windows/win32/medfound/basic-mft-processing-model
+		if (mInputSentEof)
+			EndOfStream = true;
+
 		return false;
 	}
 	else if (Result == E_UNEXPECTED)

@@ -162,21 +162,7 @@ bool MediaFoundation::TDecoder::DecodeNextPacket()
 	{
 		//	gr: don't push as this is a special empty packet
 		PushData = false;
-		//	flush ditches pending inputs!
-		//mTransformer->ProcessCommand(MFT_MESSAGE_COMMAND_FLUSH);
-
-		//	"Requests a Media Foundation transform (MFT) to that streaming is about to end."
-		//mTransformer->ProcessCommand(MFT_MESSAGE_NOTIFY_END_STREAMING);
-
-		//	gr: to flush, we just need _DRAIN
-		//		with Picked Transform Microsoft H264 Video Decoder MFT
-
-		//	notify there will be no more input
-		mTransformer->ProcessCommand(MFT_MESSAGE_NOTIFY_END_OF_STREAM);
-		
-		DoDrain = true;
-		
-		//mTransformer->ProcessCommand(MFT_MESSAGE_COMMAND_FLUSH_OUTPUT_STREAM);
+		mTransformer->PushEndOfStream();
 	}
 
 	auto PushCount = (PushData ? (PushTwice ? 2 : 1) : 0);
@@ -249,9 +235,10 @@ size_t MediaFoundation::TDecoder::PopFrames()
 		Array<uint8_t> OutFrame;
 		int64_t PacketNumber = -1;
 		json11::Json::object Meta;
+		bool EndOfStream = false;
 		try
 		{
-			PopAgain = mTransformer->PopFrame(GetArrayBridge(OutFrame), PacketNumber, Meta);
+			PopAgain = mTransformer->PopFrame(GetArrayBridge(OutFrame), PacketNumber, Meta, EndOfStream );
 		}
 		catch (std::exception& e)
 		{
@@ -259,14 +246,21 @@ size_t MediaFoundation::TDecoder::PopFrames()
 			return FramesPushed;
 		}
 		
-		//	no frame
-		if (OutFrame.IsEmpty())
-			return FramesPushed;
-		
-		auto PixelMeta = mTransformer->GetOutputPixelMeta();
-		SoyPixelsRemote Pixels(OutFrame.GetArray(), OutFrame.GetDataSize(), PixelMeta);
-		OnDecodedFrame( Pixels, PacketNumber, Meta );
-		FramesPushed++;
+		//	send frame
+		if (!OutFrame.IsEmpty())
+		{
+			auto PixelMeta = mTransformer->GetOutputPixelMeta();
+			SoyPixelsRemote Pixels(OutFrame.GetArray(), OutFrame.GetDataSize(), PixelMeta);
+			OnDecodedFrame(Pixels, PacketNumber, Meta);
+			FramesPushed++;
+		}
+
+		if (EndOfStream)
+			OnDecodedEndOfStream();
+
+		//	not expecting more frames this iteration
+		if ( OutFrame.IsEmpty() )
+			break;
 	}
 	return FramesPushed;
 }
