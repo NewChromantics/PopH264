@@ -385,6 +385,7 @@
     <ClCompile>
       <PrecompiledHeader>
       </PrecompiledHeader>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link />
     <Link />
