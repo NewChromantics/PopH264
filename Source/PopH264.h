@@ -23,6 +23,8 @@
 //	function pointer type for new frame callback
 typedef void PopH264_Callback(void* Meta);
 
+typedef void PopH264_UnitTestCallback(const char* TestName,const char* Error);
+
 
 
 __export int32_t			PopH264_GetVersion();
@@ -35,7 +37,10 @@ __export void				PopH264_Shutdown();
 //	if Buffer is null, this will just return the size
 //	returns -1 on error
 //	returns 0 if Name doesnt exist
-__export int32_t			PopH264_GetTestData(const char* Name,uint8_t* Buffer,int32_t BufferSize);
+__export int32_t			PopH264_GetTestData(const char* Name, uint8_t* Buffer, int32_t BufferSize);
+
+//	some built in unit/system tests. Prints to stdout if no callback provided
+__export void				PopH264_UnitTest(PopH264_UnitTestCallback* OnTestResult);
 
 
 

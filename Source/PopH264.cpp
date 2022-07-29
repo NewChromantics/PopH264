@@ -5,6 +5,7 @@
 #include "Json11/json11.hpp"
 #include "TInstanceManager.h"
 #include "PopH264TestData.h"
+#include <iostream>
 
 namespace PopH264
 {
@@ -571,4 +572,192 @@ __export void PopH264_GetDebugStatsJson(char* JsonBuffer,int32_t JsonBufferSize)
 		auto Json = json11::Json(Meta).dump();
 		Soy::StringToBuffer(Json, JsonBuffer, JsonBufferSize);
 	}
+}
+
+
+static void RunTest(const std::string& TestName,std::function<void()> Test, std::function<PopH264_UnitTestCallback> Report)
+{
+	try
+	{
+		Test();
+		const char* NoError = nullptr;
+		Report(TestName.c_str(), NoError);
+	}
+	catch (std::exception& e)
+	{
+		Report(TestName.c_str(), e.what());
+	}
+	catch (...)
+	{
+		Report(TestName.c_str(), "Unknown exception");
+	}
+}
+
+void Test_Decoder_DecodeTestFile(const char* Filename, const char* DecoderName, size_t DataRepeat);
+void Test_Decoder_CreateAndDestroy();
+void Test_Decoder_DecodeRainbow();
+
+__export void PopH264_UnitTest(PopH264_UnitTestCallback* OnTestResult)
+{
+	try
+	{
+		std::function<PopH264_UnitTestCallback> Report = [](const char* TestName, const char* Result)
+		{
+			if (!TestName)
+				TestName = "Unknown Test";
+			if (!Result)
+				Result = "OK";
+			std::cout << "Unit Test " << TestName << " result: " << Result << std::endl;
+		};
+		if (OnTestResult)
+		{
+			Report = OnTestResult;
+		}
+
+		RunTest("Decoder_CreateAndDestroy", Test_Decoder_CreateAndDestroy, Report);
+		RunTest("Decoder_DecodeRainbow", Test_Decoder_DecodeRainbow, Report);
+	}
+	catch (std::exception& e)
+	{
+		//	if the whole unit test throws an exception, report that as a test result
+		if (OnTestResult)
+		{
+			OnTestResult(__PRETTY_FUNCTION__, e.what());
+		}
+	}
+}
+
+
+void Test_Decoder_CreateAndDestroy()
+{
+	auto Handle = PopH264_CreateDecoder(nullptr, nullptr, 0);
+	PopH264_DestroyDecoder(Handle);
+}
+
+void Test_Decoder_DecodeRainbow()
+{
+	Test_Decoder_DecodeTestFile("RainbowGradient.h264",nullptr,1);
+}
+
+json11::Json ParseJsonObject(const std::string& JsonString)
+{
+	std::string Error;
+	auto Json = json11::Json::parse(JsonString, Error);
+	if (!Error.empty())
+	{
+		std::stringstream DebugError;
+		DebugError << "Error parsing json; " << Error << "; Json=" << JsonString;
+		throw std::runtime_error(DebugError.str());
+	}
+	if (!Json.is_object())
+		throw std::runtime_error(std::string("Expecting json to parse to object; Json=") + JsonString);
+	return Json;
+}
+
+void Test_Decoder_DecodeTestFile(const char* TestDataName, const char* DecoderName, size_t DataRepeat)
+{
+	//	gr: 1mb too big for windows on stack
+	static uint8_t TestDataBuffer[1 * 1024 * 1024];
+
+	Array<uint8_t> TestData;
+
+	//	gr: using int (auto) here, causes some resolve problem with GetRemoteArray below
+	size_t TestDataSize = PopH264_GetTestData(TestDataName, TestDataBuffer, std::size(TestDataBuffer));
+	if (TestDataSize < 0)
+		throw std::runtime_error("Missing test data");
+	if (TestDataSize == 0)
+		throw std::runtime_error("PopH264_GetTestData unexpectedly returned zero-length test data");
+	if (TestDataSize > std::size(TestDataBuffer))
+	{
+		std::stringstream Debug;
+		Debug << "Buffer for test data (" << TestDataSize << ") not big enough";
+		throw std::runtime_error(Debug.str());
+	}
+
+	//	gr: debug here as on Android GetRemoteArray with TestDataSize=auto was making a remote array of zero bytes
+	//std::Debug << "making TestDataArray..." << std::endl;
+	auto TestDataArray = GetRemoteArray(TestDataBuffer, TestDataSize, TestDataSize);
+	//std::Debug << "TestDataSize=" << TestDataSize << " TestDataArray.GetSize=" << TestDataArray.GetDataSize() << std::endl;
+	TestData.PushBackArray(TestDataArray);
+	//std::Debug << "TestData.PushBackArray() " << TestData.GetDataSize() << std::endl;
+	
+
+	std::stringstream OptionsStr;
+	OptionsStr << "{";
+	if (DecoderName)
+		OptionsStr << "\"Decoder\":\"" << DecoderName << "\",";
+	OptionsStr << "\"VerboseDebug\":true";
+	OptionsStr << "}";
+	auto OptionsString = OptionsStr.str();
+	auto* Options = OptionsString.c_str();
+	char ErrorBuffer[1024] = { 0 };
+	std::Debug << "PopH264_CreateDecoder()" << std::endl;
+	auto Handle = PopH264_CreateDecoder(Options, ErrorBuffer, std::size(ErrorBuffer));
+
+	std::Debug << "TestData (" << (TestDataName ? TestDataName : "<null>") << ") Size: " << TestData.GetDataSize() << std::endl;
+
+	bool HadEof = false;
+	int FirstFrameNumber = 9999 - 100;
+	for (auto Iteration = 0; Iteration < DataRepeat; Iteration++)
+	{
+		auto LastIteration = Iteration == (DataRepeat - 1);
+		FirstFrameNumber += 100;
+		auto Result = PopH264_PushData(Handle, TestData.GetArray(), TestData.GetDataSize(), FirstFrameNumber);
+		if (Result < 0)
+			throw std::runtime_error("DecoderTest: PushData error");
+
+		//	gr: did we need to push twice to catch a bug in broadway?
+		//PopH264_PushData(Handle, TestData, TestDataSize, 0);
+
+		//	flush
+		if (LastIteration)
+			PopH264_PushEndOfStream(Handle);
+
+		//	wait for it to decode
+		for (auto i = 0; i < 100; i++)
+		{
+			char MetaJson[1000];
+			PopH264_PeekFrame(Handle, MetaJson, std::size(MetaJson));
+
+			auto Meta = ParseJsonObject(MetaJson);
+			if (Meta.object_items().count("EndOfStream"))
+			{
+				auto EndOfStream = Meta["EndOfStream"];
+				if (!EndOfStream.is_bool())
+					throw std::runtime_error("Frame meta had .EndOfStream but isn't a bool");
+
+				if (EndOfStream.bool_value() == true)
+					HadEof = true;
+			}
+
+			static uint8_t Plane0[1024 * 1024];
+			static uint8_t Plane1[1024 * 1024];
+			static uint8_t Plane2[1024 * 1024];
+			auto FrameNumber = PopH264_PopFrame(Handle, Plane0, std::size(Plane0), Plane1, std::size(Plane1), Plane2, std::size(Plane2));
+			std::stringstream Error;
+			Error << "Decoded testdata; " << MetaJson << " FrameNumber=" << FrameNumber << " Should be " << FirstFrameNumber;
+			std::Debug << Error.str() << std::endl;
+			bool IsValid = FrameNumber >= 0;
+			if (!IsValid)
+			{
+				//std::this_thread::sleep_for(std::chrono::milliseconds(500));
+				std::this_thread::sleep_for(std::chrono::milliseconds(5));
+				continue;
+			}
+
+			if (FrameNumber != FirstFrameNumber)
+				throw std::runtime_error("Wrong frame number from decoder");
+
+			/*
+			if (Compare)
+				Compare(MetaJson, Plane0, Plane1, Plane2);
+				*/
+			break;
+		}
+	}
+
+	if (!HadEof)
+		throw std::runtime_error("Never had EOF");
+
+	PopH264_DestroyInstance(Handle);
 }
