@@ -633,25 +633,22 @@ std::string GetString(IMFActivate& Activate, const GUID& Key)
 	uint32_t Length = 0;
 	wchar_t StringWBuffer[1024] = { 0 };
 	auto Result = Activate.GetString(Key, StringWBuffer, std::size(StringWBuffer), &Length);
-	MediaFoundation::IsOkay(Result, "GetString");
-	std::wstring StringW(StringWBuffer, Length);
+	if (Result != NO_ERROR)
+	{
+		//	almost always "attribute missing"
+		if (Result != MF_E_ATTRIBUTENOTFOUND)
+		{
+			//MediaFoundation::IsOkay(Result, "GetString");
+			//std::string Platform::GetErrorString(int Error)
+		}
+		return std::string();
+	}
 
+	std::wstring StringW(StringWBuffer, Length);
 	auto String = Soy::WStringToString(StringW);
 	return String;
 }
 
-std::string GetStringSafe(IMFActivate& Activate, const GUID& Key)
-{
-	try
-	{
-		return GetString(Activate, Key);
-	}
-	catch (std::exception& e)
-	{
-		//std::Debug << e.what() << std::endl;
-		return std::string();
-	}
-}
 
 
 
@@ -722,8 +719,8 @@ GUID MediaFoundation::GetGuid(TransformerCategory::Type Category)
 MediaFoundation::TActivateMeta::TActivateMeta(IMFActivate& Activate) :
 	mActivate	( &Activate, true )
 {
-	mName = GetStringSafe(Activate, MFT_FRIENDLY_NAME_Attribute);
-	auto HardwareUrl = GetStringSafe(Activate, MFT_ENUM_HARDWARE_URL_Attribute);
+	mName = GetString(Activate, MFT_FRIENDLY_NAME_Attribute);
+	auto HardwareUrl = GetString(Activate, MFT_ENUM_HARDWARE_URL_Attribute);
 	mHardwareAccelerated = !HardwareUrl.empty();
 
 	Array<MFT_REGISTER_TYPE_INFO> InputTypes;
