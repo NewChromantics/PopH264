@@ -108,14 +108,6 @@ jobs:
           buildtargetname: ${{ env.project }}
           buildpath: ${{ env.project }}.Android/lib${{ env.project }}
 
-      - name: Android TestApp
-        id: AndroidTestApp
-        if: matrix.config.type == 'Android'
-        uses: NewChromantics/PopAction_BuildAndroid@v2
-        with:
-          buildtargetname: ${{ env.project }}
-          buildpath: ${{ env.project }}.Android/${{ env.project }}TestApp
-
       - name: Wasm setup emscripten
         if: matrix.config.type == 'Wasm'
         uses: mymindstorm/setup-emsdk@v7
