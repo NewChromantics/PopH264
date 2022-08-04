@@ -45,7 +45,7 @@ APP_CPPFLAGS += -fpermissive
 #APP_STL := stlport_static
 #APP_STL := gnustl_static
 # now only c++_static or c++_shared from ndk 21.1.6352462
-APP_STL := c++_shared
+APP_STL := c++_static
 
 # okay with unity 5.0.2
 APP_USE_CPP0X := true
