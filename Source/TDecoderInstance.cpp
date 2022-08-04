@@ -250,13 +250,21 @@ PopH264::TDecoderInstance::~TDecoderInstance()
 
 void PopH264::TDecoderInstance::PushData(const uint8_t* Data,size_t DataSize,size_t FrameNumber)
 {
+	auto Decoder = mDecoder;
+	if ( !Decoder )
+	{
+		std::stringstream Error;
+		Error << "PushData(x" << DataSize << " frame=" << FrameNumber << ") to instance with null decoder";
+		throw std::runtime_error(Error.str());
+	}
+
 	//	if user passes null, we want to end stream/flush
 	if ( Data == nullptr )
 	{
 		if (FrameNumber == 1) {
-			mDecoder->CheckDecoderUpdates();
+			Decoder->CheckDecoderUpdates();
 		} else {
-			mDecoder->PushEndOfStream();
+			Decoder->PushEndOfStream();
 		}
 		return;
 	}
@@ -289,7 +297,7 @@ void PopH264::TDecoderInstance::PushData(const uint8_t* Data,size_t DataSize,siz
 		std::Debug << __PRETTY_FUNCTION__ << " trying to detect image caused exception; " << e.what() << std::endl;
 	}
 	
-	mDecoder->Decode( GetArrayBridge(DataArray), FrameNumber );
+	Decoder->Decode( GetArrayBridge(DataArray), FrameNumber );
 }
 
 
