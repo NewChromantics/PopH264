@@ -215,16 +215,21 @@ std::string GetMetaJson(const PopH264::TDecoderFrameMeta& Meta)
 
 __export void PopH264_PeekFrame(int32_t Instance, char* JsonBuffer, int32_t JsonBufferSize)
 {
-	auto Function = [&]()
+	try
 	{
-		auto& Device = PopH264::DecoderInstanceManager.GetInstance(Instance);
-		auto Meta = Device.GetMeta();
+		auto Device = PopH264::DecoderInstanceManager.GetInstance(Instance);
+		auto Meta = Device->GetMeta();
 
 		auto Json = GetMetaJson(Meta);
 		Soy::StringToBuffer(Json, JsonBuffer, JsonBufferSize);
-		return 0;
-	};
-	SafeCall(Function, __func__, 0);
+	}
+	catch(std::exception& e)
+	{
+		json11::Json::object JsonObject;
+		JsonObject["Error"] = e.what();
+		auto Json = json11::Json(JsonObject).dump();
+		Soy::StringToBuffer(Json, JsonBuffer, JsonBufferSize);
+	}
 }
 
 
