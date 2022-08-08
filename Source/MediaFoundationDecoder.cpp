@@ -67,6 +67,8 @@ MediaFoundation::TDecoder::TDecoder(PopH264::TDecoderParams& Params,PopH264::OnD
 
 MediaFoundation::TDecoder::~TDecoder()
 {
+	//	make sure we're not pushing frames etc whilst
+	std::scoped_lock Lock(mTransformerLock);
 	mTransformer.reset();
 }
 
@@ -99,6 +101,11 @@ void MediaFoundation::TDecoder::SetInputFormat()
 
 bool MediaFoundation::TDecoder::DecodeNextPacket()
 {
+	std::scoped_lock Lock(mTransformerLock);
+	if ( !mTransformer )
+		return false;
+	auto& Transformer = *mTransformer;
+
 	//	try and pop even if we dont push data in, in case bail early
 	PopFrames();
 
@@ -162,14 +169,14 @@ bool MediaFoundation::TDecoder::DecodeNextPacket()
 	{
 		//	gr: don't push as this is a special empty packet
 		PushData = false;
-		mTransformer->PushEndOfStream();
+		Transformer.PushEndOfStream();
 	}
 
 	auto PushCount = (PushData ? (PushTwice ? 2 : 1) : 0);
 
 	for ( auto pi=0;	pi<PushCount;	pi++ )
 	{
-		if (!mTransformer->PushFrame(GetArrayBridge(Nalu), FrameNumber))
+		if (!Transformer.PushFrame(GetArrayBridge(Nalu), FrameNumber))
 		{
 			//	data was rejected
 			UnpopNalu(GetArrayBridge(Nalu), FrameNumber);
@@ -212,8 +219,8 @@ bool MediaFoundation::TDecoder::DecodeNextPacket()
 	{
 		//	drain means we're going to drain all outputs until Needs_more_input
 		//	gr: calling EOS makes output come immediately from a keyframe, but drain doesn't seem to do anything
-		//mTransformer->ProcessCommand(MFT_MESSAGE_NOTIFY_END_OF_STREAM);
-		mTransformer->ProcessCommand(MFT_MESSAGE_COMMAND_DRAIN);
+		//Transformer.ProcessCommand(MFT_MESSAGE_NOTIFY_END_OF_STREAM);
+		Transformer.ProcessCommand(MFT_MESSAGE_COMMAND_DRAIN);
 	}
 
 	//	pop any frames that have come out in the mean time

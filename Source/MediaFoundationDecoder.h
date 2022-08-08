@@ -26,6 +26,7 @@ private:
 	void			SetInputFormat();
 
 private:
+	std::mutex						mTransformerLock;
 	std::shared_ptr<TTransformer>	mTransformer;
 	
 	//	gr: only push SPS once per stream
