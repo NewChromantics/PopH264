@@ -125,13 +125,13 @@ __export int32_t PopH264_PopFrame(int32_t Instance,uint8_t* Plane0,int32_t Plane
 {
 	auto Function = [&]()
 	{
-		auto& Decoder = PopH264::DecoderInstanceManager.GetInstance(Instance);
+		auto Decoder = PopH264::DecoderInstanceManager.GetInstance(Instance);
 		//	Decoder.PopFrame
 		auto Plane0Array = GetRemoteArray(Plane0, Plane0Size);
 		auto Plane1Array = GetRemoteArray(Plane1, Plane1Size);
 		auto Plane2Array = GetRemoteArray(Plane2, Plane2Size);
 		int32_t FrameTimeMs = -1;
-		Decoder.PopFrame( FrameTimeMs, GetArrayBridge(Plane0Array), GetArrayBridge(Plane1Array), GetArrayBridge(Plane2Array));
+		Decoder->PopFrame( FrameTimeMs, GetArrayBridge(Plane0Array), GetArrayBridge(Plane1Array), GetArrayBridge(Plane2Array));
 		return FrameTimeMs;
 	};
 	return SafeCall(Function, __func__, -99 );
@@ -141,8 +141,8 @@ __export int32_t PopH264_PushData(int32_t Instance,uint8_t* Data,int32_t DataSiz
 {
 	auto Function = [&]()
 	{
-		auto& Decoder = PopH264::DecoderInstanceManager.GetInstance(Instance);
-		Decoder.PushData( Data, DataSize, FrameNumber );
+		auto Decoder = PopH264::DecoderInstanceManager.GetInstance(Instance);
+		Decoder->PushData( Data, DataSize, FrameNumber );
 		return 0;
 	};
 	return SafeCall(Function, __func__, -1 );
@@ -237,9 +237,9 @@ __export void PopH264_GetMeta(int32_t Instance, int32_t* pMetaValues, int32_t Me
 {
 	auto Function = [&]()
 	{
-		auto& Device = PopH264::DecoderInstanceManager.GetInstance(Instance);
+		auto Device = PopH264::DecoderInstanceManager.GetInstance(Instance);
 		
-		auto Meta = Device.GetMeta();
+		auto Meta = Device->GetMeta();
 		
 		size_t MetaValuesCounter = 0;
 		auto MetaValues = GetRemoteArray(pMetaValues, MetaValuesCount, MetaValuesCounter);
@@ -397,9 +397,9 @@ __export void PopH264_EncoderPushFrame(int32_t Instance,const char* MetaJson,con
 {
 	try
 	{
-		auto& Encoder = PopH264::EncoderInstanceManager.GetInstance(Instance);
+		auto Encoder = PopH264::EncoderInstanceManager.GetInstance(Instance);
 		std::string Meta( MetaJson ? MetaJson : "" );
-		Encoder.PushFrame( Meta, LumaData, ChromaUData, ChromaVData );
+		Encoder->PushFrame( Meta, LumaData, ChromaUData, ChromaVData );
 	}
 	catch(std::exception& e)
 	{
@@ -418,8 +418,8 @@ __export void PopH264_EncoderEndOfStream(int32_t Instance)
 {
 	try
 	{
-		auto& Encoder = PopH264::EncoderInstanceManager.GetInstance(Instance);
-		Encoder.EndOfStream();
+		auto Encoder = PopH264::EncoderInstanceManager.GetInstance(Instance);
+		Encoder->EndOfStream();
 	}
 	catch(std::exception& e)
 	{
@@ -436,14 +436,14 @@ __export int32_t PopH264_EncoderPopData(int32_t Instance,uint8_t* DataBuffer,int
 {
 	auto Function = [&]()
 	{
-		auto& Encoder = PopH264::EncoderInstanceManager.GetInstance(Instance);
+		auto Encoder = PopH264::EncoderInstanceManager.GetInstance(Instance);
 		//	no data buffer, just peeking size
 		if ( !DataBuffer || DataBufferSize <= 0 )
-			return Encoder.PeekNextFrameSize();
+			return Encoder->PeekNextFrameSize();
 		
 		size_t DataBufferUsed = 0;
 		auto DataArray = GetRemoteArray( DataBuffer, DataBufferSize, DataBufferUsed );
-		Encoder.PopPacket( GetArrayBridge(DataArray) );
+		Encoder->PopPacket( GetArrayBridge(DataArray) );
 		return DataBufferUsed;
 	};
 	return SafeCall(Function, __func__, -1 );
@@ -459,12 +459,12 @@ __export void PopH264_EncoderPeekData(int32_t Instance,char* MetaJsonBuffer,int3
 		try
 		{
 			//	get next frame's meta
-			auto& Encoder = PopH264::EncoderInstanceManager.GetInstance(Instance);
+			auto Encoder = PopH264::EncoderInstanceManager.GetInstance(Instance);
 
 			//	add generic meta
-			MetaJson["OutputQueueCount"] = static_cast<int32_t>(Encoder.GetPacketQueueCount());
+			MetaJson["OutputQueueCount"] = static_cast<int32_t>(Encoder->GetPacketQueueCount());
 			
-			Encoder.PeekPacket(MetaJson);
+			Encoder->PeekPacket(MetaJson);
 		}
 		catch(std::exception& e)
 		{
@@ -495,8 +495,8 @@ __export void PopH264_EncoderAddOnNewPacketCallback(int32_t Instance,PopH264_Cal
 		{
 			Callback(Meta);
 		};
-		auto& Encoder = PopH264::EncoderInstanceManager.GetInstance(Instance);
-		Encoder.AddOnNewFrameCallback(Lambda);
+		auto Encoder = PopH264::EncoderInstanceManager.GetInstance(Instance);
+		Encoder->AddOnNewFrameCallback(Lambda);
 		return 0;
 	};
 	SafeCall(Function, __func__, 0);
@@ -514,8 +514,8 @@ __export void PopH264_DecoderAddOnNewFrameCallback(int32_t Instance,PopH264_Call
 		{
 			Callback(Meta);
 		};
-		auto& Decoder = PopH264::DecoderInstanceManager.GetInstance(Instance);
-		Decoder.AddOnNewFrameCallback(Lambda);
+		auto Decoder = PopH264::DecoderInstanceManager.GetInstance(Instance);
+		Decoder->AddOnNewFrameCallback(Lambda);
 		return 0;
 	};
 	SafeCall(Function, __func__, 0);

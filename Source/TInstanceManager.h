@@ -17,13 +17,13 @@ private:
 	};
 	
 public:
-	~TInstanceManager()	{	FreeInstances();	}
-	INSTANCETYPE&		GetInstance(uint32_t Instance);
-	uint32_t			AssignInstance(std::shared_ptr<INSTANCETYPE> Object);
-	void				FreeInstance(uint32_t Instance);
-	uint32_t			CreateInstance(const INSTANCEPARAMS& Params);
-	size_t				GetInstanceCount() const	{	return mInstances.GetSize();	}
-	void				FreeInstances();
+	~TInstanceManager()				{	FreeInstances();	}
+	std::shared_ptr<INSTANCETYPE>	GetInstance(uint32_t Instance);
+	uint32_t						AssignInstance(std::shared_ptr<INSTANCETYPE> Object);
+	void							FreeInstance(uint32_t Instance);
+	uint32_t						CreateInstance(const INSTANCEPARAMS& Params);
+	size_t							GetInstanceCount() const	{	return mInstances.GetSize();	}
+	void							FreeInstances();
 	
 private:
 	std::mutex			mInstancesLock;
@@ -56,19 +56,19 @@ uint32_t TInstanceManager<INSTANCETYPE,INSTANCEPARAMS>::CreateInstance(const INS
 
 
 template<typename INSTANCETYPE,typename INSTANCEPARAMS>
-INSTANCETYPE& TInstanceManager<INSTANCETYPE,INSTANCEPARAMS>::GetInstance(uint32_t Instance)
+std::shared_ptr<INSTANCETYPE> TInstanceManager<INSTANCETYPE,INSTANCEPARAMS>::GetInstance(uint32_t Instance)
 {
 	std::lock_guard<std::mutex> Lock(mInstancesLock);
-	auto pInstance = mInstances.Find(Instance);
-	auto* Device = pInstance ? pInstance->mObject.get() : nullptr;
-	if ( !Device )
+	auto pInstanceEntry = mInstances.Find(Instance);
+	auto pInstance = pInstanceEntry ? pInstanceEntry->mObject : nullptr;
+	if ( !pInstance )
 	{
 		std::stringstream Error;
 		Error << "No instance/device matching " << Instance;
 		throw Soy::AssertException(Error.str());
 	}
 	
-	return *Device;
+	return pInstance;
 }
 
 template<typename INSTANCETYPE,typename INSTANCEPARAMS>
@@ -89,16 +89,22 @@ uint32_t TInstanceManager<INSTANCETYPE,INSTANCEPARAMS>::AssignInstance(std::shar
 template<typename INSTANCETYPE,typename INSTANCEPARAMS>
 void TInstanceManager<INSTANCETYPE,INSTANCEPARAMS>::FreeInstance(uint32_t Instance)
 {
-	std::lock_guard<std::mutex> Lock(mInstancesLock);
-	
-	auto InstanceIndex = mInstances.FindIndex(Instance);
-	if ( InstanceIndex < 0 )
+	//	pop from instances then free to make sure any other instance-fetching call gets nothing whilst we clean up
+	std::shared_ptr<INSTANCETYPE> pInstance;
 	{
-		std::Debug << "No instance " << Instance << " to free" << std::endl;
-		return;
+		std::scoped_lock Lock(mInstancesLock);
+		auto InstanceIndex = mInstances.FindIndex(Instance);
+		if ( InstanceIndex < 0 )
+		{
+			std::Debug << "No instance " << Instance << " to free" << std::endl;
+			return;
+		}
+		auto InstanceEntry = mInstances.PopAt(InstanceIndex);
+		pInstance = InstanceEntry.mObject;
 	}
-	
-	mInstances.RemoveBlock(InstanceIndex, 1);
+
+	//	free outside lock (or if there's another reference, will be freed in that ptr's scope)
+	pInstance.reset();
 }
 
 
