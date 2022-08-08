@@ -601,6 +601,7 @@ static void RunTest(const std::string& TestName,std::function<void()> Test, std:
 void Test_Decoder_DecodeTestFile(const char* Filename, const char* DecoderName, size_t DataRepeat);
 void Test_Decoder_CreateAndDestroy();
 void Test_Decoder_DecodeRainbow();
+void Test_Decoder_DestroyMidDecodeRainbow();
 
 __export void PopH264_UnitTest(PopH264_UnitTestCallback* OnTestResult)
 {
@@ -619,8 +620,10 @@ __export void PopH264_UnitTest(PopH264_UnitTestCallback* OnTestResult)
 			Report = OnTestResult;
 		}
 
+		Test_Decoder_DestroyMidDecodeRainbow();
 		RunTest("Decoder_CreateAndDestroy", Test_Decoder_CreateAndDestroy, Report);
 		RunTest("Decoder_DecodeRainbow", Test_Decoder_DecodeRainbow, Report);
+		RunTest("Decoder_DestroyMidDecode", Test_Decoder_DestroyMidDecodeRainbow, Report);
 	}
 	catch (std::exception& e)
 	{
@@ -766,4 +769,136 @@ void Test_Decoder_DecodeTestFile(const char* TestDataName, const char* DecoderNa
 		throw std::runtime_error("Never had EOF");
 
 	PopH264_DestroyInstance(Handle);
+}
+
+
+
+void Test_Decoder_DestroyMidDecode(const char* TestDataName, const char* DecoderName,size_t DataRepeat)
+{
+	//	gr: 1mb too big for windows on stack
+	static uint8_t TestDataBuffer[1 * 1024 * 1024];
+
+	Array<uint8_t> TestData;
+
+	//	gr: using int (auto) here, causes some resolve problem with GetRemoteArray below
+	size_t TestDataSize = PopH264_GetTestData(TestDataName, TestDataBuffer, std::size(TestDataBuffer));
+	if (TestDataSize < 0)
+		throw std::runtime_error("Missing test data");
+	if (TestDataSize == 0)
+		throw std::runtime_error("PopH264_GetTestData unexpectedly returned zero-length test data");
+	if (TestDataSize > std::size(TestDataBuffer))
+	{
+		std::stringstream Debug;
+		Debug << "Buffer for test data (" << TestDataSize << ") not big enough";
+		throw std::runtime_error(Debug.str());
+	}
+
+	//	gr: debug here as on Android GetRemoteArray with TestDataSize=auto was making a remote array of zero bytes
+	//std::Debug << "making TestDataArray..." << std::endl;
+	auto TestDataArray = GetRemoteArray(TestDataBuffer, TestDataSize, TestDataSize);
+	//std::Debug << "TestDataSize=" << TestDataSize << " TestDataArray.GetSize=" << TestDataArray.GetDataSize() << std::endl;
+	TestData.PushBackArray(TestDataArray);
+	//std::Debug << "TestData.PushBackArray() " << TestData.GetDataSize() << std::endl;
+
+
+	std::stringstream OptionsStr;
+	OptionsStr << "{";
+	if (DecoderName)
+		OptionsStr << "\"Decoder\":\"" << DecoderName << "\",";
+	OptionsStr << "\"VerboseDebug\":true";
+	OptionsStr << "}";
+	auto OptionsString = OptionsStr.str();
+	auto* Options = OptionsString.c_str();
+	char ErrorBuffer[1024] = { 0 };
+	std::Debug << "PopH264_CreateDecoder()" << std::endl;
+	auto Handle = PopH264_CreateDecoder(Options, ErrorBuffer, std::size(ErrorBuffer));
+
+	std::Debug << "TestData (" << (TestDataName ? TestDataName : "<null>") << ") Size: " << TestData.GetDataSize() << std::endl;
+
+	bool HadEof = false;
+	int FirstFrameNumber = 9999 - 100;
+	int FramesDecoded = 0;
+	bool SendTermination = false;
+	for (auto Iteration = 0; Iteration < DataRepeat; Iteration++)
+	{
+		auto LastIteration = Iteration == (DataRepeat - 1);
+		FirstFrameNumber += 100;
+		auto Result = PopH264_PushData(Handle, TestData.GetArray(), TestData.GetDataSize(), FirstFrameNumber);
+		if (Result < 0)
+		{
+			if ( SendTermination )
+				break;
+			throw std::runtime_error("DecoderTest: PushData error");
+		}
+
+		//	flush
+		if (LastIteration)
+			PopH264_PushEndOfStream(Handle);
+
+		//	at a "random" moment, once we've decoded at least one frame, free
+		//if ( FramesDecoded > 0 )
+		{
+			if ( (rand() % 20) == 0 )
+			{
+				PopH264_DestroyInstance(Handle);
+				SendTermination = true;
+			}
+		}
+
+		int SleepOnNoFrameMs = 1;
+
+		//	check for some decoded frames
+		for (auto i = 0; i < 1; i++)
+		{
+			char MetaJson[1000] = {0};
+			PopH264_PeekFrame(Handle, MetaJson, std::size(MetaJson));
+
+			auto Meta = ParseJsonObject(MetaJson);
+			if (Meta.object_items().count("EndOfStream"))
+			{
+				auto EndOfStream = Meta["EndOfStream"];
+				if (!EndOfStream.is_bool())
+					throw std::runtime_error("Frame meta had .EndOfStream but isn't a bool");
+
+				if (EndOfStream.bool_value() == true)
+					HadEof = true;
+			}
+
+			static uint8_t Plane0[1024 * 1024];
+			static uint8_t Plane1[1024 * 1024];
+			static uint8_t Plane2[1024 * 1024];
+			auto FrameNumber = PopH264_PopFrame(Handle, Plane0, std::size(Plane0), Plane1, std::size(Plane1), Plane2, std::size(Plane2));
+			std::stringstream Error;
+			Error << "Decoded testdata; " << MetaJson << " FrameNumber=" << FrameNumber << " Should be " << FirstFrameNumber;
+			std::Debug << Error.str() << std::endl;
+			bool IsValid = FrameNumber >= 0;
+			if (!IsValid)
+			{
+				std::this_thread::sleep_for(std::chrono::milliseconds(SleepOnNoFrameMs));
+				continue;
+			}
+
+			FramesDecoded++;
+
+			if ( HadEof )
+				break;
+		}
+	}
+
+
+	if (!HadEof)
+	{
+		//throw std::runtime_error("Never had EOF");
+	}
+
+	PopH264_DestroyInstance(Handle);
+}
+
+void Test_Decoder_DestroyMidDecodeRainbow()
+{
+	//	stress test creating, decoding and destroying mid-decode
+	for ( int i=0;	i<99000;	i++ )
+	{
+		Test_Decoder_DestroyMidDecode("RainbowGradient.h264",nullptr,100);
+	}
 }
