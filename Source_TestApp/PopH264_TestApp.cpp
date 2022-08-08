@@ -467,7 +467,7 @@ int main()
 #endif
 
 	DebugPrint("PopH264_UnitTests");
-	//PopH264_UnitTests();
+	PopH264_UnitTest(nullptr);
 	
 	//	depth data has iframe, pps, sps order
 	SafeDecoderTest("TestData/Main5.h264", nullptr, nullptr );
