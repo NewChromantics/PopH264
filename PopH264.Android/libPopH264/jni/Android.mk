@@ -177,7 +177,7 @@ $(LOCAL_PATH)/$(SRC)/Source/
 #LOCAL_LDLIBS  	+= -ljvm			# java
 
 # native glue support (hoping this starts JVM)
-LOCAL_STATIC_LIBRARIES += android_native_app_glue
+#LOCAL_STATIC_LIBRARIES += android_native_app_glue
 #LOCAL_STATIC_LIBRARIES += ndk_helper
 #LOCAL_STATIC_LIBRARIES += $(APP_MODULE)_static	# maybe should use shared?
 LOCAL_SHARED_LIBRARIES += $(APP_MODULE)_shared	# use shared to determine if any symbols are missing
@@ -206,6 +206,6 @@ LOCAL_MODULE_FILENAME := $(APP_MODULE)TestApp	# may have a better place to get t
 include $(BUILD_EXECUTABLE)
 
 #	this declares the module so we can use it above
-$(call import-module,android/native_app_glue)
+#$(call import-module,android/native_app_glue)
 
 

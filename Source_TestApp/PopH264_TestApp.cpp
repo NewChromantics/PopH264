@@ -381,49 +381,6 @@ void SafeDecoderTest(const char* TestDataName,CompareFunc_t* Compare,const char*
 	}
 }
 
-#if defined(TARGET_ANDROID)
-void CreateJavaVm()
-{
-/*
-	JavaVM *jvm;       / denotes a Java VM
-    JNIEnv *env;       // pointer to native method interface 
-    JavaVMInitArgs vm_args; // JDK/JRE 6 VM initialization arguments 
-    JavaVMOption* options = new JavaVMOption[1];
-    options[0].optionString = "-Djava.class.path=/usr/lib/java";
-    vm_args.version = JNI_VERSION_1_6;
-    vm_args.nOptions = 1;
-    vm_args.options = options;
-    vm_args.ignoreUnrecognized = false;
-    // load and initialize a Java VM, return a JNI interface pointer in env
-    JNI_CreateJavaVM(&jvm, &env, &vm_args);
-	JNI_OnLoad(jvm,nullptr);
-	*/
-}
-#endif
-
-#if defined(TARGET_ANDROID)
-#include <android_native_app_glue.h>
-//#define main	android_main
-#endif
-
-void android_main(struct android_app* state)
-{
-	std::cout << "android_main" << std::endl;
-	/*
-	struct engine engine;
-
-	// Suppress link-time optimization that removes unreferenced code
-	// to make sure glue isn't stripped.
-	app_dummy();
-
-
-	memset(&engine, 0, sizeof(engine));
-	state->userData = &engine;
-	state->onAppCmd = engine_handle_cmd;
-	state->onInputEvent = engine_handle_input;
-	engine.app = state;
-	*/
-}
 
 int main()
 {
@@ -456,9 +413,6 @@ int main()
 
 	std::cout << "main" << std::endl;
 	
-#if defined(TARGET_ANDROID)
-	CreateJavaVm();
-#endif
 	//EncoderYuv8_88Test("");
 
 #if defined(TEST_ASSETS)
