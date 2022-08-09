@@ -96,10 +96,10 @@ function BuildAbi()
 {
 	ANDROID_ABI=$1	
 	
-	if [ ! -z "$ANDROID_ABI_ONLY" && "$ANDROID_ABI_ONLY"!="$ANDROID_ABI" ]; then
-		echo "Skipping ABI [$ANDROID_ABI] (ANDROID_ABI_ONLY=$ANDROID_ABI_ONLY)"
-		return 0
-	fi
+	#if [ ! -z "$ANDROID_ABI_ONLY" && "$ANDROID_ABI_ONLY"!="$ANDROID_ABI" ]; then
+	#	echo "Skipping ABI [$ANDROID_ABI] (ANDROID_ABI_ONLY=$ANDROID_ABI_ONLY)"
+	#	return 0
+	#fi
 	
 	ENABLE_DEBUG_SYMBOLS=$2
 	echo "ndk-build $ANDROID_ABI... DEBUG_SYMBOLS=$ENABLE_DEBUG_SYMBOLS"
