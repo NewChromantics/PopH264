@@ -1413,10 +1413,17 @@ void Android::TOutputThread::PopOutputBuffer(MediaCodec_t LockedCodec,const TOut
 	auto Flags = BufferMeta.mMeta.flags;
 	auto BufferDataOffset = BufferMeta.mMeta.offset;
 	auto BufferDataSize = BufferMeta.mMeta.size;
-
+	
+	//	gr: on quest2 & galaxy s2, (not specific android versions?)
+	//		BufferSize is still valid(>0) even if DATA size is zero
+	//	on pixel3a, BufferSize becomes zero on an empty data
+	//	we shouldn't ever really use BufferSize in this function.
+	auto OutputDataSize = BufferDataSize;
+	
 	//	if data is null, then output is a surface
 	//	gr: OR it's an EOF frame with no data (see flags!)
-	if ( BufferData == nullptr || BufferSize == 0 )
+	//	todo: maybe need to re-test this with outputting to a surface
+	if ( BufferData == nullptr || OutputDataSize == 0 )
 	{
 		std::Debug << "Got Invalid OutputBuffer(" << BufferMeta.mBufferIndex << ") BufferSize=" << BufferSize << " BufferData=0x" << std::hex << (size_t)(BufferData) << std::dec << " FrameTime=" << FrameTime << " Flags=" << Flags << " offset=" << BufferDataOffset << " size=" << BufferDataSize << std::endl;
 		
@@ -1443,13 +1450,12 @@ void Android::TOutputThread::PopOutputBuffer(MediaCodec_t LockedCodec,const TOut
 		//	BUT both real size and expected size align. (2048*1515 & 2048*1516)
 		//	just for no reason, an extra page.
 		//	gr: then realised, we're not using the buffer info offsets
-		//auto OutputBufferSize = BufferSize;
-		auto OutputBufferSize = BufferDataSize;
+		//auto OutputDataSize = BufferSize;
 		auto PixelFormatBufferSize = BufferMeta.mPixelMeta.GetDataSize();
-		if ( OutputBufferSize > PixelFormatBufferSize )
+		if ( OutputDataSize > PixelFormatBufferSize )
 		{
 			std::Debug << "Clipping output pixel size from buffersize=" << BufferSize << " (meta buffer size=" << BufferDataSize <<" offset=" << BufferDataOffset <<") to " << PixelFormatBufferSize << " for " << BufferMeta.mPixelMeta << std::endl;
-			OutputBufferSize = PixelFormatBufferSize;
+			OutputDataSize = PixelFormatBufferSize;
 		}
 	
 		//	output pixels!
@@ -1457,7 +1463,7 @@ void Android::TOutputThread::PopOutputBuffer(MediaCodec_t LockedCodec,const TOut
 		//	gr: todo: be careful here and detect bad offsets going OOB
 		auto* BufferDataMutable = const_cast<uint8_t*>( BufferData );
 		BufferDataMutable += BufferDataOffset;
-		SoyPixelsRemote NewPixels( BufferDataMutable, OutputBufferSize, BufferMeta.mPixelMeta );
+		SoyPixelsRemote NewPixels( BufferDataMutable, OutputDataSize, BufferMeta.mPixelMeta );
 		
 		//	extra meta
 		json11::Json::object Meta = mOutputMeta;
