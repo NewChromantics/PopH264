@@ -42,8 +42,6 @@ private:
 private:
 	H264SwDecInst	mDecoderInstance = nullptr;
 
-	PopH264::TDecoderParams	mParams;
-
 	//	broadway goes wrong if we try and decode frames without SPS/PPS and wont recover
 	//	so, reject other packets until we get them
 	//	gr: NEED to process sps before pps
