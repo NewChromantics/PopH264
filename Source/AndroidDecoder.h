@@ -74,6 +74,8 @@ public:
 	void			OnOutputTextureWritten(int64_t PresentationTime);
 	void			OnOutputTextureAvailible();
 */
+	virtual void	OnThreadFinish(const std::string& Exception) override;
+	
 private:
 	void			PopOutputBuffer(const TOutputBufferMeta& BufferMeta);
 	void			PopOutputBuffer(MediaCodec_t LockedCodec,const TOutputBufferMeta& BufferMeta);
@@ -119,7 +121,7 @@ public:
 class Android::TInputThread : public SoyWorkerThread
 {
 public:
-	TInputThread(std::function<void(std::function<void(MediaCodec_t)>)> LockCodec,std::function<void(ArrayBridge<uint8_t>&&,PopH264::FrameNumber_t&)> PopPendingData,std::function<bool()> HasPendingData);
+	TInputThread(std::function<void(std::function<void(MediaCodec_t)>)> LockCodec,std::function<void(ArrayBridge<uint8_t>&&,PopH264::FrameNumber_t&)> PopPendingData,std::function<bool()> HasPendingData,std::function<void(std::string)> OnDecoderError);
 	
 	virtual bool	Iteration() override	{	return true;	}
 	virtual bool	Iteration(std::function<void(std::chrono::milliseconds)> Sleep) override;
@@ -130,6 +132,8 @@ public:
 	std::string		GetDebugState();
 	void			OnInputSubmitted(int32_t PresentationTime)	{}
 	
+	virtual void	OnThreadFinish(const std::string& Exception) override;
+
 private:
 	void			PushInputBuffer(int64_t BufferIndex,MediaCodec_t CodecHandle);
 	
@@ -141,6 +145,7 @@ private:
 
 	std::function<void(ArrayBridge<uint8_t>&&,PopH264::FrameNumber_t&)>	mPopPendingData;
 	std::function<bool()>						mHasPendingData;
+	std::function<void(std::string)>			mOnDecoderError;
 	
 	//	list of buffers we can write to
 	std::mutex		mInputBuffersLock;
@@ -188,7 +193,6 @@ private:
 	MediaCodec_t	mCodec = nullptr;
 	std::mutex		mCodecLock;
 	bool			mAsyncBuffers = false;
-	PopH264::TDecoderParams	mParams;
 	//std::shared_ptr<TSurfaceTexture>	mSurfaceTexture;
 	
 	std::function<void()>	mOnStartThread;

@@ -137,6 +137,16 @@ namespace Android
 
 }
 
+
+//	gr: could be a generic decoder exception type
+class FatalDecoderException : public std::runtime_error
+{
+public:
+	using std::runtime_error::runtime_error;	//	inherit constructor
+};
+
+
+
 std::string GetStatusString(media_status_t Status)
 {
 	auto NameStr = magic_enum::enum_name(Status);
@@ -469,10 +479,15 @@ std::string MagicLeap::GetCodec(int32_t Mode,bool& HardwareSurface)
 
 
 Android::TDecoder::TDecoder(PopH264::TDecoderParams Params,PopH264::OnDecodedFrame_t OnDecodedFrame,PopH264::OnFrameError_t OnFrameError) :
-	PopH264::TDecoder	( OnDecodedFrame, OnFrameError ),
-	mParams				( Params ),
-	mInputThread		( std::bind(&TDecoder::LockCodecCallback, this, std::placeholders::_1 ), std::bind(&TDecoder::GetNextInputData, this, std::placeholders::_1, std::placeholders::_2 ), std::bind(&TDecoder::HasPendingData, this ) ),
-	mOutputThread		( std::bind(&TDecoder::LockCodecCallback, this, std::placeholders::_1 ), OnDecodedFrame, [this](){this->OnDecodedEndOfStream();}, OnFrameError )
+	PopH264::TDecoder	( Params, OnDecodedFrame, OnFrameError ),
+	mInputThread		( std::bind(&TDecoder::LockCodecCallback, this, std::placeholders::_1 ),
+						 std::bind(&TDecoder::GetNextInputData, this, std::placeholders::_1, std::placeholders::_2 ),
+						 std::bind(&TDecoder::HasPendingData, this ),
+						 std::bind(&TDecoder::OnDecoderError, this, std::placeholders::_1 ) ),
+	mOutputThread		( std::bind(&TDecoder::LockCodecCallback, this, std::placeholders::_1 ),
+						 OnDecodedFrame,
+						 [this](){this->OnDecodedEndOfStream();},
+						 OnFrameError )
 {
 
 #if __ANDROID_API__ < 28
@@ -541,7 +556,6 @@ Android::TDecoder::TDecoder(PopH264::TDecoderParams Params,PopH264::OnDecodedFra
 	*/
 }
 
-	void			LockCodecCallback(std::function<void(MediaCodec_t)> Callback);
 
 
 //	return true if ready, return false if not ready (try again!). Exception on error
@@ -660,9 +674,12 @@ void Android::TDecoder::CreateCodec()
 	media_status_t Status = AMEDIA_OK;
 
 	Status = AMediaCodec_setAsyncNotifyCallback( mCodec, Callbacks, this );
-	if ( Status == AMEDIA_OK ) {
+	if ( Status == AMEDIA_OK )
+	{
 		mAsyncBuffers = true;
-	} else {
+	}
+	else
+	{
 		std::Debug << "AMediaCodec_setAsyncNotifyCallback failed, using non-async mode" << std::endl;
 	}
 
@@ -790,6 +807,11 @@ void Android::TDecoder::CreateCodec()
 	Status = AMediaCodec_start(mCodec);
 	IsOkay(Status,"AMediaCodec_Start");
 	
+	//	gr: 2nd start ALWAYS returns Error_Base (non specific error), so it cannot
+	//		be used for any kind of state check
+	//Status = AMediaCodec_start(mCodec);
+	//std::Debug << "AMediaCodec_start() 2nd attempt = " << Status << std::endl;
+
 	if ( mParams.mVerboseDebug )
 		std::Debug << __PRETTY_FUNCTION__ << " Codec created." << std::endl;
 }
@@ -1024,18 +1046,47 @@ void Android::TInputThread::PushInputBuffer(int64_t BufferIndex,MediaCodec_t Cod
 {
 	//	gr: we can grab a buffer without submitted it, so this is okay if we fail here
 	std::Debug << "Pushing to input buffer #" << BufferIndex << std::endl;
+	
+	//if ( BufferIndex == 4)
+	//	throw FatalDecoderException("Testing fatal error in PushInputBuffer");
+	
+	/*
+	//	randomly stop/start test
+	//	result: can never re-start
+	//	result: stop() crashes if after getInputBuffer()
+	if ( BufferIndex == 4 )
+	{
+		//	this crashes if called immediately after AMediaCodec_getInputBuffer!
+		std::Debug << "PushInputBuffer BufferIndex=4 stop & start test...." << std::endl;
+		std::this_thread::sleep_for(std::chrono::milliseconds(50));
+		auto StopError = AMediaCodec_stop(Codec);
+		std::Debug << "PushInputBuffer BufferIndex=4 stop & start test; StopError=" << StopError << std::endl;
+		std::this_thread::sleep_for(std::chrono::milliseconds(50));
+		auto StartError = AMediaCodec_start( Codec );
+		std::Debug << "PushInputBuffer BufferIndex=4 stop & start test; StartError=" << StartError << std::endl;
+		std::this_thread::sleep_for(std::chrono::milliseconds(50));
+	}
+	*/
 
 	//auto BufferHandle = static_cast<MLHandle>( BufferIndex );
 	uint8_t* Buffer = nullptr;
 	size_t BufferSize = 0;
 	Buffer = AMediaCodec_getInputBuffer( Codec, BufferIndex, &BufferSize );
-	//auto Result = MLMediaCodecGetInputBufferPointer( mHandle, BufferHandle, &Buffer, &BufferSize );
-	//IsOkay( Result, "MLMediaCodecGetInputBufferPointer" );
+	//	never call AMediaCodec_stop(Codec) after [successfull] getInputBuffer
+	//	get a segmentation fault
+	//	todo: add a lock to REALLY stop this happening
+	
+	//	gr: after some testing, (calling AMediaCodec_stop() ) it seems the ONLY
+	//		time we get a null input buffer (assuming we're using the buffers correctly)
+	//		is if the decoder is stopped.
+	//		if the low-level code has stopped/errored, this doesnt propogate through in any
+	//		way (we cannot poll state, and async errors don't get reported!) but
+	//		this does silently return null, as it does if you call _stop()
 	if ( Buffer == nullptr )
 	{
 		std::stringstream Error;
-		Error << "AMediaCodec_getInputBuffer null buffer (size=" << BufferSize << ")";
-		throw Soy::AssertException(Error);
+		Error << "AMediaCodec_getInputBuffer(BufferIndex=" << BufferIndex << ") return null. Assuming decoder has stopped.";
+		throw FatalDecoderException(Error.str());
 	}
 
 	//	grab next packet
@@ -1075,6 +1126,7 @@ void Android::TInputThread::PushInputBuffer(int64_t BufferIndex,MediaCodec_t Cod
 	
 	std::Debug << "AMediaCodec_queueInputBuffer( BufferIndex=" << BufferIndex << " DataSize=" << BufferWrittenSize << "/" << BufferSize << " presentationtime=" << PresentationTimeMicroSecs << " Flags=" << Flags <<") success" << std::endl;
 
+	//	gr: dont really need to use this, already sending as flag.
 #if __ANDROID_API__ >= 26
 	if ( H264PacketType == H264NaluContent::EndOfStream )
 	{
@@ -1515,6 +1567,7 @@ void Android::TOutputThread::OnDecodedEndOfStream()
 
 bool Android::TOutputThread::Iteration()
 {
+	std::Debug << "OutputThread::Iteration" << std::endl;
 /*
 	//	flush any texture requests
 	if ( mOutputTexturesAvailible > 0 )
@@ -1540,14 +1593,9 @@ bool Android::TOutputThread::Iteration()
 	{
 		//	read a buffer
 		TOutputBufferMeta BufferMeta;
-		if ( true )
 		{
 			std::lock_guard<std::mutex> Lock(mOutputBuffersLock);
 			BufferMeta = mOutputBuffers.PopAt(0);
-		}
-		else
-		{
-			Soy_AssertTodo();
 		}
 		try
 		{
@@ -1579,15 +1627,23 @@ bool Android::TOutputThread::Iteration()
 }
 
 
-Android::TInputThread::TInputThread(std::function<void(std::function<void(MediaCodec_t)>)> LockCodec,std::function<void(ArrayBridge<uint8_t>&&,PopH264::FrameNumber_t&)> PopPendingData,std::function<bool()> HasPendingData) :
+Android::TInputThread::TInputThread(std::function<void(std::function<void(MediaCodec_t)>)> LockCodec,std::function<void(ArrayBridge<uint8_t>&&,PopH264::FrameNumber_t&)> PopPendingData,std::function<bool()> HasPendingData,std::function<void(std::string)> OnDecoderError) :
 	mPopPendingData	( PopPendingData ),
 	mHasPendingData	( HasPendingData ),
 	mLockCodec		( LockCodec ),
+	mOnDecoderError	( OnDecoderError ),
 	SoyWorkerThread	("Android::TInputThread", SoyWorkerWaitMode::Wake )
 {
 	Start();
 }
 
+void Android::TInputThread::OnThreadFinish(const std::string& Exception)
+{
+	if ( !Exception.empty() )
+		mOnDecoderError(Exception);
+	
+	SoyWorkerThread::OnThreadFinish(std::string("OnThreadFinish=")+Exception);
+}
 
 bool Android::TInputThread::Iteration(std::function<void(std::chrono::milliseconds)> Sleep)
 {
@@ -1643,15 +1699,25 @@ bool Android::TInputThread::Iteration(std::function<void(std::chrono::millisecon
 		//	gr: if this doesn't run, we should re-place buffer index (in catch) but decoder probably ending anyway
 		mLockCodec(PushWithCodec);	
 	}
+	catch(FatalDecoderException& e)
+	{
+		//	throwing here should be fatal to the input thread, which should be fatal to the decoder
+		std::Debug << __PRETTY_FUNCTION__ << " fatal exception pushing input buffer #" << BufferIndex << "; " << e.what() << std::endl;
+		throw;
+	}
 	catch(std::exception& e)
 	{
-		std::Debug << __PRETTY_FUNCTION__ << " Exception pushing input buffer " << BufferIndex << "; " << e.what() << GetDebugState() << std::endl;
 		if ( BufferIndex >= 0 )
 		{
 			std::lock_guard<std::mutex> Lock(mInputBuffersLock);
-			auto& ElementZero = *mInputBuffers.InsertBlock(0,1);
-			ElementZero = BufferIndex;
+			//	gr: to maybe avoid getting stuck, reinserting input buffer at the back
+			//		there's a change GetInputBuffer() errors when the codec is errored
+			//		but in case the error is poph264 we return it
+			//auto& ElementZero = *mInputBuffers.InsertBlock(0,1);
+			//ElementZero = BufferIndex;
+			mInputBuffers.PushBack(BufferIndex);
 		}
+		std::Debug << __PRETTY_FUNCTION__ << " Exception pushing input buffer " << BufferIndex << "; " << e.what() << " (reinserted to back) " << GetDebugState() << std::endl;
 		Sleep( std::chrono::milliseconds(InputThreadErrorThrottle) );
 	}
 	
@@ -1702,4 +1768,13 @@ std::string Android::TOutputThread::GetDebugState()
 	Debug << "] ";
 */
 	return Debug.str();
+}
+
+void Android::TOutputThread::OnThreadFinish(const std::string& Exception)
+{
+	if ( !Exception.empty() )
+		std::Debug << "Fatal error in Android::TOutputThread is Unhandled! " << Exception << std::endl;
+	//	mOnDecoderError(Exception);
+
+	SoyWorkerThread::OnThreadFinish(Exception);
 }
