@@ -816,9 +816,10 @@ void Test_Decoder_DestroyMidDecode(const char* TestDataName, const char* Decoder
 	std::Debug << "TestData (" << (TestDataName ? TestDataName : "<null>") << ") Size: " << TestData.GetDataSize() << std::endl;
 
 	bool HadEof = false;
+	std::string FatalError;
 	int FirstFrameNumber = 9999 - 100;
 	int FramesDecoded = 0;
-	bool SendTermination = false;
+	bool SentTermination = false;
 	for (auto Iteration = 0; Iteration < DataRepeat; Iteration++)
 	{
 		auto LastIteration = Iteration == (DataRepeat - 1);
@@ -826,7 +827,7 @@ void Test_Decoder_DestroyMidDecode(const char* TestDataName, const char* Decoder
 		auto Result = PopH264_PushData(Handle, TestData.GetArray(), TestData.GetDataSize(), FirstFrameNumber);
 		if (Result < 0)
 		{
-			if ( SendTermination )
+			if ( SentTermination )
 				break;
 			throw std::runtime_error("DecoderTest: PushData error");
 		}
@@ -837,11 +838,12 @@ void Test_Decoder_DestroyMidDecode(const char* TestDataName, const char* Decoder
 
 		//	at a "random" moment, once we've decoded at least one frame, free
 		//if ( FramesDecoded > 0 )
+		if ( false )
 		{
 			if ( (rand() % 20) == 0 )
 			{
 				PopH264_DestroyInstance(Handle);
-				SendTermination = true;
+				SentTermination = true;
 			}
 		}
 
@@ -864,6 +866,14 @@ void Test_Decoder_DestroyMidDecode(const char* TestDataName, const char* Decoder
 					HadEof = true;
 			}
 
+			if (Meta.object_items().count("Error"))
+			{
+				FatalError = Meta["Error"].string_value();
+				std::Debug << "Decoder error: " << FatalError << std::endl;
+				throw std::runtime_error(std::string("Decoder had fatal error;")+FatalError);
+				break;
+			}
+			
 			static uint8_t Plane0[1024 * 1024];
 			static uint8_t Plane1[1024 * 1024];
 			static uint8_t Plane2[1024 * 1024];
