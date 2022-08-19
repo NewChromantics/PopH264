@@ -798,6 +798,19 @@ void Android::TDecoder::CreateCodec()
 
 Android::TDecoder::~TDecoder()
 {
+	auto SafeWaitForThread = [&](SoyWorkerThread& Thread)
+	{
+		try
+		{
+			std::Debug << __PRETTY_FUNCTION__ << "wait for " << Thread.GetThreadName() << " thread to finish..." << std::endl;
+			Thread.WaitToFinish();
+		}
+		catch (std::exception& e)
+		{
+			std::Debug << __PRETTY_FUNCTION__ << "wait for " << Thread.GetThreadName() << " exception; " << e.what() << std::endl;
+		}
+	};
+	
 	std::Debug << __PRETTY_FUNCTION__ << std::endl;
 	if ( mCodec )
 	{
@@ -826,10 +839,9 @@ Android::TDecoder::~TDecoder()
 			std::Debug << __PRETTY_FUNCTION__ << "stop input & output threads..." << std::endl;
 			mInputThread.Stop();
 			mOutputThread.Stop();
-			std::Debug << __PRETTY_FUNCTION__ << "wait for input & output threads to finish..." << std::endl;
-			mInputThread.WaitToFinish();
-			mOutputThread.WaitToFinish();
-		
+			SafeWaitForThread(mOutputThread);
+			SafeWaitForThread(mInputThread);
+
 			//	gr: I seem to recall it's safe to destroy the codec if the threads arent finished, 
 			//		they will error internally need to make sure. Find some reference to thread safety in the docs/code!
 			std::Debug << "AMediaCodec_destroy" << std::endl;
@@ -843,9 +855,8 @@ Android::TDecoder::~TDecoder()
 	}
 	
 	//	make sure threads are stopped regardless
-	std::Debug << __PRETTY_FUNCTION__ << "hail mary wait for input & output threads to finish..." << std::endl;
-	mInputThread.WaitToFinish();
-	mOutputThread.WaitToFinish();
+	SafeWaitForThread(mOutputThread);
+	SafeWaitForThread(mInputThread);
 }
 
 void Android::TDecoder::LockCodecCallback(std::function<void(MediaCodec_t)> Callback)
@@ -930,7 +941,7 @@ void Android::TDecoder::DequeueOutputBuffers()
 //	returns true if more data to proccess
 bool Android::TDecoder::DecodeNextPacket()
 {
-	std::Debug << __PRETTY_FUNCTION__<< std::endl;
+	//std::Debug << __PRETTY_FUNCTION__<< std::endl;
 
 	//	we have to wait for input thread to want to pull data here, we can't force it
 	mInputThread.Wake();
