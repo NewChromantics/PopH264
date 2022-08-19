@@ -395,12 +395,20 @@ void PopH264::TDecoderInstance::PushErrorFrame(const std::string& Error,PopH264:
 	json11::Json::object Meta;
 	Meta["Error"] = Error;
 	
-	PushFrame( Pixels, FrameNumber, Meta );
+	try
+	{
+		PushFrame( Pixels, FrameNumber, Meta );
+	}
+	catch(std::exception&e)
+	{
+		std::Debug << "PushFrame exception " << e.what() << std::endl;
+	}
 }
 
 void PopH264::TDecoderInstance::OnFatalError(const std::string& Error)
 {
-	//	gr: 
+	std::Debug << "Decoder fatal error: " << Error << std::endl;
+	PushErrorFrame(std::string("OnFatalError=")+Error,PopH264::FrameNumber_t(-1));
 }
 
 
