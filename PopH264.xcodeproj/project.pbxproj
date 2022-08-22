@@ -1482,7 +1482,7 @@
 					New,
 				);
 				LastSwiftUpdateCheck = 1220;
-				LastUpgradeCheck = 0810;
+				LastUpgradeCheck = 1340;
 				ORGANIZATIONNAME = NewChromantics;
 				TargetAttributes = {
 					BF151FD82384786600A70EBF = {
@@ -1923,7 +1923,7 @@
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CODE_SIGN_IDENTITY = "Apple Distribution";
+				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Manual;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = X52DR36JY2;
@@ -1964,7 +1964,7 @@
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CODE_SIGN_IDENTITY = "Apple Distribution";
+				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Manual;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = X52DR36JY2;
@@ -2114,7 +2114,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = BF004B6724FD3CAC00DC6A90 /* PopH264_Osx.xcconfig */;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "Apple Distribution";
+				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Manual;
 				DEVELOPMENT_TEAM = X52DR36JY2;
 				INFOPLIST_FILE = "$(SRCROOT)/Source_Osx/PopH264_Osx_Info.plist";
@@ -2127,7 +2127,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = BF004B6724FD3CAC00DC6A90 /* PopH264_Osx.xcconfig */;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "Apple Distribution";
+				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Manual;
 				DEVELOPMENT_TEAM = X52DR36JY2;
 				INFOPLIST_FILE = "$(SRCROOT)/Source_Osx/PopH264_Osx_Info.plist";
@@ -2340,6 +2340,7 @@
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = X52DR36JY2;
+				ENABLE_HARDENED_RUNTIME = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					TARGET_OSX,
 					"DEBUG=1",
@@ -2362,6 +2363,7 @@
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = X52DR36JY2;
+				ENABLE_HARDENED_RUNTIME = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = TARGET_OSX;
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				PRODUCT_NAME = PopH264_TestApp;
