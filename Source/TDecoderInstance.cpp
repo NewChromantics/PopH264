@@ -270,7 +270,7 @@ void PopH264::TDecoderInstance::PushData(const uint8_t* Data,size_t DataSize,siz
 	}
 	
 	auto DataArray = GetRemoteArray( Data, DataSize );
-	
+	/*
 	//	gr: temporary hack, if the data coming in is a different format, detect it, and switch decoders
 	//		maybe we can do something more elegant (eg. wait until first frame before allocating decoder)
 	//	gr: don't even need to interrupt decoder
@@ -296,7 +296,7 @@ void PopH264::TDecoderInstance::PushData(const uint8_t* Data,size_t DataSize,siz
 	{
 		std::Debug << __PRETTY_FUNCTION__ << " trying to detect image caused exception; " << e.what() << std::endl;
 	}
-	
+	*/
 	Decoder->Decode( GetArrayBridge(DataArray), FrameNumber );
 }
 
