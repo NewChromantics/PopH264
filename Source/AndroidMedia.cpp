@@ -311,7 +311,7 @@ bool TSurfaceTexture::Update(SoyTime& Timestamp,bool& Changed)
 
 void TSurfacePixelBuffer::Lock(ArrayBridge<Opengl::TTexture>&& Textures,Opengl::TContext& Context,float3x3& Transform)
 {
-	ofScopeTimerWarning InitTimer("CopyToGlTexture init",4);
+	Soy::TScopeTimerPrint InitTimer("CopyToGlTexture init",4);
 	if ( !mSurfaceTexture )
 		return;
 
@@ -780,7 +780,7 @@ void AndroidEncoderBuffer::ReleaseBuffer(bool Render)
 {
 	if ( mOutputBufferIndex != -1 && mCodec )
 	{
-		ofScopeTimerWarning Timer("releaseOutputBuffer",2);
+		Soy::TScopeTimerPrint Timer("releaseOutputBuffer",2);
 		mCodec->CallVoidMethod("releaseOutputBuffer", mOutputBufferIndex, Render );
 		mOutputBufferIndex = -1;
 	}

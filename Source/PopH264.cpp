@@ -536,11 +536,8 @@ __export int32_t PopH264_GetTestData(const char* Name,uint8_t* Buffer,int32_t Bu
 }
 
 
-
 __export void UnityPluginLoad(/*IUnityInterfaces*/void*)
 {
-	//	if this DLL is being used in unity, we dont get any debug output in xcode, so enable NSLog
-	Debug::EnablePrint_Platform = true;
 	std::Debug << __PRETTY_FUNCTION__ << std::endl;
 }
 
@@ -907,7 +904,7 @@ void Test_Decoder_DestroyMidDecode(const char* TestDataName, const char* Decoder
 void Test_Decoder_DestroyMidDecodeRainbow()
 {
 	//	stress test creating, decoding and destroying mid-decode
-	for ( int i=0;	i<99000;	i++ )
+	//for ( int i=0;	i<99000;	i++ )
 	{
 		Test_Decoder_DestroyMidDecode("RainbowGradient.h264",nullptr,100);
 	}
