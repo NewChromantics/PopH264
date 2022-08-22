@@ -51,9 +51,6 @@
     <ClCompile Include="..\Source\SoyLib\src\SoyTime.cpp">
       <Filter>SoyLib</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\SoyLib\src\SoyPng.cpp">
-      <Filter>SoyLib</Filter>
-    </ClCompile>
     <ClCompile Include="..\Source\SoyLib\src\SoyAssert.cpp">
       <Filter>SoyLib</Filter>
     </ClCompile>
@@ -61,27 +58,6 @@
       <Filter>SoyLib</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\SoyLib\src\SoyThread.cpp">
-      <Filter>SoyLib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\SoyLib\src\SoyMediaFormat.cpp">
-      <Filter>SoyLib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\SoyLib\src\SoyMedia.cpp">
-      <Filter>SoyLib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\SoyLib\src\SoyMediaFoundation.cpp">
-      <Filter>SoyLib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\SoyLib\src\SoyMath.cpp">
-      <Filter>SoyLib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\SoyLib\src\SoyJson.cpp">
-      <Filter>SoyLib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\SoyLib\src\SoyEvent.cpp">
-      <Filter>SoyLib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\SoyLib\src\SoyWave.cpp">
       <Filter>SoyLib</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\SoyLib\src\SoyH264.cpp">
@@ -198,13 +174,7 @@
     <ClCompile Include="..\Source\Json11\json11.cpp">
       <Filter>Source\Json11</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\SoyLib\src\SoyImage.cpp">
-      <Filter>SoyLib</Filter>
-    </ClCompile>
     <ClCompile Include="..\Source\SoyLib\src\SoyFourcc.cpp">
-      <Filter>SoyLib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\SoyLib\src\SoyStreamBuffer.cpp">
       <Filter>SoyLib</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\IntelMediaDecoder.cpp">
@@ -278,12 +248,6 @@
     <ClInclude Include="..\Source\SoyLib\src\SoyTypes_Windows.h">
       <Filter>SoyLib</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\SoyLib\src\string.hpp">
-      <Filter>SoyLib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\SoyLib\src\SoyPng.h">
-      <Filter>SoyLib</Filter>
-    </ClInclude>
     <ClInclude Include="..\Source\SoyLib\src\SoyAssert.h">
       <Filter>SoyLib</Filter>
     </ClInclude>
@@ -291,27 +255,6 @@
       <Filter>SoyLib</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\SoyLib\src\SoyThread.h">
-      <Filter>SoyLib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\SoyLib\src\SoyMedia.h">
-      <Filter>SoyLib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\SoyLib\src\SoyMediaFormat.h">
-      <Filter>SoyLib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\SoyLib\src\soymediafoundation.h">
-      <Filter>SoyLib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\SoyLib\src\SoyMath.h">
-      <Filter>SoyLib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\SoyLib\src\SoyJson.h">
-      <Filter>SoyLib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\SoyLib\src\SoyEvent.h">
-      <Filter>SoyLib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\SoyLib\src\SoyWave.h">
       <Filter>SoyLib</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\SoyLib\src\SoyH264.h">
@@ -413,13 +356,7 @@
     <ClInclude Include="..\Source\Json11\json11.hpp">
       <Filter>Source\Json11</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\SoyLib\src\SoyImage.h">
-      <Filter>SoyLib</Filter>
-    </ClInclude>
     <ClInclude Include="..\Source\SoyLib\src\SoyFourcc.h">
-      <Filter>SoyLib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\SoyLib\src\SoyStreamBuffer.h">
       <Filter>SoyLib</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\MagicEnum\include\magic_enum.hpp">

@@ -93,54 +93,16 @@
     <ClCompile Include="..\Source\SoyLib\src\SoyArray.cpp" />
     <ClCompile Include="..\Source\SoyLib\src\SoyAssert.cpp" />
     <ClCompile Include="..\Source\SoyLib\src\SoyDebug.cpp" />
-    <ClCompile Include="..\Source\SoyLib\src\SoyEvent.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Static|x64'">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="..\Source\SoyLib\src\SoyFilesystem.cpp" />
     <ClCompile Include="..\Source\SoyLib\src\SoyFourcc.cpp" />
     <ClCompile Include="..\Source\SoyLib\src\SoyH264.cpp" />
-    <ClCompile Include="..\Source\SoyLib\src\SoyImage.cpp" />
-    <ClCompile Include="..\Source\SoyLib\src\SoyJson.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Static|x64'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\Source\SoyLib\src\SoyMath.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Static|x64'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\Source\SoyLib\src\SoyMedia.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Static|x64'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\Source\SoyLib\src\SoyMediaFormat.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Static|x64'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\Source\SoyLib\src\SoyMediaFoundation.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Static|x64'">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="..\Source\SoyLib\src\SoyPixels.cpp" />
     <ClCompile Include="..\Source\SoyLib\src\SoyPlatform.cpp" />
-    <ClCompile Include="..\Source\SoyLib\src\SoyPng.cpp" />
     <ClCompile Include="..\Source\SoyLib\src\SoyRuntimeLibrary.cpp" />
-    <ClCompile Include="..\Source\SoyLib\src\SoyStreamBuffer.cpp" />
     <ClCompile Include="..\Source\SoyLib\src\SoyString.cpp" />
     <ClCompile Include="..\Source\SoyLib\src\SoyThread.cpp" />
     <ClCompile Include="..\Source\SoyLib\src\SoyTime.cpp" />
     <ClCompile Include="..\Source\SoyLib\src\SoyTypes.cpp" />
-    <ClCompile Include="..\Source\SoyLib\src\SoyWave.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Static|x64'">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="..\Source\TDecoder.cpp" />
     <ClCompile Include="..\Source\TDecoderInstance.cpp" />
     <ClCompile Include="..\Source\TEncoder.cpp" />
@@ -232,24 +194,13 @@
     <ClInclude Include="..\Source\SoyLib\src\SoyArray.h" />
     <ClInclude Include="..\Source\SoyLib\src\SoyAssert.h" />
     <ClInclude Include="..\Source\SoyLib\src\SoyDebug.h" />
-    <ClInclude Include="..\Source\SoyLib\src\SoyEvent.h" />
     <ClInclude Include="..\Source\SoyLib\src\SoyFourcc.h" />
     <ClInclude Include="..\Source\SoyLib\src\SoyH264.h" />
-    <ClInclude Include="..\Source\SoyLib\src\SoyImage.h" />
-    <ClInclude Include="..\Source\SoyLib\src\SoyJson.h" />
-    <ClInclude Include="..\Source\SoyLib\src\SoyMath.h" />
-    <ClInclude Include="..\Source\SoyLib\src\SoyMedia.h" />
-    <ClInclude Include="..\Source\SoyLib\src\SoyMediaFormat.h" />
-    <ClInclude Include="..\Source\SoyLib\src\soymediafoundation.h" />
     <ClInclude Include="..\Source\SoyLib\src\SoyPixels.h" />
-    <ClInclude Include="..\Source\SoyLib\src\SoyPng.h" />
-    <ClInclude Include="..\Source\SoyLib\src\SoyStreamBuffer.h" />
     <ClInclude Include="..\Source\SoyLib\src\SoyString.h" />
     <ClInclude Include="..\Source\SoyLib\src\SoyThread.h" />
     <ClInclude Include="..\Source\SoyLib\src\SoyTypes.h" />
     <ClInclude Include="..\Source\SoyLib\src\SoyTypes_Windows.h" />
-    <ClInclude Include="..\Source\SoyLib\src\SoyWave.h" />
-    <ClInclude Include="..\Source\SoyLib\src\string.hpp" />
     <ClInclude Include="..\Source\TDecoder.h" />
   </ItemGroup>
   <ItemGroup>
