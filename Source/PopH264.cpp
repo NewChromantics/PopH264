@@ -694,6 +694,7 @@ void Test_Decoder_DecodeTestFile(const char* TestDataName, const char* DecoderNa
 			PopH264_PeekFrame(Handle, MetaJson, std::size(MetaJson));
 
 			auto Meta = ParseJsonObject(MetaJson);
+			bool ThisIsEof = false;
 			if (Meta.object_items().count("EndOfStream"))
 			{
 				auto EndOfStream = Meta["EndOfStream"];
@@ -701,7 +702,10 @@ void Test_Decoder_DecodeTestFile(const char* TestDataName, const char* DecoderNa
 					throw std::runtime_error("Frame meta had .EndOfStream but isn't a bool");
 
 				if (EndOfStream.bool_value() == true)
+				{
+					ThisIsEof = true;
 					HadEof = true;
+				}
 			}
 
 			static uint8_t Plane0[1024 * 1024];
@@ -719,8 +723,10 @@ void Test_Decoder_DecodeTestFile(const char* TestDataName, const char* DecoderNa
 				continue;
 			}
 
-			if (FrameNumber != FirstFrameNumber)
-				throw std::runtime_error("Wrong frame number from decoder");
+			//	if this is an EOF frame, the frame number might be 0
+			if ( !ThisIsEof )
+				if (FrameNumber != FirstFrameNumber)
+					throw std::runtime_error("Wrong frame number from decoder");
 
 			/*
 			if (Compare)
