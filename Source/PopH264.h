@@ -70,9 +70,6 @@ __export void				PopH264_DestroyInstance(int32_t Instance);
 //	in json format. More meta & debug may get added here
 __export void				PopH264_EnumDecoders(char* DecodersJsonBuffer,int32_t DecodersJsonBufferLength);
 
-
-//	deprecate meta values for json
-__export void				PopH264_GetMeta(int32_t Instance, int32_t* MetaValues, int32_t MetaValuesCount);
 __export void				PopH264_PeekFrame(int32_t Instance,char* JsonBuffer,int32_t JsonBufferSize);
 
 //	push NALU packets (even fragmented)

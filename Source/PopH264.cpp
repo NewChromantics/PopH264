@@ -233,37 +233,6 @@ __export void PopH264_PeekFrame(int32_t Instance, char* JsonBuffer, int32_t Json
 }
 
 
-__export void PopH264_GetMeta(int32_t Instance, int32_t* pMetaValues, int32_t MetaValuesCount)
-{
-	auto Function = [&]()
-	{
-		auto Device = PopH264::DecoderInstanceManager.GetInstance(Instance);
-		
-		auto Meta = Device->GetMeta();
-		
-		size_t MetaValuesCounter = 0;
-		auto MetaValues = GetRemoteArray(pMetaValues, MetaValuesCount, MetaValuesCounter);
-		
-		BufferArray<SoyPixelsMeta, 3> PlaneMetas;
-		Meta.mPixelsMeta.GetPlanes(GetArrayBridge(PlaneMetas));
-		MetaValues.PushBack(PlaneMetas.GetSize());
-		
-		for ( auto p=0;	p<PlaneMetas.GetSize();	p++ )
-		{
-			auto& PlaneMeta = PlaneMetas[p];
-			//std::Debug << "Outputting plane " << p << "/" << PlaneMetas.GetSize() << "; " << PlaneMeta << std::endl;
-			MetaValues.PushBack(PlaneMeta.GetWidth());
-			MetaValues.PushBack(PlaneMeta.GetHeight());
-			MetaValues.PushBack(PlaneMeta.GetChannels());
-			MetaValues.PushBack(PlaneMeta.GetFormat());
-			MetaValues.PushBack(PlaneMeta.GetDataSize());
-		}
-		
-		return 0;
-	};
-	SafeCall(Function, __func__, 0 );
-}
-
 
 __export int32_t PopH264_GetVersion()
 {
