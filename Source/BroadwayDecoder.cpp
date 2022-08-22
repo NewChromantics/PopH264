@@ -130,11 +130,11 @@ bool Broadway::TDecoder::DecodeNextPacket()
 		return false;
 	
 	const unsigned IntraGrayConcealment = 0;
-	const unsigned IntraReferenceConcealment = 1;
+	//const unsigned IntraReferenceConcealment = 1;
 	
 	H264SwDecInput Input;
 	Input.pStream = Nalu.GetArray();
-	Input.dataLen = Nalu.GetDataSize();
+	Input.dataLen = size_cast<uint32_t>(Nalu.GetDataSize());
 	
 	if ( Input.dataLen == 0 )
 		return false;

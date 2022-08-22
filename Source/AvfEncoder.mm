@@ -273,7 +273,7 @@ Avf::TCompressor::TCompressor(TEncoderParams& Params,const SoyPixelsMeta& Meta,s
 		
 		if ( Params.mMaxSliceBytes > 0 )
 		{
-			int32_t MaxSliceBytes = Params.mMaxSliceBytes;
+			int32_t MaxSliceBytes = size_cast<int32_t>(Params.mMaxSliceBytes);
 			CFNumberRef Number = CFNumberCreate(NULL, kCFNumberSInt32Type, &MaxSliceBytes );
 			auto status = VTSessionSetProperty(mSession, kVTCompressionPropertyKey_MaxH264SliceBytes, Number);
 			Avf::IsOkay(status,ProfileDebug.str()+"kVTCompressionPropertyKey_MaxH264SliceBytes");
@@ -299,7 +299,7 @@ Avf::TCompressor::TCompressor(TEncoderParams& Params,const SoyPixelsMeta& Meta,s
 		//	-1 is unlimited, and is the default
 		if ( Params.mMaxFrameBuffers > 0 )
 		{
-			int32_t MaxFrameBuffers = Params.mMaxFrameBuffers;
+			int32_t MaxFrameBuffers = size_cast<int32_t>(Params.mMaxFrameBuffers);
 			CFNumberRef Number = CFNumberCreate(NULL, kCFNumberSInt32Type, &MaxFrameBuffers );
 			auto status = VTSessionSetProperty(mSession, kVTCompressionPropertyKey_MaxFrameDelayCount, Number);
 			Avf::IsOkay(status,"kVTCompressionPropertyKey_MaxFrameDelayCount");
@@ -307,7 +307,7 @@ Avf::TCompressor::TCompressor(TEncoderParams& Params,const SoyPixelsMeta& Meta,s
 		
 		if ( Params.mKeyFrameFrequency > 0 )
 		{
-			int32_t KeyframeFrequency = Params.mKeyFrameFrequency;
+			int32_t KeyframeFrequency = size_cast<int32_t>(Params.mKeyFrameFrequency);
 			CFNumberRef Number = CFNumberCreate(NULL, kCFNumberSInt32Type, &KeyframeFrequency );
 			auto status = VTSessionSetProperty(mSession, kVTCompressionPropertyKey_MaxKeyFrameInterval, Number);
 			Avf::IsOkay(status,"kVTCompressionPropertyKey_MaxKeyFrameInterval");
@@ -467,7 +467,7 @@ void Avf::TCompressor::OnCompressed(OSStatus status, VTEncodeInfoFlags infoFlags
 
 	//	look for SPS & PPS data if we have a keyframe
 	//	AFTER CMSampleBufferDataIsReady as SampleBuffer may be null
-	CFDictionaryRef Dictionary = static_cast<CFDictionaryRef>( CFArrayGetValueAtIndex(CMSampleBufferGetSampleAttachmentsArray(SampleBuffer, true), 0) );
+	//CFDictionaryRef Dictionary = static_cast<CFDictionaryRef>( CFArrayGetValueAtIndex(CMSampleBufferGetSampleAttachmentsArray(SampleBuffer, true), 0) );
 	//bool IsKeyframe = !CFDictionaryContainsKey( Dictionary, kCMSampleAttachmentKey_NotSync);
 	
 
