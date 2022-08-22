@@ -96,7 +96,7 @@ void DecoderTest(const char* TestDataName,CompareFunc_t* Compare,const char* Dec
 	if (!LoadDataFromFilename(TestDataName, GetArrayBridge(TestData)))
 	{
 		//	gr: using int (auto) here, causes some resolve problem with GetRemoteArray below
-		size_t TestDataSize = PopH264_GetTestData(TestDataName, TestDataBuffer, std::size(TestDataBuffer));
+		auto TestDataSize = PopH264_GetTestData(TestDataName, TestDataBuffer, std::size(TestDataBuffer));
 		if ( TestDataSize < 0 )
 			throw std::runtime_error("Missing test data");
 		if ( TestDataSize == 0 )
@@ -316,11 +316,12 @@ void EncoderYuv8_88Test(int Width,int Height,const char* EncoderName="")
 	auto TestMetaJsons = TestMetaJsonStr.str();
 	const char* TestMetaJson = TestMetaJsons.c_str();//	unsafe!
 
-	PopH264_EncoderPushFrame(Handle, TestMetaJson, Yuv.GetPixelsArray().GetArray(), nullptr, nullptr, ErrorBuffer, std::size(ErrorBuffer));
-	PopH264_EncoderPushFrame(Handle, TestMetaJson, Yuv.GetPixelsArray().GetArray(), nullptr, nullptr, ErrorBuffer, std::size(ErrorBuffer));
-	PopH264_EncoderPushFrame(Handle, TestMetaJson, Yuv.GetPixelsArray().GetArray(), nullptr, nullptr, ErrorBuffer, std::size(ErrorBuffer));
-	PopH264_EncoderPushFrame(Handle, TestMetaJson, Yuv.GetPixelsArray().GetArray(), nullptr, nullptr, ErrorBuffer, std::size(ErrorBuffer));
-	PopH264_EncoderPushFrame( Handle, TestMetaJson, Yuv.GetPixelsArray().GetArray(), nullptr, nullptr, ErrorBuffer, std::size(ErrorBuffer) );
+	auto ErrorBufferSize = static_cast<int>( std::size(ErrorBuffer) );
+	PopH264_EncoderPushFrame(Handle, TestMetaJson, Yuv.GetPixelsArray().GetArray(), nullptr, nullptr, ErrorBuffer, ErrorBufferSize );
+	PopH264_EncoderPushFrame(Handle, TestMetaJson, Yuv.GetPixelsArray().GetArray(), nullptr, nullptr, ErrorBuffer, ErrorBufferSize);
+	PopH264_EncoderPushFrame(Handle, TestMetaJson, Yuv.GetPixelsArray().GetArray(), nullptr, nullptr, ErrorBuffer, ErrorBufferSize);
+	PopH264_EncoderPushFrame(Handle, TestMetaJson, Yuv.GetPixelsArray().GetArray(), nullptr, nullptr, ErrorBuffer, ErrorBufferSize);
+	PopH264_EncoderPushFrame( Handle, TestMetaJson, Yuv.GetPixelsArray().GetArray(), nullptr, nullptr, ErrorBuffer, ErrorBufferSize );
 	
 	if ( strlen(ErrorBuffer) )
 	{
