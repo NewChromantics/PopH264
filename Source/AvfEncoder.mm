@@ -208,8 +208,8 @@ Avf::TCompressor::TCompressor(TEncoderParams& Params,const SoyPixelsMeta& Meta,s
 				
 		{
 			void* CallbackParam = this;
-			auto Width = Meta.GetWidth();
-			auto Height = Meta.GetHeight();
+			auto Width = size_cast<int32_t>(Meta.GetWidth());
+			auto Height = size_cast<int32_t>(Meta.GetHeight());
 			ProfileDebug << Width << "x" << Height << ";";
 			OSStatus status = VTCompressionSessionCreate( NULL, Width, Height, kCMVideoCodecType_H264, sessionAttributes, NULL, NULL, OnCompressedCallback, CallbackParam, &mSession );
 			//std::Debug << "H264: VTCompressionSessionCreate " << status << std::endl;
@@ -247,7 +247,7 @@ Avf::TCompressor::TCompressor(TEncoderParams& Params,const SoyPixelsMeta& Meta,s
 		if ( Params.mAverageKbps > 0 )
 		{
 			//	this was giving about 25x too much, maybe im giving it the wrong values, but I dont think so
-			int32_t AverageBitRate = Params.mAverageKbps * 1024 * 8;
+			int32_t AverageBitRate = size_cast<int32_t>(Params.mAverageKbps * 1024 * 8);
 			CFNumberRef Number = CFNumberCreate(NULL, kCFNumberSInt32Type, &AverageBitRate );
 			auto status = VTSessionSetProperty(mSession, kVTCompressionPropertyKey_AverageBitRate, Number);
 			Avf::IsOkay(status,ProfileDebug.str()+"kVTCompressionPropertyKey_AverageBitRate");
@@ -257,7 +257,7 @@ Avf::TCompressor::TCompressor(TEncoderParams& Params,const SoyPixelsMeta& Meta,s
 		//	gr: setting on iphone SE (ios 13) has little effect
 		if ( Params.mMaxKbps > 0 )
 		{
-			int32_t Bytes = Params.mMaxKbps * 1024;
+			int32_t Bytes = size_cast<int32_t>(Params.mMaxKbps * 1024);
 			int32_t Secs = 1;
 			CFNumberRef n1 = CFNumberCreate( kCFAllocatorDefault, kCFNumberSInt32Type, &Bytes );
 			CFNumberRef n2 = CFNumberCreate( kCFAllocatorDefault, kCFNumberSInt32Type, &Secs );
@@ -343,7 +343,7 @@ void AnnexBToAnnexB(const ArrayBridge<uint8_t>& Data,std::function<void(const Ar
 {
 	//	gr: does this start with 0001 etc? if so, cut
 	Soy_AssertTodo();
-	EnumPacket( GetArrayBridge(Data) );
+	//EnumPacket( GetArrayBridge(Data) );
 }
 
 void NaluToAnnexB(const ArrayBridge<uint8_t>& Data,size_t LengthSize,std::function<void(const ArrayBridge<uint8_t>&&)>& EnumPacket)
@@ -353,7 +353,7 @@ void NaluToAnnexB(const ArrayBridge<uint8_t>& Data,size_t LengthSize,std::functi
 	while ( i <Data.GetSize() )
 	{
 		size_t ChunkLength = 0;
-		auto* pData = &Data[i+0];
+		//auto* pData = &Data[i+0];
 		
 		if ( LengthSize == 1 )
 		{
@@ -394,7 +394,7 @@ extern "C" void ExtractPackets(const ArrayBridge<uint8_t>&& Packets,CMFormatDesc
 	
 	//	extract header packets
 	//	SPS, then PPS
-	H264NaluContent::Type NaluContentTypes[] = { H264NaluContent::SequenceParameterSet, H264NaluContent::PictureParameterSet };
+	//H264NaluContent::Type NaluContentTypes[] = { H264NaluContent::SequenceParameterSet, H264NaluContent::PictureParameterSet };
 	for ( auto i=0;	i<ParamSetCount;	i++ )
 	{
 		if ( i > 1 )
@@ -451,8 +451,8 @@ void Avf::TCompressor::OnCompressed(OSStatus status, VTEncodeInfoFlags infoFlags
 
 	//	get meta
 	CMTime PresentationTimestamp = CMSampleBufferGetPresentationTimeStamp(SampleBuffer);
-	CMTime DecodeTimestamp = CMSampleBufferGetDecodeTimeStamp(SampleBuffer);
-	CMTime SampleDuration = CMSampleBufferGetDuration(SampleBuffer);
+	//CMTime DecodeTimestamp = CMSampleBufferGetDecodeTimeStamp(SampleBuffer);
+	//CMTime SampleDuration = CMSampleBufferGetDuration(SampleBuffer);
 	auto FrameNumber = TimeToFrameNumber(PresentationTimestamp);
 	//	todo: deal with OOO packets with theirown decode time
 	//auto DecodeTimecode = Soy::Platform::GetTime(DecodeTimestamp);
@@ -468,7 +468,7 @@ void Avf::TCompressor::OnCompressed(OSStatus status, VTEncodeInfoFlags infoFlags
 	//	look for SPS & PPS data if we have a keyframe
 	//	AFTER CMSampleBufferDataIsReady as SampleBuffer may be null
 	CFDictionaryRef Dictionary = static_cast<CFDictionaryRef>( CFArrayGetValueAtIndex(CMSampleBufferGetSampleAttachmentsArray(SampleBuffer, true), 0) );
-	bool IsKeyframe = !CFDictionaryContainsKey( Dictionary, kCMSampleAttachmentKey_NotSync);
+	//bool IsKeyframe = !CFDictionaryContainsKey( Dictionary, kCMSampleAttachmentKey_NotSync);
 	
 
 	//	extract data

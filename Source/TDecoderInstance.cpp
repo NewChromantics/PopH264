@@ -297,7 +297,7 @@ void PopH264::TDecoderInstance::PushData(const uint8_t* Data,size_t DataSize,siz
 		std::Debug << __PRETTY_FUNCTION__ << " trying to detect image caused exception; " << e.what() << std::endl;
 	}
 	*/
-	Decoder->Decode( GetArrayBridge(DataArray), FrameNumber );
+	Decoder->Decode( GetArrayBridge(DataArray), size_cast<PopH264::FrameNumber_t>(FrameNumber) );
 }
 
 

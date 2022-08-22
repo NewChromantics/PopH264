@@ -184,7 +184,7 @@ void Avf::TDecompressor::OnDecodedFrame(OSStatus Status,CVImageBufferRef ImageBu
 	IsOkay(Status,__PRETTY_FUNCTION__);
 	
 	//	gr: seem to need an extra retain. find out what's releaseing this twice despite retain below
-	auto RetainCount = CFGetRetainCount( ImageBuffer );
+	//auto RetainCount = CFGetRetainCount( ImageBuffer );
 	//std::Debug << "On decoded frame, retain count=" << RetainCount << std::endl;
 	//CFRetain( ImageBuffer );
 	//RetainCount = CFGetRetainCount( ImageBuffer );
@@ -198,7 +198,7 @@ void Avf::TDecompressor::OnDecodedFrame(OSStatus Status,CVImageBufferRef ImageBu
 	std::shared_ptr<TPixelBuffer> PixelBuffer( new CVPixelBuffer(ImageBuffer, Retain, mDecoderRenderer, Transform ) );
 	
 	auto Time = Soy::Platform::GetTime(PresentationTimeStamp);
-	PopH264::FrameNumber_t FrameNumber = Time.mTime;
+	PopH264::FrameNumber_t FrameNumber = size_cast<uint32_t>(Time.mTime);
 	mOnFrame( PixelBuffer, FrameNumber );
 }
 
@@ -209,7 +209,7 @@ void Avf::TDecompressor::OnDecodeError(const char* Error,CMTime PresentationTime
 	std::Debug << __PRETTY_FUNCTION__ << Error << std::endl;
 	std::string ErrorStr(Error);
 	auto Time = Soy::Platform::GetTime(PresentationTimeStamp);
-	PopH264::FrameNumber_t FrameNumber = Time.mTime;
+	PopH264::FrameNumber_t FrameNumber = size_cast<uint32_t>(Time.mTime);
 	mOnError( ErrorStr, FrameNumber );
 }
 

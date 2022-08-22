@@ -238,7 +238,7 @@ __export int32_t PopH264_GetVersion()
 {
 	auto Function = [&]()
 	{
-		return PopH264::Version.GetMillion();
+		return static_cast<int>(PopH264::Version.GetMillion());
 	};
 	return SafeCall( Function, __func__, -1 );
 }
@@ -403,17 +403,17 @@ __export void PopH264_EncoderEndOfStream(int32_t Instance)
 
 __export int32_t PopH264_EncoderPopData(int32_t Instance,uint8_t* DataBuffer,int32_t DataBufferSize)
 {
-	auto Function = [&]()
+	auto Function = [&]() -> int32_t
 	{
 		auto Encoder = PopH264::EncoderInstanceManager.GetInstance(Instance);
 		//	no data buffer, just peeking size
 		if ( !DataBuffer || DataBufferSize <= 0 )
-			return Encoder->PeekNextFrameSize();
+			return size_cast<int32_t>(Encoder->PeekNextFrameSize());
 		
 		size_t DataBufferUsed = 0;
 		auto DataArray = GetRemoteArray( DataBuffer, DataBufferSize, DataBufferUsed );
 		Encoder->PopPacket( GetArrayBridge(DataArray) );
-		return DataBufferUsed;
+		return size_cast<int32_t>(DataBufferUsed);
 	};
 	return SafeCall(Function, __func__, -1 );
 }
@@ -499,7 +499,7 @@ __export int32_t PopH264_GetTestData(const char* Name,uint8_t* Buffer,int32_t Bu
 
 		//	todo: catch "name doesnt exist"
 		PopH264::GetTestData( Name, GetArrayBridge(BufferArray), FullSize );
-		return FullSize;
+		return size_cast<int32_t>(FullSize);
 	};
 	return SafeCall(Function, __func__, -1);
 }
@@ -676,7 +676,7 @@ void Test_Decoder_DecodeTestFile(const char* TestDataName, const char* DecoderNa
 	{
 		auto LastIteration = Iteration == (DataRepeat - 1);
 		FirstFrameNumber += 100;
-		auto Result = PopH264_PushData(Handle, TestData.GetArray(), TestData.GetDataSize(), FirstFrameNumber);
+		auto Result = PopH264_PushData(Handle, TestData.GetArray(), (int)TestData.GetDataSize(), FirstFrameNumber);
 		if (Result < 0)
 			throw std::runtime_error("DecoderTest: PushData error");
 
@@ -790,7 +790,7 @@ void Test_Decoder_DestroyMidDecode(const char* TestDataName, const char* Decoder
 	{
 		auto LastIteration = Iteration == (DataRepeat - 1);
 		FirstFrameNumber += 100;
-		auto Result = PopH264_PushData(Handle, TestData.GetArray(), TestData.GetDataSize(), FirstFrameNumber);
+		auto Result = PopH264_PushData(Handle, TestData.GetArray(), static_cast<int>(TestData.GetDataSize()), FirstFrameNumber);
 		if (Result < 0)
 		{
 			if ( SentTermination )
@@ -803,8 +803,7 @@ void Test_Decoder_DestroyMidDecode(const char* TestDataName, const char* Decoder
 			PopH264_PushEndOfStream(Handle);
 
 		//	at a "random" moment, once we've decoded at least one frame, free
-		//if ( FramesDecoded > 0 )
-		if ( false )
+		if ( FramesDecoded > 99999 )
 		{
 			if ( (rand() % 20) == 0 )
 			{
