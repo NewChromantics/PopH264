@@ -19,7 +19,7 @@ on:
 
 jobs:
   Build:
-    name: ${{ matrix.config.os }}-${{ matrix.config.type }}
+    name: ${{ matrix.config.os }}-${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
     strategy:
       matrix:
@@ -27,6 +27,7 @@ jobs:
           - os: ubuntu-18.04
             type: linux
             arch: x86_64
+            name: Linux
             
           - os: ubuntu-latest
             type: Wasm
@@ -34,25 +35,32 @@ jobs:
           - os: Nvidia
             type: linux
             arch: arm64
+            name: Nvidia Linux
 
           # - os: Pi4
           #   type: linux
           #   architecture: arm64
+              name: Raspberry Pi
 
           - os: windows-latest
             type: x64
+            name: Windows x64
 
           - os: macos-12
             scheme: PopH264_Universal
+            name: Apple Universal
           
           - os: macos-latest
             scheme: PopH264_MacosStatic
+            name: Macos Static
 
           - os: macos-latest
             scheme: PopH264_MacosDylib
+            name: Macos Dylib
 
           - os: ubuntu-latest
             type: Android
+            name: Android
 
     steps:
       - name: Checkout repo
