@@ -50,7 +50,7 @@ namespace PopH264
 	//	1.3.39	Ios now converts greyscale to YUV. Greyscale is blank on ios (fine on osx)
 	//	gr: use macros once linux is automated
 	//const Soy::TVersion	Version(VERSION_MAJOR,VERSION_MINOR,VERSION_PATCH);
-	const Soy::TVersion	Version(1,4,7);
+	const Soy::TVersion	Version(1,4,8);
 }
 
 
