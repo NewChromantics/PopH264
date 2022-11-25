@@ -22,12 +22,6 @@ jobs:
       with:
         buildtargetname: "PopH264"
         buildpath: "PopH264.Android/libPopH264"
-        
-    - name: Build Android test app
-      uses: NewChromantics/PopAction_BuildAndroid@v2
-      with:
-        buildtargetname: "PopH264"
-        buildpath: "PopH264.Android/PopH264TestApp"
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v2
