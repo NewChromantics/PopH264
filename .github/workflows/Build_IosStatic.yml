@@ -1,0 +1,32 @@
+name: Build Ios Static
+
+env:
+  project: PopH264
+
+on:
+  push:
+    branches:
+      - master
+      - '*Test*' 
+
+jobs:
+  Build:
+    name: Ios Static Library
+    runs-on: macos-12
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: "recursive"
+
+      - name: Build Ios Static
+        uses: NewChromantics/PopAction_BuildApple@v1.0.11
+        with:
+          BuildScheme: ${{ env.project }}_IosStatic
+          project: ${{ env.project }}
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          # tsdk: these env vars are set in each of the actions
+          name: ${{ env.UPLOAD_NAME }}
+          path: ${{ env.UPLOAD_DIR }}
