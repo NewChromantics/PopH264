@@ -207,6 +207,17 @@ std::string GetMetaJson(const PopH264::TDecoderFrameMeta& Meta)
 	Json["FrameNumber"] = Meta.mFrameNumber;
 	Json["QueuedFrames"] = static_cast<int>(Meta.mFramesQueued);
 	
+	//	coping with int32 by subtracting a good portion of the 80's and 90's
+	//	need a time well within 2147483647
+	static uint64_t BaseTime = 1669100000000;
+	auto Now64 = SoyTime::Now().mTime;
+	auto Decoded64 = Meta.mDecodedTime.mTime;
+	int32_t Now32 = static_cast<int32_t>(Now64 - BaseTime);
+	int32_t Decoded32 = ( Decoded64 > 0 ) ? static_cast<int32_t>(Decoded64 - BaseTime) : 0;
+	Json["DecodedTimeMs"] = Decoded32;
+	//	send the current clock time along with Decoded for a frame of reference
+	Json["NowTimeMs"] = Now32;
+
 	json11::Json TheJson = Json;
 	std::string MetaJsonString = TheJson.dump();
 	return MetaJsonString;

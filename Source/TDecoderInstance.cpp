@@ -352,13 +352,17 @@ bool PopH264::TDecoderInstance::PopFrame(TFrame& Frame)
 	if ( mFrames.IsEmpty() )
 		return false;
 	
-	Soy::TScopeTimerPrint Timer2("PopH264::TDecoderInstance::PopFrame copy",2);
-	Frame = mFrames[0];
-	Timer2.Stop();
+	{
+		Soy::TScopeTimerPrint Timer2("PopH264::TDecoderInstance::PopFrame copy",2);
+		Frame = mFrames[0];
+	}
+		
+	{
+		Soy::TScopeTimerPrint Timer3("PopH264::TDecoderInstance::PopFrame remove block",2);
+		mFrames.RemoveBlock(0,1);
+	}
 
-	Soy::TScopeTimerPrint Timer3("PopH264::TDecoderInstance::PopFrame remove block",2);
-	mFrames.RemoveBlock(0,1);
-	Timer3.Stop();
+	Frame.mPoppedTime = SoyTime::Now();
 	return true;
 }
 
@@ -381,6 +385,7 @@ PopH264::TDecoderFrameMeta PopH264::TDecoderInstance::GetMeta()
 			if ( Frame0.mPixels )
 				Meta.mPixelsMeta = Frame0.mPixels->GetMeta();
 			Meta.mMeta = Frame0.mMeta;
+			Meta.mDecodedTime = Frame0.mDecodedTime;
 		}
 	}
 	return Meta;
@@ -417,6 +422,7 @@ void PopH264::TDecoderInstance::PushFrame(const SoyPixelsImpl& Frame,PopH264::Fr
 	TFrame NewFrame;
 	NewFrame.mFrameNumber = FrameNumber;
 	NewFrame.mMeta = Meta;
+	NewFrame.mDecodedTime = SoyTime::Now();
 
 	//	if we get an invalid pixels we're assuming it's the EndOfStream packet
 	if ( !Frame.GetMeta().IsValid() && FrameNumber == 0 )

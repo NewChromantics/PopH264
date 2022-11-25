@@ -30,6 +30,9 @@ public:
 	int32_t							mFrameNumber = -1;		//	this may be time, specified by user, so is really just Meta
 	bool							mEndOfStream = false;
 	json11::Json::object			mMeta;					//	additional (maybe decoder dependent) meta
+	SoyTime							mPushedTime;
+	SoyTime							mDecodedTime;
+	SoyTime							mPoppedTime;
 };
 
 //	meta we send back to caller
@@ -41,6 +44,7 @@ public:
 	bool					mEndOfStream = false;	//	this is the last frame
 	size_t					mFramesQueued = 0;		//	frames buffered up
 	json11::Json::object	mMeta;					//	additional (maybe decoder dependent) meta
+	SoyTime					mDecodedTime;
 };
 
 #if defined(_MSC_VER)
