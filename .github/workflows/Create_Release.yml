@@ -40,7 +40,7 @@ jobs:
           # - os: Pi4
           #   type: linux
           #   architecture: arm64
-              name: Raspberry Pi
+          #    name: Raspberry Pi
 
           - os: windows-latest
             type: x64
