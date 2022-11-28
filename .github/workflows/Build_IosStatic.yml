@@ -19,10 +19,11 @@ jobs:
           submodules: "recursive"
 
       - name: Build Ios Static
-        uses: NewChromantics/PopAction_BuildApple@v1.0.11
+        uses: NewChromantics/PopAction_BuildApple@main
         with:
           BuildScheme: ${{ env.project }}_IosStatic
           project: ${{ env.project }}
+          Destination: "generic/platform=iOS"
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
