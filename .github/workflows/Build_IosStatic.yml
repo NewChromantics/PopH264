@@ -19,7 +19,7 @@ jobs:
           submodules: "recursive"
 
       - name: Build Ios Static
-        uses: NewChromantics/PopAction_BuildApple@main
+        uses: NewChromantics/PopAction_BuildApple@master
         with:
           BuildScheme: ${{ env.project }}_IosStatic
           project: ${{ env.project }}
