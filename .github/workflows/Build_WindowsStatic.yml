@@ -1,0 +1,37 @@
+name: Build Windows
+
+on:
+  push:
+    branches:
+      - master
+      - '*Test*'
+
+jobs:
+  Build:
+    runs-on: windows-latest
+    env:
+      project: PopH264
+    
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: 'recursive'
+        
+    - name: Add msbuild to PATH
+      uses: microsoft/setup-msbuild@v1.0.2
+      
+    - name: Windows
+      uses: NewChromantics/PopAction_BuildWindows@v1
+      with:
+        BuildPlatform: x64
+        BuildConfiguration: Static
+        # would be nice to extract this from visual studio
+        BuildDirectory: Build\Static_x64
+        project: ${{ env.project }}
+
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        # tsdk: these env vars are set in each of the actions
+        name: ${{ env.UPLOAD_NAME }}
+        path: ${{ env.UPLOAD_DIR }}
