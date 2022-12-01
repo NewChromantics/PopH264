@@ -1,4 +1,4 @@
-name: Build Windows
+name: Build Windows Static
 
 on:
   push:
