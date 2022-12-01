@@ -1956,6 +1956,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/Source/X264/Ios/lib",
 				);
+				LLVM_LTO = NO;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.NewChromantics.PopH264;
@@ -2091,6 +2092,7 @@
 				INFOPLIST_FILE = "$(SRCROOT)/Source_TestApp/PopH264_TestAppIos_Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LLVM_LTO = NO;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -2304,6 +2306,7 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = X52DR36JY2;
+				LLVM_LTO = NO;
 				PRODUCT_NAME = PopH264_Ios;
 				SKIP_INSTALL = YES;
 			};
