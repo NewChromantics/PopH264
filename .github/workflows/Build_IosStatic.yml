@@ -19,7 +19,8 @@ jobs:
           submodules: "recursive"
 
       - name: Build Ios Static
-        uses: NewChromantics/PopAction_BuildApple@master
+        id: BuildIosStatic
+        uses: NewChromantics/PopAction_BuildApple@@v1.2.0
         with:
           BuildScheme: ${{ env.project }}_IosStatic
           project: ${{ env.project }}
@@ -28,6 +29,5 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
-          # tsdk: these env vars are set in each of the actions
-          name: ${{ env.UPLOAD_NAME }}
-          path: ${{ env.UPLOAD_DIR }}
+          name: ${{ steps.BuildIosStatic.outputs.UPLOAD_NAME }}
+          path: ${{ steps.BuildIosStatic.outputs.UPLOAD_DIR }}
