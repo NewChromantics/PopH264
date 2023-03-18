@@ -1,0 +1,31 @@
+//	config for OSX bundle apps
+//#include "PopApp.xcconfig"
+#include "../Source/Version.xcconfig"
+
+SDKROOT = appletvos
+IPHONEOS_DEPLOYMENT_TARGET = 13.0
+
+
+//	gr: move to soy xcconfig
+TARGET_ARCH[arch=i386] = TARGET_ARCH_INTEL
+TARGET_ARCH[arch=arm64e] = TARGET_ARCH_ARM64E
+TARGET_ARCH[arch=x86_64] = TARGET_ARCH_INTEL64
+TARGET_ARCH[arch=arm64] = TARGET_ARCH_ARM64
+
+
+
+GCC_PREPROCESSOR_DEFINITIONS = $(inherited) TARGET_IOS $(TARGET_ARCH)
+INFOPLIST_FILE = $(SRCROOT)/Info.plist
+
+BROADWAY_PATH = $(SRCROOT)/Source/Broadway/Decoder
+HEADER_SEARCH_PATHS = $(HEADER_SEARCH_PATHS) $(inherited) $(BROADWAY_PATH)/inc
+LIBRARY_SEARCH_PATHS = $(LIBRARY_SEARCH_PATHS) $(inherited)
+
+//	this should add bitcode, but doesnt without BITCODE_GENERATION_MODE
+OTHER_CFLAGS = -Wno-ambiguous-macro -fembed-bitcode
+OTHER_LDFLAGS = -fembed-bitcode;
+
+ENABLE_BITCODE = YES
+BITCODE_GENERATION_MODE = bitcode
+BUILD_LIBRARY_FOR_DISTRIBUTION = YES
+
