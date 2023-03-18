@@ -1,0 +1,33 @@
+name: Build Tvos Static
+
+env:
+  project: PopH264
+
+on:
+  push:
+    branches:
+      - master
+      - '*Test*'
+
+jobs:
+  Build:
+    name: Tvos Static Library
+    runs-on: macos-12
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: "recursive"
+
+      - name: Build Ios Static
+        id: BuildTvosStatic
+        uses: NewChromantics/PopAction_BuildApple@v1.2.0
+        with:
+          BuildScheme: ${{ env.project }}_TvosStatic
+          project: ${{ env.project }}
+          Destination: "generic/platform=tvOS"
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ steps.BuildTvosStatic.outputs.UPLOAD_NAME }}
+          path: ${{ steps.BuildTvosStatic.outputs.UPLOAD_DIR }}
