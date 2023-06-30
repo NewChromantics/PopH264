@@ -65,18 +65,19 @@ void PopH264::TDecoder::CheckDecoderUpdates()
 	CheckUpdates();
 }
 
+
+
 void PopH264::TDecoder::Decode(ArrayBridge<uint8_t>&& PacketData,FrameNumber_t FrameNumber)
 {
-	//	gr: maybe we should split when we PopNalu to move this work away from caller thread
-	auto PushNalu = [&](const ArrayBridge<uint8_t>&& Nalu)
+	//	todo? if this is the first data, detect non-poph264/nalu input formats (eg. jpeg), that we dont want to split
+	//	now split when popped, in case this data isn't actually H264 data
 	{
-		std::lock_guard<std::mutex> Lock(mPendingDataLock);
+		std::scoped_lock Lock(mPendingDataLock);
 		std::shared_ptr<TInputNaluPacket> pPacket( new TInputNaluPacket() );
-		pPacket->mData.Copy(Nalu);
+		pPacket->mData.Copy(PacketData);
 		pPacket->mFrameNumber = FrameNumber;
 		mPendingDatas.PushBack(pPacket);
-	};
-	H264::SplitNalu( PacketData, PushNalu );
+	}
 	
 	while ( true )
 	{
@@ -106,7 +107,7 @@ bool PopH264::TDecoder::PopNalu(ArrayBridge<uint8_t>&& Buffer,FrameNumber_t& Fra
 	//	gr:could returnthis now and avoid the copy & alloc at caller
 	std::shared_ptr<TInputNaluPacket> NextPacket;
 	{
-		std::lock_guard<std::mutex> Lock( mPendingDataLock );
+		std::scoped_lock Lock( mPendingDataLock );
 		if ( mPendingDatas.IsEmpty() )
 		{
 			//	expecting more data to come
@@ -116,7 +117,26 @@ bool PopH264::TDecoder::PopNalu(ArrayBridge<uint8_t>&& Buffer,FrameNumber_t& Fra
 			//	no more data ever
 			return false;
 		}
+		
 		NextPacket = mPendingDatas.PopAt(0);
+		{
+			//	if this packet contains multiple nalu packets, split it here
+			std::vector<std::shared_ptr<TInputNaluPacket>> SplitPackets;
+			
+			auto OnSplitNalu = [&](const ArrayBridge<uint8_t>&& Nalu)
+			{
+				std::shared_ptr<TInputNaluPacket> pPacket( new TInputNaluPacket() );
+				pPacket->mData.Copy(Nalu);
+				pPacket->mFrameNumber = FrameNumber;
+				SplitPackets.push_back( pPacket );
+			};
+			H264::SplitNalu( GetArrayBridge(NextPacket->mData), OnSplitNalu );
+			
+			//	if we split multiple re-insert back into the list
+			NextPacket = SplitPackets[0];
+			for ( auto i=1;	i<SplitPackets.size();	i++ )
+				mPendingDatas.PushBack(SplitPackets[i]);
+		}
 	}
 	Buffer.Copy( NextPacket->mData );
 	FrameNumber = NextPacket->mFrameNumber;
