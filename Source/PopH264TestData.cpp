@@ -3,6 +3,8 @@
 #include <algorithm>
 #include "SoyDebug.h"
 
+#include "TestData/Cat.jpg.cpp"
+
 //	ffmpeg -i PopH264Test_GreyscaleGradient.png -pix_fmt yuvj420p -bf 0 -codec:v libx264 -profile:v baseline -level 3.0 -preset slow -f rawvideo PopH264Test_GreyscaleGradient.h264
 //	xxd -i -a ./PopH264Test_GreyscaleGradient.h264
 const uint8_t __PopH264Test_GreyscaleGradient_h264[] = {
@@ -215,6 +217,13 @@ void GetTestFileData(FixedRemoteArray<const uint8_t>& InputData,ArrayBridge<uint
 
 void PopH264::GetTestData(const std::string& Name,ArrayBridge<uint8_t>&& Data,size_t& FullSize)
 {
+	if ( Name == "Cat.jpg" )
+	{
+		auto FileData = GetRemoteArray(__Cat_jpg);
+		GetTestFileData( FileData, Data, FullSize );
+		return;
+	}
+
 	if ( Name == "GreyscaleGradient.h264" )
 	{
 		auto FileData = GetRemoteArray(__PopH264Test_GreyscaleGradient_h264);

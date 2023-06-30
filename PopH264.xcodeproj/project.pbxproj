@@ -745,6 +745,8 @@
 		BF8AB6BE21F228D0008E7E76 /* SoyTime.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SoyTime.h; path = Source/SoyLib/src/SoyTime.h; sourceTree = "<group>"; };
 		BF8AB6C721F23712008E7E76 /* PopH264.cs */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = PopH264.cs; path = Unity/PopH264/Assets/PopH264/PopH264.cs; sourceTree = "<group>"; };
 		BF985EB52876E95700F04399 /* libPopH264_Ios.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPopH264_Ios.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		BF9F2B612A4F607E00D7261A /* Cat.jpg.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Cat.jpg.cpp; sourceTree = "<group>"; };
+		BF9F2B622A4F607E00D7261A /* Cat.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = Cat.jpg; sourceTree = "<group>"; };
 		BFAD0AB529C6706100CF7EA6 /* libPopH264_Tvos.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPopH264_Tvos.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		BFAD0AB629C6709600CF7EA6 /* PopH264_Tvos.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = PopH264_Tvos.xcconfig; sourceTree = "<group>"; };
 		BFAE45FB2850BA8200C0646D /* PopH264.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PopH264.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1201,6 +1203,16 @@
 			name = "Unity C#";
 			sourceTree = "<group>";
 		};
+		BF9F2B602A4F607E00D7261A /* TestData */ = {
+			isa = PBXGroup;
+			children = (
+				BF9F2B612A4F607E00D7261A /* Cat.jpg.cpp */,
+				BF9F2B622A4F607E00D7261A /* Cat.jpg */,
+			);
+			name = TestData;
+			path = Source/TestData;
+			sourceTree = "<group>";
+		};
 		BFC471782447506B00A2DA70 /* Source_TestApp */ = {
 			isa = PBXGroup;
 			children = (
@@ -1215,6 +1227,7 @@
 		BFD6076D1EA16ED20035C814 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				BF9F2B602A4F607E00D7261A /* TestData */,
 				BFC6C4F92565D16D00CBD99D /* AndroidDecoder.cpp */,
 				BFC6C4FA2565D16D00CBD99D /* AndroidDecoder.h */,
 				BFC6C4F02565B1AB00CBD99D /* AndroidMedia.cpp */,
