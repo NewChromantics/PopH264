@@ -1,6 +1,16 @@
 #include "TDecoder.h"
 #include "SoyH264.h"
+#include "std_span.hpp"
 #include "json11.hpp"
+#include "FileReader.hpp"
+
+namespace Jpeg
+{
+	bool	IsJpegHeader(std::span<uint8_t> FileData);
+}
+
+
+
 
 
 PopH264::TDecoder::TDecoder(const TDecoderParams& Params,PopH264::OnDecodedFrame_t OnDecodedFrame,PopH264::OnFrameError_t OnFrameError) :
@@ -102,6 +112,51 @@ void PopH264::TDecoder::UnpopNalu(ArrayBridge<uint8_t>&& Nalu,FrameNumber_t Fram
 }
 
 
+bool Jpeg::IsJpegHeader(std::span<uint8_t> FileData)
+{
+	//	extra fast, extra loose jpeg header detector
+	if ( FileData.size() < 10 )
+		return false;
+	
+	FileReader_t Reader( FileData );
+	
+	//	start of information
+	auto Soi = Reader.Read16Reverse();
+	if ( Soi != 0xffd8 )
+		return false;
+	
+	//	sections follow this format
+	auto MarkerStart = Reader.Read8();
+	auto MarkerNumber = Reader.Read8();
+	auto MarkerSize = Reader.Read16();
+	
+	if ( MarkerStart != 0xff )
+		return false;
+	//	marker number expected to be 0xe0+ for exif header
+	
+	//	too small to be exif
+	if ( MarkerSize < 4 )
+		return false;
+	
+	//	gr: this COULD be a different marker
+	//auto ExifHeader = Reader.ReadFourcc('EXIF');
+	auto ExifHeader = Reader.Read32Reverse();
+
+	switch ( ExifHeader )
+	{
+		case 'JFIF':
+		case 'Exif':
+			return true;
+			
+		default:
+		{
+			//auto Fourcc = GetFourccString(ExifHeader,true);
+			//std::cerr << "Failed to detect as jpeg, as first marker fourcc is " << Fourcc << std::endl;
+			return false;
+		}
+	}
+}
+
 bool PopH264::TDecoder::PopNalu(ArrayBridge<uint8_t>&& Buffer,FrameNumber_t& FrameNumber)
 {
 	//	gr:could returnthis now and avoid the copy & alloc at caller
@@ -119,6 +174,12 @@ bool PopH264::TDecoder::PopNalu(ArrayBridge<uint8_t>&& Buffer,FrameNumber_t& Fra
 		}
 		
 		NextPacket = mPendingDatas.PopAt(0);
+		
+		//	todo: detect non h264 packets here (if first)
+		if ( Jpeg::IsJpegHeader( std::span(NextPacket->mData.GetArray(),NextPacket->mData.GetSize()) ) )
+		{
+		}
+		else
 		{
 			//	if this packet contains multiple nalu packets, split it here
 			std::vector<std::shared_ptr<TInputNaluPacket>> SplitPackets;

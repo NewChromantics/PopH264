@@ -238,6 +238,15 @@
 		BF9936992930F4C600B9739C /* VideoToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BFC4719424477DE500A2DA70 /* VideoToolbox.framework */; };
 		BF99369A2930F4D300B9739C /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BFC4719224477DDE00A2DA70 /* CoreVideo.framework */; };
 		BF99369B2930F4D900B9739C /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BFC4719624477DEF00A2DA70 /* AVFoundation.framework */; };
+		BF9F2B552A4F5E0000D7261A /* FileReader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF9F2B542A4F5DFD00D7261A /* FileReader.cpp */; };
+		BF9F2B562A4F5E0000D7261A /* FileReader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF9F2B542A4F5DFD00D7261A /* FileReader.cpp */; };
+		BF9F2B572A4F5E0100D7261A /* FileReader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF9F2B542A4F5DFD00D7261A /* FileReader.cpp */; };
+		BF9F2B582A4F5E0100D7261A /* FileReader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF9F2B542A4F5DFD00D7261A /* FileReader.cpp */; };
+		BF9F2B592A4F5E0200D7261A /* FileReader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF9F2B542A4F5DFD00D7261A /* FileReader.cpp */; };
+		BF9F2B5A2A4F5E0300D7261A /* FileReader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF9F2B542A4F5DFD00D7261A /* FileReader.cpp */; };
+		BF9F2B5B2A4F5E0300D7261A /* FileReader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF9F2B542A4F5DFD00D7261A /* FileReader.cpp */; };
+		BF9F2B5C2A4F5E0400D7261A /* FileReader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF9F2B542A4F5DFD00D7261A /* FileReader.cpp */; };
+		BF9F2B5D2A4F5E0400D7261A /* FileReader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF9F2B542A4F5DFD00D7261A /* FileReader.cpp */; };
 		BFAD0A9129C6706100CF7EA6 /* TDecoderInstance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF32256C2445ECD800C74D4D /* TDecoderInstance.cpp */; };
 		BFAD0A9229C6706100CF7EA6 /* TEncoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF3225772445F8DD00C74D4D /* TEncoder.cpp */; };
 		BFAD0A9329C6706100CF7EA6 /* TEncoderInstance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF3225692445EC9F00C74D4D /* TEncoderInstance.cpp */; };
@@ -745,6 +754,9 @@
 		BF8AB6BE21F228D0008E7E76 /* SoyTime.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SoyTime.h; path = Source/SoyLib/src/SoyTime.h; sourceTree = "<group>"; };
 		BF8AB6C721F23712008E7E76 /* PopH264.cs */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = PopH264.cs; path = Unity/PopH264/Assets/PopH264/PopH264.cs; sourceTree = "<group>"; };
 		BF985EB52876E95700F04399 /* libPopH264_Ios.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPopH264_Ios.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		BF9F2B532A4F5DFD00D7261A /* FileReader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = FileReader.hpp; path = Source/FileReader.hpp; sourceTree = "<group>"; };
+		BF9F2B542A4F5DFD00D7261A /* FileReader.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = FileReader.cpp; path = Source/FileReader.cpp; sourceTree = "<group>"; };
+		BF9F2B5E2A4F5E1400D7261A /* std_span.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = std_span.hpp; path = Source/std_span.hpp; sourceTree = "<group>"; };
 		BF9F2B612A4F607E00D7261A /* Cat.jpg.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Cat.jpg.cpp; sourceTree = "<group>"; };
 		BF9F2B622A4F607E00D7261A /* Cat.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = Cat.jpg; sourceTree = "<group>"; };
 		BFAD0AB529C6706100CF7EA6 /* libPopH264_Tvos.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPopH264_Tvos.a; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1239,14 +1251,15 @@
 				BF8AB63A21F20CD9008E7E76 /* Broadway */,
 				BF8AB63B21F20D4C008E7E76 /* Broadway */,
 				BFF1C6E822E3C65800AFDFD5 /* BroadwayAll.c */,
-				BFE87C1D25E7E85E00224AB0 /* PopH264_WasmBroadwayDecoder.c */,
 				BF8AB69F21F21F07008E7E76 /* BroadwayDecoder.cpp */,
 				BF8AB6A021F21F07008E7E76 /* BroadwayDecoder.h */,
+				BF9F2B542A4F5DFD00D7261A /* FileReader.cpp */,
+				BF9F2B532A4F5DFD00D7261A /* FileReader.hpp */,
 				BF18268E24226111006FEB93 /* Json11 */,
+				BF1D95C22850C257008E3758 /* libx264.a */,
 				BF096B1524B91F4E00D985E5 /* Linux */,
 				BF53E83022EDCC7E008253CD /* MagicLeapDecoder.cpp */,
 				BF53E83122EDCC7F008253CD /* MagicLeapDecoder.h */,
-				BF1D95C22850C257008E3758 /* libx264.a */,
 				BF51B89B256837D8004DE4C7 /* MediaFoundationDecoder.cpp */,
 				BF4D031E25CC6B6B003FF218 /* MediaFoundationDecoder.h */,
 				BF4D031D25CC6B6B003FF218 /* MediaFoundationEncoder.cpp */,
@@ -1256,12 +1269,14 @@
 				BF096B1424B918A400D985E5 /* nvidia */,
 				BF096B1124B9158A00D985E5 /* NvidiaEncoder.cpp */,
 				BF096B1224B9158A00D985E5 /* NvidiaEncoder.h */,
+				BFE87C1D25E7E85E00224AB0 /* PopH264_WasmBroadwayDecoder.c */,
 				BF8AB63821F20C41008E7E76 /* PopH264.cpp */,
 				BF8AB63721F20C41008E7E76 /* PopH264.h */,
 				BF459CDE21F7D60500CED59D /* PopH264Framework.h */,
 				BFFBE95324582ED000E9BE1B /* PopH264TestData.cpp */,
 				BFFBE95424582ED000E9BE1B /* PopH264TestData.h */,
 				BF8AB6A221F225C5008E7E76 /* SoyLib */,
+				BF9F2B5E2A4F5E1400D7261A /* std_span.hpp */,
 				BF53E82D22EDC989008253CD /* TDecoder.cpp */,
 				BF53E82C22EDC6A6008253CD /* TDecoder.h */,
 				BF32256C2445ECD800C74D4D /* TDecoderInstance.cpp */,
@@ -1737,6 +1752,7 @@
 				BF51B8AF256A7203004DE4C7 /* SoyPlatform.mm in Sources */,
 				BFFBE97F245DB65000E9BE1B /* AvfDecoder.mm in Sources */,
 				BFBC07F12386C0BC0070BCB4 /* SoyThread.cpp in Sources */,
+				BF9F2B582A4F5E0100D7261A /* FileReader.cpp in Sources */,
 				BF3225792445F8DD00C74D4D /* TEncoder.cpp in Sources */,
 				BF151FE72384788600A70EBF /* SoyAssert.cpp in Sources */,
 				BFC471A2244781CC00A2DA70 /* SoyString.mm in Sources */,
@@ -1776,6 +1792,7 @@
 				BF1D95FE2850CC61008E3758 /* SoyPlatform.mm in Sources */,
 				BF1D95E72850CC03008E3758 /* BroadwayAll.c in Sources */,
 				BF1D96022850CC6C008E3758 /* SoyString.cpp in Sources */,
+				BF9F2B572A4F5E0100D7261A /* FileReader.cpp in Sources */,
 				BF1D95EB2850CC21008E3758 /* PopH264TestData.cpp in Sources */,
 				BF1D96052850CC74008E3758 /* SoyTime.cpp in Sources */,
 				BF1D95EE2850CC2A008E3758 /* TEncoder.cpp in Sources */,
@@ -1815,6 +1832,7 @@
 				BF1FA6C328759C7E002F03C5 /* SoyPlatform.mm in Sources */,
 				BF1FA6C428759C7E002F03C5 /* BroadwayAll.c in Sources */,
 				BF1FA6C528759C7E002F03C5 /* SoyString.cpp in Sources */,
+				BF9F2B5C2A4F5E0400D7261A /* FileReader.cpp in Sources */,
 				BF1FA6C628759C7E002F03C5 /* PopH264TestData.cpp in Sources */,
 				BF1FA6C728759C7E002F03C5 /* SoyTime.cpp in Sources */,
 				BF1FA6C828759C7E002F03C5 /* TEncoder.cpp in Sources */,
@@ -1854,6 +1872,7 @@
 				BFE7AADC25D94565006F48F1 /* SoyFilesystem.mm in Sources */,
 				BFE7AADD25D9456A006F48F1 /* SoyPixels.cpp in Sources */,
 				BFE7AADE25D9456A006F48F1 /* SoyPng.cpp in Sources */,
+				BF9F2B5A2A4F5E0300D7261A /* FileReader.cpp in Sources */,
 				BF23A42025D9417A0060DE06 /* PopH264_TestApp.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1866,6 +1885,7 @@
 				BFFBE97E245DB65000E9BE1B /* AvfDecoder.mm in Sources */,
 				BF459CF421F7DB1B00CED59D /* PopH264.cpp in Sources */,
 				BF3225782445F8DD00C74D4D /* TEncoder.cpp in Sources */,
+				BF9F2B552A4F5E0000D7261A /* FileReader.cpp in Sources */,
 				BF459CF721F7DB3C00CED59D /* SoyTypes.cpp in Sources */,
 				BFC471A1244781CC00A2DA70 /* SoyString.mm in Sources */,
 				BFF1C6EA22E3C65800AFDFD5 /* BroadwayAll.c in Sources */,
@@ -1905,6 +1925,7 @@
 				BF985EE02876E9E100F04399 /* TEncoder.cpp in Sources */,
 				BF985EDF2876E9E100F04399 /* TEncoderInstance.cpp in Sources */,
 				BF985EC52876E9B200F04399 /* AvfPixelBuffer.mm in Sources */,
+				BF9F2B5B2A4F5E0300D7261A /* FileReader.cpp in Sources */,
 				BF985EC02876E99700F04399 /* BroadwayAll.c in Sources */,
 				BF985EC82876E9CB00F04399 /* SoyRuntimeLibrary.cpp in Sources */,
 				BF985ED52876E9D900F04399 /* SoyTime.mm in Sources */,
@@ -1944,6 +1965,7 @@
 				BFAD0A9229C6706100CF7EA6 /* TEncoder.cpp in Sources */,
 				BFAD0A9329C6706100CF7EA6 /* TEncoderInstance.cpp in Sources */,
 				BFAD0A9429C6706100CF7EA6 /* AvfPixelBuffer.mm in Sources */,
+				BF9F2B5D2A4F5E0400D7261A /* FileReader.cpp in Sources */,
 				BFAD0A9529C6706100CF7EA6 /* BroadwayAll.c in Sources */,
 				BFAD0A9629C6706100CF7EA6 /* SoyRuntimeLibrary.cpp in Sources */,
 				BFAD0A9729C6706100CF7EA6 /* SoyTime.mm in Sources */,
@@ -1983,6 +2005,7 @@
 				BF1D95B42850C105008E3758 /* SoyRuntimeLibrary.cpp in Sources */,
 				BFAE46032850BC0300C0646D /* AvfEncoder.mm in Sources */,
 				BF1D95B52850C105008E3758 /* SoyString.cpp in Sources */,
+				BF9F2B562A4F5E0000D7261A /* FileReader.cpp in Sources */,
 				BF1D95C12850C1EB008E3758 /* SoyTypes.mm in Sources */,
 				BF1D95BD2850C105008E3758 /* SoyTime.cpp in Sources */,
 				BF1D95BA2850C105008E3758 /* SoyString.mm in Sources */,
@@ -2020,6 +2043,7 @@
 			files = (
 				BFFBE961245835CD00E9BE1B /* SoyFilesystem.cpp in Sources */,
 				BFFBE9712458389B00E9BE1B /* SoyPng.cpp in Sources */,
+				BF9F2B592A4F5E0200D7261A /* FileReader.cpp in Sources */,
 				BFFBE9722458389B00E9BE1B /* SoyPixels.cpp in Sources */,
 				BFFBE97924587F7600E9BE1B /* json11.cpp in Sources */,
 				BFFBE974245838B000E9BE1B /* SoyFilesystem.mm in Sources */,
