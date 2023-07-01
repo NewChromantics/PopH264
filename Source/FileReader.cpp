@@ -1,6 +1,7 @@
 #include "FileReader.hpp"
 #include <sstream>
 
+using namespace PopH264;
 
 void FileReader_t::CheckRemaning(size_t Bytes)
 {
@@ -84,7 +85,19 @@ void FileReader_t::ReadFourcc(uint32_t ExpectedFourcc)
 		Error << "read incorrect fourcc";
 		throw std::runtime_error( Error.str() );
 	}
-};
+}
+
+void FileReader_t::ReadFourccReverse(uint32_t ExpectedFourcc)
+{
+	auto Fourcc = Read32Reverse();
+	if ( Fourcc != ExpectedFourcc )
+	{
+		std::stringstream Error;
+		//Error << "Wav chunk fourcc expected [" << GetFourccString(ExpectedFourcc) << "] found [" << GetFourccString(Fourcc) << "]";
+		Error << "read incorrect fourcc";
+		throw std::runtime_error( Error.str() );
+	}
+}
 
 float FileReader_t::Read16AsFloat()
 {

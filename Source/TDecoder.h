@@ -13,6 +13,18 @@ namespace json11
 	class Json;
 }
 
+namespace ContentType
+{
+	//	fourcc content type enums
+	enum Type : uint32_t
+	{
+		Unknown		= 0,
+		Jpeg		= 'jpeg',
+		EndOfFile	= 'eof!'
+	};
+}
+		
+
 namespace PopH264
 {
 	class TDecoder;
@@ -31,8 +43,9 @@ namespace PopH264
 class PopH264::TInputNaluPacket
 {
 public:
-	Array<uint8_t>	mData;
-	uint32_t		mFrameNumber = 0;	//	warning, as we've split data into multiple nalu-packets per-frame, this is NOT unique
+	ContentType::Type	mContentType = ContentType::Unknown;
+	Array<uint8_t>		mData;
+	uint32_t			mFrameNumber = 0;	//	warning, as we've split data into multiple nalu-packets per-frame, this is NOT unique
 };
 
 
@@ -69,7 +82,7 @@ public:
 	__deprecated_prefix TDecoder(OnDecodedFrame_t OnDecodedFrame,OnFrameError_t OnFrameError) __deprecated;
 	TDecoder(const TDecoderParams& Params,OnDecodedFrame_t OnDecodedFrame,OnFrameError_t OnFrameError);
 	
-	void			Decode(ArrayBridge<uint8_t>&& PacketData,FrameNumber_t FrameNumber);
+	void			Decode(ArrayBridge<uint8_t>&& PacketData,FrameNumber_t FrameNumber,ContentType::Type ContentType=ContentType::Unknown);
 
 	//	gr: this has a callback because of flushing old packets. Need to overhaul the framenumber<->packet relationship
 	void			PushEndOfStream();
@@ -86,6 +99,7 @@ protected:
 	
 	bool			HasPendingData()		{	return !mPendingDatas.IsEmpty();	}
 	void			PeekHeaderNalus(ArrayBridge<uint8_t>&& SpsBuffer,ArrayBridge<uint8_t>&& PpsBuffer);
+	std::shared_ptr<TInputNaluPacket>	PopNextPacket();
 	bool			PopNalu(ArrayBridge<uint8_t>&& Buffer,FrameNumber_t& FrameNumber);
 	void			UnpopNalu(ArrayBridge<uint8_t>&& Buffer,FrameNumber_t FrameNumber);
 

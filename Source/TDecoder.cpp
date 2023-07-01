@@ -6,9 +6,8 @@
 
 namespace Jpeg
 {
-	bool	IsJpegHeader(std::span<uint8_t> FileData);
+	static bool	IsJpegHeader(std::span<uint8_t> FileData);
 }
-
 
 
 
@@ -59,15 +58,8 @@ void PopH264::TDecoder::OnDecodedEndOfStream()
 
 void PopH264::TDecoder::PushEndOfStream()
 {
-	//	send an explicit end of stream nalu
-	//	todo: overload this for implementation specific flushes
-	auto Eos = H264::EncodeNaluByte(H264NaluContent::EndOfStream,H264NaluPriority::Important);
-	uint8_t EndOfStreamNalu[]{ 0,0,0,1,Eos };
-	auto DataArray = GetRemoteArray( EndOfStreamNalu );
-	
-	//	mark pending data as finished
-	mPendingDataFinished = true;
-	Decode( GetArrayBridge(DataArray), 0 );
+	FixedRemoteArray NoData( (uint8_t*)nullptr, 0 );
+	Decode( GetArrayBridge(NoData), 0, ContentType::EndOfFile );
 }
 
 void PopH264::TDecoder::CheckDecoderUpdates()
@@ -77,15 +69,23 @@ void PopH264::TDecoder::CheckDecoderUpdates()
 
 
 
-void PopH264::TDecoder::Decode(ArrayBridge<uint8_t>&& PacketData,FrameNumber_t FrameNumber)
+void PopH264::TDecoder::Decode(ArrayBridge<uint8_t>&& PacketData,FrameNumber_t FrameNumber,ContentType::Type ContentType)
 {
 	//	todo? if this is the first data, detect non-poph264/nalu input formats (eg. jpeg), that we dont want to split
+
+	if ( ContentType == ContentType::EndOfFile )
+	{
+		//	mark that we expect no more data after this
+		mPendingDataFinished = true;
+	}
+	
 	//	now split when popped, in case this data isn't actually H264 data
 	{
 		std::scoped_lock Lock(mPendingDataLock);
 		std::shared_ptr<TInputNaluPacket> pPacket( new TInputNaluPacket() );
 		pPacket->mData.Copy(PacketData);
 		pPacket->mFrameNumber = FrameNumber;
+		pPacket->mContentType = ContentType;
 		mPendingDatas.PushBack(pPacket);
 	}
 	
@@ -118,6 +118,7 @@ bool Jpeg::IsJpegHeader(std::span<uint8_t> FileData)
 	if ( FileData.size() < 10 )
 		return false;
 	
+	using namespace PopH264;
 	FileReader_t Reader( FileData );
 	
 	//	start of information
@@ -157,7 +158,7 @@ bool Jpeg::IsJpegHeader(std::span<uint8_t> FileData)
 	}
 }
 
-bool PopH264::TDecoder::PopNalu(ArrayBridge<uint8_t>&& Buffer,FrameNumber_t& FrameNumber)
+std::shared_ptr<PopH264::TInputNaluPacket> PopH264::TDecoder::PopNextPacket()
 {
 	//	gr:could returnthis now and avoid the copy & alloc at caller
 	std::shared_ptr<TInputNaluPacket> NextPacket;
@@ -167,10 +168,10 @@ bool PopH264::TDecoder::PopNalu(ArrayBridge<uint8_t>&& Buffer,FrameNumber_t& Fra
 		{
 			//	expecting more data to come
 			if ( !mPendingDataFinished )
-				return false;
+				return nullptr;
 		
 			//	no more data ever
-			return false;
+			return nullptr;
 		}
 		
 		NextPacket = mPendingDatas.PopAt(0);
@@ -178,6 +179,13 @@ bool PopH264::TDecoder::PopNalu(ArrayBridge<uint8_t>&& Buffer,FrameNumber_t& Fra
 		//	todo: detect non h264 packets here (if first)
 		if ( Jpeg::IsJpegHeader( std::span(NextPacket->mData.GetArray(),NextPacket->mData.GetSize()) ) )
 		{
+			//	detected jpeg, dont attempt split
+			std::Debug << "Detected Jpeg packet, skipping nalu split" << std::endl;
+			NextPacket->mContentType = ContentType::Jpeg;
+		}
+		else if ( NextPacket->mData.IsEmpty() )
+		{
+			//	do nothing with empty packets (just retaining content type)
 		}
 		else
 		{
@@ -188,7 +196,7 @@ bool PopH264::TDecoder::PopNalu(ArrayBridge<uint8_t>&& Buffer,FrameNumber_t& Fra
 			{
 				std::shared_ptr<TInputNaluPacket> pPacket( new TInputNaluPacket() );
 				pPacket->mData.Copy(Nalu);
-				pPacket->mFrameNumber = FrameNumber;
+				pPacket->mFrameNumber = NextPacket->mFrameNumber;
 				SplitPackets.push_back( pPacket );
 			};
 			H264::SplitNalu( GetArrayBridge(NextPacket->mData), OnSplitNalu );
@@ -199,11 +207,30 @@ bool PopH264::TDecoder::PopNalu(ArrayBridge<uint8_t>&& Buffer,FrameNumber_t& Fra
 				mPendingDatas.PushBack(SplitPackets[i]);
 		}
 	}
-	Buffer.Copy( NextPacket->mData );
-	FrameNumber = NextPacket->mFrameNumber;
-	return true;
+	
+	return NextPacket;
 }
 
+bool PopH264::TDecoder::PopNalu(ArrayBridge<uint8_t>&& Buffer,FrameNumber_t& FrameNumber)
+{
+	auto NextPacket = PopNextPacket();
+	if ( !NextPacket )
+		return false;
+
+	Buffer.Copy( NextPacket->mData );
+	FrameNumber = NextPacket->mFrameNumber;
+	
+	//	anything calling this funciton is legacy that's popping h264 packets
+	//	so if this is an EOF packet, re-insert h264 eos marker
+	if ( NextPacket->mContentType == ContentType::EndOfFile )
+	{
+		auto Eos = H264::EncodeNaluByte(H264NaluContent::EndOfStream,H264NaluPriority::Important);
+		uint8_t EndOfStreamNalu[]{ 0,0,0,1,Eos };
+		Buffer.Copy( GetRemoteArray( EndOfStreamNalu ) );
+	}
+	
+	return true;
+}
 
 void PopH264::TDecoder::PeekHeaderNalus(ArrayBridge<uint8_t>&& SpsBuffer,ArrayBridge<uint8_t>&& PpsBuffer)
 {

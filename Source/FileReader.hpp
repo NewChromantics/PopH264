@@ -5,8 +5,15 @@
 
 
 
+//	to avoid symbol clash when static lib is linked, (as symbol visibility doesn't work very well cross platform)
+//	hide the clashin symbols in a namespace
+namespace PopH264
+{
+	class FileReader_t;
+}
+
 //	gr: I have a more mature class in SoyLib somewhere for this that is async-compatible
-class FileReader_t
+class PopH264::FileReader_t
 {
 public:
 	FileReader_t(std::span<uint8_t> Data) :
@@ -27,6 +34,7 @@ public:
 	float				Read16AsFloat();
 	float				Read32AsFloat();
 	void				ReadFourcc(uint32_t ExpectedFourcc);
+	void				ReadFourccReverse(uint32_t ExpectedFourcc);
 	std::span<uint8_t>	ReadBytes(size_t Size);
 	template<typename TYPE>
 	TYPE				ReadObject()

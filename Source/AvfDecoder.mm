@@ -1,3 +1,4 @@
+#include "std_span.hpp"
 #include "AvfDecoder.h"
 #include "SoyPixels.h"
 #include "SoyAvf.h"
@@ -22,28 +23,128 @@
 #include "AvfPixelBuffer.h"
 
 #include "PopH264.h"	//	param keys
+#include "FileReader.hpp"
+
+namespace Jpeg
+{
+	class Meta_t;
+	static Meta_t		DecodeMeta(std::span<uint8_t> FileData);
+}
+
+class Jpeg::Meta_t
+{
+public:
+	uint32_t	mWidth = 0;
+	uint32_t	mHeight = 0;
+};
+
+Jpeg::Meta_t Jpeg::DecodeMeta(std::span<uint8_t> FileData)
+{
+	using namespace PopH264;
+	FileReader_t Reader(FileData);
+	
+	//	check jpeg header
+	{
+		auto a = Reader.Read8();
+		auto b = Reader.Read8();
+		if ( a != 0xff || b != 0xd8 )
+			throw std::runtime_error("Not a jpeg");
+	}
+	
+	//	walk through blocks
+	while ( Reader.RemainingBytes() > 0 )
+	{
+		auto BlockId = Reader.Read16Reverse();
+		if ( (BlockId & 0xff00) != 0xff00 )
+			throw std::runtime_error("Invalid block start");
+		
+		auto BlockLength = Reader.Read16Reverse();
+		BlockLength -= 2;
+	
+		//	check JFIF header
+		if ( BlockId == 0xffe0 )
+		{
+			Reader.ReadFourccReverse('JFIF');
+			auto JfifTerm = Reader.Read8();
+			if ( JfifTerm != 0 )
+				throw std::runtime_error("Missing terminator after JFIF");
+			//	read the rest of this block
+			auto BlockData = Reader.ReadBytes( BlockLength - 5 );
+		}
+		else if ( BlockId == 0xffc0 )
+		{
+			auto Precision = Reader.Read8();
+			Jpeg::Meta_t Meta;
+			Meta.mHeight = Reader.Read16Reverse();
+			Meta.mWidth = Reader.Read16Reverse();
+			return Meta;
+		}
+		else
+		{
+			//	skip block
+			auto BlockData = Reader.ReadBytes(BlockLength);
+		}
+	}
+
+	throw std::runtime_error("Failed to extract meta from jpeg");
+}
 
 
 
 class Avf::TDecompressor
 {
 public:
-	TDecompressor(const PopH264::TDecoderParams& Params,const ArrayBridge<uint8_t>& Sps,const ArrayBridge<uint8_t>& Pps,std::function<void(std::shared_ptr<TPixelBuffer>,PopH264::FrameNumber_t)> OnFrame,std::function<void(const std::string&,PopH264::FrameNumber_t)> OnError);
+	TDecompressor(const PopH264::TDecoderParams& Params,std::function<void(std::shared_ptr<TPixelBuffer>,PopH264::FrameNumber_t)> OnFrame,std::function<void(const std::string&,PopH264::FrameNumber_t)> OnError);
 	~TDecompressor();
 	
-	void								Decode(ArrayBridge<uint8_t>&& Nalu,size_t FrameNumber);
-	void								Flush();
-	H264::NaluPrefix::Type				GetFormatNaluPrefixType()	{	return H264::NaluPrefix::ThirtyTwo;	}
-	
-	void								OnDecodedFrame(OSStatus Status,CVImageBufferRef ImageBuffer,VTDecodeInfoFlags Flags,CMTime PresentationTimeStamp );
-	void								OnDecodeError(const char* Error,CMTime PresentationTime);
+	virtual void		Decode(PopH264::TInputNaluPacket& Packet)=0;
+	void				Flush();
 
+	//	public for delegate access
+	void				OnDecodedFrame(OSStatus Status,CVImageBufferRef ImageBuffer,VTDecodeInfoFlags Flags,CMTime PresentationTimeStamp );
+	void				OnDecodeError(const char* Error,CMTime PresentationTime);
+
+protected:
+	void				CreateDecoderSession(CFPtr<CMFormatDescriptionRef> InputFormat);
+	bool				HasSession();
+	virtual void		DecodeSample(CFPtr<CMSampleBufferRef> FrameData,size_t FrameNumber);
+	
+	
 	std::shared_ptr<AvfDecoderRenderer>	mDecoderRenderer;
 	CFPtr<VTDecompressionSessionRef>	mSession;
 	CFPtr<CMFormatDescriptionRef>		mInputFormat;
 	std::function<void(std::shared_ptr<TPixelBuffer>,PopH264::FrameNumber_t)>		mOnFrame;
 	std::function<void(const std::string&,PopH264::FrameNumber_t)>	mOnError;
 	PopH264::TDecoderParams				mParams;
+};
+
+
+class Avf::TDecompressorH264 : public Avf::TDecompressor
+{
+public:
+	TDecompressorH264(const PopH264::TDecoderParams& Params,std::function<void(std::shared_ptr<TPixelBuffer>,PopH264::FrameNumber_t)> OnFrame,std::function<void(const std::string&,PopH264::FrameNumber_t)> OnError);
+	
+	virtual void			Decode(PopH264::TInputNaluPacket& Packet) override;
+
+private:
+	void					CreateSession();
+	
+	H264::NaluPrefix::Type	GetFormatNaluPrefixType()	{	return H264::NaluPrefix::ThirtyTwo;	}
+	
+	//	pending packets we need before we can create the session
+	Array<uint8_t>			mNaluSps;
+	Array<uint8_t>			mNaluPps;
+	Array<uint8_t>			mNaluSei;
+};
+
+
+class Avf::TDecompressorJpeg : public Avf::TDecompressor
+{
+public:
+	TDecompressorJpeg(const PopH264::TDecoderParams& Params,std::function<void(std::shared_ptr<TPixelBuffer>,PopH264::FrameNumber_t)> OnFrame,std::function<void(const std::string&,PopH264::FrameNumber_t)> OnError);
+	
+	void					CreateDecoder(ArrayBridge<uint8_t>& JpegData);
+	virtual void			Decode(PopH264::TInputNaluPacket& Packet) override;
 };
 
 
@@ -76,13 +177,66 @@ SoyPixelsMeta GetFormatDescriptionPixelMeta(CMFormatDescriptionRef Format)
 }
 
 
-Avf::TDecompressor::TDecompressor(const PopH264::TDecoderParams& Params,const ArrayBridge<uint8_t>& Sps,const ArrayBridge<uint8_t>& Pps,std::function<void(std::shared_ptr<TPixelBuffer>,PopH264::FrameNumber_t)> OnFrame,std::function<void(const std::string&,PopH264::FrameNumber_t)> OnError) :
+Avf::TDecompressor::TDecompressor(const PopH264::TDecoderParams& Params,std::function<void(std::shared_ptr<TPixelBuffer>,PopH264::FrameNumber_t)> OnFrame,std::function<void(const std::string&,PopH264::FrameNumber_t)> OnError) :
 	mDecoderRenderer	( new AvfDecoderRenderer() ),
 	mOnFrame			( OnFrame ),
 	mOnError			( OnError ),
 	mParams				( Params )
 {
-	mInputFormat = Avf::GetFormatDescriptionH264( Sps, Pps, GetFormatNaluPrefixType() );
+}
+
+Avf::TDecompressorH264::TDecompressorH264(const PopH264::TDecoderParams& Params,std::function<void(std::shared_ptr<TPixelBuffer>,PopH264::FrameNumber_t)> OnFrame,std::function<void(const std::string&,PopH264::FrameNumber_t)> OnError) :
+	TDecompressor	( Params, OnFrame, OnError )
+{
+	//	doesn't create a session until we've accumulate sps & pps
+}
+
+
+void Avf::TDecompressorH264::CreateSession()
+{
+	if ( mNaluSps.IsEmpty() )
+		return;
+	if ( mNaluPps.IsEmpty() )
+		return;
+	
+	auto InputFormat = Avf::GetFormatDescriptionH264( GetArrayBridge(mNaluSps), GetArrayBridge(mNaluPps), GetFormatNaluPrefixType() );
+	CreateDecoderSession(InputFormat);
+}
+
+Avf::TDecompressorJpeg::TDecompressorJpeg(const PopH264::TDecoderParams& Params,std::function<void(std::shared_ptr<TPixelBuffer>,PopH264::FrameNumber_t)> OnFrame,std::function<void(const std::string&,PopH264::FrameNumber_t)> OnError) :
+	TDecompressor	( Params, OnFrame, OnError )
+{
+	//	gr: we need the correct dimensions for the format or the decoder wont work
+	//		so we unfortunetly need the first data before we can proceed
+}
+
+
+void Avf::TDecompressorJpeg::CreateDecoder(ArrayBridge<uint8_t>& JpegData)
+{
+	CFAllocatorRef Allocator = nil;
+	CMVideoCodecType Codec = kCMVideoCodecType_JPEG;
+	
+	//	width & height in the format NEEDS to be accurate or we'll get a decode error
+	auto JpegMeta = Jpeg::DecodeMeta( std::span( JpegData.GetArray(), JpegData.GetSize() ) );
+	CFDictionaryRef Extensions = nullptr;
+	//	refcounted on alloc, so we write to object
+	CFPtr<CMFormatDescriptionRef> FormatDesc;
+	auto Result = CMVideoFormatDescriptionCreate( Allocator, Codec, JpegMeta.mWidth, JpegMeta.mHeight, Extensions, &FormatDesc.mObject );
+	Avf::IsOkay( Result, "CMVideoFormatDescriptionCreate jpeg");
+	CreateDecoderSession( FormatDesc );
+}
+
+bool Avf::TDecompressor::HasSession()
+{
+	return mSession.mObject != nullptr;
+}
+
+void Avf::TDecompressor::CreateDecoderSession(CFPtr<CMFormatDescriptionRef> InputFormat)
+{
+	if ( HasSession() )
+		return;
+	
+	mInputFormat = InputFormat;
 		
 	CFAllocatorRef Allocator = nil;
 	
@@ -94,8 +248,10 @@ Avf::TDecompressor::TDecompressor(const PopH264::TDecoderParams& Params,const Ar
 	SInt32 Width = size_cast<SInt32>( FormatPixelMeta.GetWidth() );
 	SInt32 Height = size_cast<SInt32>( FormatPixelMeta.GetHeight() );
 	
-	CFDictionarySetValue(destinationPixelBufferAttributes,kCVPixelBufferWidthKey, CFNumberCreate(NULL, kCFNumberSInt32Type, &Width));
-	CFDictionarySetValue(destinationPixelBufferAttributes, kCVPixelBufferHeightKey, CFNumberCreate(NULL, kCFNumberSInt32Type, &Height));
+	//	gr: does H264 need this?
+	//		jpeg doesn't
+	//CFDictionarySetValue(destinationPixelBufferAttributes,kCVPixelBufferWidthKey, CFNumberCreate(NULL, kCFNumberSInt32Type, &Width));
+	//CFDictionarySetValue(destinationPixelBufferAttributes, kCVPixelBufferHeightKey, CFNumberCreate(NULL, kCFNumberSInt32Type, &Height));
 	
 	bool OpenglCompatible = false;
 	auto ForceNonPlanarOutput = false;
@@ -177,6 +333,7 @@ Avf::TDecompressor::~TDecompressor()
 		std::Debug << __PRETTY_FUNCTION__ << " mSession.Release exception: " << e.what() << std::endl;
 	}
 }
+
 
 void Avf::TDecompressor::OnDecodedFrame(OSStatus Status,CVImageBufferRef ImageBuffer,VTDecodeInfoFlags Flags,CMTime PresentationTimeStamp)
 {
@@ -263,6 +420,7 @@ CFPtr<CMSampleBufferRef> CreateSampleBuffer(ArrayBridge<uint8_t>& DataArray,SoyT
 											Flags );
 	Avf::IsOkay( Result, "CMBlockBufferAppendMemoryBlock" );
 		
+	
 	/*
 	//CMFormatDescriptionRef Format = GetFormatDescription( Packet.mMeta );
 	//CMFormatDescriptionRef Format = Packet.mFormat->mDesc;
@@ -298,7 +456,8 @@ CFPtr<CMSampleBufferRef> CreateSampleBuffer(ArrayBridge<uint8_t>& DataArray,SoyT
 								  SampleSizes.GetArray(),
 								  &SampleBuffer.mObject );
 	Avf::IsOkay( Result, "CMSampleBufferCreate" );
-		
+
+	
 	//	sample buffer now has a reference to the block, so we dont want it
 	//	gr: should now auto release
 	//CFRelease( BlockBuffer );
@@ -306,28 +465,104 @@ CFPtr<CMSampleBufferRef> CreateSampleBuffer(ArrayBridge<uint8_t>& DataArray,SoyT
 	return SampleBuffer;
 }
 
-void Avf::TDecompressor::Decode(ArrayBridge<uint8_t>&& Nalu, size_t FrameNumber)
+
+void Avf::TDecompressorJpeg::Decode(PopH264::TInputNaluPacket& Packet)
 {
-	//	if we get an endofstream packet, do a flush
+	//	ignore EOF packet
+	if ( Packet.mContentType == ContentType::EndOfFile )
+		return;
+	
+	auto JpegData = GetArrayBridge(Packet.mData);
+
+	//	setup session once we have jpeg data
+	CreateDecoder( JpegData );
+
+	////	gr: all jpeg samples need to have frame number 0
+	//uint64_t FrameNumber = 99;
+	uint64_t FrameNumber = Packet.mFrameNumber;
+	
+	SoyTime PresentationTime(FrameNumber);
+	SoyTime DecodeTime(FrameNumber);
+	SoyTime Duration(16ull);
+	auto SampleBuffer = CreateSampleBuffer( JpegData, PresentationTime, DecodeTime, Duration, mInputFormat.mObject );
+	
+	DecodeSample( SampleBuffer, FrameNumber );
+}
+
+
+void Avf::TDecompressorH264::Decode(PopH264::TInputNaluPacket& Packet)
+{
+	bool EndOfStream = false;
+	if ( Packet.mContentType == ContentType::EndOfFile )
+		EndOfStream = true;
+
+	H264NaluContent::Type H264PacketType = H264NaluContent::Invalid;
+	auto Nalu = GetArrayBridge(Packet.mData);
+	if ( Packet.mData.GetSize() > 0 )
 	{
-		auto H264PacketType = H264::GetPacketType(GetArrayBridge(Nalu));
-		if ( H264PacketType == H264NaluContent::EndOfStream )
+		H264PacketType = H264::GetPacketType( GetArrayBridge(Nalu) );
+	}
+	if ( H264PacketType == H264NaluContent::EndOfStream )
+		EndOfStream = true;
+	
+	if ( EndOfStream )
+	{
+		//	synchronous flush
+		Flush();
+		return;
+	}
+
+	if ( mParams.mVerboseDebug )
+		std::Debug << "Popped Nalu " << H264PacketType << " x" << Nalu.GetDataSize() << "bytes" << std::endl;
+
+	//	do not push SPS, PPS or SEI packets to decoder
+	//	SEI gives -12349 error
+	if ( H264PacketType == H264NaluContent::SequenceParameterSet )
+	{
+		mNaluSps = Nalu;
+		return;
+	}
+	else if ( H264PacketType == H264NaluContent::PictureParameterSet )
+	{
+		mNaluPps = Nalu;
+		return;
+	}
+	else if ( H264PacketType == H264NaluContent::SupplimentalEnhancementInformation )
+	{
+		if ( !mParams.mDecodeSei )
 		{
-			//	synchronous flush
-			Flush();
+			mNaluSei = Nalu;
 			return;
 		}
 	}
+
+	//	try and create the session in case we've got the SPS & PPS we need
+	CreateSession();
 	
+	//	no decompression session yet, drop packet
+	//	could be packet before SPS/PPS and we ignore it
+	if ( !HasSession() )
+	{
+		if ( mParams.mVerboseDebug )
+			std::Debug << "Dropping H264 frame (" << magic_enum::enum_name(H264PacketType) << ") as decompressor isn't ready (waiting for sps/pps)" << std::endl;
+		return;
+	}
+
 	auto NaluSize = GetFormatNaluPrefixType();
 	H264::ConvertNaluPrefix( Nalu, NaluSize );
 	
-	SoyTime PresentationTime( static_cast<uint64_t>(FrameNumber) );
-	SoyTime DecodeTime( static_cast<uint64_t>(FrameNumber) );
+	uint64_t FrameNumber = Packet.mFrameNumber;
+	SoyTime PresentationTime(FrameNumber);
+	SoyTime DecodeTime(FrameNumber);
 	SoyTime Duration(16ull);
 	auto SampleBuffer = CreateSampleBuffer( Nalu, PresentationTime, DecodeTime, Duration, mInputFormat.mObject );
 	
-	
+	DecodeSample(SampleBuffer, FrameNumber);
+}
+
+
+void Avf::TDecompressor::DecodeSample(CFPtr<CMSampleBufferRef> SampleBuffer,size_t FrameNumber)
+{
 	VTDecodeFrameFlags Flags = 0;
 	VTDecodeInfoFlags FlagsOut = 0;
 	
@@ -484,86 +719,44 @@ void Avf::TDecoder::OnDecodedFrame(TPixelBuffer& PixelBuffer,PopH264::FrameNumbe
 }
 
 
-void Avf::TDecoder::AllocDecoder()
-{
-	auto OnPacket = [this](std::shared_ptr<TPixelBuffer> pPixelBuffer,PopH264::FrameNumber_t FrameNumber)
-	{
-		//std::Debug << "Decompressed pixel buffer " << PresentationTime << std::endl;
-		json11::Json::object Meta;
-		this->OnDecodedFrame( *pPixelBuffer, FrameNumber, Meta );
-	};
-	
-	auto OnError = [this](const std::string& Error,PopH264::FrameNumber_t FrameNumber)
-	{
-		this->OnFrameError(Error,FrameNumber);
-	};
-
-	if ( mDecompressor )
-		return;
-	
-	if ( mNaluSps.IsEmpty() || mNaluPps.IsEmpty() )
-	{
-		std::Debug << __PRETTY_FUNCTION__ << " waiting for " << (mNaluSps.IsEmpty()?"SPS":"") << " " << (mNaluPps.IsEmpty()?"PPS":"") << std::endl;
-		return;
-	}
-	
-	//	gr: does decompressor need to wait for SPS&PPS?
-	mDecompressor.reset( new TDecompressor( mParams, GetArrayBridge(mNaluSps), GetArrayBridge(mNaluPps), OnPacket, OnError ) );
-}
-
 bool Avf::TDecoder::DecodeNextPacket()
 {
-	Array<uint8_t> Nalu;
-	PopH264::FrameNumber_t FrameNumber=0;
-	if ( !PopNalu( GetArrayBridge(Nalu), FrameNumber ) )
+	auto pNextPacket = PopNextPacket();
+	if ( !pNextPacket )
 		return false;
-
-	//	store latest sps & pps, need to cache these so we can create decoder
-	auto H264PacketType = H264::GetPacketType(GetArrayBridge(Nalu));
-	if ( mParams.mVerboseDebug )
-		std::Debug << "Popped Nalu " << H264PacketType << " x" << Nalu.GetDataSize() << "bytes" << std::endl;
-
-	//	do not push SPS, PPS or SEI packets to decoder
-	//	SEI gives -12349 error
-	if ( H264PacketType == H264NaluContent::SequenceParameterSet )
-	{
-		mNaluSps = Nalu;
-		return true;
-	}
-	else if ( H264PacketType == H264NaluContent::PictureParameterSet )
-	{
-		mNaluPps = Nalu;
-		return true;
-	}
-	else if ( H264PacketType == H264NaluContent::SupplimentalEnhancementInformation )
-	{
-		if ( !mParams.mDecodeSei )
-		{
-			mNaluSei = Nalu;
-			return true;
-		}
-	}
-
-	//	make sure we have a decoder
-	AllocDecoder();
+	auto& NextPacket = *pNextPacket;
 	
-	//	no decompressor yet, drop packet
+	//	need to create a decompressor
 	if ( !mDecompressor )
 	{
-		if ( mParams.mVerboseDebug )
-			std::Debug << "Dropping H264 frame (" << magic_enum::enum_name(H264PacketType) << ") as decompressor isn't ready (waiting for sps/pps)" << std::endl;
-		return true;
+		auto OnPacket = [this](std::shared_ptr<TPixelBuffer> pPixelBuffer,PopH264::FrameNumber_t FrameNumber)
+		{
+			//std::Debug << "Decompressed pixel buffer " << PresentationTime << std::endl;
+			json11::Json::object Meta;
+			this->OnDecodedFrame( *pPixelBuffer, FrameNumber, Meta );
+		};
+		
+		auto OnError = [this](const std::string& Error,PopH264::FrameNumber_t FrameNumber)
+		{
+			this->OnFrameError(Error,FrameNumber);
+		};
+		
+		if ( NextPacket.mContentType == ContentType::Jpeg )
+		{
+			mDecompressor.reset( new TDecompressorJpeg( mParams, OnPacket, OnError ) );
+		}
+		else
+		{
+			mDecompressor.reset( new TDecompressorH264( mParams, OnPacket, OnError ) );
+		}
 	}
 	
-	mDecompressor->Decode( GetArrayBridge(Nalu), FrameNumber );
+	mDecompressor->Decode( NextPacket );
 	
-	//	if this was an end of stream packet, the decompressor should have flushed, so now
-	//	queue up an EndOfStream packet
-	//	todo: see if avf is marking a last packet as EOS
-	if ( H264PacketType == H264NaluContent::EndOfStream )
+	if ( NextPacket.mContentType == ContentType::EndOfFile )
 	{
 		OnDecodedEndOfStream();
 	}
-	
+
 	return true;
 }

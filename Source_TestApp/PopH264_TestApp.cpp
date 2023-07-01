@@ -385,6 +385,8 @@ void SafeDecoderTest(const char* TestDataName,CompareFunc_t* Compare,const char*
 
 int main()
 {
+	SafeDecoderTest("Cat.jpg", nullptr, nullptr );
+	
 	//if ( false )
 	{
 		EncoderGreyscaleTest();
@@ -425,6 +427,7 @@ int main()
 	PopH264_UnitTest(nullptr);
 	
 	//	depth data has iframe, pps, sps order
+	SafeDecoderTest("Cat.jpg", nullptr, nullptr );
 	SafeDecoderTest("TestData/Main5.h264", nullptr, nullptr );
 	SafeDecoderTest("TestData/Colour.h264", nullptr, nullptr );
 	SafeDecoderTest("TestData/Depth.h264", nullptr, nullptr );

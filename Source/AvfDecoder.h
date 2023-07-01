@@ -14,7 +14,9 @@ namespace Avf
 	class TDecoder;
 	
 	//	platform type (obj-c)
-	class TDecompressor;
+	class TDecompressor;	//	base class
+	class TDecompressorH264;
+	class TDecompressorJpeg;
 
 	//	same as X264
 	class TFrameMeta;
@@ -33,16 +35,14 @@ public:
 	
 private:
 	virtual bool	DecodeNextPacket() override;	//	returns true if more data to proccess
-	void			AllocDecoder();
+	void			AllocDecoderH264();
+	void			AllocDecoderJpeg();
 
 	using			PopH264::TDecoder::OnDecodedFrame;	//	reveal inherited versions of OnDecodedFrame when resolving
 	void			OnDecodedFrame(TPixelBuffer& PixelBuffer,PopH264::FrameNumber_t FrameNumber,const json11::Json& Meta);
 
 private:
 	std::shared_ptr<TDecompressor>	mDecompressor;
-	Array<uint8_t>					mNaluSps;
-	Array<uint8_t>					mNaluPps;
-	Array<uint8_t>					mNaluSei;
 };
 
 
