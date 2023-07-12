@@ -591,7 +591,8 @@ void Avf::TDecompressor::DecodeSample(CFPtr<CMSampleBufferRef> SampleBuffer,size
 	bool RecreateStream = false;
 	{
 		//std::Debug << "decompressing " << Packet.mTimecode << "..." << std::endl;
-		Soy::TScopeTimer Timer("VTDecompressionSessionDecodeFrame", 1, OnFinished, true );
+		//Soy::TScopeTimer Timer("VTDecompressionSessionDecodeFrame", 0, OnFinished, true );
+		Soy::TScopeTimerPrint Timer("VTDecompressionSessionDecodeFrame", 0 );
 		auto Result = VTDecompressionSessionDecodeFrame( mSession.mObject, SampleBuffer.mObject, Flags, nullptr, &FlagsOut );
 		Timer.Stop();
 		//std::Debug << "Decompress " << Packet.mTimecode << " took " << DecodeDuration << "; error=" << (int)Result << std::endl;
@@ -702,10 +703,24 @@ void Avf::TDecoder::OnDecodedFrame(TPixelBuffer& PixelBuffer,PopH264::FrameNumbe
 		{
 			//	merge planes
 			SoyPixels Merged( *Planes[0] );
+
+			//	gr: we have a problem here where we can have an image like
+			//	height = 1001
+			//	luma height = 1001
+			//	but chroma plane (half height) comes out as 501
+			auto LumaHeight = Planes[0]->GetHeight();
+			auto DoubleChromaHeight = Planes[1]->GetHeight() * 2;
+			if ( LumaHeight < DoubleChromaHeight )
+				Merged.ResizeClip( Merged.GetWidth(), DoubleChromaHeight );
+
 			if ( Planes.GetSize() == 2 )
+			{
 				Merged.AppendPlane(*Planes[1]);
+			}
 			else
+			{
 				Merged.AppendPlane(*Planes[1],*Planes[2]);
+			}
 			OnDecodedFrame( Merged, FrameNumber, Meta );
 		}
 		
