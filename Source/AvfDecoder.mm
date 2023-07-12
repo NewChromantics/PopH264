@@ -107,6 +107,7 @@ public:
 protected:
 	void				CreateDecoderSession(CFPtr<CMFormatDescriptionRef> InputFormat);
 	bool				HasSession();
+	void				FreeSession();
 	virtual void		DecodeSample(CFPtr<CMSampleBufferRef> FrameData,size_t FrameNumber);
 	
 	
@@ -201,6 +202,10 @@ void Avf::TDecompressorH264::CreateSession()
 	
 	auto InputFormat = Avf::GetFormatDescriptionH264( GetArrayBridge(mNaluSps), GetArrayBridge(mNaluPps), GetFormatNaluPrefixType() );
 	CreateDecoderSession(InputFormat);
+	
+	//	throw away the old sps/pps, so we can tell if we've got a new format!
+	mNaluSps.Clear();
+	mNaluPps.Clear();
 }
 
 Avf::TDecompressorJpeg::TDecompressorJpeg(const PopH264::TDecoderParams& Params,std::function<void(std::shared_ptr<TPixelBuffer>,PopH264::FrameNumber_t)> OnFrame,std::function<void(const std::string&,PopH264::FrameNumber_t)> OnError) :
@@ -233,8 +238,12 @@ bool Avf::TDecompressor::HasSession()
 
 void Avf::TDecompressor::CreateDecoderSession(CFPtr<CMFormatDescriptionRef> InputFormat)
 {
-	if ( HasSession() )
-		return;
+	//	gr: we now allow recreation of sessions, so calling this will clear the old one
+	//	todo? Only if input format changes
+	//if ( HasSession() )
+	//	return;
+	FreeSession();
+	
 	
 	mInputFormat = InputFormat;
 		
@@ -314,26 +323,31 @@ Avf::TDecompressor::~TDecompressor()
 {
 	try
 	{
+		FreeSession();
+	}
+	catch(std::exception& e)
+	{
+		std::Debug << __PRETTY_FUNCTION__ << " FreeSession exception: " << e.what() << std::endl;
+	}
+	
+}
+
+void Avf::TDecompressor::FreeSession()
+{
+	try
+	{
 		Flush();
 	}
 	catch(std::exception& e)
 	{
-		std::Debug << __PRETTY_FUNCTION__ << " flush exception: " << e.what() << std::endl;
+		std::Debug << __PRETTY_FUNCTION__ << " Flush exception: " << e.what() << std::endl;
 	}
 	
 	// End the session
 	VTDecompressionSessionInvalidate( mSession.mObject );
 	
-	try
-	{
-		mSession.Release();
-	}
-	catch(std::exception& e)
-	{
-		std::Debug << __PRETTY_FUNCTION__ << " mSession.Release exception: " << e.what() << std::endl;
-	}
+	mSession.Release();
 }
-
 
 void Avf::TDecompressor::OnDecodedFrame(OSStatus Status,CVImageBufferRef ImageBuffer,VTDecodeInfoFlags Flags,CMTime PresentationTimeStamp)
 {
@@ -515,23 +529,28 @@ void Avf::TDecompressorH264::Decode(PopH264::TInputNaluPacket& Packet)
 	if ( mParams.mVerboseDebug )
 		std::Debug << "Popped Nalu " << H264PacketType << " x" << Nalu.GetDataSize() << "bytes" << std::endl;
 
+	bool DecodePacket = false;
+	
 	//	do not push SPS, PPS or SEI packets to decoder
 	//	SEI gives -12349 error
 	if ( H264PacketType == H264NaluContent::SequenceParameterSet )
 	{
 		mNaluSps = Nalu;
-		return;
+		DecodePacket = false;
+		//return;
 	}
 	else if ( H264PacketType == H264NaluContent::PictureParameterSet )
 	{
 		mNaluPps = Nalu;
-		return;
+		DecodePacket = false;
+		//return;
 	}
 	else if ( H264PacketType == H264NaluContent::SupplimentalEnhancementInformation )
 	{
 		if ( !mParams.mDecodeSei )
 		{
 			mNaluSei = Nalu;
+			DecodePacket = false;
 			return;
 		}
 	}
@@ -548,6 +567,9 @@ void Avf::TDecompressorH264::Decode(PopH264::TInputNaluPacket& Packet)
 		return;
 	}
 
+	if ( !DecodePacket )
+		return;
+	
 	auto NaluSize = GetFormatNaluPrefixType();
 	H264::ConvertNaluPrefix( Nalu, NaluSize );
 	
