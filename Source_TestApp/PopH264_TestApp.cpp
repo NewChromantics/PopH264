@@ -62,13 +62,8 @@ int fopen_s(FILE **f, const char *name, const char *mode)
 
 #include "SoyFilesystem.h"
 
-bool LoadDataFromFilename(const char* DataFilename,ArrayBridge<uint8_t>&& Data)
+bool LoadFile(const std::string& Filename,ArrayBridge<uint8_t>& Data)
 {
-	std::stringstream FilePath;
-	FilePath << Platform::GetAppResourcesDirectory() << DataFilename;
-
-	auto Filename = FilePath.str();
-
 	FILE* File = nullptr;
 	auto Error = fopen_s(&File,Filename.c_str(), "rb");
 	if (!File)
@@ -83,6 +78,27 @@ bool LoadDataFromFilename(const char* DataFilename,ArrayBridge<uint8_t>&& Data)
 	}
 	fclose(File);
 	return true;
+}
+
+bool LoadDataFromFilename(const char* DataFilename,ArrayBridge<uint8_t>&& Data)
+{
+	//	change this to detect absolute paths rather than just trying random combinations
+	std::vector<std::string> TryFilenames;
+	
+	{
+		std::stringstream FilePath;
+		FilePath << Platform::GetAppResourcesDirectory() << DataFilename;
+		TryFilenames.push_back(FilePath.str());
+	}
+	//	in case absolute path
+	TryFilenames.push_back( std::string(DataFilename) );
+
+	for ( auto& Filename : TryFilenames )
+	{
+		if ( LoadFile( Filename, Data ) )
+			return true;
+	}
+	return false;
 }
 
 //	gr: 1mb too big for windows on stack
