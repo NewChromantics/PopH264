@@ -247,11 +247,25 @@ bool Avf::TDecompressor::HasSession()
 
 void Avf::TDecompressor::CreateDecoderSession(CFPtr<CMFormatDescriptionRef> InputFormat)
 {
-	//	gr: we now allow recreation of sessions, so calling this will clear the old one
-	//	todo? Only if input format changes
+	//	but skip if format is the same
+	//	todo: may need to allow user to force this... or should inputformat be null'd when session is gone?
+	static bool CheckFormatSame = true;
+	
+	if ( CheckFormatSame && mInputFormat )
+	{
+		auto Same = CMFormatDescriptionEqual( mInputFormat.mObject, InputFormat.mObject );
+		if ( Same )
+		{
+			std::Debug << "Skipping CreateDecoderSession() with duplicate input format" << std::endl;
+			return;
+		}
+	}
+		
+	//	gr: we now allow recreation of sessions, so calling this function will always clear the old one
 	//if ( HasSession() )
 	//	return;
 	FreeSession();
+	std::cerr << __FUNCTION__ << std::endl;
 	
 	
 	mInputFormat = InputFormat;
