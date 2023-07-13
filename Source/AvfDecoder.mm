@@ -132,6 +132,8 @@ private:
 	
 	H264::NaluPrefix::Type	GetFormatNaluPrefixType()	{	return H264::NaluPrefix::ThirtyTwo;	}
 	
+	bool					mAllowSpsPpsToRecreateSession = false;	//	if true, then a new sps & pps appearing recreates session
+	
 	//	pending packets we need before we can create the session
 	Array<uint8_t>			mNaluSps;
 	Array<uint8_t>			mNaluPps;
@@ -199,11 +201,18 @@ void Avf::TDecompressorH264::CreateSession()
 		return;
 	if ( mNaluPps.IsEmpty() )
 		return;
+
+	//	only create session if allowed
+	if ( HasSession() )
+	{
+		if ( !mAllowSpsPpsToRecreateSession )
+			return;
+	}
 	
 	auto InputFormat = Avf::GetFormatDescriptionH264( GetArrayBridge(mNaluSps), GetArrayBridge(mNaluPps), GetFormatNaluPrefixType() );
 	CreateDecoderSession(InputFormat);
 	
-	//	throw away the old sps/pps, so we can tell if we've got a new format!
+	//	throw away the old sps/pps, so we can tell when we've got a new format
 	mNaluSps.Clear();
 	mNaluPps.Clear();
 }
