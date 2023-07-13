@@ -20,7 +20,7 @@ jobs:
 
       - name: Build Ios Static
         id: BuildIosStatic
-        uses: NewChromantics/PopAction_BuildApple@@v1.2.0
+        uses: NewChromantics/PopAction_BuildApple@v1.2.0
         with:
           BuildScheme: ${{ env.project }}_IosStatic
           project: ${{ env.project }}
