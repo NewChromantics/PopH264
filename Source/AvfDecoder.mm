@@ -132,7 +132,7 @@ private:
 	
 	H264::NaluPrefix::Type	GetFormatNaluPrefixType()	{	return H264::NaluPrefix::ThirtyTwo;	}
 	
-	bool					mAllowSpsPpsToRecreateSession = false;	//	if true, then a new sps & pps appearing recreates session
+	bool					mAllowSpsPpsToRecreateSession = true;	//	if true, then a new sps & pps appearing recreates session
 	
 	//	pending packets we need before we can create the session
 	Array<uint8_t>			mNaluSps;
