@@ -529,7 +529,8 @@ void Avf::TDecompressorH264::Decode(PopH264::TInputNaluPacket& Packet)
 	if ( mParams.mVerboseDebug )
 		std::Debug << "Popped Nalu " << H264PacketType << " x" << Nalu.GetDataSize() << "bytes" << std::endl;
 
-	bool DecodePacket = false;
+	//	some packets the avf decoder will error on, never decode them.
+	bool DecodePacket = true;
 	
 	//	do not push SPS, PPS or SEI packets to decoder
 	//	SEI gives -12349 error
@@ -537,13 +538,11 @@ void Avf::TDecompressorH264::Decode(PopH264::TInputNaluPacket& Packet)
 	{
 		mNaluSps = Nalu;
 		DecodePacket = false;
-		//return;
 	}
 	else if ( H264PacketType == H264NaluContent::PictureParameterSet )
 	{
 		mNaluPps = Nalu;
 		DecodePacket = false;
-		//return;
 	}
 	else if ( H264PacketType == H264NaluContent::SupplimentalEnhancementInformation )
 	{
