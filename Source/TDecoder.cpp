@@ -127,7 +127,7 @@ bool PopH264::TDecoder::PopNalu(ArrayBridge<uint8_t>&& Buffer,FrameNumber_t& Fra
 			{
 				std::shared_ptr<TInputNaluPacket> pPacket( new TInputNaluPacket() );
 				pPacket->mData.Copy(Nalu);
-				pPacket->mFrameNumber = FrameNumber;
+				pPacket->mFrameNumber = NextPacket->mFrameNumber;
 				SplitPackets.push_back( pPacket );
 			};
 			H264::SplitNalu( GetArrayBridge(NextPacket->mData), OnSplitNalu );
