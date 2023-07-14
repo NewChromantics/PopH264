@@ -32,10 +32,11 @@ jobs:
           - os: ubuntu-latest
             type: Wasm
 
-          - os: Nvidia
-            type: linux
-            arch: arm64
-            name: Nvidia Linux
+          # nvidia temporarily disabled... compiler out of date?
+          #- os: Nvidia
+          #  type: linux
+          #  arch: arm64
+          #  name: Nvidia Linux
 
           # - os: Pi4
           #   type: linux
