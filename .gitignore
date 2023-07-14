@@ -55,3 +55,6 @@ PopH264Test_*.png
 
 # dont accidentally commit new build files
 Unity/PopH264/Assets/PopH264/
+
+# macos system files
+.DS_Store
