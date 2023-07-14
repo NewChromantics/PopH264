@@ -219,6 +219,9 @@
     <ClCompile Include="..\Source\SoyLib\src\SoyPlatform.cpp">
       <Filter>SoyLib</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source\FileReader.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\SoyLib\src\Array.hpp">
@@ -478,6 +481,9 @@
     </ClInclude>
     <ClInclude Include="..\Source\SoyLib\src\SoyPlatform.h">
       <Filter>SoyLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\FileReader.hpp">
+      <Filter>Source</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

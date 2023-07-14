@@ -78,6 +78,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Static|x64'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\Source\FileReader.cpp" />
     <ClCompile Include="..\Source\IntelMediaDecoder.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
@@ -146,6 +147,7 @@
     <ClInclude Include="..\Source\Broadway\Decoder\src\h264bsd_util.h" />
     <ClInclude Include="..\Source\Broadway\Decoder\src\h264bsd_vlc.h" />
     <ClInclude Include="..\Source\Broadway\Decoder\src\h264bsd_vui.h" />
+    <ClInclude Include="..\Source\FileReader.hpp" />
     <ClInclude Include="..\Source\IntelMediaDecoder.h" />
     <ClInclude Include="..\Source\Json11\json11.hpp" />
     <ClInclude Include="..\Source\MediaFoundationDecoder.h" />
