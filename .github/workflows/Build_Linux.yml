@@ -17,10 +17,11 @@ jobs:
           - os: ubuntu-18.04
             type: linux
             arch: x86_64
-
-          - os: Nvidia
-            type: linux
-            arch: arm64
+          
+          # nvidia temporarily disabled... compiler out of date?
+          #- os: Nvidia
+          #  type: linux
+          #  arch: arm64
 
           - os: ubuntu-18.04
             type: linux
