@@ -30,6 +30,7 @@ $(SRC_PATH)/TDecoderInstance.cpp \
 $(SRC_PATH)/TEncoder.cpp \
 $(SRC_PATH)/TEncoderInstance.cpp \
 $(SRC_PATH)/Json11/json11.cpp \
+$(SRC_PATH)/FileReader.cpp \
 
 # soy lib files
 LIB_SRC_FILES  += \
