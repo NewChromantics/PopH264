@@ -30,7 +30,8 @@ MediaFoundation::TDecoder::TDecoder(PopH264::TDecoderParams& Params,PopH264::OnD
 	PopH264::TDecoder	( OnDecodedFrame, OnFrameError ),
 	mParams				( Params )
 {
-	Soy::TFourcc InputFourccs[] = { "H264" };
+	//Soy::TFourcc InputFourccs[] = { "H264" };
+	Soy::TFourcc InputFourccs[] = { "MJPG" };
 	Soy::TFourcc OutputFourccs[] = { "NV12" };
 	auto Inputs = FixedRemoteArray(InputFourccs);
 	auto Outputs = FixedRemoteArray(OutputFourccs);
@@ -72,31 +73,63 @@ MediaFoundation::TDecoder::~TDecoder()
 	mTransformer.reset();
 }
 
-void MediaFoundation::TDecoder::SetInputFormat()
+void MediaFoundation::TDecoder::SetInputFormat(ContentType::Type ContentType)
 {
 	if (mTransformer->IsInputFormatReady())
 		return;
 
-	//	should get this from the initial meta
-	Soy::TFourcc InputFormat("H264");
 
-	IMFMediaType* InputMediaType = nullptr;
-	auto Result = MFCreateMediaType(&InputMediaType);
-	IsOkay(Result, "MFCreateMediaType");
-	Result = InputMediaType->SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Video);
-	IsOkay(Result, "InputMediaType->SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Video)");
-	auto InputFormatGuid = GetGuid(InputFormat);
-	Result = InputMediaType->SetGUID(MF_MT_SUBTYPE, InputFormatGuid);
-	IsOkay(Result, "InputMediaType->SetGUID(MF_MT_SUBTYPE)");
+	if ( ContentType == ContentType::Jpeg && false )
+	{
+		IMFMediaType* InputMediaType = nullptr;
+		auto Result = MFCreateMediaType(&InputMediaType);
+		IsOkay(Result, "MFCreateMediaType");
+		Result = InputMediaType->SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Image);
+		IsOkay(Result, "InputMediaType->SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Image)");
+		//auto InputFormatGuid = GUID_ContainerFormatJpeg;
+		auto InputFormatGuid = MFImageFormat_JPEG;
+		Result = InputMediaType->SetGUID(MF_MT_SUBTYPE, InputFormatGuid);
+		IsOkay(Result, "InputMediaType->SetGUID(MF_MT_SUBTYPE)");
 
-	//	gr: doesn't make much difference with frames
-	auto FramesPerSecond = 30;
-	Result = MFSetAttributeRatio(InputMediaType, MF_MT_FRAME_RATE, FramesPerSecond, 1);
-	IsOkay(Result, "Set MF_MT_FRAME_RATE");
+		mTransformer->SetInputFormat(*InputMediaType);
+	}
+	else if ( ContentType == ContentType::Jpeg )
+	{
+		//	I think we can reuse mjpeg for jpeg, when there's no jpeg decoders
+		IMFMediaType* InputMediaType = nullptr;
+		auto Result = MFCreateMediaType(&InputMediaType);
+		IsOkay(Result, "MFCreateMediaType");
+		Result = InputMediaType->SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Video);
+		IsOkay(Result, "InputMediaType->SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Video)");
+		auto InputFormatGuid = MFVideoFormat_MJPG;	//	'MJPG'
+		Result = InputMediaType->SetGUID(MF_MT_SUBTYPE, InputFormatGuid);
+		IsOkay(Result, "InputMediaType->SetGUID(MF_MT_SUBTYPE)");
 
-	mTransformer->SetInputFormat(*InputMediaType);
-	//Result = Transformer.SetInputType(0, InputMediaType, 0);
-	//IsOkay(Result, "SetInputType");
+		mTransformer->SetInputFormat(*InputMediaType);
+	}
+	else
+	{
+		Soy::TFourcc InputFormat("H264");
+	
+		IMFMediaType* InputMediaType = nullptr;
+		auto Result = MFCreateMediaType(&InputMediaType);
+		IsOkay(Result, "MFCreateMediaType");
+		Result = InputMediaType->SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Video);
+		IsOkay(Result, "InputMediaType->SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Video)");
+		//auto InputFormatGuid = MFVideoFormat_H264;
+		auto InputFormatGuid = GetGuid(InputFormat);
+		Result = InputMediaType->SetGUID(MF_MT_SUBTYPE, InputFormatGuid);
+		IsOkay(Result, "InputMediaType->SetGUID(MF_MT_SUBTYPE)");
+
+		//	gr: doesn't make much difference with frames
+		auto FramesPerSecond = 30;
+		Result = MFSetAttributeRatio(InputMediaType, MF_MT_FRAME_RATE, FramesPerSecond, 1);
+		IsOkay(Result, "Set MF_MT_FRAME_RATE");
+
+		mTransformer->SetInputFormat(*InputMediaType);
+		//Result = Transformer.SetInputType(0, InputMediaType, 0);
+		//IsOkay(Result, "SetInputType");
+	}
 }
 
 bool MediaFoundation::TDecoder::DecodeNextPacket()
@@ -109,13 +142,15 @@ bool MediaFoundation::TDecoder::DecodeNextPacket()
 	//	try and pop even if we dont push data in, in case bail early
 	PopFrames();
 
-	Array<uint8_t> Nalu;
-	PopH264::FrameNumber_t FrameNumber = 0;
-	if (!PopNalu(GetArrayBridge(Nalu), FrameNumber))
+	auto NextPacket = PopNextPacket();
+	if ( !NextPacket )
 		return false;
 
+	auto& Nalu = NextPacket->mData;
+	auto& FrameNumber = NextPacket->mFrameNumber;
+
 	//	gr: this will change to come from PopNalu to sync with meta
-	SetInputFormat();
+	SetInputFormat( NextPacket->mContentType );
 
 	auto NaluType = H264::GetPacketType(GetArrayBridge(Nalu));
 	//std::Debug << "MediaFoundation got " << magic_enum::enum_name(NaluType) << " x" << Nalu.GetSize() << std::endl;
