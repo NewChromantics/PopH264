@@ -3,6 +3,7 @@
 #include "SoyLib/src/SoyImage.h"
 #include "PopH264.h"
 #include "json11.hpp"
+#include <span>
 
 //	gr: this works on osx, but currently, none of the functions are implemented :)
 //	gr: also needs SDK
@@ -248,57 +249,47 @@ PopH264::TDecoderInstance::~TDecoderInstance()
 	std::Debug << __PRETTY_FUNCTION__ << " decoder destroyed." <<std::endl;
 }
 
-void PopH264::TDecoderInstance::PushData(const uint8_t* Data,size_t DataSize,size_t FrameNumber)
+void PopH264::TDecoderInstance::PushData(std::span<uint8_t> Data,FrameNumber_t FrameNumber)
 {
 	auto Decoder = mDecoder;
 	if ( !Decoder )
 	{
 		std::stringstream Error;
-		Error << "PushData(x" << DataSize << " frame=" << FrameNumber << ") to instance with null decoder";
+		Error << "PushData(x" << Data.size() << " frame=" << FrameNumber << ") to instance with null decoder";
 		throw std::runtime_error(Error.str());
 	}
 
-	//	if user passes null, we want to end stream/flush
-	if ( Data == nullptr )
+	//	if user passes no data, we want to end stream/flush
+	if ( Data.empty() )
 	{
-		if (FrameNumber == 1) {
+		//	gr: get rid of the CheckDecoderUpdate hack
+		if (FrameNumber == 1)
+		{
 			Decoder->CheckDecoderUpdates();
-		} else {
+		}
+		else
+		{
 			Decoder->PushEndOfStream();
 		}
 		return;
 	}
 	
-	auto DataArray = GetRemoteArray( Data, DataSize );
-	/*
-	//	gr: temporary hack, if the data coming in is a different format, detect it, and switch decoders
-	//		maybe we can do something more elegant (eg. wait until first frame before allocating decoder)
-	//	gr: don't even need to interrupt decoder
-	try
-	{
-		//	do fast PNG check, STB is sometimes matching TGA
-		if (TPng::IsPngHeader(GetArrayBridge(DataArray)))
-		{
-			//	calc duration
-			SoyTime DecodeDuration;
-			auto ImageMeta = Soy::IsImage(GetArrayBridge(DataArray));
-			if (ImageMeta.IsValid())
-			{
-				SoyPixels Pixels;
-				Soy::DecodeImage(Pixels, GetArrayBridge(DataArray));
-				json11::Json::object Meta;
-				this->PushFrame(Pixels, FrameNumber, Meta );
-				return;
-			}
-		}
-	}
-	catch (std::exception& e)
-	{
-		std::Debug << __PRETTY_FUNCTION__ << " trying to detect image caused exception; " << e.what() << std::endl;
-	}
-	*/
-	Decoder->Decode( GetArrayBridge(DataArray), size_cast<PopH264::FrameNumber_t>(FrameNumber) );
+	Decoder->Decode( Data, FrameNumber );
 }
+
+void PopH264::TDecoderInstance::PushEndOfStream()
+{
+	auto Decoder = mDecoder;
+	if ( !Decoder )
+	{
+		std::stringstream Error;
+		Error << "PushEndOfStream to instance with null decoder";
+		throw std::runtime_error(Error.str());
+	}
+	Decoder->PushEndOfStream();	
+}
+
+
 
 
 void PopH264::TDecoderInstance::PopFrame(int32_t& FrameNumber,ArrayBridge<uint8_t>&& Plane0,ArrayBridge<uint8_t>&& Plane1,ArrayBridge<uint8_t>&& Plane2)

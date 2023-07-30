@@ -58,8 +58,7 @@ void PopH264::TDecoder::OnDecodedEndOfStream()
 
 void PopH264::TDecoder::PushEndOfStream()
 {
-	FixedRemoteArray NoData( (uint8_t*)nullptr, 0 );
-	Decode( GetArrayBridge(NoData), 0, ContentType::EndOfFile );
+	Decode( {}, FrameNumberInvalid, ContentType::EndOfFile );
 }
 
 void PopH264::TDecoder::CheckDecoderUpdates()
@@ -69,7 +68,7 @@ void PopH264::TDecoder::CheckDecoderUpdates()
 
 
 
-void PopH264::TDecoder::Decode(ArrayBridge<uint8_t>&& PacketData,FrameNumber_t FrameNumber,ContentType::Type ContentType)
+void PopH264::TDecoder::Decode(std::span<uint8_t> PacketData,FrameNumber_t FrameNumber,ContentType::Type ContentType)
 {
 	//	todo? if this is the first data, detect non-poph264/nalu input formats (eg. jpeg), that we dont want to split
 
@@ -83,7 +82,7 @@ void PopH264::TDecoder::Decode(ArrayBridge<uint8_t>&& PacketData,FrameNumber_t F
 	{
 		std::scoped_lock Lock(mPendingDataLock);
 		std::shared_ptr<TInputNaluPacket> pPacket( new TInputNaluPacket() );
-		pPacket->mData.Copy(PacketData);
+		std::copy( PacketData.begin(), PacketData.end(), std::back_inserter(pPacket->mData) );
 		pPacket->mFrameNumber = FrameNumber;
 		pPacket->mContentType = ContentType;
 		mPendingDatas.PushBack(pPacket);
@@ -98,17 +97,10 @@ void PopH264::TDecoder::Decode(ArrayBridge<uint8_t>&& PacketData,FrameNumber_t F
 }
 
 
-void PopH264::TDecoder::UnpopNalu(ArrayBridge<uint8_t>&& Nalu,FrameNumber_t FrameNumber)
+void PopH264::TDecoder::UnpopPacket(std::shared_ptr<TInputNaluPacket> Packet)
 {
-	//	put-back data at the start of the queue
-	//auto PushNalu = [&](const ArrayBridge<uint8_t>&& Nalu)
-	{
-		std::lock_guard<std::mutex> Lock(mPendingDataLock);
-		std::shared_ptr<TInputNaluPacket> pPacket( new TInputNaluPacket() );
-		pPacket->mData.Copy(Nalu);
-		pPacket->mFrameNumber = FrameNumber;
-		mPendingDatas.PushBack(pPacket);
-	};
+	std::lock_guard<std::mutex> Lock(mPendingDataLock);
+	mPendingDatas.PushBack(Packet);
 }
 
 
@@ -175,15 +167,16 @@ std::shared_ptr<PopH264::TInputNaluPacket> PopH264::TDecoder::PopNextPacket()
 		}
 		
 		NextPacket = mPendingDatas.PopAt(0);
+		std::span<uint8_t> NextPacketData( NextPacket->mData );
 		
 		//	todo: detect non h264 packets here (if first)
-		if ( Jpeg::IsJpegHeader( std::span(NextPacket->mData.GetArray(),NextPacket->mData.GetSize()) ) )
+		if ( Jpeg::IsJpegHeader(NextPacketData) )
 		{
 			//	detected jpeg, dont attempt split
 			std::Debug << "Detected Jpeg packet, skipping nalu split" << std::endl;
 			NextPacket->mContentType = ContentType::Jpeg;
 		}
-		else if ( NextPacket->mData.IsEmpty() )
+		else if ( NextPacket->mData.empty() )
 		{
 			//	do nothing with empty packets (just retaining content type)
 		}
@@ -192,14 +185,14 @@ std::shared_ptr<PopH264::TInputNaluPacket> PopH264::TDecoder::PopNextPacket()
 			//	if this packet contains multiple nalu packets, split it here
 			std::vector<std::shared_ptr<TInputNaluPacket>> SplitPackets;
 			
-			auto OnSplitNalu = [&](const ArrayBridge<uint8_t>&& Nalu)
+			auto OnSplitNalu = [&](std::span<uint8_t> Nalu)
 			{
 				std::shared_ptr<TInputNaluPacket> pPacket( new TInputNaluPacket() );
-				pPacket->mData.Copy(Nalu);
+				std::copy( Nalu.begin(), Nalu.end(), std::back_inserter(pPacket->mData) );
 				pPacket->mFrameNumber = NextPacket->mFrameNumber;
 				SplitPackets.push_back( pPacket );
 			};
-			H264::SplitNalu( GetArrayBridge(NextPacket->mData), OnSplitNalu );
+			H264::SplitNalu( NextPacket->mData, OnSplitNalu );
 			
 			//	if we split multiple re-insert back into the list
 			NextPacket = SplitPackets[0];
@@ -217,7 +210,9 @@ bool PopH264::TDecoder::PopNalu(ArrayBridge<uint8_t>&& Buffer,FrameNumber_t& Fra
 	if ( !NextPacket )
 		return false;
 
-	Buffer.Copy( NextPacket->mData );
+	auto NextPacketData = NextPacket->GetData();
+	FixedRemoteArray<uint8_t> NextPacketArray( NextPacketData.data(), NextPacketData.size() );
+	Buffer.Copy( NextPacketArray );
 	FrameNumber = NextPacket->mFrameNumber;
 	
 	//	anything calling this funciton is legacy that's popping h264 packets
@@ -238,15 +233,17 @@ void PopH264::TDecoder::PeekHeaderNalus(ArrayBridge<uint8_t>&& SpsBuffer,ArrayBr
 	
 	for ( auto pd=0;	pd<mPendingDatas.GetSize();	pd++ )
 	{
-		auto& PendingNaluData = mPendingDatas[pd]->mData;
-		auto NaluType = H264::GetPacketType(GetArrayBridge(PendingNaluData));
+		auto PendingNaluData = mPendingDatas[pd]->GetData();
+		auto NaluType = H264::GetPacketType(PendingNaluData);
 		if (NaluType == H264NaluContent::SequenceParameterSet)
 		{
-			SpsBuffer.Copy(PendingNaluData);
+			FixedRemoteArray Data( PendingNaluData.data(), PendingNaluData.size() );
+			SpsBuffer.Copy(Data);
 		}
 		if (NaluType == H264NaluContent::PictureParameterSet)
 		{
-			PpsBuffer.Copy(PendingNaluData);
+			FixedRemoteArray Data( PendingNaluData.data(), PendingNaluData.size() );
+			PpsBuffer.Copy(Data);
 		}
 		if ( !SpsBuffer.IsEmpty() && !PpsBuffer.IsEmpty() )
 			return;

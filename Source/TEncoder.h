@@ -4,6 +4,7 @@
 #include "HeapArray.hpp"
 #include "SoyTime.h"
 #include <functional>
+#include <span>
 
 class SoyPixelsImpl;
 
@@ -18,8 +19,10 @@ namespace PopH264
 class PopH264::TPacket
 {
 public:
-	std::shared_ptr<Array<uint8_t>>	mData;
-	std::string						mInputMeta;	//	original input meta json
+	std::span<uint8_t>		GetData()	{	return mData ? std::span<uint8_t>( mData->data(), mData->size() ) : std::span<uint8_t>();	}
+public:
+	std::shared_ptr<std::vector<uint8_t>>	mData;
+	std::string								mInputMeta;	//	original input meta json
 };
 
 

@@ -269,7 +269,7 @@ void PopH264::TEncoderInstance::PeekPacket(json11::Json::object& Meta)
 	{
 		std::lock_guard<std::mutex> Lock(mPacketsLock);
 		auto& Packet0 = mPackets[0];
-		DataSize = Packet0.mData ? Packet0.mData->GetDataSize() : 0;
+		DataSize = Packet0.mData ? Packet0.mData->size() : 0;
 		InputMeta = Packet0.mInputMeta;
 	}
 
@@ -301,25 +301,21 @@ size_t PopH264::TEncoderInstance::PeekNextFrameSize()
 		if ( !mPackets.IsEmpty() )
 		{
 			auto& Packet0 = mPackets[0];
-			return Packet0.mData->GetSize();
+			return Packet0.mData->size();
 		}
 	}
 	
 	return 0;
 }
 
-void PopH264::TEncoderInstance::PopPacket(ArrayBridge<uint8_t>&& Data)
+PopH264::TPacket PopH264::TEncoderInstance::PopPacket()
 {
-	std::shared_ptr<Array<uint8_t>>	PacketData;
-	{
-		std::lock_guard<std::mutex> Lock(mPacketsLock);
-		if ( !this->mPackets.GetSize() )
-			throw Soy::AssertException("PopH264::TEncoderInstance::PopPacket no packets queued");
+	std::scoped_lock Lock(mPacketsLock);
+	if ( !this->mPackets.GetSize() )
+		throw std::runtime_error("PopH264::TEncoderInstance::PopPacket no packets queued");
 		
-		auto Packet = mPackets.PopAt(0);
-		PacketData = Packet.mData;
-	}
-	Data.Copy(*PacketData);
+	auto Packet = mPackets.PopAt(0);
+	return Packet;
 }
 
 void PopH264::TEncoderInstance::OnNewPacket(TPacket& Packet)
@@ -329,7 +325,7 @@ void PopH264::TEncoderInstance::OnNewPacket(TPacket& Packet)
 	{
 		try
 		{
-			auto H264PacketType = H264::GetPacketType(GetArrayBridge(*Packet.mData));
+			auto H264PacketType = H264::GetPacketType( Packet.GetData() );
 			std::Debug << __PRETTY_FUNCTION__ << "(" << magic_enum::enum_name(H264PacketType) << ")" << std::endl;
 		}
 		catch (std::exception& e)

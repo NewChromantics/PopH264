@@ -51,7 +51,7 @@ public:
 	
 private:
 	void			AllocEncoder(const SoyPixelsMeta& Meta);
-	void			OnPacketCompressed(const ArrayBridge<uint8_t>& Data,size_t FrameNumber);
+	void			OnPacketCompressed(std::span<uint8_t> Data,size_t FrameNumber);
 
 
 protected:
