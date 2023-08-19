@@ -1097,7 +1097,9 @@ void MediaFoundation::TTransformer::SetInputFormat(IMFMediaType& MediaType)
 	LockTransformer(Set);
 	
 	//	gr: are these needed?
-	ProcessCommand(MFT_MESSAGE_COMMAND_FLUSH);
+	// gr: this errors when called on encoder on win11 VM
+	//ProcessCommand(MFT_MESSAGE_COMMAND_FLUSH);
+
 	ProcessCommand(MFT_MESSAGE_NOTIFY_BEGIN_STREAMING);
 	ProcessCommand(MFT_MESSAGE_NOTIFY_START_OF_STREAM);
 
@@ -1399,6 +1401,9 @@ bool MediaFoundation::TTransformer::PushFrame(std::span<uint8_t> Data, int64_t F
 
 void MediaFoundation::TTransformer::SetOutputFormat()
 {
+	if ( !mInputFormatSet )
+		throw std::runtime_error("Need to set input format before output format");
+
 	auto& Transformer = *mTransformer;
 
 	//	gr: a manual one never seems to work
@@ -1521,6 +1526,10 @@ bool MediaFoundation::TTransformer::PopFrame(std::vector<uint8_t>& Data,int64_t&
 
 	if (!mTransformer)
 		throw Soy::AssertException("Transformer is null");
+
+	//	input format isn't set, cannot set output format yet and can't pop anything
+	if ( !mInputFormatSet )
+		return false;
 
 	auto& Transformer = *mTransformer;
 	DWORD StatusFlags = 0;
