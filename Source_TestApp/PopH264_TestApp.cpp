@@ -21,6 +21,9 @@
 namespace Platform
 {
 	std::string	GetAppResourcesDirectory();
+
+	void		CaptureStdErr();
+	void		DebugLog(const char* text);
 }
 std::string Platform::GetAppResourcesDirectory()
 {
@@ -35,14 +38,65 @@ extern void CompareGreyscale(const char* MetaJson,uint8_t* Plane0Data,uint8_t* P
 extern void MakeRainbowPng(const char* Filename);
 extern void CompareRainbow(const char* MetaJson,uint8_t* Plane0Data,uint8_t* Plane1Data,uint8_t* Plane2Data);
 
-void DebugPrint(const std::string& Message)
+
+
+template <class CharT, class TraitsT = std::char_traits<CharT> >
+class basic_debugbuf :
+	public std::basic_stringbuf<CharT, TraitsT>
 {
-#if defined(TARGET_WINDOWS)
-	OutputDebugStringA(Message.c_str());
-	OutputDebugStringA("\n");
-#endif
-	std::cout << Message.c_str() << std::endl;
+public:
+
+	virtual ~basic_debugbuf()
+	{
+		//	not on all platforms
+		//sync();
+	}
+
+protected:
+
+	std::mutex	mSyncLock;
+	std::string	mBuffer;
+
+
+	int overflow(int c) override
+	{
+		std::lock_guard<std::mutex> Lock(mSyncLock);
+		mBuffer += (char)c;
+
+		if (c == '\n')
+		{
+			//flush();
+			Platform::DebugLog(mBuffer.c_str());
+			//mBuffer = std::string();
+			mBuffer.clear();
+		}
+		//	gr: what is -1? std::eof?
+		return c == -1 ? -1 : ' ';
+	}
+};
+
+
+basic_debugbuf<char> OutputBuf;
+
+void Platform::CaptureStdErr()
+{
+	//if (!IsDebuggerPresent())
+	//	return;
+	std::cerr.rdbuf(&OutputBuf);
 }
+
+
+#if defined(TARGET_WINDOWS)
+void Platform::DebugLog(const char* text)
+{
+	::OutputDebugStringA(text);
+}
+#else
+void Platform::DebugLog(const char* text)
+{
+	printf("%s\n",text);
+}
+#endif
 
 typedef void CompareFunc_t(const char* MetaJson,uint8_t* Plane0,uint8_t* Plane1,uint8_t* Plane2);
 
@@ -170,9 +224,7 @@ void DecoderTest(const char* TestDataName,CompareFunc_t* Compare,const char* Dec
 			static uint8_t Plane1[1024 * 1024];
 			static uint8_t Plane2[1024 * 1024];
 			auto FrameNumber = PopH264_PopFrame(Handle, Plane0, std::size(Plane0), Plane1, std::size(Plane1), Plane2, std::size(Plane2));
-			std::stringstream Error;
-			Error << "Decoded testdata; " << MetaJson << " FrameNumber=" << FrameNumber << " Should be " << FirstFrameNumber;
-			DebugPrint(Error.str());
+			std::cerr  << "Decoded testdata; " << MetaJson << " FrameNumber=" << FrameNumber << " Should be " << FirstFrameNumber << std::endl;
 			bool IsValid = FrameNumber >= 0;
 			if (!IsValid)
 			{
@@ -281,9 +333,7 @@ void EncoderGreyscaleTest()
 	//	testing the apple encoder
 	char ErrorBuffer[1000] = {0};
 	auto Handle = PopH264_CreateEncoder(EncoderOptionsJson, ErrorBuffer, std::size(ErrorBuffer) );
-	std::stringstream Debug;
-	Debug << "PopH264_CreateEncoder handle=" << Handle << " error=" << ErrorBuffer;
-	DebugPrint(Debug.str());
+	std::cerr << "PopH264_CreateEncoder handle=" << Handle << " error=" << ErrorBuffer << std::endl;
 	
 	//	encode a test image
 	const uint8_t TestImage[128*128]={128};
@@ -296,8 +346,7 @@ void EncoderGreyscaleTest()
 	}
 	)V0G0N";
 	PopH264_EncoderPushFrame( Handle, TestMetaJson, TestImage, nullptr, nullptr, ErrorBuffer, std::size(ErrorBuffer) );
-	Debug << "PopH264_EncoderPushFrame error=" << ErrorBuffer;
-	DebugPrint(Debug.str());
+	std::cerr  << "PopH264_EncoderPushFrame error=" << ErrorBuffer << std::endl;
 	
 	//	todo: decode it again
 	
@@ -311,13 +360,11 @@ void EncoderYuv8_88Test(int Width,int Height,const char* EncoderName="")
 	EncoderOptionsJson << "{\n";
 	EncoderOptionsJson << "	\"Encoder\":\"" << EncoderName << "\"	";
 	EncoderOptionsJson << "}";
-	DebugPrint(std::string("Encoder options: ") + EncoderOptionsJson.str());
+	std::cerr << "Encoder options: " << EncoderOptionsJson.str() << std::endl;
 	
 	char ErrorBuffer[1000] = {0};
 	auto Handle = PopH264_CreateEncoder(EncoderOptionsJson.str().c_str(), ErrorBuffer, std::size(ErrorBuffer) );
-	std::stringstream Debug;
-	Debug << "PopH264_CreateEncoder EncoderName=" << EncoderName << " handle=" << Handle << " error=" << ErrorBuffer;
-	DebugPrint(Debug.str());
+	std::cerr << "PopH264_CreateEncoder EncoderName=" << EncoderName << " handle=" << Handle << " error=" << ErrorBuffer << std::endl;
 
 	SoyPixels Yuv( SoyPixelsMeta(Width,Height,SoyPixelsFormat::Yuv_8_88));
 	auto Size = Yuv.GetPixelsArray().GetDataSize();
@@ -341,8 +388,7 @@ void EncoderYuv8_88Test(int Width,int Height,const char* EncoderName="")
 	
 	if ( strlen(ErrorBuffer) )
 	{
-		Debug << "PopH264_EncoderPushFrame error=" << ErrorBuffer;
-		DebugPrint(Debug.str());
+		std::cerr << "PopH264_EncoderPushFrame error=" << ErrorBuffer << std::endl;
 	}
 
 	PopH264_EncoderEndOfStream(Handle);
@@ -374,7 +420,7 @@ void EncoderYuv8_88Test(int Width,int Height,const char* EncoderName="")
 			//	gr: try a few times in case data isnt ready yet.
 			if ( MaxErrors-- < 0 )
 			{
-				DebugPrint("Re-decode, too many errors");
+				std::cerr << "Re-decode, too many errors" << std::endl;
 				break;
 			}
 			std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -394,13 +440,15 @@ void SafeDecoderTest(const char* TestDataName,CompareFunc_t* Compare,const char*
 	}
 	catch (std::exception& e)
 	{
-		DebugPrint(e.what());
+		std::cerr << e.what() << std::endl;
 	}
 }
 
 
 int main()
 {
+	Platform::CaptureStdErr();
+
 	SafeDecoderTest("Cat.jpg", nullptr, nullptr );
 	
 	//if ( false )
@@ -439,7 +487,7 @@ int main()
 	MakeRainbowPng("PopH264Test_RainbowGradient.png");
 #endif
 
-	DebugPrint("PopH264_UnitTests");
+	std::cerr << "PopH264_UnitTests" << std::endl;
 	PopH264_UnitTest(nullptr);
 	
 	//	depth data has iframe, pps, sps order
