@@ -149,11 +149,19 @@ bool MediaFoundation::TDecoder::DecodeNextPacket()
 		return false;
 	auto& NextPacket = *pNextPacket;
 
-	//	gr: this will change to come from PopNalu to sync with meta
-	SetInputFormat( NextPacket.mContentType );
+	H264NaluContent::Type NaluType = H264NaluContent::EndOfStream;
+	if ( NextPacket.mContentType == ContentType::EndOfFile )
+	{
+		NaluType = H264NaluContent::EndOfStream;
+	}
+	else
+	{
+		//	gr: this will change to come from PopNalu to sync with meta
+		SetInputFormat( NextPacket.mContentType );
 
-	auto NaluType = H264::GetPacketType(NextPacket.GetData());
-	//std::Debug << "MediaFoundation got " << magic_enum::enum_name(NaluType) << " x" << Nalu.GetSize() << std::endl;
+		NaluType = H264::GetPacketType(NextPacket.GetData());
+		//std::Debug << "MediaFoundation got " << magic_enum::enum_name(NaluType) << " x" << Nalu.GetSize() << std::endl;
+	}
 
 	bool PushData = true;
 	bool PushTwice = false;
