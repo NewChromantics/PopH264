@@ -30,8 +30,10 @@ MediaFoundation::TDecoder::TDecoder(PopH264::TDecoderParams& Params,PopH264::OnD
 	PopH264::TDecoder	( OnDecodedFrame, OnFrameError ),
 	mParams				( Params )
 {
-	//Soy::TFourcc InputFourccs[] = { "H264" };
-	Soy::TFourcc InputFourccs[] = { "MJPG" };
+	//	move this to first data setup, so we know what kind of transformer to make, in case jpeg is pushed
+	//	or... do we try and make a h264 transformer anyway in the rare case of a jpeg so we know support
+	Soy::TFourcc InputFourccs[] = { "H264" };
+	//Soy::TFourcc InputFourccs[] = { "MJPG" };
 	Soy::TFourcc OutputFourccs[] = { "NV12" };
 	auto Inputs = FixedRemoteArray(InputFourccs);
 	auto Outputs = FixedRemoteArray(OutputFourccs);
