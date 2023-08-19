@@ -144,17 +144,15 @@ bool MediaFoundation::TDecoder::DecodeNextPacket()
 	//	try and pop even if we dont push data in, in case bail early
 	PopFrames();
 
-	auto NextPacket = PopNextPacket();
-	if ( !NextPacket )
+	auto pNextPacket = PopNextPacket();
+	if ( !pNextPacket )
 		return false;
-
-	auto& Nalu = NextPacket->mData;
-	auto& FrameNumber = NextPacket->mFrameNumber;
+	auto& NextPacket = *pNextPacket;
 
 	//	gr: this will change to come from PopNalu to sync with meta
-	SetInputFormat( NextPacket->mContentType );
+	SetInputFormat( NextPacket.mContentType );
 
-	auto NaluType = H264::GetPacketType(GetArrayBridge(Nalu));
+	auto NaluType = H264::GetPacketType(NextPacket.GetData());
 	//std::Debug << "MediaFoundation got " << magic_enum::enum_name(NaluType) << " x" << Nalu.GetSize() << std::endl;
 
 	bool PushData = true;
@@ -213,10 +211,10 @@ bool MediaFoundation::TDecoder::DecodeNextPacket()
 
 	for ( auto pi=0;	pi<PushCount;	pi++ )
 	{
-		if (!Transformer.PushFrame(GetArrayBridge(Nalu), FrameNumber))
+		if (!Transformer.PushFrame( NextPacket.GetData(), NextPacket.mFrameNumber ) )
 		{
 			//	data was rejected
-			UnpopNalu(GetArrayBridge(Nalu), FrameNumber);
+			UnpopPacket(pNextPacket);
 			//	gr: important, always show this
 			//if (mVerboseDebug)
 				std::Debug << __PRETTY_FUNCTION__ << " rejected " << NaluType << " unpopped" << std::endl;
@@ -276,13 +274,13 @@ size_t MediaFoundation::TDecoder::PopFrames()
 	bool PopAgain = true;
 	while (PopAgain && --LoopSafety > 0)
 	{
-		Array<uint8_t> OutFrame;
+		std::vector<uint8_t> OutFrame;
 		int64_t PacketNumber = -1;
 		json11::Json::object Meta;
 		bool EndOfStream = false;
 		try
 		{
-			PopAgain = mTransformer->PopFrame(GetArrayBridge(OutFrame), PacketNumber, Meta, EndOfStream );
+			PopAgain = mTransformer->PopFrame(OutFrame, PacketNumber, Meta, EndOfStream );
 		}
 		catch (std::exception& e)
 		{
@@ -291,10 +289,10 @@ size_t MediaFoundation::TDecoder::PopFrames()
 		}
 		
 		//	send frame
-		if (!OutFrame.IsEmpty())
+		if (!OutFrame.empty())
 		{
 			auto PixelMeta = mTransformer->GetOutputPixelMeta();
-			SoyPixelsRemote Pixels(OutFrame.GetArray(), OutFrame.GetDataSize(), PixelMeta);
+			SoyPixelsRemote Pixels(OutFrame.data(), OutFrame.size(), PixelMeta);
 			OnDecodedFrame(Pixels, PacketNumber, Meta);
 			FramesPushed++;
 		}
@@ -303,7 +301,7 @@ size_t MediaFoundation::TDecoder::PopFrames()
 			OnDecodedEndOfStream();
 
 		//	not expecting more frames this iteration
-		if ( OutFrame.IsEmpty() )
+		if ( OutFrame.empty() )
 			break;
 	}
 	return FramesPushed;

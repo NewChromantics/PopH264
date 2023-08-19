@@ -1,6 +1,6 @@
 #include "TDecoder.h"
 #include "SoyH264.h"
-#include "std_span.hpp"
+#include <span>
 #include "json11.hpp"
 #include "FileReader.hpp"
 
@@ -192,7 +192,7 @@ std::shared_ptr<PopH264::TInputNaluPacket> PopH264::TDecoder::PopNextPacket()
 				pPacket->mFrameNumber = NextPacket->mFrameNumber;
 				SplitPackets.push_back( pPacket );
 			};
-			H264::SplitNalu( NextPacket->mData, OnSplitNalu );
+			H264::SplitNalu( NextPacket->GetData(), OnSplitNalu );
 			
 			//	if we split multiple re-insert back into the list
 			NextPacket = SplitPackets[0];
