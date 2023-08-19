@@ -2520,6 +2520,7 @@
 		};
 		BFC4717524474FFA00A2DA70 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = BF004B6724FD3CAC00DC6A90 /* PopH264_Osx.xcconfig */;
 			buildSettings = {
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;

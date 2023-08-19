@@ -4,6 +4,7 @@
 #include "HeapArray.hpp"
 #include "SoyTime.h"
 #include <functional>
+#include <span>
 
 class SoyPixelsImpl;
 
@@ -30,8 +31,10 @@ namespace PopH264
 	class TDecoder;
 	class TDecoderParams;
 
+	class PacketMeta_t;
 	class TInputNaluPacket;
-	typedef uint32_t FrameNumber_t;
+	typedef uint32_t FrameNumber_t;		//	this could be an index, or it could be time. Should essentially be a frame identifier
+	constexpr FrameNumber_t FrameNumberInvalid = 0;
 	
 	//	just shorthand names for cleaner constructors
 	typedef std::function<void(const SoyPixelsImpl&,FrameNumber_t,const ::json11::Json&)> OnDecodedFrame_t;
@@ -39,13 +42,21 @@ namespace PopH264
 	typedef std::function<void(const std::string&,FrameNumber_t*)> OnFrameError_t;
 }
 
-
-class PopH264::TInputNaluPacket
+class PopH264::PacketMeta_t
 {
 public:
 	ContentType::Type	mContentType = ContentType::Unknown;
-	Array<uint8_t>		mData;
-	uint32_t			mFrameNumber = 0;	//	warning, as we've split data into multiple nalu-packets per-frame, this is NOT unique
+	FrameNumber_t		mFrameNumber = 0;	//	warning, as we've split data into multiple nalu-packets per-frame, this is NOT unique
+};
+
+//	this is being deprecated for passing meta + span's and trying to keep large un-moving buffers
+//	instead of holding lots of small buffers
+class PopH264::TInputNaluPacket : public PopH264::PacketMeta_t
+{
+public:
+	std::span<uint8_t>		GetData()	{	return std::span(mData);	}
+public:
+	std::vector<uint8_t>	mData;
 };
 
 
@@ -82,7 +93,7 @@ public:
 	__deprecated_prefix TDecoder(OnDecodedFrame_t OnDecodedFrame,OnFrameError_t OnFrameError) __deprecated;
 	TDecoder(const TDecoderParams& Params,OnDecodedFrame_t OnDecodedFrame,OnFrameError_t OnFrameError);
 	
-	void			Decode(ArrayBridge<uint8_t>&& PacketData,FrameNumber_t FrameNumber,ContentType::Type ContentType=ContentType::Unknown);
+	void			Decode(std::span<uint8_t> PacketData,FrameNumber_t FrameNumber,ContentType::Type ContentType=ContentType::Unknown);
 
 	//	gr: this has a callback because of flushing old packets. Need to overhaul the framenumber<->packet relationship
 	void			PushEndOfStream();
@@ -101,7 +112,7 @@ protected:
 	void			PeekHeaderNalus(ArrayBridge<uint8_t>&& SpsBuffer,ArrayBridge<uint8_t>&& PpsBuffer);
 	std::shared_ptr<TInputNaluPacket>	PopNextPacket();
 	bool			PopNalu(ArrayBridge<uint8_t>&& Buffer,FrameNumber_t& FrameNumber);
-	void			UnpopNalu(ArrayBridge<uint8_t>&& Buffer,FrameNumber_t FrameNumber);
+	void			UnpopPacket(std::shared_ptr<TInputNaluPacket> Packet);
 
 protected:
 	TDecoderParams		mParams;

@@ -52,7 +52,7 @@ public:
 	size_t			GetPacketQueueCount()	{	return mPackets.GetSize();	}
 	void			PeekPacket(json11::Json::object& Meta);
 	size_t			PeekNextFrameSize();
-	void			PopPacket(ArrayBridge<uint8_t>&& Data);
+	TPacket			PopPacket();
 	//bool			PopFrame(TFrame& Frame);
 	//void			PushFrame(const SoyPixelsImpl& Frame,int32_t FrameNumber,std::chrono::milliseconds DecodeDurationMs);
 	

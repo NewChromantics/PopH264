@@ -208,7 +208,7 @@ void MediaFoundation::GetMeta(json11::Json::object& Meta, IMFMediaType& Media)
 		uint32_t Value32 = 0;
 		auto Result = Media.GetUINT32(MF_MT_AVG_BITRATE, &Value32);
 		MediaFoundation::IsOkay(Result, "MF_MT_AVG_BITRATE");
-		Meta["AverageBitsPerSecondRate"] = Result;
+		Meta["AverageBitsPerSecondRate"] = static_cast<int>(Value32);
 	}
 	catch (std::exception& e)
 	{

@@ -7,6 +7,7 @@
 #include "PopH264TestData.h"
 #include <iostream>
 
+
 namespace PopH264
 {
 	//	1.2.0	removed access to c++ decoder object
@@ -142,7 +143,16 @@ __export int32_t PopH264_PushData(int32_t Instance,uint8_t* Data,int32_t DataSiz
 	auto Function = [&]()
 	{
 		auto Decoder = PopH264::DecoderInstanceManager.GetInstance(Instance);
-		Decoder->PushData( Data, DataSize, FrameNumber );
+		if ( Data == nullptr )
+		{
+			Decoder->PushEndOfStream();
+		}
+		else
+		{
+			std::span<uint8_t> DataArray( Data, DataSize );
+			PopH264::FrameNumber_t FrameNum( FrameNumber );
+			Decoder->PushData( DataArray, FrameNum );
+		}
 		return 0;
 	};
 	return SafeCall(Function, __func__, -1 );
@@ -421,10 +431,18 @@ __export int32_t PopH264_EncoderPopData(int32_t Instance,uint8_t* DataBuffer,int
 		if ( !DataBuffer || DataBufferSize <= 0 )
 			return size_cast<int32_t>(Encoder->PeekNextFrameSize());
 		
-		size_t DataBufferUsed = 0;
-		auto DataArray = GetRemoteArray( DataBuffer, DataBufferSize, DataBufferUsed );
-		Encoder->PopPacket( GetArrayBridge(DataArray) );
-		return size_cast<int32_t>(DataBufferUsed);
+		auto Buffer = std::span( DataBuffer, DataBufferSize );
+		auto Packet = Encoder->PopPacket();
+		auto PacketData = Packet.GetData();
+		if ( PacketData.size() > Buffer.size() )
+		{
+			std::stringstream Error;
+			Error << "Popping packet x" << PacketData.size() << " but buffer is only x" << Buffer.size() << " bytes";
+			throw std::runtime_error(Error.str());
+		}
+		std::copy( PacketData.begin(), PacketData.end(), Buffer.begin() );
+		
+		return PacketData.size();
 	};
 	return SafeCall(Function, __func__, -1 );
 }
