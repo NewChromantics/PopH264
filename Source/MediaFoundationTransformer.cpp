@@ -1071,7 +1071,10 @@ void MediaFoundation::TTransformer::SetInputFormat(Soy::TFourcc Fourcc, std::fun
 
 void MediaFoundation::TTransformer::ProcessCommand(MFT_MESSAGE_TYPE Command)
 {
-	auto& Transformer = *this->mTransformer;
+	auto pTransformer = this->mTransformer;
+	if ( !pTransformer )
+		throw std::runtime_error("Missing transformer in ProcessCommand");
+	auto& Transformer = *pTransformer;
 	ULONG_PTR Param = 0;// nullptr;
 	auto Result = Transformer.ProcessMessage(Command, Param);
 	IsOkay(Result, std::string("ProcessMessage ") + std::string(magic_enum::enum_name(Command)));

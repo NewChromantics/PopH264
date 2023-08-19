@@ -30,11 +30,7 @@
       <FullProgramDatabaseFile>true</FullProgramDatabaseFile>
       <DelayLoadDLLs>x264.dll</DelayLoadDLLs>
     </Link>
-    <PostBuildEvent>
-      <Command>REM Copy the Build dir contents to unity
-xcopy /y $(OutDir). $(ProjectDir)..\Unity\$(ProjectName)\Assets\$(ProjectName)
-</Command>
-    </PostBuildEvent>
+    <PostBuildEvent />
   </ItemDefinitionGroup>
   <ItemGroup />
 </Project>
