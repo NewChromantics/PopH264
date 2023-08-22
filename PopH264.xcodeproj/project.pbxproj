@@ -1528,7 +1528,6 @@
 				TargetAttributes = {
 					BF151FD82384786600A70EBF = {
 						CreatedOnToolsVersion = 10.1;
-						DevelopmentTeam = X52DR36JY2;
 						ProvisioningStyle = Manual;
 					};
 					BF1D95DF2850CB69008E3758 = {
@@ -1966,7 +1965,7 @@
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Manual;
 				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = X52DR36JY2;
+				DEVELOPMENT_TEAM = "";
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				INFOPLIST_FILE = "$(SRCROOT)/Source_Ios/PopH264_Ios_Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
@@ -2008,7 +2007,7 @@
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Manual;
 				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = X52DR36JY2;
+				DEVELOPMENT_TEAM = "";
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				INFOPLIST_FILE = "$(SRCROOT)/Source_Ios/PopH264_Ios_Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
@@ -2156,8 +2155,9 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = BF004B6724FD3CAC00DC6A90 /* PopH264_Osx.xcconfig */;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Manual;
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = "$(SRCROOT)/Source_Osx/PopH264_Osx_Info.plist";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 			};
@@ -2167,9 +2167,9 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = BF004B6724FD3CAC00DC6A90 /* PopH264_Osx.xcconfig */;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "";
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Manual;
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = "$(SRCROOT)/Source_Osx/PopH264_Osx_Info.plist";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 			};
