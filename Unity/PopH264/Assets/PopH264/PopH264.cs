@@ -108,9 +108,15 @@ public static class PopH264
 		public int[]			ImageRect;		//	some decoders will output an image aligned to say, 16 (macro blocks, or byte alignment etc) If the image is padded, we should have a [x,y,w,h] array here
 	};
 	
-	static public string GetString(byte[] Ascii)
+	//	if we make this public for re-use, give it a name that doesn't suggest this is an API function
+	//	make sure we use this! using GetString without all 0's will crash unity as console tries to print it
+	static private string GetString(byte[] Ascii)
 	{
+		if ( Ascii[0] == 0 )
+			return null;
 		var String = System.Text.ASCIIEncoding.ASCII.GetString(Ascii);
+		
+		//	clip string as unity doesn't cope well with large terminator strings
 		var TerminatorPos = String.IndexOf('\0');
 		if (TerminatorPos >= 0)
 			String = String.Substring(0, TerminatorPos);
