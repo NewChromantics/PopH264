@@ -29,7 +29,6 @@ jobs:
           Destination: "platform=macOS"
 
       - name: Upload artifacts
-        needs: Build
         uses: actions/upload-artifact@v2
         with:
           name: ${{ steps.Build.outputs.UPLOAD_NAME }}
