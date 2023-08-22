@@ -44,12 +44,10 @@ LD_RUNPATH_SEARCH_PATHS = $(inherited) @executable_path/../Frameworks @loader_pa
 DEFINES_MODULE = YES
 DEFINES_MODULE = YES
 FRAMEWORK_VERSION = A
-// can't use _ in .bundles!
-//PRODUCT_NAME = $(TARGET_NAME)
-PRODUCT_NAME = PopH264
 
-//PRODUCT_BUNDLE_IDENTIFIER = com.NewChromantics.PopH264Framework
-PRODUCT_BUNDLE_IDENTIFIER = com.NewChromantics.$(PRODUCT_NAME:c99extidentifier)
+
+PRODUCT_BUNDLE_IDENTIFIER = com.NewChromantics.$(PRODUCT_NAME:rfc1034identifier)
+PRODUCT_NAME = $(TARGET_NAME)
 
 
 LIBRARY_SEARCH_PATHS = $(inherited) $(PROJECT_DIR)/Source/X264/osx
