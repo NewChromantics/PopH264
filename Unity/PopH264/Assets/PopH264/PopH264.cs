@@ -117,6 +117,18 @@ public static class PopH264
 		return String;
 	}
 
+
+	//	nice wrappers for raw CAPI calls
+	static public string		GetVersion()
+	{
+		var Version = PopH264_GetVersion();
+		var Major = (Version / (100 * 100000));
+		var Minor = (Version / 100000) % 100;
+		var Patch = (Version) % 100000;
+		return $"{Major}.{Minor}.{Patch}";
+	}
+
+
 	public struct FrameInput
 	{
 		public byte[] Bytes;
@@ -177,8 +189,7 @@ public static class PopH264
 		public Decoder(DecoderParams? DecoderParams,bool ThreadedDecoding)
 		{
 			//	show version on first call
-			var Version = PopH264_GetVersion();
-			Debug.Log("PopH264 version " + Version);
+			Debug.Log($"PopH264 version {GetVersion()}");
 			
 			this.ThreadedDecoding = ThreadedDecoding;
 
