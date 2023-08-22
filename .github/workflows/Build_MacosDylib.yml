@@ -1,0 +1,37 @@
+name: Build Macos Dylib
+
+env:
+  project: PopH264
+
+on:
+  pull_request:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+      - '*Test*' 
+
+jobs:
+  Build:
+    name: Macos Dylib Library
+    runs-on: macos-12
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: "recursive"
+
+      - name: Build Macos Static
+        uses: NewChromantics/PopAction_BuildApple@v1.3.0
+        id: Build
+        with:
+          BuildScheme: ${{ env.project }}_MacosDylib
+          Project: ${{ env.project }}
+          Destination: "platform=macOS"
+
+      - name: Upload artifacts
+        needs: Build
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ steps.Build.outputs.UPLOAD_NAME }}
+          path: ${{ steps.Build.outputs.UPLOAD_DIR }}
+          if-no-files-found: error
