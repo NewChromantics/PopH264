@@ -1,4 +1,3 @@
-#define POPH264_AS_PACKAGE	//	disable this when testing Poph264 builds (which are placed in /Assets/PopH264)
 using UnityEngine;
 using System.Collections;					// required for Coroutines
 using System.Runtime.InteropServices;		// required for DllImport
@@ -13,19 +12,9 @@ using System.Collections.Generic;
 public static class PopH264
 {
 #if UNITY_UWP
-	private const string PluginName = "PopH264.Uwp";
-#error building uwp
+	private const string PluginName = "PopH264.Uwp";	//	PopH264.Uwp.dll
 #elif UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
-#if POPH264_AS_PACKAGE
-	private const string PluginFrameworkPath = "Packages/com.newchromantics.poph264/PopH264.xcframework/macos-x86_64/";
-#else
-	// universal xcframework
-	//private const string PluginFrameworkPath = "Assets/PopH264/PopH264.xcframework/macos-x86_64/";
-	private const string PluginFrameworkPath = "Assets/PopH264/";
-#endif
-	private const string PluginExecutable = "PopH264_Osx.framework/PopH264_Osx";
-	//private const string PluginExecutable = "PopH264_Osx.framework/Versions/A/PopH264_Osx";
-	private const string PluginName = PluginFrameworkPath+PluginExecutable;
+	private const string PluginName = "PopH264";	//	libPopH264.dylib
 #elif UNITY_IPHONE
 	private const string PluginName = "__Internal";
 #else
