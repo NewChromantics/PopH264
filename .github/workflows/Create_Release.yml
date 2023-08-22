@@ -59,6 +59,10 @@ jobs:
             scheme: PopH264_MacosDylib
             name: Macos Dylib
 
+          - os: macos-latest
+            scheme: PopH264_Ios
+            name: Ios Framework
+
           - os: ubuntu-latest
             type: Android
             name: Android
