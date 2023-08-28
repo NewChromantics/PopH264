@@ -29,7 +29,7 @@ jobs:
 
          - name: Windows Uwp x64
            project: PopH264.Uwp
-           BuildPlatform: x64
+           BuildPlatform: "x64 Uwp" # Solution platform
            BuildConfiguration: Release
            OutputDirectory: PopH264_Uwp_Release_x64
 
