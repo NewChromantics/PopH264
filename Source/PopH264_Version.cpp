@@ -63,7 +63,7 @@ __export int32_t PopH264_GetVersion()
 	Version *= 100;
 
 	Version += PopH264::VersionMinor;
-	Version *= 100;
+	Version *= 100000;
 
 	Version += PopH264::VersionPatch;
 
