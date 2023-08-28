@@ -45,7 +45,7 @@ jobs:
            BuildDirectory: Build\PopH264.Uwp_Release_ARM
 
     
-     steps:
+    steps:
       - uses: actions/checkout@v2
         with:
           submodules: 'recursive'
