@@ -86,15 +86,13 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>$(SolutionDir)..\Build\$(Configuration)_$(Platform)\</OutDir>
-    <IncludePath>$(OutDir);$(ProjectDir)..\Source\SoyLib\src;$(ProjectDir)..\Source\Json11;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)..\Source\SoyLib\src;$(ProjectDir)..\Source\Json11;$(SolutionDir)..\Build\PopH264_$(Configuration)_$(Platform)\;$(IncludePath)</IncludePath>
     <LibraryPath>$(OutDir);$(LibraryPath)</LibraryPath>
     <IntDir>$(SolutionDir)$(ProjectName)_$(Platform)_$(Configuration)\Temp\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(SolutionDir)..\Build\$(Configuration)_$(Platform)\</OutDir>
-    <IncludePath>$(OutDir);$(ProjectDir)..\Source\SoyLib\src;$(ProjectDir)..\Source\Json11;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)..\Source\SoyLib\src;$(ProjectDir)..\Source\Json11;$(SolutionDir)..\Build\PopH264_$(Configuration)_$(Platform)\;$(IncludePath)</IncludePath>
     <LibraryPath>$(OutDir);$(LibraryPath)</LibraryPath>
     <IntDir>$(SolutionDir)$(ProjectName)_$(Platform)_$(Configuration)\Temp\</IntDir>
   </PropertyGroup>

@@ -58,3 +58,5 @@ Unity/PopH264/Assets/PopH264/
 
 # macos system files
 .DS_Store
+
+PopH264.visualstudio/PopH264.Uwp_x64_Debug/
