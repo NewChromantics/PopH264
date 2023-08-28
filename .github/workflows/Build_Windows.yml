@@ -34,13 +34,13 @@ jobs:
 
          - name: Windows Uwp Arm64
            project: PopH264.Uwp
-           BuildPlatform: ARM64
+           BuildPlatform: "ARM64 Uwp" # solution platform
            BuildConfiguration: Release
            OutputDirectory: Build\PopH264.Uwp_Release_ARM64
 
          - name: Windows Uwp Arm
            project: PopH264.Uwp
-           BuildPlatform: ARM
+           BuildPlatform: "ARM Uwp" # solution platform
            BuildConfiguration: Release
            OutputDirectory: Build\PopH264.Uwp_Release_ARM
 
