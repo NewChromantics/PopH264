@@ -190,8 +190,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # Download artifacts into Packaging dir
-      - uses: actions/checkout@v2
-        name: Download build artifacts
+      - name: Download build artifacts
         uses: actions/download-artifact@v2
         with:
           path: ${{ env.project }}.Package/
