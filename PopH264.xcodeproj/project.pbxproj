@@ -46,6 +46,12 @@
 		BF18269524226126006FEB93 /* json11.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF18269024226126006FEB93 /* json11.cpp */; };
 		BF1826B124228D31006FEB93 /* SoyFourcc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF1826AD24228D31006FEB93 /* SoyFourcc.cpp */; };
 		BF1826B224228D31006FEB93 /* SoyFourcc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF1826AD24228D31006FEB93 /* SoyFourcc.cpp */; };
+		BF1CB28C2A9D15710095D19A /* PopH264_Version.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF1CB28B2A9D15670095D19A /* PopH264_Version.cpp */; };
+		BF1CB28D2A9D15710095D19A /* PopH264_Version.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF1CB28B2A9D15670095D19A /* PopH264_Version.cpp */; };
+		BF1CB28E2A9D15720095D19A /* PopH264_Version.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF1CB28B2A9D15670095D19A /* PopH264_Version.cpp */; };
+		BF1CB28F2A9D15730095D19A /* PopH264_Version.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF1CB28B2A9D15670095D19A /* PopH264_Version.cpp */; };
+		BF1CB2902A9D15730095D19A /* PopH264_Version.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF1CB28B2A9D15670095D19A /* PopH264_Version.cpp */; };
+		BF1CB2912A9D15740095D19A /* PopH264_Version.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF1CB28B2A9D15670095D19A /* PopH264_Version.cpp */; };
 		BF1D95E42850CBF7008E3758 /* PopH264.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF8AB63821F20C41008E7E76 /* PopH264.cpp */; };
 		BF1D95E52850CBFE008E3758 /* AvfDecoder.mm in Sources */ = {isa = PBXBuildFile; fileRef = BFFBE97B245DB65000E9BE1B /* AvfDecoder.mm */; };
 		BF1D95E62850CC00008E3758 /* AvfEncoder.mm in Sources */ = {isa = PBXBuildFile; fileRef = BFC471812447523000A2DA70 /* AvfEncoder.mm */; };
@@ -375,6 +381,7 @@
 		BF1826AC24228D31006FEB93 /* SoyFourcc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SoyFourcc.h; path = Source/SoyLib/src/SoyFourcc.h; sourceTree = "<group>"; };
 		BF1826AD24228D31006FEB93 /* SoyFourcc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SoyFourcc.cpp; path = Source/SoyLib/src/SoyFourcc.cpp; sourceTree = "<group>"; };
 		BF1A4329266B93B1004BA276 /* SrcWeb */ = {isa = PBXFileReference; lastKnownFileType = folder; path = SrcWeb; sourceTree = "<group>"; };
+		BF1CB28B2A9D15670095D19A /* PopH264_Version.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = PopH264_Version.cpp; path = Source/PopH264_Version.cpp; sourceTree = "<group>"; };
 		BF1D95C22850C257008E3758 /* libx264.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libx264.a; path = Source/X264/osx/libx264.a; sourceTree = "<group>"; };
 		BF1D95E02850CB69008E3758 /* libPopH264.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libPopH264.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 		BF1FA6ED28759C7E002F03C5 /* libPopH264_Macos.a */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libPopH264_Macos.a; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1010,6 +1017,7 @@
 				BF096B1124B9158A00D985E5 /* NvidiaEncoder.cpp */,
 				BF096B1224B9158A00D985E5 /* NvidiaEncoder.h */,
 				BFE87C1D25E7E85E00224AB0 /* PopH264_WasmBroadwayDecoder.c */,
+				BF1CB28B2A9D15670095D19A /* PopH264_Version.cpp */,
 				BF8AB63821F20C41008E7E76 /* PopH264.cpp */,
 				BF8AB63721F20C41008E7E76 /* PopH264.h */,
 				BF459CDE21F7D60500CED59D /* PopH264Framework.h */,
@@ -1448,6 +1456,7 @@
 				BF1826B224228D31006FEB93 /* SoyFourcc.cpp in Sources */,
 				BF151FE42384787800A70EBF /* TDecoder.cpp in Sources */,
 				BF32256E2445ECD800C74D4D /* TDecoderInstance.cpp in Sources */,
+				BF1CB28E2A9D15720095D19A /* PopH264_Version.cpp in Sources */,
 				BFEF6A1F2469963B000A1F88 /* SoyH264.cpp in Sources */,
 				BF151FEA2384788600A70EBF /* SoyPixels.cpp in Sources */,
 				BF151FE62384788600A70EBF /* SoyArray.cpp in Sources */,
@@ -1488,6 +1497,7 @@
 				BF1D95F12850CC40008E3758 /* AvfPixelBuffer.mm in Sources */,
 				BF1D96072850CC79008E3758 /* SoyTypes.cpp in Sources */,
 				BF1D95F22850CC43008E3758 /* memheap.cpp in Sources */,
+				BF1CB28D2A9D15710095D19A /* PopH264_Version.cpp in Sources */,
 				BF1D95F42850CC47008E3758 /* SoyAssert.cpp in Sources */,
 				BF1D95F92850CC52008E3758 /* SoyH264.cpp in Sources */,
 				BF1D95EF2850CC2C008E3758 /* TEncoderInstance.cpp in Sources */,
@@ -1528,6 +1538,7 @@
 				BF1FA6D828759C7E002F03C5 /* AvfPixelBuffer.mm in Sources */,
 				BF1FA6D928759C7E002F03C5 /* SoyTypes.cpp in Sources */,
 				BF1FA6DA28759C7E002F03C5 /* memheap.cpp in Sources */,
+				BF1CB28F2A9D15730095D19A /* PopH264_Version.cpp in Sources */,
 				BF1FA6DB28759C7E002F03C5 /* SoyAssert.cpp in Sources */,
 				BF1FA6DC28759C7E002F03C5 /* SoyH264.cpp in Sources */,
 				BF1FA6DD28759C7E002F03C5 /* TEncoderInstance.cpp in Sources */,
@@ -1581,6 +1592,7 @@
 				BF459CFC21F7DB4400CED59D /* SoyDebug.cpp in Sources */,
 				BF32256D2445ECD800C74D4D /* TDecoderInstance.cpp in Sources */,
 				BFEF6A1E2469963A000A1F88 /* SoyH264.cpp in Sources */,
+				BF1CB28C2A9D15710095D19A /* PopH264_Version.cpp in Sources */,
 				BF459CF821F7DB4400CED59D /* SoyTime.cpp in Sources */,
 				BF51B8AE256A7203004DE4C7 /* SoyPlatform.mm in Sources */,
 				BF459CFA21F7DB4400CED59D /* SoyDebug.mm in Sources */,
@@ -1621,6 +1633,7 @@
 				BF985EC32876E9A900F04399 /* PopH264.cpp in Sources */,
 				BF985ED22876E9CB00F04399 /* SoyPlatform.mm in Sources */,
 				BF985EDB2876E9D900F04399 /* SoyTime.cpp in Sources */,
+				BF1CB2902A9D15730095D19A /* PopH264_Version.cpp in Sources */,
 				BF985ED02876E9CB00F04399 /* SoyAssert.cpp in Sources */,
 				BF985ECD2876E9CB00F04399 /* SoyAvf.mm in Sources */,
 				BF985EBF2876E98B00F04399 /* AvfEncoder.mm in Sources */,
@@ -1661,6 +1674,7 @@
 				BFAD0AA529C6706100CF7EA6 /* PopH264.cpp in Sources */,
 				BFAD0AA629C6706100CF7EA6 /* SoyPlatform.mm in Sources */,
 				BFAD0AA729C6706100CF7EA6 /* SoyTime.cpp in Sources */,
+				BF1CB2912A9D15740095D19A /* PopH264_Version.cpp in Sources */,
 				BFAD0AA829C6706100CF7EA6 /* SoyAssert.cpp in Sources */,
 				BFAD0AA929C6706100CF7EA6 /* SoyAvf.mm in Sources */,
 				BFAD0AAA29C6706100CF7EA6 /* AvfEncoder.mm in Sources */,

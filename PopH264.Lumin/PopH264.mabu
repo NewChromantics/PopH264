@@ -2,6 +2,7 @@ KIND = shared
 SRCS = \
 ../Source/Test.cpp \
 ../Source/PopH264.cpp	\
+../Source/PopH264_Version.cpp	\
 ../Source/TDecoder.cpp \
 ../Source/BroadwayDecoder.cpp \
 ../Source/BroadwayAll.c	\

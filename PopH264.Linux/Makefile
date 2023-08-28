@@ -24,6 +24,7 @@ LIB_INCLUDES = \
 
 LIB_SRC_FILES  = \
 $(SRC_PATH)/PopH264.cpp \
+$(SRC_PATH)/PopH264_Version.cpp \
 $(SRC_PATH)/PopH264TestData.cpp \
 $(SRC_PATH)/TDecoder.cpp \
 $(SRC_PATH)/TDecoderInstance.cpp \
