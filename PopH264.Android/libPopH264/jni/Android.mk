@@ -142,7 +142,8 @@ cmd-strip :=
 LOCAL_LDFLAGS	+= -Wl,-rpath,.
 
 LOCAL_MODULE := $(APP_MODULE)_shared
-LOCAL_MODULE_FILENAME := $(APP_MODULE) # outputs NAME.so
+# remember, unity requires lib at the start of android so's! (undocumented! see https://github.com/NewChromantics/MinimalUnityPlugin/issues/1 )
+LOCAL_MODULE_FILENAME := lib$(APP_MODULE) # outputs NAME.so
 
 include $(BUILD_SHARED_LIBRARY)
 
