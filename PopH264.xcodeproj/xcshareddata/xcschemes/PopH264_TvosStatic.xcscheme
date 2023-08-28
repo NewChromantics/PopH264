@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "BFAD0A8F29C6706100CF7EA6"
-               BuildableName = "libPopH264_TvosStatic.a"
+               BuildableName = "libPopH264_Tvos.a"
                BlueprintName = "PopH264_TvosStatic"
                ReferencedContainer = "container:PopH264.xcodeproj">
             </BuildableReference>
@@ -51,7 +51,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "BFAD0A8F29C6706100CF7EA6"
-            BuildableName = "libPopH264_TvosStatic.a"
+            BuildableName = "libPopH264_Tvos.a"
             BlueprintName = "PopH264_TvosStatic"
             ReferencedContainer = "container:PopH264.xcodeproj">
          </BuildableReference>
