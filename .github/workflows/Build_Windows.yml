@@ -55,7 +55,7 @@ jobs:
       
       - name: Build ${{ matrix.config.name }}
         id: Build
-        uses: NewChromantics/PopAction_BuildWindows@v1.2.0
+        uses: NewChromantics/PopAction_BuildWindows@v1.2.1
         with:
           BuildSolution: PopH264.visualstudio/PopH264.sln
           BuildPlatform: ${{ matrix.config.BuildPlatform }}
