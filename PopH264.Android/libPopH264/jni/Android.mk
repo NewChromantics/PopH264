@@ -70,6 +70,7 @@ $(LOCAL_PATH)/$(SRC)/Source/Json11	\
 # todo: generate from input from xcode
 LOCAL_SRC_FILES  := \
 $(SRC)/Source/PopH264.cpp \
+$(SRC)/Source/PopH264_Version.cpp \
 $(SRC)/Source/PopH264TestData.cpp \
 $(SRC)/Source/TDecoder.cpp \
 $(SRC)/Source/TDecoderInstance.cpp \

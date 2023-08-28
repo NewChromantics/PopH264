@@ -19,31 +19,31 @@ jobs:
            project: PopH264
            BuildPlatform: x64
            BuildConfiguration: Release
-           OutputDirectory: PopH264_Release_x64
+           OutputDirectory: Windows/PopH264_Release_x64
 
          - name: Windows Static x64
            project: PopH264
            BuildPlatform: x64
            BuildConfiguration: Static
-           OutputDirectory: PopH264_Static_x64
+           OutputDirectory: Windows/PopH264_Static_x64
 
          - name: Windows Uwp x64
            project: PopH264.Uwp
            BuildPlatform: "x64 Uwp" # Solution platform
            BuildConfiguration: Release
-           OutputDirectory: PopH264_Uwp_Release_x64
+           OutputDirectory: Windows/PopH264_Uwp_Release_x64
 
          - name: Windows Uwp Arm64
            project: PopH264.Uwp
            BuildPlatform: "ARM64 Uwp" # solution platform
            BuildConfiguration: Release
-           OutputDirectory: PopH264_Uwp_Release_ARM64
+           OutputDirectory: Windows/PopH264_Uwp_Arm64
 
          - name: Windows Uwp Arm
            project: PopH264.Uwp
            BuildPlatform: "ARM Uwp" # solution platform
            BuildConfiguration: Release
-           OutputDirectory: PopH264_Uwp_Release_ARM
+           OutputDirectory: Windows/PopH264_Uwp_Arm
 
     
     steps:
@@ -68,6 +68,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           # gr: newer versions of build action use outputs
-          name: ${{ steps.Build.outputs.UPLOAD_NAME }}
+          #name: ${{ steps.Build.outputs.UPLOAD_NAME }}
+          name: ${{ matrix.config.name }}	# different artifact names so they don't override eachother
           path: ${{ steps.Build.outputs.UPLOAD_DIR }}
           if-no-files-found: error
