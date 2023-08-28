@@ -195,13 +195,18 @@ jobs:
     needs: Build
     runs-on: ubuntu-latest
     steps:
-      # Download artifacts into Packaging dir
+      # Download project still, for package meta mostly (don't need submodules)
+      - name: Checkout repo for packaging
+        uses: actions/checkout@v2
+
+      # Download ALL artifacts into Packaging dir
       - name: Download build artifacts
         uses: actions/download-artifact@v2
         with:
           path: ${{ env.project }}.Package/
 
       # copy files we want in the release/package into the package dir
+      # we use this to collate ALL the final files!
       - name: Copy files for packaging
         run: |
          echo Copying files into $PACKAGE_DIR
