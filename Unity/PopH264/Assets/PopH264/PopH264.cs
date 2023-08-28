@@ -1,4 +1,3 @@
-#define POPH264_AS_PACKAGE	//	disable this when testing Poph264 builds (which are placed in /Assets/PopH264)
 using UnityEngine;
 using System.Collections;					// required for Coroutines
 using System.Runtime.InteropServices;		// required for DllImport
@@ -13,19 +12,9 @@ using System.Collections.Generic;
 public static class PopH264
 {
 #if UNITY_UWP
-	private const string PluginName = "PopH264.Uwp";
-#error building uwp
+	private const string PluginName = "PopH264.Uwp";	//	PopH264.Uwp.dll
 #elif UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
-#if POPH264_AS_PACKAGE
-	private const string PluginFrameworkPath = "Packages/com.newchromantics.poph264/PopH264.xcframework/macos-x86_64/";
-#else
-	// universal xcframework
-	//private const string PluginFrameworkPath = "Assets/PopH264/PopH264.xcframework/macos-x86_64/";
-	private const string PluginFrameworkPath = "Assets/PopH264/";
-#endif
-	private const string PluginExecutable = "PopH264_Osx.framework/PopH264_Osx";
-	//private const string PluginExecutable = "PopH264_Osx.framework/Versions/A/PopH264_Osx";
-	private const string PluginName = PluginFrameworkPath+PluginExecutable;
+	private const string PluginName = "PopH264";	//	libPopH264.dylib
 #elif UNITY_IPHONE
 	private const string PluginName = "__Internal";
 #else
@@ -119,14 +108,32 @@ public static class PopH264
 		public int[]			ImageRect;		//	some decoders will output an image aligned to say, 16 (macro blocks, or byte alignment etc) If the image is padded, we should have a [x,y,w,h] array here
 	};
 	
-	static public string GetString(byte[] Ascii)
+	//	if we make this public for re-use, give it a name that doesn't suggest this is an API function
+	//	make sure we use this! using GetString without all 0's will crash unity as console tries to print it
+	static private string GetString(byte[] Ascii)
 	{
+		if ( Ascii[0] == 0 )
+			return null;
 		var String = System.Text.ASCIIEncoding.ASCII.GetString(Ascii);
+		
+		//	clip string as unity doesn't cope well with large terminator strings
 		var TerminatorPos = String.IndexOf('\0');
 		if (TerminatorPos >= 0)
 			String = String.Substring(0, TerminatorPos);
 		return String;
 	}
+
+
+	//	nice wrappers for raw CAPI calls
+	static public string		GetVersion()
+	{
+		var Version = PopH264_GetVersion();
+		var Major = (Version / (100 * 100000));
+		var Minor = (Version / 100000) % 100;
+		var Patch = (Version) % 100000;
+		return $"{Major}.{Minor}.{Patch}";
+	}
+
 
 	public struct FrameInput
 	{
@@ -188,8 +195,7 @@ public static class PopH264
 		public Decoder(DecoderParams? DecoderParams,bool ThreadedDecoding)
 		{
 			//	show version on first call
-			var Version = PopH264_GetVersion();
-			Debug.Log("PopH264 version " + Version);
+			Debug.Log($"PopH264 version {GetVersion()}");
 			
 			this.ThreadedDecoding = ThreadedDecoding;
 

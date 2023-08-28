@@ -1,0 +1,4 @@
+#include "./PopH264_Osx.xcconfig"
+
+//	explicit name for dylib so output ends up at libPopH264.dylib
+PRODUCT_NAME = PopH264
