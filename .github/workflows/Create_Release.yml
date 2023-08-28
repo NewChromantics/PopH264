@@ -19,18 +19,18 @@ on:
 
 jobs:
   Build:
-    name: ${{ matrix.config.os }}-${{ matrix.config.name }}
+    name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
     strategy:
       matrix:
         config:
-          - os: ubuntu-18.04
+          - os: ubuntu-latest
             type: linux
             arch: x86_64
             name: Linux
             
-          - os: ubuntu-latest
-            type: Wasm
+          #- os: ubuntu-latest
+          #  type: Wasm
 
           # nvidia temporarily disabled... compiler out of date?
           #- os: Nvidia
@@ -50,6 +50,10 @@ jobs:
           - os: macos-12
             scheme: PopH264_Universal
             name: Apple Universal
+          
+          - os: macos-latest
+            scheme: PopH264_Ios
+            name: Ios Framework
           
           - os: macos-latest
             scheme: PopH264_MacosStatic
