@@ -43,8 +43,6 @@ $(SOY_PATH)/src/SoyArray.cpp \
 $(SOY_PATH)/src/SoyTime.cpp \
 $(SOY_PATH)/src/SoyString.cpp \
 $(SOY_PATH)/src/SoyH264.cpp \
-$(SOY_PATH)/src/SoyPng.cpp \
-$(SOY_PATH)/src/SoyImage.cpp \
 $(SOY_PATH)/src/SoyFourcc.cpp \
 $(SOY_PATH)/src/SoyThread.cpp \
 

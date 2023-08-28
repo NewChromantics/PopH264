@@ -97,17 +97,8 @@ $(SOY_PATH)/src/SoyString.cpp \
 $(SOY_PATH)/src/SoyH264.cpp \
 $(SOY_PATH)/src/SoyFourcc.cpp \
 $(SOY_PATH)/src/SoyThread.cpp \
-$(SOY_PATH)/src/SoyMediaFormat.cpp \
 $(SOY_PATH)/src/SoyRuntimeLibrary.cpp \
 $(SOY_PATH)/src/SoyPlatform.cpp \
-
-#$(SOY_PATH)/src/SoyOpengl.cpp \
-#$(SOY_PATH)/src/SoyOpenglContext.cpp \
-#$(SOY_PATH)/src/SoyEvent.cpp \
-#$(SOY_PATH)/src/SoyShader.cpp \
-#$(SOY_PATH)/src/SoyUnity.cpp \
-#$(SOY_PATH)/src/SoyBase64.cpp \
-#$(SOY_PATH)/src/SoyGraphics.cpp \
 
 
 #$(call import-module,android-ndk-profiler)
