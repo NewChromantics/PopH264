@@ -83,18 +83,27 @@ jobs:
           - name: Apple Universal
             runs_on: macos-12
             scheme: PopH264_Universal
+            destination: "platform=macOS" # has no effect, but gets passed to xcodebuild so will fail if empty (todo: fix in action!)
 
           - name: Ios Framework
             runs_on: macos-latest
             scheme: PopH264_Ios
+            destination: "generic/platform=iOS"
+            
+          - name: Tvos Static
+            runs_on: macos-latest
+            scheme: PopH264_TvosStatic
+            destination: "generic/platform=tvOS"
 
           - name: Macos Static
             runs_on: macos-latest
             scheme: PopH264_MacosStatic
+            destination: "generic/platform=macOS"
 
           - name: Macos Dylib
             runs_on: macos-latest
             scheme: PopH264_MacosDylib
+            destination: "generic/platform=macOS"
 
           - name: Android
             runs_on: ubuntu-latest
@@ -132,10 +141,11 @@ jobs:
       - name: Build Apple ${{matrix.config.scheme}}
         id: Apple
         if: matrix.config.scheme != ''
-        uses: NewChromantics/PopAction_BuildApple@v1.0.11
+        uses: NewChromantics/PopAction_BuildApple@v1.2.2
         with:
           BuildScheme: ${{matrix.config.scheme}}
           project: ${{ env.project }}
+          destination: ${{ matrix.config.destination }}
 
       - name: Build Linux ${{ matrix.config.linux_target }}
         id: Linux
