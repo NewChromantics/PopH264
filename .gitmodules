@@ -4,21 +4,9 @@
 [submodule "Source/Broadway"]
 	path = Source/Broadway
 	url = https://github.com/SoylentGraham/Broadway.git
-[submodule "Unity/PopH264/Assets/PopCodecs"]
-	path = Unity/PopH264/Assets/PopCodecs
-	url = https://github.com/NewChromantics/PopCodecs.git
 [submodule "Source/Json11"]
 	path = Source/Json11
 	url = https://github.com/dropbox/json11.git
-[submodule "Unity/PopH264/Assets/PopYuv"]
-	path = Unity/PopH264/Assets/PopYuv
-	url = https://github.com/NewChromantics/PopUnityYuvShader.git
-[submodule "Unity/PopH264/Assets/PopUnityWebsocket"]
-	path = Unity/PopH264/Assets/PopUnityWebsocket
-	url = https://github.com/NewChromantics/PopUnityWebsocket.git
-[submodule "Unity/PopH264/Assets/PopUnityAndroidZipReader"]
-	path = Unity/PopH264/Assets/PopUnityAndroidZipReader
-	url = https://github.com/NewChromantics/PopUnityAndroidZipReader.git
 [submodule "TestData"]
 	path = TestData
 	url = https://github.com/NewChromantics/PopH264TestData.git
