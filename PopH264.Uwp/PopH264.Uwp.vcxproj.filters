@@ -4,14 +4,110 @@
     <Filter Include="Source">
       <UniqueIdentifier>{34256f74-9d84-4dd9-8219-d2aba029edd6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Soylib">
+      <UniqueIdentifier>{26b7c47e-0370-4d0c-9512-ff5090f31524}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Source\PopH264_Version.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source\FileReader.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\MediaFoundationDecoder.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\MediaFoundationTransformer.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\PopH264.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\TDecoder.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\TDecoderInstance.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\SoyLib\src\memheap.cpp">
+      <Filter>Source\Soylib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\SoyLib\src\SoyH264.cpp">
+      <Filter>Source\Soylib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\SoyLib\src\SoyPlatform.cpp">
+      <Filter>Source\Soylib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\SoyLib\src\SoyString.cpp">
+      <Filter>Source\Soylib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\SoyLib\src\SoyFourcc.cpp">
+      <Filter>Source\Soylib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\SoyLib\src\SoyPixels.cpp">
+      <Filter>Source\Soylib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Json11\json11.cpp">
+      <Filter>Source\Soylib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\SoyLib\src\SoyTypes.cpp">
+      <Filter>Source\Soylib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\SoyLib\src\SoyArray.cpp">
+      <Filter>Source\Soylib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\SoyLib\src\SoyTime.cpp">
+      <Filter>Source\Soylib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\TEncoder.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\TEncoderInstance.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\PopH264TestData.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\SoyLib\src\SoyDebug.cpp">
+      <Filter>Source\Soylib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\MediaFoundationEncoder.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\PopH264.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\FileReader.hpp">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\MediaFoundationDecoder.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\MediaFoundationTransformer.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\TDecoder.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\TDecoderInstance.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\TInstanceManager.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\TEncoder.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\TEncoderInstance.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\PopH264TestData.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\MediaFoundationEncoder.h">
       <Filter>Source</Filter>
     </ClInclude>
   </ItemGroup>

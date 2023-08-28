@@ -25,13 +25,8 @@ build-iphonesimulator/
 
 
 # visual studio temporary files
-PopH264.visualstudio/PopH264_TestApp/x64/
+PopH264.visualstudio/PopH264*/
 *.user
-PopH264.visualstudio/PopH264_TestApp_x64_Debug/
-PopH264.visualstudio/PopH264_x64_Debug/
-PopH264.visualstudio/PopH264_x64_Release/
-PopH264.visualstudio/PopH264_TestApp_x64_Release/
-PopH264.visualstudio/PopH264_x64_Static/
 
 
 # vscode files
@@ -59,6 +54,3 @@ Unity/PopH264/Assets/PopH264/
 # macos system files
 .DS_Store
 
-PopH264.visualstudio/PopH264.Uwp_x64_Debug/
-
-PopH264.visualstudio/PopH264.Uwp_ARM64_Release/

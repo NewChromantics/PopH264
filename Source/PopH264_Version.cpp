@@ -50,9 +50,9 @@ namespace PopH264
 
 	//	gr: use macros once linux is automated
 	//const Soy::TVersion	Version(VERSION_MAJOR,VERSION_MINOR,VERSION_PATCH);
-	constexpr size_t	VersionMajor = 1;
-	constexpr size_t	VersionMinor = 6;
-	constexpr size_t	VersionPatch = 0;
+	constexpr int	VersionMajor = 1;
+	constexpr int	VersionMinor = 6;
+	constexpr int	VersionPatch = 0;
 }
 
 
@@ -63,7 +63,7 @@ __export int32_t PopH264_GetVersion()
 	Version *= 100;
 
 	Version += PopH264::VersionMinor;
-	Version *= 100;
+	Version *= 100000;
 
 	Version += PopH264::VersionPatch;
 

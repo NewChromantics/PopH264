@@ -90,6 +90,7 @@
     <ClCompile Include="..\Source\MediaFoundationTransformer.cpp" />
     <ClCompile Include="..\Source\PopH264.cpp" />
     <ClCompile Include="..\Source\PopH264TestData.cpp" />
+    <ClCompile Include="..\Source\PopH264_Version.cpp" />
     <ClCompile Include="..\Source\SoyLib\src\memheap.cpp" />
     <ClCompile Include="..\Source\SoyLib\src\SoyArray.cpp" />
     <ClCompile Include="..\Source\SoyLib\src\SoyAssert.cpp" />
@@ -309,7 +310,7 @@
     <ClCompile>
       <PrecompiledHeader>
       </PrecompiledHeader>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link />
     <Link />
@@ -321,6 +322,7 @@
     <ClCompile>
       <PrecompiledHeader>
       </PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>
     <Link />
     <Link />

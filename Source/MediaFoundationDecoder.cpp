@@ -27,8 +27,7 @@ namespace MediaFoundation
 
 
 MediaFoundation::TDecoder::TDecoder(PopH264::TDecoderParams& Params,PopH264::OnDecodedFrame_t OnDecodedFrame,PopH264::OnFrameError_t OnFrameError) :
-	PopH264::TDecoder	( OnDecodedFrame, OnFrameError ),
-	mParams				( Params )
+	PopH264::TDecoder	( Params, OnDecodedFrame, OnFrameError )
 {
 	//	move this to first data setup, so we know what kind of transformer to make, in case jpeg is pushed
 	//	or... do we try and make a h264 transformer anyway in the rare case of a jpeg so we know support

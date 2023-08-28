@@ -222,6 +222,9 @@
     <ClCompile Include="..\Source\FileReader.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source\PopH264_Version.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\SoyLib\src\Array.hpp">

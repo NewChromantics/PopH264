@@ -8,13 +8,13 @@
 #include <SoyPixels.h>
 
 #include <combaseapi.h>
+//#include <mfobjects.h>	//	can't forward declare _MFT_MESSAGE_TYPE
 #include <mftransform.h>	//	can't forward declare _MFT_MESSAGE_TYPE
 
 #include "json11.hpp"
 #include <span>
 
 
-class IMFAttributes;
 
 namespace MediaFoundation
 {
@@ -47,8 +47,6 @@ namespace MediaFoundation
 }
 std::ostream&	operator<<(std::ostream &out, const PROPVARIANT& in);
 
-class IMFTransform;
-class IMFMediaType;
 
 class MediaFoundation::TActivateMeta
 {
