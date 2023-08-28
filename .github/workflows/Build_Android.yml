@@ -20,7 +20,8 @@ jobs:
         submodules: 'recursive'
 
     - name: Build Android lib
-      uses: NewChromantics/PopAction_BuildAndroid@v2
+      id: Build
+      uses: NewChromantics/PopAction_BuildAndroid@v2.0.1
       with:
         buildtargetname: "PopH264"
         buildpath: "PopH264.Android/libPopH264"
@@ -28,6 +29,6 @@ jobs:
     - name: Upload artifacts
       uses: actions/upload-artifact@v2
       with:
-        # tsdk: these env vars are set in each of the actions
-        name: ${{ env.UPLOAD_NAME }}
-        path: ${{ env.UPLOAD_DIR }}
+        name: ${{ steps.Build.outputs.UPLOAD_NAME }}
+        path: ${{ steps.Build.outputs.UPLOAD_DIR }}
+        if-no-files-found: error

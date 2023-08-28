@@ -159,7 +159,7 @@ jobs:
       - name: Build Android Lib
         id: Android
         if: matrix.config.type == 'Android'
-        uses: NewChromantics/PopAction_BuildAndroid@v2
+        uses: NewChromantics/PopAction_BuildAndroid@v2.0.1
         with:
           buildtargetname: ${{ env.project }}
           buildpath: ${{ env.project }}.Android/lib${{ env.project }}
