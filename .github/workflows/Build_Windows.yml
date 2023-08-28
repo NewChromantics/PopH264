@@ -18,31 +18,31 @@ jobs:
            project: PopH264
            BuildPlatform: x64
            BuildConfiguration: Release
-           OutputDirectory: ${{ env.GITHUB_WORKSPACE }}\PopH264_Release_x64\
+           OutputDirectory: PopH264_Release_x64
 
          - name: Windows Static x64
            project: PopH264
            BuildPlatform: x64
            BuildConfiguration: Static
-           OutputDirectory: ${{ env.GITHUB_WORKSPACE }}\PopH264_Static_x64\
+           OutputDirectory: PopH264_Static_x64
 
          - name: Windows Uwp x64
            project: PopH264.Uwp
            BuildPlatform: x64
            BuildConfiguration: Release
-           OutputDirectory: ${{ env.GITHUB_WORKSPACE }}\PopH264.Uwp_Release_x64\
+           OutputDirectory: PopH264_Uwp_Release_x64
 
          - name: Windows Uwp Arm64
            project: PopH264.Uwp
            BuildPlatform: "ARM64 Uwp" # solution platform
            BuildConfiguration: Release
-           OutputDirectory: ${{ env.GITHUB_WORKSPACE }}\PopH264.Uwp_Release_ARM64\
+           OutputDirectory: PopH264_Uwp_Release_ARM64
 
          - name: Windows Uwp Arm
            project: PopH264.Uwp
            BuildPlatform: "ARM Uwp" # solution platform
            BuildConfiguration: Release
-           OutputDirectory: ${{ env.GITHUB_WORKSPACE }}\PopH264.Uwp_Release_ARM\
+           OutputDirectory: PopH264_Uwp_Release_ARM
 
     
     steps:
@@ -60,7 +60,7 @@ jobs:
           BuildSolution: PopH264.visualstudio/PopH264.sln
           BuildPlatform: ${{ matrix.config.BuildPlatform }}
           BuildConfiguration: ${{ matrix.config.BuildConfiguration }}
-          OutputDirectory: ${{ matrix.config.OutputDirectory }}
+          OutputDirectory: ${{ github.workspace }}\${{ matrix.config.OutputDirectory }}\ # need an absolute path here, must end with trailing slash
           project: ${{ matrix.config.project }}
 
       - name: Upload Artifacts
