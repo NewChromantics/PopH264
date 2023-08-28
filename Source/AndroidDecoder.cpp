@@ -1095,10 +1095,12 @@ void Android::TInputThread::PushInputBuffer(int64_t BufferIndex,MediaCodec_t Cod
 	//	gr: as we can submit an offset, we could LOCK the pending data, submit, then unlock & delete and save a copy
 	size_t BufferWrittenSize = 0;
 	auto BufferArray = GetRemoteArray( Buffer, BufferSize, BufferWrittenSize );
+	std::span BufferSpan( Buffer, BufferSize );
 	PopH264::FrameNumber_t PacketTime = 0;
 	mPopPendingData( GetArrayBridge(BufferArray), PacketTime );
 	
-	auto H264PacketType = H264::GetPacketType(GetArrayBridge(BufferArray));
+	
+	auto H264PacketType = H264::GetPacketType(BufferSpan);
 		
 	//	process buffer
 	int64_t DataOffset = 0;
