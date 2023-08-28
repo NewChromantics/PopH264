@@ -18,31 +18,31 @@ jobs:
            project: PopH264
            BuildPlatform: x64
            BuildConfiguration: Release
-           BuildDirectory: Build\PopH264_Release_x64
+           OutputDirectory: Build\PopH264_Release_x64
 
          - name: Windows Static x64
            project: PopH264
            BuildPlatform: x64
            BuildConfiguration: Static
-           BuildDirectory: Build\PopH264_Static_x64
+           OutputDirectory: Build\PopH264_Static_x64
 
          - name: Windows Uwp x64
            project: PopH264.Uwp
            BuildPlatform: x64
            BuildConfiguration: Release
-           BuildDirectory: Build\PopH264.Uwp_Release_x64
+           OutputDirectory: Build\PopH264.Uwp_Release_x64
 
          - name: Windows Uwp Arm64
            project: PopH264.Uwp
            BuildPlatform: ARM64
            BuildConfiguration: Release
-           BuildDirectory: Build\PopH264.Uwp_Release_ARM64
+           OutputDirectory: Build\PopH264.Uwp_Release_ARM64
 
          - name: Windows Uwp Arm
            project: PopH264.Uwp
            BuildPlatform: ARM
            BuildConfiguration: Release
-           BuildDirectory: Build\PopH264.Uwp_Release_ARM
+           OutputDirectory: Build\PopH264.Uwp_Release_ARM
 
     
     steps:
@@ -60,8 +60,7 @@ jobs:
           BuildSolution: PopH264.visualstudio/PopH264.sln
           BuildPlatform: ${{ matrix.config.BuildPlatform }}
           BuildConfiguration: ${{ matrix.config.BuildConfiguration }}
-          # would be nice to extract this from visual studio
-          BuildDirectory: ${{ matrix.config.BuildDirectory }}
+          OutputDirectory: ${{ matrix.config.OutputDirectory }}
           project: ${{ matrix.config.project }}
 
       - name: Upload Artifacts
