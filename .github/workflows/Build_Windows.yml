@@ -1,6 +1,7 @@
 name: Build Windows
 
 on:
+  pull_request:
   push:
     branches:
       - master
@@ -8,30 +9,63 @@ on:
 
 jobs:
   Build:
+    name: ${{ matrix.config.name }}    
     runs-on: windows-latest
-    env:
-      project: PopH264
-    
-    steps:
-    - uses: actions/checkout@v2
-      with:
-        submodules: 'recursive'
-        
-    - name: Add msbuild to PATH
-      uses: microsoft/setup-msbuild@v1.0.2
-      
-    - name: Windows
-      uses: NewChromantics/PopAction_BuildWindows@v1
-      with:
-        BuildPlatform: x64
-        BuildConfiguration: Release
-        # would be nice to extract this from visual studio
-        BuildDirectory: Build\Release_x6
-        project: ${{ env.project }}
+    strategy:
+      matrix:
+        config:
+         - name: Windows Dll x64
+           project: PopH264
+           BuildPlatform: x64
+           BuildConfiguration: Release
+           BuildDirectory: Build\PopH264_Release_x64
 
-    - name: Upload Artifacts
-      uses: actions/upload-artifact@v2
-      with:
-        # tsdk: these env vars are set in each of the actions
-        name: ${{ env.UPLOAD_NAME }}
-        path: ${{ env.UPLOAD_DIR }}
+         - name: Windows Static x64
+           project: PopH264
+           BuildPlatform: x64
+           BuildConfiguration: Static
+           BuildDirectory: Build\PopH264_Static_x64
+
+         - name: Windows Uwp x64
+           project: PopH264.Uwp
+           BuildPlatform: x64
+           BuildConfiguration: Release
+           BuildDirectory: Build\PopH264.Uwp_Release_x64
+
+         - name: Windows Uwp Arm64
+           project: PopH264.Uwp
+           BuildPlatform: ARM64
+           BuildConfiguration: Release
+           BuildDirectory: Build\PopH264.Uwp_Release_ARM64
+
+         - name: Windows Uwp Arm
+           project: PopH264.Uwp
+           BuildPlatform: ARM
+           BuildConfiguration: Release
+           BuildDirectory: Build\PopH264.Uwp_Release_ARM
+
+    
+     steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
+        
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v1.0.2
+      
+      - name: Build ${{ matrix.config.name }}
+        uses: NewChromantics/PopAction_BuildWindows@v1
+        with:
+          BuildPlatform: ${{ matrix.config.BuildPlatform }}
+          BuildConfiguration: ${{ matrix.config.BuildConfiguration }}
+          # would be nice to extract this from visual studio
+          BuildDirectory: ${{ matrix.config.BuildDirectory }}
+          project: ${{ matrix.config.project }}
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          # gr: newer versions of build action use outputs
+          name: ${{ env.UPLOAD_NAME }}
+          path: ${{ env.UPLOAD_DIR }}
+          if-no-files-found: error
