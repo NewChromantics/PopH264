@@ -2,6 +2,7 @@
 #include <sstream>
 #include "PopH264.h"
 #include "SoyPixels.h"
+#include <thread>
 
 #if !defined(TARGET_WINDOWS) && defined(_MSC_VER)
 #define TARGET_WINDOWS
@@ -15,9 +16,6 @@
 //#include <Windows.h>
 #endif
 
-
-#if defined(TARGET_WINDOWS)//||defined(TARGET_LINUX)||defined(TARGET_ANDROID)
-//	instead of building SoyFilesystem.cpp
 namespace Platform
 {
 	std::string	GetAppResourcesDirectory();
@@ -25,13 +23,16 @@ namespace Platform
 	void		CaptureStdErr();
 	void		DebugLog(const char* text);
 }
+
+
+#if defined(TARGET_WINDOWS)//||defined(TARGET_LINUX)||defined(TARGET_ANDROID)
+//	instead of building SoyFilesystem.cpp
 std::string Platform::GetAppResourcesDirectory()
 {
 	return "";
 }
 #endif
 
-#include <thread>
 
 extern void MakeGreyscalePng(const char* Filename);
 extern void CompareGreyscale(const char* MetaJson,uint8_t* Plane0Data,uint8_t* Plane1Data,uint8_t* Plane2Data);
@@ -77,6 +78,7 @@ protected:
 
 
 basic_debugbuf<char> OutputBuf;
+
 
 void Platform::CaptureStdErr()
 {
@@ -447,8 +449,10 @@ void SafeDecoderTest(const char* TestDataName,CompareFunc_t* Compare,const char*
 
 int main()
 {
+#if defined(TARGET_WINDOWS)
 	Platform::CaptureStdErr();
-
+#endif
+	
 	SafeDecoderTest("Cat.jpg", nullptr, nullptr );
 	
 	//if ( false )
