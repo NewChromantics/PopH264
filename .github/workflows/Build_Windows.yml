@@ -2,6 +2,7 @@ name: Build Windows
 
 on:
   pull_request:
+  workflow_dispatch:
   push:
     branches:
       - master

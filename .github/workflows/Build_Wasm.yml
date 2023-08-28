@@ -1,6 +1,8 @@
 name: Build Wasm
 
 on:
+  pull_request:
+  workflow_dispatch:
   push:
     branches:
       - master

@@ -1,6 +1,8 @@
 name: Build Linux
 
 on:
+  pull_request:
+  workflow_dispatch:
   push:
     branches:
       - master

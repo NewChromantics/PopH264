@@ -4,6 +4,8 @@ env:
   project: PopH264
 
 on:
+  pull_request:
+  workflow_dispatch:
   push:
     branches:
       - master
