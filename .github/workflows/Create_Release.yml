@@ -22,56 +22,87 @@ on:
 jobs:
   Build:
     name: ${{ matrix.config.name }}
-    runs-on: ${{ matrix.config.os }}
+    runs-on: ${{ matrix.config.runs_on }}
     strategy:
       matrix:
         config:
-          - os: ubuntu-latest
-            type: linux
+          - name: Linux x64
+            runs_on: ubuntu-latest
+            linux_target: linux
             arch: x86_64
-            name: Linux
             
           #- os: ubuntu-latest
           #  type: Wasm
 
           # nvidia temporarily disabled... compiler out of date?
-          #- os: Nvidia
-          #  type: linux
+          #- name: Nvidia Linux
+          #  runs_on: Nvidia
+          #  linux_target: Nvidia
           #  arch: arm64
-          #  name: Nvidia Linux
 
-          # - os: Pi4
-          #   type: linux
-          #   architecture: arm64
-          #    name: Raspberry Pi
+          # - name: Pi4
+          #   runs_on: Raspberry Pi
+          #   linux_target: pi
+          #   arch: arm64
 
-          - os: windows-latest
+          - name: Windows Dll x64
+            runs_on: windows-latest
+            project: PopH264
+            BuildPlatform: x64
+            BuildConfiguration: Release
+            OutputDirectory: Windows/PopH264_Release_x64
+
+          - name: Windows Static x64
+            runs_on: windows-latest
+            project: PopH264
+            BuildPlatform: x64
+            BuildConfiguration: Static
+            OutputDirectory: Windows/PopH264_Static_x64
+
+          - name: Windows Uwp x64
+            runs_on: windows-latest
+            project: PopH264.Uwp
+            BuildPlatform: "x64 Uwp" # Solution platform
+            BuildConfiguration: Release
+            OutputDirectory: Windows/PopH264_Uwp_Release_x64
+
+          - name: Windows Uwp Arm64
+            runs_on: windows-latest
+            project: PopH264.Uwp
+            BuildPlatform: "ARM64 Uwp" # solution platform
+            BuildConfiguration: Release
+            OutputDirectory: Windows/PopH264_Uwp_Arm64
+
+          - name: Windows Uwp Arm
+            runs_on: windows-latest
+            project: PopH264.Uwp
+            BuildPlatform: "ARM Uwp" # solution platform
+            BuildConfiguration: Release
+            OutputDirectory: Windows/PopH264_Uwp_Arm
+           
+          - name: Windows x64
+            runs_on: windows-latest
             type: x64
-            name: Windows x64
 
-          - os: macos-12
+          - name: Apple Universal
+            runs_on: macos-12
             scheme: PopH264_Universal
-            name: Apple Universal
-          
-          - os: macos-latest
+
+          - name: Ios Framework
+            runs_on: macos-latest
             scheme: PopH264_Ios
-            name: Ios Framework
-          
-          - os: macos-latest
+
+          - name: Macos Static
+            runs_on: macos-latest
             scheme: PopH264_MacosStatic
-            name: Macos Static
 
-          - os: macos-latest
+          - name: Macos Dylib
+            runs_on: macos-latest
             scheme: PopH264_MacosDylib
-            name: Macos Dylib
 
-          - os: macos-latest
-            scheme: PopH264_Ios
-            name: Ios Framework
-
-          - os: ubuntu-latest
+          - name: Android
+            runs_on: ubuntu-latest
             type: Android
-            name: Android
 
     steps:
       - name: Checkout repo
@@ -80,22 +111,22 @@ jobs:
           submodules: recursive
 
       - name: Configure Windows
-        if: matrix.config.os == 'windows-latest'
+        if: matrix.config.BuildConfiguration != ''
         uses: microsoft/setup-msbuild@v1.0.2
 
       - name: Windows
         id: Windows
-        if: matrix.config.os == 'windows-latest'
-        uses: NewChromantics/PopAction_BuildWindows@v1
+        if: matrix.config.BuildConfiguration != ''
+        uses: NewChromantics/PopAction_BuildWindows@v1.2.2
         with:
-          BuildPlatform: x64
-          BuildConfiguration: Release
-          # would be nice to extract this from visual studio
-          BuildDirectory: Build\Release_x64
-          project: ${{ env.project }}
+          BuildSolution: PopH264.visualstudio/PopH264.sln
+          BuildPlatform: ${{ matrix.config.BuildPlatform }}
+          BuildConfiguration: ${{ matrix.config.BuildConfiguration }}
+          OutputDirectory: ${{ github.workspace }}\${{ matrix.config.OutputDirectory }}\ # need an absolute path here, must end with trailing slash
+          project: ${{ matrix.config.project }}
 
       - name: "Import Apple-Distriubution NewChromantics Signing Certificate"
-        if: startsWith(matrix.config.os,'macos')
+        if: startsWith(matrix.config.runs_on,'macos')
         uses: NewChromantics/import-signing-certificate@v1.0.2
         with:
           certificate-data: ${{ secrets.APPLE_DIST_NEWCHROMANTICS_P12 }}
@@ -112,10 +143,10 @@ jobs:
 
       - name: Linux
         id: Linux
-        if: matrix.config.type == 'linux'
+        if: matrix.config.linux_target != ''
         uses: NewChromantics/PopAction_BuildLinux@v1
         with:
-          os: ${{ matrix.config.os }}
+          os: ${{ matrix.config.linux_target }}
           project: ${{ env.project }}
           arch: ${{ matrix.config.arch }}
 
@@ -140,18 +171,19 @@ jobs:
           BUILD_TARGET_NAME: PopH264
         run: PopH264.Emscripten/Build.sh PopH264.Emscripten/ release
 
-      - name: Wasm set artifact env vars
+      - name: Wasm set artifact output vars
         if: matrix.config.type == 'Wasm'
         run: |
-          echo "UPLOAD_NAME=PopH264.Wasm" >> $GITHUB_ENV
-          echo "UPLOAD_DIR=PopH264.Emscripten/Build" >> $GITHUB_ENV 
+          echo "UPLOAD_NAME=PopH264.Wasm" >> $GITHUB_OUTPUT
+          echo "UPLOAD_DIR=PopH264.Emscripten/Build" >> $GITHUB_OUTPUT
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
-          # tsdk: these env vars are set in each of the actions
-          name: ${{ env.UPLOAD_NAME }}
-          path: ${{ env.UPLOAD_DIR }}
+          #name: ${{ steps.Windows.outputs.UPLOAD_NAME }}
+          name: ${{ matrix.config.name }}
+          path: ${{ steps.Windows.outputs.UPLOAD_DIR || steps.Linux.outputs.UPLOAD_DIR || steps.Android.outputs.UPLOAD_DIR || steps.Apple.outputs.UPLOAD_DIR }}
+          if-no-files-found: error
 
   publish-gpr:
     needs: Build
@@ -159,7 +191,7 @@ jobs:
     steps:
       # Download artifacts into Packaging dir
       - uses: actions/checkout@v2
-      - name: Download build artifacts
+        name: Download build artifacts
         uses: actions/download-artifact@v2
         with:
           path: ${{ env.project }}.Package/
