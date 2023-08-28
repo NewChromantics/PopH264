@@ -48,8 +48,9 @@ $(SOY_PATH)/src/SoyThread.cpp \
 
 APP_SRC_FILES =	\
 $(PROJECT_PATH)/Source_TestApp/PopH264_TestApp.cpp	\
-$(PROJECT_PATH)/Source_TestApp/PopH264_TestAssetGenerator.cpp	\
 $(SOY_PATH)/src/SoyFilesystem.cpp
+
+#$(PROJECT_PATH)/Source_TestApp/PopH264_TestAssetGenerator.cpp	\
 
 LIB_DEFINES = \
 -DTARGET_LINUX	\
