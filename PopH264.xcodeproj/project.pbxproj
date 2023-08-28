@@ -576,6 +576,7 @@
 		BF15207C2385930B00A70EBF /* libml_media_ccparser.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libml_media_ccparser.dylib; path = ../MagicLeap/mlsdk/v0.22.0/lib/osx/libml_media_ccparser.dylib; sourceTree = "<group>"; };
 		BF15207E238595C700A70EBF /* SoyRuntimeLibrary.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SoyRuntimeLibrary.h; path = Source/SoyLib/src/SoyRuntimeLibrary.h; sourceTree = "<group>"; };
 		BF15207F238595C700A70EBF /* SoyRuntimeLibrary.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SoyRuntimeLibrary.cpp; path = Source/SoyLib/src/SoyRuntimeLibrary.cpp; sourceTree = "<group>"; };
+		BF18213F2A9CE383001FE7C8 /* PopH264_Apple.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = PopH264_Apple.xcconfig; sourceTree = "<group>"; };
 		BF18268F24226126006FEB93 /* json11.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = json11.hpp; path = Source/Json11/json11.hpp; sourceTree = "<group>"; };
 		BF18269024226126006FEB93 /* json11.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = json11.cpp; path = Source/Json11/json11.cpp; sourceTree = "<group>"; };
 		BF1826AC24228D31006FEB93 /* SoyFourcc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SoyFourcc.h; path = Source/SoyLib/src/SoyFourcc.h; sourceTree = "<group>"; };
@@ -718,7 +719,6 @@
 		BF985EB52876E95700F04399 /* libPopH264_Ios.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPopH264_Ios.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		BF9F2B532A4F5DFD00D7261A /* FileReader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = FileReader.hpp; path = Source/FileReader.hpp; sourceTree = "<group>"; };
 		BF9F2B542A4F5DFD00D7261A /* FileReader.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = FileReader.cpp; path = Source/FileReader.cpp; sourceTree = "<group>"; };
-		BF9F2B5E2A4F5E1400D7261A /* std_span.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = std_span.hpp; path = Source/std_span.hpp; sourceTree = "<group>"; };
 		BF9F2B612A4F607E00D7261A /* Cat.jpg.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Cat.jpg.cpp; sourceTree = "<group>"; };
 		BF9F2B622A4F607E00D7261A /* Cat.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = Cat.jpg; sourceTree = "<group>"; };
 		BFAC70C52A9563D600D8734F /* PopH264_MacosDylib.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = PopH264_MacosDylib.xcconfig; sourceTree = "<group>"; };
@@ -729,8 +729,6 @@
 		BFBC07EE2386C0B50070BCB4 /* SoyThread.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SoyThread.h; path = Source/SoyLib/src/SoyThread.h; sourceTree = "<group>"; };
 		BFBC07F223882F9D0070BCB4 /* libml_mediaerror.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libml_mediaerror.dylib; path = ../MagicLeap/mlsdk/v0.22.0/lib/osx/libml_mediaerror.dylib; sourceTree = "<group>"; };
 		BFBC07F423882FB90070BCB4 /* libml_mediaerror.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libml_mediaerror.dylib; path = ../MagicLeap/mlsdk/v0.22.0/lib/osx/libml_mediaerror.dylib; sourceTree = "<group>"; };
-		BFBC07FF238AE8A70070BCB4 /* SoyLib_Osx.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = SoyLib_Osx.xcconfig; path = Source/SoyLib/SoyLib_Osx.xcconfig; sourceTree = "<group>"; };
-		BFBC0800238AE8A70070BCB4 /* SoyLib_Ios.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = SoyLib_Ios.xcconfig; path = Source/SoyLib/SoyLib_Ios.xcconfig; sourceTree = "<group>"; };
 		BFC4717124474FFA00A2DA70 /* PopH264_TestApp */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = PopH264_TestApp; sourceTree = BUILT_PRODUCTS_DIR; };
 		BFC471792447509600A2DA70 /* PopH264_TestApp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PopH264_TestApp.cpp; sourceTree = "<group>"; };
 		BFC471802447523000A2DA70 /* AvfEncoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AvfEncoder.h; path = Source/AvfEncoder.h; sourceTree = "<group>"; };
@@ -927,6 +925,7 @@
 				BFAC70C52A9563D600D8734F /* PopH264_MacosDylib.xcconfig */,
 				BF1FA6EF28759D25002F03C5 /* PopH264_MacosStatic_Info.plist */,
 				BF459CDD21F7D60500CED59D /* PopH264_Osx_Info.plist */,
+				BF18213F2A9CE383001FE7C8 /* PopH264_Apple.xcconfig */,
 				BF004B6724FD3CAC00DC6A90 /* PopH264_Osx.xcconfig */,
 				BFAE46012850BB6B00C0646D /* PopH264_OsxBundle_Info.plist */,
 			);
@@ -1125,8 +1124,6 @@
 				BF1826AC24228D31006FEB93 /* SoyFourcc.h */,
 				BFDB2BAB2448B4CE009EC370 /* SoyH264.cpp */,
 				BFDB2BAC2448B4CF009EC370 /* SoyH264.h */,
-				BFBC0800238AE8A70070BCB4 /* SoyLib_Ios.xcconfig */,
-				BFBC07FF238AE8A70070BCB4 /* SoyLib_Osx.xcconfig */,
 				BFFC941D245EE17900AEE711 /* SoyMedia.h */,
 				BF0CCB2224A78D8D00596877 /* SoyMediaFormat.cpp */,
 				BF0CCB2324A78D8D00596877 /* SoyMediaFormat.h */,
@@ -1227,7 +1224,6 @@
 				BFFBE95324582ED000E9BE1B /* PopH264TestData.cpp */,
 				BFFBE95424582ED000E9BE1B /* PopH264TestData.h */,
 				BF8AB6A221F225C5008E7E76 /* SoyLib */,
-				BF9F2B5E2A4F5E1400D7261A /* std_span.hpp */,
 				BF53E82D22EDC989008253CD /* TDecoder.cpp */,
 				BF53E82C22EDC6A6008253CD /* TDecoder.h */,
 				BF32256C2445ECD800C74D4D /* TDecoderInstance.cpp */,
@@ -1951,17 +1947,6 @@
 			baseConfigurationReference = BF151FF52384795600A70EBF /* PopH264_Ios.xcconfig */;
 			buildSettings = {
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
-				CLANG_WARN_COMMA = YES;
-				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
-				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
-				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
-				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
-				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
-				CLANG_WARN_STRICT_PROTOTYPES = YES;
-				CLANG_WARN_SUSPICIOUS_MOVE = YES;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Manual;
 				DEFINES_MODULE = YES;
@@ -1993,17 +1978,6 @@
 			baseConfigurationReference = BF151FF52384795600A70EBF /* PopH264_Ios.xcconfig */;
 			buildSettings = {
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
-				CLANG_WARN_COMMA = YES;
-				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
-				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
-				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
-				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
-				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
-				CLANG_WARN_STRICT_PROTOTYPES = YES;
-				CLANG_WARN_SUSPICIOUS_MOVE = YES;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Manual;
 				DEFINES_MODULE = YES;
@@ -2183,7 +2157,6 @@
 				BUILD_LIBRARY_FOR_DISTRIBUTION = NO;
 				BUILD_TARGET_NAME = PopH264;
 				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
@@ -2205,7 +2178,6 @@
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				EXCLUDED_ARCHS = "";
-				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -2239,7 +2211,6 @@
 				BUILD_LIBRARY_FOR_DISTRIBUTION = NO;
 				BUILD_TARGET_NAME = PopH264;
 				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
@@ -2261,7 +2232,6 @@
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				EXCLUDED_ARCHS = "";
-				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = s;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -2367,6 +2337,7 @@
 		};
 		BFC4717524474FFA00A2DA70 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = BF004B6724FD3CAC00DC6A90 /* PopH264_Osx.xcconfig */;
 			buildSettings = {
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;

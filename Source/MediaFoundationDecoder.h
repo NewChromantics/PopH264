@@ -23,7 +23,7 @@ private:
 	virtual bool	DecodeNextPacket() override;
 	size_t			PopFrames();
 
-	void			SetInputFormat();
+	void			SetInputFormat(ContentType::Type ContentType);
 
 private:
 	std::mutex						mTransformerLock;

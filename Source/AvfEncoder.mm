@@ -20,7 +20,7 @@
 #include "SoyH264.h"
 
 #include "PopH264.h"	//	param keys
-
+#include <span>
 
 //#define EXECUTE_ON_DISPATCH_QUEUE
 
@@ -97,7 +97,7 @@ Avf::TEncoderParams::TEncoderParams(json11::Json& Options)
 class Avf::TCompressor
 {
 public:
-	TCompressor(TEncoderParams& Params,const SoyPixelsMeta& Meta,std::function<void(const ArrayBridge<uint8_t>&&,size_t)> OnPacket);
+	TCompressor(TEncoderParams& Params,const SoyPixelsMeta& Meta,std::function<void(std::span<uint8_t>,size_t)> OnPacket);
 	~TCompressor();
 	
 	void	OnCompressed(OSStatus status, VTEncodeInfoFlags infoFlags,CMSampleBufferRef sampleBuffer);
@@ -106,10 +106,10 @@ public:
 	void	Encode(CVPixelBufferRef PixelBuffer,size_t FrameNumber,bool Keyframe);
 	
 private:
-	void	OnPacket(const ArrayBridge<uint8_t>&& Data,size_t FrameNumber);
+	void	OnPacket(std::span<uint8_t> Data,size_t FrameNumber);
 	
 private:
-	std::function<void(const ArrayBridge<uint8_t>&&,size_t)>	mOnPacket;
+	std::function<void(std::span<uint8_t>,size_t)>	mOnPacket;
 	
 	VTCompressionSessionRef	mSession = nil;
 	dispatch_queue_t		mQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
@@ -131,7 +131,7 @@ void OnCompressedCallback(void *outputCallbackRefCon,void *sourceFrameRefCon, OS
 
 
 
-Avf::TCompressor::TCompressor(TEncoderParams& Params,const SoyPixelsMeta& Meta,std::function<void(const ArrayBridge<uint8_t>&&,size_t)> OnPacket) :
+Avf::TCompressor::TCompressor(TEncoderParams& Params,const SoyPixelsMeta& Meta,std::function<void(std::span<uint8_t>,size_t)> OnPacket) :
 	mOnPacket	( OnPacket )
 {
 	if ( !mOnPacket )
@@ -339,18 +339,18 @@ void Avf::TCompressor::Flush()
 }
 
 
-void AnnexBToAnnexB(const ArrayBridge<uint8_t>& Data,std::function<void(const ArrayBridge<uint8_t>&&)> EnumPacket)
+void AnnexBToAnnexB(std::span<uint8_t> Data,std::function<void(std::span<uint8_t>)> EnumPacket)
 {
 	//	gr: does this start with 0001 etc? if so, cut
 	Soy_AssertTodo();
 	//EnumPacket( GetArrayBridge(Data) );
 }
 
-void NaluToAnnexB(const ArrayBridge<uint8_t>& Data,size_t LengthSize,std::function<void(const ArrayBridge<uint8_t>&&)>& EnumPacket)
+void NaluToAnnexB(std::span<uint8_t> Data,size_t LengthSize,std::function<void(std::span<uint8_t>)> EnumPacket)
 {
 	//	walk through data
 	int i=0;
-	while ( i <Data.GetSize() )
+	while ( i <Data.size() )
 	{
 		size_t ChunkLength = 0;
 		//auto* pData = &Data[i+0];
@@ -373,10 +373,9 @@ void NaluToAnnexB(const ArrayBridge<uint8_t>& Data,size_t LengthSize,std::functi
 			ChunkLength |= Data[i+3] << 0;
 		}
 	
-		auto* DataStart = &Data[i+LengthSize];
-		auto PacketContent = GetRemoteArray( DataStart, ChunkLength );
+		auto PacketContent = Data.subspan( i+LengthSize, ChunkLength );
 
-		EnumPacket( GetArrayBridge(PacketContent) );
+		EnumPacket( PacketContent );
 		
 		i += LengthSize + ChunkLength;
 	}
@@ -384,7 +383,8 @@ void NaluToAnnexB(const ArrayBridge<uint8_t>& Data,size_t LengthSize,std::functi
 
 
 //	this could be multiple nals, and we need to cut the prefix, so enum
-extern "C" void ExtractPackets(const ArrayBridge<uint8_t>&& Packets,CMFormatDescriptionRef FormatDescription,std::function<void(const ArrayBridge<uint8_t>&&)> EnumPacket)
+//	gr: why is this extern C?
+extern "C" void ExtractPackets(std::span<uint8_t> Packets,CMFormatDescriptionRef FormatDescription,std::function<void(std::span<uint8_t>)> EnumPacket)
 {
 	int nal_size_field_bytes = 0;
 	//	SPS & PPS (&sei?) set count, maybe we should integrate that into this func
@@ -399,15 +399,15 @@ extern "C" void ExtractPackets(const ArrayBridge<uint8_t>&& Packets,CMFormatDesc
 	{
 		if ( i > 1 )
 			throw Soy::AssertException("Got Packet header > SPS & PPS");
-		Array<uint8_t> SpsData;
-		Avf::GetFormatDescriptionData( GetArrayBridge(SpsData), FormatDescription, i );
+		std::vector<uint8_t> SpsData;
+		Avf::GetFormatDescriptionData( SpsData, FormatDescription, i );
 
 		//	gr: this header is already here. lets debug it in EnumPacket though
 		//	insert nalu header
 		//auto Content = NaluContentTypes[i];
 		//auto Priority = H264NaluPriority::Important;
 		//auto NaluByte = H264::EncodeNaluByte(Content,Priority);
-		EnumPacket( GetArrayBridge(SpsData) );
+		EnumPacket( std::span(SpsData) );
 	}
 	
 	
@@ -483,19 +483,17 @@ void Avf::TCompressor::OnCompressed(OSStatus status, VTEncodeInfoFlags infoFlags
 			//	CMBlockBufferGetDataPointer is also an option...
 			//	...but we copy in case buffer isn't contiguous
 			//if (!CMBlockBufferIsRangeContiguous(block_buffer, 0, 0)) {
-			Array<uint8_t> PacketData;
-			
 			auto DataSize = CMBlockBufferGetDataLength( BlockBuffer );
-			PacketData.SetSize( DataSize );
-			auto Result = CMBlockBufferCopyDataBytes( BlockBuffer, 0, PacketData.GetDataSize(), PacketData.GetArray() );
+			std::vector<uint8_t> PacketData( DataSize );
+			auto Result = CMBlockBufferCopyDataBytes( BlockBuffer, 0, PacketData.size(), PacketData.data() );
 			Avf::IsOkay( Result, "CMBlockBufferCopyDataBytes" );
 			
-			auto EnumPacket = [&](const ArrayBridge<uint8_t>&& PacketData)
+			auto EnumPacket = [&](std::span<uint8_t> PacketData)
 			{
-				OnPacket( GetArrayBridge(PacketData), FrameNumber );
+				OnPacket( PacketData, FrameNumber );
 			};
 			//	this could be multiple nals, and we need to cut the prefix, so enum
-			ExtractPackets( GetArrayBridge(PacketData), FormatDescription, EnumPacket );
+			ExtractPackets( PacketData, FormatDescription, EnumPacket );
 		}
 		else
 		{
@@ -531,14 +529,10 @@ void Avf::TCompressor::OnCompressed(OSStatus status, VTEncodeInfoFlags infoFlags
 	*/
 }
 
-void Avf::TCompressor::OnPacket(const ArrayBridge<uint8_t>&& Data,size_t FrameNumber)
+void Avf::TCompressor::OnPacket(std::span<uint8_t> Data,size_t FrameNumber)
 {
 	//	fill output with nalu header
-	Array<uint8_t> NaluPacket;
-	NaluPacket.PushBack(0);
-	NaluPacket.PushBack(0);
-	NaluPacket.PushBack(0);
-	NaluPacket.PushBack(1);
+	std::vector<uint8_t> NaluPacket{0,0,0,1};
 
 	static bool Debug = false;
 	if ( Debug )
@@ -548,12 +542,12 @@ void Avf::TCompressor::OnPacket(const ArrayBridge<uint8_t>&& Data,size_t FrameNu
 		H264NaluPriority::Type Priority;
 		auto NaluByte = Data[0];
 		H264::DecodeNaluByte( NaluByte, Content, Priority );
-		std::Debug << __PRETTY_FUNCTION__ << " x" << Data.GetDataSize() << "bytes (pre-0001) " << magic_enum::enum_name(Content) << " " << magic_enum::enum_name(Priority) << std::endl;
+		std::Debug << __PRETTY_FUNCTION__ << " x" << Data.size() << "bytes (pre-0001) " << magic_enum::enum_name(Content) << " " << magic_enum::enum_name(Priority) << std::endl;
 	}
 	
-	NaluPacket.PushBackArray(Data);
+	std::copy( Data.begin(), Data.end(), std::back_inserter(NaluPacket) );
 
-	mOnPacket( GetArrayBridge(NaluPacket), FrameNumber );
+	mOnPacket( NaluPacket, FrameNumber );
 }
 
 
@@ -571,7 +565,7 @@ void Avf::TCompressor::Encode(CVPixelBufferRef PixelBuffer,size_t FrameNumber,bo
 		
 		//	specifying duration helps with bitrates and keyframing
 		//kCMTimeInvalid
-		auto Duration = Soy::Platform::GetTime( SoyTime(std::chrono::milliseconds(33)) );
+		auto Duration = Soy::Platform::GetTime( std::chrono::milliseconds(33) );
 		void* FrameMeta = nullptr;
 
 		//	set keyframe
@@ -628,7 +622,7 @@ void Avf::TEncoder::AllocEncoder(const SoyPixelsMeta& Meta)
 		throw Soy_AssertException(Error);
 	}
 	
-	auto OnPacket = [this](const ArrayBridge<uint8_t>&& PacketData,size_t FrameNumber)
+	auto OnPacket = [this](std::span<uint8_t> PacketData,size_t FrameNumber)
 	{
 		this->OnPacketCompressed( PacketData, FrameNumber );
 	};
@@ -673,7 +667,7 @@ void Avf::TEncoder::FinishEncoding()
 
 
 	
-void Avf::TEncoder::OnPacketCompressed(const ArrayBridge<uint8_t>& Data,size_t FrameNumber)
+void Avf::TEncoder::OnPacketCompressed(std::span<uint8_t> Data,size_t FrameNumber)
 {
 	Soy::TScopeTimerPrint Timer("OnNalPacket",2);
 	//auto DecodeOrderNumber = mPicture.i_dts;
@@ -682,9 +676,9 @@ void Avf::TEncoder::OnPacketCompressed(const ArrayBridge<uint8_t>& Data,size_t F
 	auto FrameMeta = GetFrameMeta(FrameNumber);
 			
 	PopH264::TPacket OutputPacket;
-	OutputPacket.mData.reset(new Array<uint8_t>());
+	OutputPacket.mData.reset(new std::vector<uint8_t>());
 	OutputPacket.mInputMeta = FrameMeta;
-	OutputPacket.mData->PushBackArray(Data);
+	std::copy( Data.begin(), Data.end(), std::back_inserter(*OutputPacket.mData) );
 	OnOutputPacket(OutputPacket);
 }
 

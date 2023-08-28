@@ -30,7 +30,7 @@ APP_CPPFLAGS += $(GCC_PREPROCESSOR_DEFINITIONS_LIST)$(SPACE)
 # gr: incompatible with unity's build
 #APP_CPPFLAGS += -std=c++11 -pthread -frtti -fexceptions -D__cplusplus11
 # gr: including c++11 is okay, but SOME CODE (not sure what yet), causes "dll not found"..."
-APP_CPPFLAGS += -std=c++17
+APP_CPPFLAGS += -std=c++20
 APP_CPPFLAGS += -fexceptions
 
 # try and format errors so xcode can jump to them

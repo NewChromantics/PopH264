@@ -35,11 +35,11 @@ namespace MediaFoundation
 	TActivateList	EnumTransforms(const GUID& Category);
 	TActivateMeta	GetBestTransform(const GUID& Category, const ArrayBridge<Soy::TFourcc>& InputFilter, const ArrayBridge<Soy::TFourcc>& OutputFilter);
 	
-	Soy::AutoReleasePtr<IMFSample>		CreateSample(const ArrayBridge<uint8_t>& Data, Soy::TFourcc Fourcc, uint64_t SampleTime100Nano);
-	Soy::AutoReleasePtr<IMFMediaBuffer>	CreateBuffer(const ArrayBridge<uint8_t>& Data);
+	Soy::AutoReleasePtr<IMFSample>		CreateSample(std::span<uint8_t> Data, Soy::TFourcc Fourcc, uint64_t SampleTime100Nano);
+	Soy::AutoReleasePtr<IMFMediaBuffer>	CreateBuffer(std::span<uint8_t> Data);
 	Soy::AutoReleasePtr<IMFMediaBuffer>	CreateBuffer(DWORD Size, DWORD Alignment);
 	Soy::AutoReleasePtr<IMFSample>		CreateSample(DWORD Size, DWORD Alignment);
-	void								ReadData(IMFSample& Sample,ArrayBridge<uint8_t>& Data);
+	void								ReadData(IMFSample& Sample,std::vector<uint8_t>& Data);
 
 	void			GetMeta(json11::Json::object& Meta,IMFMediaType& Media);
 }
@@ -1071,7 +1071,10 @@ void MediaFoundation::TTransformer::SetInputFormat(Soy::TFourcc Fourcc, std::fun
 
 void MediaFoundation::TTransformer::ProcessCommand(MFT_MESSAGE_TYPE Command)
 {
-	auto& Transformer = *this->mTransformer;
+	auto pTransformer = this->mTransformer;
+	if ( !pTransformer )
+		throw std::runtime_error("Missing transformer in ProcessCommand");
+	auto& Transformer = *pTransformer;
 	ULONG_PTR Param = 0;// nullptr;
 	auto Result = Transformer.ProcessMessage(Command, Param);
 	IsOkay(Result, std::string("ProcessMessage ") + std::string(magic_enum::enum_name(Command)));
@@ -1097,7 +1100,9 @@ void MediaFoundation::TTransformer::SetInputFormat(IMFMediaType& MediaType)
 	LockTransformer(Set);
 	
 	//	gr: are these needed?
-	ProcessCommand(MFT_MESSAGE_COMMAND_FLUSH);
+	// gr: this errors when called on encoder on win11 VM
+	//ProcessCommand(MFT_MESSAGE_COMMAND_FLUSH);
+
 	ProcessCommand(MFT_MESSAGE_NOTIFY_BEGIN_STREAMING);
 	ProcessCommand(MFT_MESSAGE_NOTIFY_START_OF_STREAM);
 
@@ -1188,10 +1193,10 @@ MediaFoundation::TTransformer::~TTransformer()
 }
 
 
-Soy::AutoReleasePtr<IMFMediaBuffer> MediaFoundation::CreateBuffer(const ArrayBridge<uint8_t>& Data)
+Soy::AutoReleasePtr<IMFMediaBuffer> MediaFoundation::CreateBuffer(std::span<uint8_t> Data)
 {
 	Soy::AutoReleasePtr<IMFMediaBuffer> pBuffer;
-	auto Result = MFCreateMemoryBuffer(Data.GetDataSize(), &pBuffer.mObject);
+	auto Result = MFCreateMemoryBuffer(Data.size_bytes(), &pBuffer.mObject);
 	IsOkay(Result, "MFCreateMemoryBuffer");
 	//pBuffer.Retain();
 
@@ -1204,7 +1209,8 @@ Soy::AutoReleasePtr<IMFMediaBuffer> MediaFoundation::CreateBuffer(const ArrayBri
 
 	size_t NewSize = 0;
 	auto DestArray = GetRemoteArray(DestData, DestMaxSize, NewSize);
-	DestArray.Copy(Data);
+	auto SourceArray = GetRemoteArray(Data.data(), Data.size() );
+	DestArray.Copy(SourceArray);
 	
 	Result = pBuffer->Unlock();
 	IsOkay(Result, "Buffer Unlock");
@@ -1234,7 +1240,7 @@ Soy::AutoReleasePtr<IMFMediaBuffer> MediaFoundation::CreateBuffer(DWORD Size, DW
 }
 
 
-Soy::AutoReleasePtr<IMFSample> MediaFoundation::CreateSample(const ArrayBridge<uint8_t>& Data,Soy::TFourcc Fourcc, uint64_t SampleTime100Nano)
+Soy::AutoReleasePtr<IMFSample> MediaFoundation::CreateSample(std::span<uint8_t> Data,Soy::TFourcc Fourcc, uint64_t SampleTime100Nano)
 {
 //#pragma message("This binary will not load on windows 7")
 	auto Buffer = CreateBuffer(Data);
@@ -1273,7 +1279,30 @@ Soy::AutoReleasePtr<IMFSample> MediaFoundation::CreateSample(DWORD Size, DWORD A
 	return pSample;
 }
 
-void MediaFoundation::ReadData(IMFSample& Sample, ArrayBridge<uint8_t>& Data)
+void LockBuffer(IMFMediaBuffer& Buffer,std::function<void(std::span<uint8_t>)> OnLocked)
+{
+	//	lock
+	uint8_t* SrcData = nullptr;
+	DWORD SrcSize = 0;
+
+	//	note: lock is garunteed to be contiguous
+	auto Result = Buffer.Lock(&SrcData, nullptr, &SrcSize);
+	MediaFoundation::IsOkay(Result, "MediaBuffer::Lock");
+
+	try
+	{
+		std::span LockedArray(SrcData, SrcSize);
+		OnLocked(LockedArray);
+		Buffer.Unlock();
+	}
+	catch(...)
+	{
+		Buffer.Unlock();
+		throw;
+	}
+}
+
+void MediaFoundation::ReadData(IMFSample& Sample, std::vector<uint8_t>& Data)
 {
 	//	ConvertToContiguousBuffer automatically retains
 	Soy::AutoReleasePtr<IMFMediaBuffer> pBuffer;
@@ -1282,20 +1311,12 @@ void MediaFoundation::ReadData(IMFSample& Sample, ArrayBridge<uint8_t>& Data)
 	if ( !pBuffer )
 		throw Soy::AssertException("Missing Media buffer object");
 
-	auto& Buffer = *pBuffer;
+	auto OnLocked = [&](std::span<uint8_t> BufferData)
+	{
+		std::copy( BufferData.begin(), BufferData.end(), std::back_inserter(Data) );
+	};
+	LockBuffer( *pBuffer, OnLocked );
 
-	//	lock
-	uint8_t* SrcData = nullptr;
-	DWORD SrcSize = 0;
-	
-	//	note: lock is garunteed to be contiguous
-	Result = Buffer.Lock(&SrcData, nullptr, &SrcSize);
-	IsOkay(Result, "MediaBuffer::Lock");
-
-	auto LockedArray = GetRemoteArray(SrcData, SrcSize);
-	Data.Copy(LockedArray);
-
-	Buffer.Unlock();
 }
 
 void MediaFoundation::TTransformer::PushEndOfStream()
@@ -1323,7 +1344,7 @@ void MediaFoundation::TTransformer::PushEndOfStream()
 
 
 
-bool MediaFoundation::TTransformer::PushFrame(const ArrayBridge<uint8_t>&& Data,int64_t FrameNumber)
+bool MediaFoundation::TTransformer::PushFrame(std::span<uint8_t> Data, int64_t FrameNumber)
 {
 	if (!mTransformer)
 		throw Soy::AssertException("Decoder is null");
@@ -1383,6 +1404,9 @@ bool MediaFoundation::TTransformer::PushFrame(const ArrayBridge<uint8_t>&& Data,
 
 void MediaFoundation::TTransformer::SetOutputFormat()
 {
+	if ( !mInputFormatSet )
+		throw std::runtime_error("Need to set input format before output format");
+
 	auto& Transformer = *mTransformer;
 
 	//	gr: a manual one never seems to work
@@ -1499,12 +1523,16 @@ IMFMediaType& MediaFoundation::TTransformer::GetOutputMediaType()
 	return *mOutputMediaType.mObject;
 }
 
-bool MediaFoundation::TTransformer::PopFrame(ArrayBridge<uint8_t>&& Data,int64_t& FrameNumber, json11::Json::object& Meta,bool& EndOfStream)
+bool MediaFoundation::TTransformer::PopFrame(std::vector<uint8_t>& Data,int64_t& FrameNumber, json11::Json::object& Meta,bool& EndOfStream)
 {
 	EndOfStream = false;
 
 	if (!mTransformer)
 		throw Soy::AssertException("Transformer is null");
+
+	//	input format isn't set, cannot set output format yet and can't pop anything
+	if ( !mInputFormatSet )
+		return false;
 
 	auto& Transformer = *mTransformer;
 	DWORD StatusFlags = 0;
@@ -1614,7 +1642,7 @@ bool MediaFoundation::TTransformer::PopFrame(ArrayBridge<uint8_t>&& Data,int64_t
 	//	read!
 	ReadData(*output_buffer.pSample, Data);
 	if ( mVerboseDebug )
-		std::Debug << "Output sample size is " << Data.GetDataSize() << std::endl;
+		std::Debug << "Output sample size is " << Data.size() << std::endl;
 
 	//	copy format meta
 	Meta = mOutputMediaMetaCache;

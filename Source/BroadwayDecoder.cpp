@@ -146,7 +146,8 @@ bool Broadway::TDecoder::DecodeNextPacket()
 	Output.pStrmCurrPos = nullptr;
 	
 	//	this may throw, probably shouldn't let it, but not sure what to do yet, so let it throw
-	auto H264PacketType = H264::GetPacketType(GetArrayBridge(Nalu));
+	std::span<uint8_t> NaluSpan( Nalu.GetArray(), Nalu.GetSize() );
+	auto H264PacketType = H264::GetPacketType(NaluSpan);
 
 	//	if we havent had headers yet, broadway will fail (and not recover)
 	//	if we try and process frames, so drop them

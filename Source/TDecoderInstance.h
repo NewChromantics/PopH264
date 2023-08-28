@@ -4,6 +4,11 @@
 #include "SoyLib/src/Array.hpp"
 #include "SoyLib/src/SoyPixels.h"
 #include "TDecoder.h"
+#include <span>
+
+typedef std::chrono::time_point<std::chrono::steady_clock> EventTime_t;
+
+
 
 class SoyPixelsImpl;
 #include "json11.hpp"
@@ -62,7 +67,7 @@ public:
 	void									AddOnNewFrameCallback(std::function<void()> Callback);
 
 	//	input
-	void									PushData(const uint8_t* Data,size_t DataSize,size_t FrameNumber);
+	void									PushData(std::span<uint8_t> Data,FrameNumber_t FrameNumber);
 	void									PushEndOfStream();
 	
 	//	output

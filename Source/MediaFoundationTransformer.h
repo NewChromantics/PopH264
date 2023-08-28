@@ -11,6 +11,7 @@
 #include <mftransform.h>	//	can't forward declare _MFT_MESSAGE_TYPE
 
 #include "json11.hpp"
+#include <span>
 
 
 class IMFAttributes;
@@ -72,11 +73,11 @@ public:
 
 public:
 	//	this returns false if the data was not pushed (where we need to unpop the data, as to not lose it)
-	bool			PushFrame(const ArrayBridge<uint8_t>&& Data, int64_t FrameNumber);
+	bool			PushFrame(std::span<uint8_t> Data, int64_t FrameNumber);
 	void			PushEndOfStream();
 
 	//	returns true if we should call again (ie, there are more frames to get)
-	bool			PopFrame(ArrayBridge<uint8_t>&& Data,int64_t& FrameNumber,json11::Json::object& Meta,bool& EndOfStream);
+	bool			PopFrame(std::vector<uint8_t>& Data,int64_t& FrameNumber,json11::Json::object& Meta,bool& EndOfStream);
 	
 	void			ProcessCommand(MFT_MESSAGE_TYPE Command);
 

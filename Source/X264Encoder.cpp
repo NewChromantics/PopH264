@@ -326,7 +326,7 @@ void X264::TEncoder::Encode(x264_picture_t* InputPicture)
 	static int LastPictureOrderNumber = -1;
 
 	//	gr: currently, decoder NEEDS to have nal packets split
-	auto OnNalPacket = [&](FixedRemoteArray<uint8_t>& Data)
+	auto OnNalPacket = [&](std::span<uint8_t> Data)
 	{
 		Soy::TScopeTimerPrint Timer("OnNalPacket",2);
 		auto DecodeOrderNumber = mPicture.i_dts;
@@ -346,9 +346,9 @@ void X264::TEncoder::Encode(x264_picture_t* InputPicture)
 		//	todo: insert DTS into meta anyway!
 		//	gr: DTS is 0 all of the time, I think there's a setting to allow out of order
 		PopH264::TPacket OutputPacket;
-		OutputPacket.mData.reset(new Array<uint8_t>());
+		OutputPacket.mData.reset(new std::vector<uint8_t>());
 		OutputPacket.mInputMeta = FrameMeta;
-		OutputPacket.mData->PushBackArray(Data);
+		std::copy( Data.begin(), Data.end(), std::back_inserter(*OutputPacket.mData) );
 		OnOutputPacket(OutputPacket);
 	};
 	
@@ -376,7 +376,7 @@ void X264::TEncoder::Encode(x264_picture_t* InputPicture)
 	{
 		auto& Nal = Nals[n];
 		auto NalSize = Nal.i_payload;
-		auto PacketArray = GetRemoteArray(Nal.p_payload, NalSize);
+		std::span<uint8_t> PacketArray( Nal.p_payload, NalSize );
 		//	if this throws we lose a packet!
 		OnNalPacket(PacketArray);
 		TotalNalSize += NalSize;

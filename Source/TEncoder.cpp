@@ -13,16 +13,16 @@ PopH264::TEncoder::TEncoder(std::function<void(TPacket&)> OnOutputPacket) :
 
 void PopH264::TEncoder::OnOutputPacket(TPacket& Packet)
 {
-	auto OutputPacket = [&](const ArrayBridge<uint8_t>&& Data)
+	auto OutputPacket = [&](std::span<uint8_t> Data)
 	{
 		TPacket NextPacket;
 		NextPacket.mInputMeta = Packet.mInputMeta;
-		NextPacket.mData.reset(new Array<uint8_t>());
-		NextPacket.mData->Copy(Data);
+		NextPacket.mData.reset(new std::vector<uint8_t>());
+		std::copy( Data.begin(), Data.end(), std::back_inserter( *NextPacket.mData ) );
 		mOnOutputPacket(NextPacket);
 	};
 
-	H264::SplitNalu( GetArrayBridge(*Packet.mData), OutputPacket );
+	H264::SplitNalu( Packet.GetData(), OutputPacket );
 }
 
 

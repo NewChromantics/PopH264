@@ -4,110 +4,15 @@
     <Filter Include="Source">
       <UniqueIdentifier>{34256f74-9d84-4dd9-8219-d2aba029edd6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="SoyLib">
-      <UniqueIdentifier>{01323292-f2e1-480c-be29-d0f88b3d4502}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\Source\BroadwayAll.c">
+    <ClCompile Include="..\Source\PopH264_Version.cpp">
       <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\BroadwayDecoder.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\PopH264.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\SoyLib\src\memheap.cpp">
-      <Filter>SoyLib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\SoyLib\src\SoyArray.cpp">
-      <Filter>SoyLib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\SoyLib\src\SoyAssert.cpp">
-      <Filter>SoyLib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\SoyLib\src\SoyDebug.cpp">
-      <Filter>SoyLib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\SoyLib\src\SoyPixels.cpp">
-      <Filter>SoyLib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\SoyLib\src\SoyString.cpp">
-      <Filter>SoyLib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\SoyLib\src\SoyThread.cpp">
-      <Filter>SoyLib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\SoyLib\src\SoyTypes.cpp">
-      <Filter>SoyLib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\TDecoder.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\SoyLib\src\SoyTime.cpp">
-      <Filter>SoyLib</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Source\BroadwayDecoder.h">
-      <Filter>Source</Filter>
-    </ClInclude>
     <ClInclude Include="..\Source\PopH264.h">
       <Filter>Source</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\PopH264DecoderInstance.h">
-      <Filter>Source</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\PopH264Framework.h">
-      <Filter>Source</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\SoyLib\src\Array.hpp">
-      <Filter>SoyLib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\SoyLib\src\BufferArray.hpp">
-      <Filter>SoyLib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\SoyLib\src\HeapArray.hpp">
-      <Filter>SoyLib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\SoyLib\src\MemHeap.hpp">
-      <Filter>SoyLib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\SoyLib\src\SoyArray.h">
-      <Filter>SoyLib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\SoyLib\src\SoyAssert.h">
-      <Filter>SoyLib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\SoyLib\src\SoyDebug.h">
-      <Filter>SoyLib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\SoyLib\src\SoyPixels.h">
-      <Filter>SoyLib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\SoyLib\src\SoyString.h">
-      <Filter>SoyLib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\SoyLib\src\SoyThread.h">
-      <Filter>SoyLib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\SoyLib\src\SoyTypes.h">
-      <Filter>SoyLib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\SoyLib\src\SoyTypes_Windows.h">
-      <Filter>SoyLib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\TDecoder.h">
-      <Filter>Source</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\SoyLib\src\SoyTime.h">
-      <Filter>SoyLib</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\Source\InstanceManager.inc">
-      <Filter>Source</Filter>
-    </None>
   </ItemGroup>
 </Project>

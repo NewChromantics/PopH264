@@ -235,7 +235,10 @@ void MediaFoundation::TEncoder::Encode(const SoyPixelsImpl& _Pixels, const std::
 	auto FrameNumber = PushFrameMeta(Meta);
 
 	auto& PixelsArray = EncodePixels.GetPixelsArray();
-	if (!mTransformer->PushFrame(GetArrayBridge(PixelsArray), FrameNumber))
+	auto* PixelsBytes = const_cast<uint8_t*>(PixelsArray.GetArray());
+	std::span<uint8_t> PixelsSpan( PixelsBytes, PixelsArray.GetDataSize() );
+
+	if (!mTransformer->PushFrame(PixelsSpan, FrameNumber))
 	{
 		std::Debug << "Input rejected... dropping frame?" << std::endl;
 	}
@@ -257,16 +260,16 @@ bool MediaFoundation::TEncoder::FlushOutputFrame()
 	{
 		json11::Json::object Meta;
 		PopH264::TPacket Packet;
-		Packet.mData.reset(new Array<uint8_t>());
+		Packet.mData.reset(new std::vector<uint8_t>());
 		int64_t FrameNumber = -1;
 		bool EndOfStream = false;
-		mTransformer->PopFrame(GetArrayBridge(*Packet.mData), FrameNumber, Meta, EndOfStream);
+		mTransformer->PopFrame( *Packet.mData, FrameNumber, Meta, EndOfStream);
 
 		if (EndOfStream)
 			throw std::runtime_error("Todo: handle EndOfStream");
 
 		//	no packet
-		if (Packet.mData->IsEmpty())
+		if ( Packet.mData->empty() )
 			return false;
 
 		try

@@ -1,6 +1,8 @@
 name: Build Windows
 
 on:
+  pull_request:
+  workflow_dispatch:
   push:
     branches:
       - master
@@ -8,30 +10,64 @@ on:
 
 jobs:
   Build:
+    name: ${{ matrix.config.name }}    
     runs-on: windows-latest
-    env:
-      project: PopH264
+    strategy:
+      matrix:
+        config:
+         - name: Windows Dll x64
+           project: PopH264
+           BuildPlatform: x64
+           BuildConfiguration: Release
+           OutputDirectory: PopH264_Release_x64
+
+         - name: Windows Static x64
+           project: PopH264
+           BuildPlatform: x64
+           BuildConfiguration: Static
+           OutputDirectory: PopH264_Static_x64
+
+         - name: Windows Uwp x64
+           project: PopH264.Uwp
+           BuildPlatform: x64
+           BuildConfiguration: Release
+           OutputDirectory: PopH264_Uwp_Release_x64
+
+         - name: Windows Uwp Arm64
+           project: PopH264.Uwp
+           BuildPlatform: "ARM64 Uwp" # solution platform
+           BuildConfiguration: Release
+           OutputDirectory: PopH264_Uwp_Release_ARM64
+
+         - name: Windows Uwp Arm
+           project: PopH264.Uwp
+           BuildPlatform: "ARM Uwp" # solution platform
+           BuildConfiguration: Release
+           OutputDirectory: PopH264_Uwp_Release_ARM
+
     
     steps:
-    - uses: actions/checkout@v2
-      with:
-        submodules: 'recursive'
+      - uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
         
-    - name: Add msbuild to PATH
-      uses: microsoft/setup-msbuild@v1.0.2
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v1.0.2
       
-    - name: Windows
-      uses: NewChromantics/PopAction_BuildWindows@v1
-      with:
-        BuildPlatform: x64
-        BuildConfiguration: Release
-        # would be nice to extract this from visual studio
-        BuildDirectory: Build\Release_x6
-        project: ${{ env.project }}
+      - name: Build ${{ matrix.config.name }}
+        id: Build
+        uses: NewChromantics/PopAction_BuildWindows@v1.2.2
+        with:
+          BuildSolution: PopH264.visualstudio/PopH264.sln
+          BuildPlatform: ${{ matrix.config.BuildPlatform }}
+          BuildConfiguration: ${{ matrix.config.BuildConfiguration }}
+          OutputDirectory: ${{ github.workspace }}\${{ matrix.config.OutputDirectory }}\ # need an absolute path here, must end with trailing slash
+          project: ${{ matrix.config.project }}
 
-    - name: Upload Artifacts
-      uses: actions/upload-artifact@v2
-      with:
-        # tsdk: these env vars are set in each of the actions
-        name: ${{ env.UPLOAD_NAME }}
-        path: ${{ env.UPLOAD_DIR }}
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          # gr: newer versions of build action use outputs
+          name: ${{ steps.Build.outputs.UPLOAD_NAME }}
+          path: ${{ steps.Build.outputs.UPLOAD_DIR }}
+          if-no-files-found: error
