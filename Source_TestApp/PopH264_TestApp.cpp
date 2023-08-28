@@ -8,7 +8,7 @@
 #endif
 
 #if !defined(TARGET_WINDOWS) && !defined(TARGET_ANDROID) && !defined(TARGET_IOS)
-#define TEST_ASSETS
+//#define TEST_ASSETS
 #endif
 
 #if defined(TARGET_WINDOWS)

@@ -43,16 +43,14 @@ $(SOY_PATH)/src/SoyArray.cpp \
 $(SOY_PATH)/src/SoyTime.cpp \
 $(SOY_PATH)/src/SoyString.cpp \
 $(SOY_PATH)/src/SoyH264.cpp \
-$(SOY_PATH)/src/SoyPng.cpp \
-$(SOY_PATH)/src/SoyImage.cpp \
-$(SOY_PATH)/src/SoyStreamBuffer.cpp \
 $(SOY_PATH)/src/SoyFourcc.cpp \
 $(SOY_PATH)/src/SoyThread.cpp \
 
 APP_SRC_FILES =	\
 $(PROJECT_PATH)/Source_TestApp/PopH264_TestApp.cpp	\
-$(PROJECT_PATH)/Source_TestApp/PopH264_TestAssetGenerator.cpp	\
 $(SOY_PATH)/src/SoyFilesystem.cpp
+
+#$(PROJECT_PATH)/Source_TestApp/PopH264_TestAssetGenerator.cpp	\
 
 LIB_DEFINES = \
 -DTARGET_LINUX	\

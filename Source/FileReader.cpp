@@ -1,5 +1,6 @@
 #include "FileReader.hpp"
 #include <sstream>
+#include <limits>
 
 using namespace PopH264;
 
