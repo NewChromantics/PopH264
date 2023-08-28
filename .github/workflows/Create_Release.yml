@@ -140,12 +140,12 @@ jobs:
       - name: Build Linux ${{ matrix.config.linux_target }}
         id: Linux
         if: matrix.config.linux_target != ''
-        uses: NewChromantics/PopAction_BuildLinux@v1
+        uses: NewChromantics/PopAction_BuildLinux@v1.0.1
         with:
           os: ${{ matrix.config.linux_target }}
           project: ${{ env.project }}
           arch: ${{ matrix.config.arch }}
-
+          
       - name: Build Android Lib
         id: Android
         if: matrix.config.type == 'Android'
