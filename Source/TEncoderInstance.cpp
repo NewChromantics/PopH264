@@ -15,8 +15,11 @@
 //	gr: disabled on ios atm as there's no x64 build for simulator. See if we can change this at compile time (but can't do the same with linking!)
 #if defined(TARGET_ANDROID) || defined(TARGET_IOS) || !defined(OSX_X264_SUPPORT)
 //	no x264
-#else
-#define ENABLE_X264
+#endif
+
+//	gr: disabling x264 until builds are good again
+#if defined(TARGET_WINDOWS)
+//#define ENABLE_X264
 #endif
 
 #if defined(TARGET_IOS) || defined(TARGET_OSX)
