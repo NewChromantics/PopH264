@@ -80,10 +80,6 @@ jobs:
             BuildConfiguration: Release
             OutputDirectory: Windows/PopH264_Uwp_Arm
            
-          - name: Windows x64
-            runs_on: windows-latest
-            type: x64
-
           - name: Apple Universal
             runs_on: macos-12
             scheme: PopH264_Universal
@@ -114,7 +110,7 @@ jobs:
         if: matrix.config.BuildConfiguration != ''
         uses: microsoft/setup-msbuild@v1.0.2
 
-      - name: Windows
+      - name: Build Windows ${{ matrix.config.BuildConfiguration }}
         id: Windows
         if: matrix.config.BuildConfiguration != ''
         uses: NewChromantics/PopAction_BuildWindows@v1.2.2
@@ -126,14 +122,14 @@ jobs:
           project: ${{ matrix.config.project }}
 
       - name: "Import Apple-Distriubution NewChromantics Signing Certificate"
-        if: startsWith(matrix.config.runs_on,'macos')
+        if: matrix.config.scheme != ''
         uses: NewChromantics/import-signing-certificate@v1.0.2
         with:
           certificate-data: ${{ secrets.APPLE_DIST_NEWCHROMANTICS_P12 }}
           certificate-passphrase: ${{ secrets.APPLE_DIST_NEWCHROMANTICS_PASSWORD }}
           keychain-password: "Hello"
 
-      - name: Apple ${{matrix.config.scheme}}
+      - name: Build Apple ${{matrix.config.scheme}}
         id: Apple
         if: matrix.config.scheme != ''
         uses: NewChromantics/PopAction_BuildApple@v1.0.11
@@ -141,7 +137,7 @@ jobs:
           BuildScheme: ${{matrix.config.scheme}}
           project: ${{ env.project }}
 
-      - name: Linux
+      - name: Build Linux ${{ matrix.config.linux_target }}
         id: Linux
         if: matrix.config.linux_target != ''
         uses: NewChromantics/PopAction_BuildLinux@v1
@@ -150,7 +146,7 @@ jobs:
           project: ${{ env.project }}
           arch: ${{ matrix.config.arch }}
 
-      - name: Android Lib
+      - name: Build Android Lib
         id: Android
         if: matrix.config.type == 'Android'
         uses: NewChromantics/PopAction_BuildAndroid@v2
@@ -164,7 +160,7 @@ jobs:
         with:
           version: "latest" #"1.39.15"
 
-      - name: Wasm build
+      - name: Build Wasm
         id: Wasm
         if: matrix.config.type == 'Wasm'
         env: 
