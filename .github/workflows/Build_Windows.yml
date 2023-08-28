@@ -18,31 +18,31 @@ jobs:
            project: PopH264
            BuildPlatform: x64
            BuildConfiguration: Release
-           OutputDirectory: $GITHUB_WORKSPACE\PopH264_Release_x64\
+           OutputDirectory: ${{ env.GITHUB_WORKSPACE }}\PopH264_Release_x64\
 
          - name: Windows Static x64
            project: PopH264
            BuildPlatform: x64
            BuildConfiguration: Static
-           OutputDirectory: $GITHUB_WORKSPACE\PopH264_Static_x64\
+           OutputDirectory: ${{ env.GITHUB_WORKSPACE }}\PopH264_Static_x64\
 
          - name: Windows Uwp x64
            project: PopH264.Uwp
            BuildPlatform: x64
            BuildConfiguration: Release
-           OutputDirectory: $GITHUB_WORKSPACE\PopH264.Uwp_Release_x64\
+           OutputDirectory: ${{ env.GITHUB_WORKSPACE }}\PopH264.Uwp_Release_x64\
 
          - name: Windows Uwp Arm64
            project: PopH264.Uwp
            BuildPlatform: "ARM64 Uwp" # solution platform
            BuildConfiguration: Release
-           OutputDirectory: $GITHUB_WORKSPACE\PopH264.Uwp_Release_ARM64\
+           OutputDirectory: ${{ env.GITHUB_WORKSPACE }}\PopH264.Uwp_Release_ARM64\
 
          - name: Windows Uwp Arm
            project: PopH264.Uwp
            BuildPlatform: "ARM Uwp" # solution platform
            BuildConfiguration: Release
-           OutputDirectory: $GITHUB_WORKSPACE\PopH264.Uwp_Release_ARM\
+           OutputDirectory: ${{ env.GITHUB_WORKSPACE }}\PopH264.Uwp_Release_ARM\
 
     
     steps:
