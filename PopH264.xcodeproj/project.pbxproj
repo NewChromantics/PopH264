@@ -354,6 +354,7 @@
 		58413A462605137B008EF9F9 /* PopH264.h.meta */ = {isa = PBXFileReference; lastKnownFileType = text; name = PopH264.h.meta; path = "Unity/PopH264/Assets/PopH264/PopH264.xcframework/ios-arm64/PopH264_Ios.framework/Headers/PopH264.h.meta"; sourceTree = "<group>"; };
 		BF004B6724FD3CAC00DC6A90 /* PopH264_Osx.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = PopH264_Osx.xcconfig; sourceTree = "<group>"; };
 		BF004B6824FD3D1C00DC6A90 /* Version.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Version.xcconfig; path = Source/Version.xcconfig; sourceTree = "<group>"; };
+		BF03C51D2A9D16F900737B68 /* Source_CSharp */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Source_CSharp; sourceTree = "<group>"; };
 		BF096B1124B9158A00D985E5 /* NvidiaEncoder.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = NvidiaEncoder.cpp; path = Source/NvidiaEncoder.cpp; sourceTree = "<group>"; };
 		BF096B1224B9158A00D985E5 /* NvidiaEncoder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = NvidiaEncoder.h; path = Source/NvidiaEncoder.h; sourceTree = "<group>"; };
 		BF096B1424B918A400D985E5 /* nvidia */ = {isa = PBXFileReference; lastKnownFileType = folder; name = nvidia; path = Source/nvidia; sourceTree = "<group>"; };
@@ -515,7 +516,6 @@
 		BF8AB6BC21F228D0008E7E76 /* SoyTime.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SoyTime.cpp; path = Source/SoyLib/src/SoyTime.cpp; sourceTree = "<group>"; };
 		BF8AB6BD21F228D0008E7E76 /* SoyTime.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = SoyTime.mm; path = Source/SoyLib/src/SoyTime.mm; sourceTree = "<group>"; };
 		BF8AB6BE21F228D0008E7E76 /* SoyTime.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SoyTime.h; path = Source/SoyLib/src/SoyTime.h; sourceTree = "<group>"; };
-		BF8AB6C721F23712008E7E76 /* PopH264.cs */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = PopH264.cs; path = Unity/PopH264/Assets/PopH264/PopH264.cs; sourceTree = "<group>"; };
 		BF985EB52876E95700F04399 /* libPopH264_Ios.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPopH264_Ios.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		BF9F2B532A4F5DFD00D7261A /* FileReader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = FileReader.hpp; path = Source/FileReader.hpp; sourceTree = "<group>"; };
 		BF9F2B542A4F5DFD00D7261A /* FileReader.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = FileReader.cpp; path = Source/FileReader.cpp; sourceTree = "<group>"; };
@@ -803,6 +803,7 @@
 				BF1A4329266B93B1004BA276 /* SrcWeb */,
 				BF004B6424FD3CAC00DC6A90 /* Source_Osx */,
 				BF151FDA2384786600A70EBF /* Source_Ios */,
+				BF03C51D2A9D16F900737B68 /* Source_CSharp */,
 				BF4A6A151EA16D7D00613A64 /* Products */,
 				BF459CEC21F7D73B00CED59D /* Frameworks */,
 			);
@@ -954,14 +955,6 @@
 			name = SoyLib;
 			sourceTree = "<group>";
 		};
-		BF8AB6C621F236F8008E7E76 /* Unity C# */ = {
-			isa = PBXGroup;
-			children = (
-				BF8AB6C721F23712008E7E76 /* PopH264.cs */,
-			);
-			name = "Unity C#";
-			sourceTree = "<group>";
-		};
 		BF9F2B602A4F607E00D7261A /* TestData */ = {
 			isa = PBXGroup;
 			children = (
@@ -1034,7 +1027,6 @@
 				BF3225622445E57100C74D4D /* TEncoderInstance.h */,
 				BF3225602445E57100C74D4D /* TInstanceManager.h */,
 				BFD607731EA16EFC0035C814 /* Unity */,
-				BF8AB6C621F236F8008E7E76 /* Unity C# */,
 				BF004B6824FD3D1C00DC6A90 /* Version.xcconfig */,
 				BF1FA6F028759EF9002F03C5 /* VersionRelease.xcconfig */,
 				BF3225702445F0A400C74D4D /* X264 */,
