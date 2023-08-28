@@ -21,34 +21,6 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
-		58413A0226051079008EF9F9 /* Info.plist.meta in Resources */ = {isa = PBXBuildFile; fileRef = 58413A0126051078008EF9F9 /* Info.plist.meta */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		58413A08260510A6008EF9F9 /* PopH264_Osx.meta in Products */ = {isa = PBXBuildFile; fileRef = 58413A04260510A6008EF9F9 /* PopH264_Osx.meta */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		58413A09260510A6008EF9F9 /* Versions.meta in Products */ = {isa = PBXBuildFile; fileRef = 58413A05260510A6008EF9F9 /* Versions.meta */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		58413A0A260510A6008EF9F9 /* Headers.meta in Products */ = {isa = PBXBuildFile; fileRef = 58413A06260510A6008EF9F9 /* Headers.meta */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		58413A0B260510A6008EF9F9 /* Resources.meta in Products */ = {isa = PBXBuildFile; fileRef = 58413A07260510A6008EF9F9 /* Resources.meta */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		58413A0E260510D1008EF9F9 /* PopH264.h.meta in Headers */ = {isa = PBXBuildFile; fileRef = 58413A0D260510D1008EF9F9 /* PopH264.h.meta */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		58413A12260510FD008EF9F9 /* Current.meta in Versions */ = {isa = PBXBuildFile; fileRef = 58413A10260510FD008EF9F9 /* Current.meta */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		58413A13260510FD008EF9F9 /* A.meta in Versions */ = {isa = PBXBuildFile; fileRef = 58413A11260510FD008EF9F9 /* A.meta */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		58413A1926051124008EF9F9 /* PopH264_Osx.meta in Versions/A */ = {isa = PBXBuildFile; fileRef = 58413A1526051123008EF9F9 /* PopH264_Osx.meta */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		58413A1A26051124008EF9F9 /* _CodeSignature.meta in Versions/A */ = {isa = PBXBuildFile; fileRef = 58413A1626051123008EF9F9 /* _CodeSignature.meta */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		58413A1B26051124008EF9F9 /* Headers.meta in Versions/A */ = {isa = PBXBuildFile; fileRef = 58413A1726051123008EF9F9 /* Headers.meta */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		58413A1C26051124008EF9F9 /* Resources.meta in Versions/A */ = {isa = PBXBuildFile; fileRef = 58413A1826051124008EF9F9 /* Resources.meta */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		58413A1F2605115A008EF9F9 /* CodeResources.meta in Versions/A/_CodeSignature */ = {isa = PBXBuildFile; fileRef = 58413A1E2605115A008EF9F9 /* CodeResources.meta */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		58413A2226051196008EF9F9 /* PopH264.h.meta in Versions/A/Headers */ = {isa = PBXBuildFile; fileRef = 58413A2126051196008EF9F9 /* PopH264.h.meta */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		58413A25260511BA008EF9F9 /* Info.plist.meta in Versions/A/Resources */ = {isa = PBXBuildFile; fileRef = 58413A24260511BA008EF9F9 /* Info.plist.meta */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		58413A2B260511E7008EF9F9 /* Resources.meta in Versions/Current */ = {isa = PBXBuildFile; fileRef = 58413A27260511E6008EF9F9 /* Resources.meta */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		58413A2C260511E7008EF9F9 /* PopH264_Osx.meta in Versions/Current */ = {isa = PBXBuildFile; fileRef = 58413A28260511E6008EF9F9 /* PopH264_Osx.meta */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		58413A2D260511E7008EF9F9 /* Headers.meta in Versions/Current */ = {isa = PBXBuildFile; fileRef = 58413A29260511E7008EF9F9 /* Headers.meta */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		58413A2E260511E7008EF9F9 /* _CodeSignature.meta in Versions/Current */ = {isa = PBXBuildFile; fileRef = 58413A2A260511E7008EF9F9 /* _CodeSignature.meta */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		58413A3126051210008EF9F9 /* CodeResources.meta in Versions/Current/_CodeSignature */ = {isa = PBXBuildFile; fileRef = 58413A3026051210008EF9F9 /* CodeResources.meta */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		58413A342605123C008EF9F9 /* PopH264.h.meta in Versions/Current/Headers */ = {isa = PBXBuildFile; fileRef = 58413A332605123C008EF9F9 /* PopH264.h.meta */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		58413A3726051265008EF9F9 /* Info.plist.meta in Versions/Current/Resources */ = {isa = PBXBuildFile; fileRef = 58413A3626051265008EF9F9 /* Info.plist.meta */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		58413A3E2605132E008EF9F9 /* Headers.meta in Products */ = {isa = PBXBuildFile; fileRef = 58413A3A2605132D008EF9F9 /* Headers.meta */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		58413A3F2605132E008EF9F9 /* Info.plist.meta in Products */ = {isa = PBXBuildFile; fileRef = 58413A3B2605132D008EF9F9 /* Info.plist.meta */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		58413A402605132E008EF9F9 /* PopH264_Ios.meta in Products */ = {isa = PBXBuildFile; fileRef = 58413A3C2605132D008EF9F9 /* PopH264_Ios.meta */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		58413A412605132E008EF9F9 /* _CodeSignature.meta in Products */ = {isa = PBXBuildFile; fileRef = 58413A3D2605132D008EF9F9 /* _CodeSignature.meta */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		58413A4426051358008EF9F9 /* CodeResources.meta in _CodeSignature */ = {isa = PBXBuildFile; fileRef = 58413A4326051358008EF9F9 /* CodeResources.meta */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		58413A472605137B008EF9F9 /* PopH264.h.meta in Headers */ = {isa = PBXBuildFile; fileRef = 58413A462605137B008EF9F9 /* PopH264.h.meta */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		BF0CCB2424A78D8D00596877 /* SoyMediaFormat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF0CCB2224A78D8D00596877 /* SoyMediaFormat.cpp */; };
 		BF0CCB2524A78D8D00596877 /* SoyMediaFormat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF0CCB2224A78D8D00596877 /* SoyMediaFormat.cpp */; };
 		BF151FE12384787200A70EBF /* BroadwayAll.c in Sources */ = {isa = PBXBuildFile; fileRef = BFF1C6E822E3C65800AFDFD5 /* BroadwayAll.c */; };
@@ -312,184 +284,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		584139F926050FC5008EF9F9 /* Resources */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 7;
-			files = (
-				58413A0226051079008EF9F9 /* Info.plist.meta in Resources */,
-			);
-			name = Resources;
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		58413A032605108E008EF9F9 /* Products */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 12;
-			dstPath = PopH264_Osx.framework;
-			dstSubfolderSpec = 7;
-			files = (
-				58413A08260510A6008EF9F9 /* PopH264_Osx.meta in Products */,
-				58413A09260510A6008EF9F9 /* Versions.meta in Products */,
-				58413A0A260510A6008EF9F9 /* Headers.meta in Products */,
-				58413A0B260510A6008EF9F9 /* Resources.meta in Products */,
-			);
-			name = Products;
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		58413A0C260510BC008EF9F9 /* Headers */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = PopH264_Osx.framework/Headers;
-			dstSubfolderSpec = 7;
-			files = (
-				58413A0E260510D1008EF9F9 /* PopH264.h.meta in Headers */,
-			);
-			name = Headers;
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		58413A0F260510E2008EF9F9 /* Versions */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = PopH264_Osx.framework/Versions;
-			dstSubfolderSpec = 7;
-			files = (
-				58413A12260510FD008EF9F9 /* Current.meta in Versions */,
-				58413A13260510FD008EF9F9 /* A.meta in Versions */,
-			);
-			name = Versions;
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		58413A1426051106008EF9F9 /* Versions/A */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = PopH264_Osx.framework/Versions/A;
-			dstSubfolderSpec = 7;
-			files = (
-				58413A1926051124008EF9F9 /* PopH264_Osx.meta in Versions/A */,
-				58413A1A26051124008EF9F9 /* _CodeSignature.meta in Versions/A */,
-				58413A1B26051124008EF9F9 /* Headers.meta in Versions/A */,
-				58413A1C26051124008EF9F9 /* Resources.meta in Versions/A */,
-			);
-			name = Versions/A;
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		58413A1D26051142008EF9F9 /* Versions/A/_CodeSignature */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = PopH264_Osx.framework/Versions/A/_CodeSignature;
-			dstSubfolderSpec = 7;
-			files = (
-				58413A1F2605115A008EF9F9 /* CodeResources.meta in Versions/A/_CodeSignature */,
-			);
-			name = Versions/A/_CodeSignature;
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		58413A202605117A008EF9F9 /* Versions/A/Headers */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = PopH264_Osx.framework/Versions/A/Headers;
-			dstSubfolderSpec = 7;
-			files = (
-				58413A2226051196008EF9F9 /* PopH264.h.meta in Versions/A/Headers */,
-			);
-			name = Versions/A/Headers;
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		58413A23260511A4008EF9F9 /* Versions/A/Resources */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 12;
-			dstPath = PopH264_Osx.framework/Versions/A/Resources;
-			dstSubfolderSpec = 7;
-			files = (
-				58413A25260511BA008EF9F9 /* Info.plist.meta in Versions/A/Resources */,
-			);
-			name = Versions/A/Resources;
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		58413A26260511CA008EF9F9 /* Versions/Current */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = PopH264_Osx.framework/Versions/Current;
-			dstSubfolderSpec = 7;
-			files = (
-				58413A2B260511E7008EF9F9 /* Resources.meta in Versions/Current */,
-				58413A2C260511E7008EF9F9 /* PopH264_Osx.meta in Versions/Current */,
-				58413A2D260511E7008EF9F9 /* Headers.meta in Versions/Current */,
-				58413A2E260511E7008EF9F9 /* _CodeSignature.meta in Versions/Current */,
-			);
-			name = Versions/Current;
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		58413A2F260511F7008EF9F9 /* Versions/Current/_CodeSignature */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = PopH264_Osx.framework/Versions/Current/_CodeSignature;
-			dstSubfolderSpec = 7;
-			files = (
-				58413A3126051210008EF9F9 /* CodeResources.meta in Versions/Current/_CodeSignature */,
-			);
-			name = Versions/Current/_CodeSignature;
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		58413A3226051223008EF9F9 /* Versions/Current/Headers */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = PopH264_Osx.framework/Versions/Current/Headers;
-			dstSubfolderSpec = 7;
-			files = (
-				58413A342605123C008EF9F9 /* PopH264.h.meta in Versions/Current/Headers */,
-			);
-			name = Versions/Current/Headers;
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		58413A3526051248008EF9F9 /* Versions/Current/Resources */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = PopH264_Osx.framework/Versions/Current/Resources;
-			dstSubfolderSpec = 7;
-			files = (
-				58413A3726051265008EF9F9 /* Info.plist.meta in Versions/Current/Resources */,
-			);
-			name = Versions/Current/Resources;
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		58413A3926051310008EF9F9 /* Products */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = PopH264_Ios.framework;
-			dstSubfolderSpec = 16;
-			files = (
-				58413A3E2605132E008EF9F9 /* Headers.meta in Products */,
-				58413A3F2605132E008EF9F9 /* Info.plist.meta in Products */,
-				58413A402605132E008EF9F9 /* PopH264_Ios.meta in Products */,
-				58413A412605132E008EF9F9 /* _CodeSignature.meta in Products */,
-			);
-			name = Products;
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		58413A4226051344008EF9F9 /* _CodeSignature */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = PopH264_Ios.framework/_CodeSignature;
-			dstSubfolderSpec = 16;
-			files = (
-				58413A4426051358008EF9F9 /* CodeResources.meta in _CodeSignature */,
-			);
-			name = _CodeSignature;
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		58413A4526051367008EF9F9 /* Headers */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = PopH264_Ios.framework/Headers;
-			dstSubfolderSpec = 16;
-			files = (
-				58413A472605137B008EF9F9 /* PopH264.h.meta in Headers */,
-			);
-			name = Headers;
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		BF9936972930F49100B9739C /* Embed Libraries */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -558,7 +352,6 @@
 		BF096B1224B9158A00D985E5 /* NvidiaEncoder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = NvidiaEncoder.h; path = Source/NvidiaEncoder.h; sourceTree = "<group>"; };
 		BF096B1424B918A400D985E5 /* nvidia */ = {isa = PBXFileReference; lastKnownFileType = folder; name = nvidia; path = Source/nvidia; sourceTree = "<group>"; };
 		BF096B1524B91F4E00D985E5 /* Linux */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Linux; path = Source/Linux; sourceTree = "<group>"; };
-		BF0A19C21EA428F4007EBC95 /* Unity */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Unity; sourceTree = "<group>"; };
 		BF0CCB2224A78D8D00596877 /* SoyMediaFormat.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SoyMediaFormat.cpp; path = Source/SoyLib/src/SoyMediaFormat.cpp; sourceTree = "<group>"; };
 		BF0CCB2324A78D8D00596877 /* SoyMediaFormat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SoyMediaFormat.h; path = Source/SoyLib/src/SoyMediaFormat.h; sourceTree = "<group>"; };
 		BF151FD92384786600A70EBF /* PopH264_Ios.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = PopH264_Ios.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -998,7 +791,6 @@
 				BF53E82B22ECB934008253CD /* v0.21.0 */,
 				BF53E82622EC8B59008253CD /* PopH264.Lumin */,
 				BFF1C6E322E377D100AFDFD5 /* PopH264.Android */,
-				BF0A19C21EA428F4007EBC95 /* Unity */,
 				BFD6076D1EA16ED20035C814 /* Source */,
 				BFC471782447506B00A2DA70 /* Source_TestApp */,
 				BF1A4329266B93B1004BA276 /* SrcWeb */,
@@ -1360,10 +1152,6 @@
 				BF151FD42384786600A70EBF /* Headers */,
 				BF151FD52384786600A70EBF /* Sources */,
 				BF151FD62384786600A70EBF /* Frameworks */,
-				BF151FD72384786600A70EBF /* Resources */,
-				58413A3926051310008EF9F9 /* Products */,
-				58413A4226051344008EF9F9 /* _CodeSignature */,
-				58413A4526051367008EF9F9 /* Headers */,
 			);
 			buildRules = (
 			);
@@ -1434,19 +1222,6 @@
 				BF459CD021F7D5C700CED59D /* Headers */,
 				BF459CD121F7D5C700CED59D /* Sources */,
 				BF459CD221F7D5C700CED59D /* Frameworks */,
-				BF459CD321F7D5C700CED59D /* Resources */,
-				584139F926050FC5008EF9F9 /* Resources */,
-				58413A032605108E008EF9F9 /* Products */,
-				58413A0C260510BC008EF9F9 /* Headers */,
-				58413A0F260510E2008EF9F9 /* Versions */,
-				58413A1426051106008EF9F9 /* Versions/A */,
-				58413A1D26051142008EF9F9 /* Versions/A/_CodeSignature */,
-				58413A202605117A008EF9F9 /* Versions/A/Headers */,
-				58413A23260511A4008EF9F9 /* Versions/A/Resources */,
-				58413A26260511CA008EF9F9 /* Versions/Current */,
-				58413A2F260511F7008EF9F9 /* Versions/Current/_CodeSignature */,
-				58413A3226051223008EF9F9 /* Versions/Current/Headers */,
-				58413A3526051248008EF9F9 /* Versions/Current/Resources */,
 			);
 			buildRules = (
 			);
@@ -1606,25 +1381,11 @@
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		BF151FD72384786600A70EBF /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		BF23A40F25D9415D0060DE06 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				BFBD253325D95B540076C307 /* TestData in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		BF459CD321F7D5C700CED59D /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
