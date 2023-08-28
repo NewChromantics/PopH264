@@ -27,10 +27,41 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\Source\FileReader.cpp" />
+    <ClCompile Include="..\Source\Json11\json11.cpp" />
+    <ClCompile Include="..\Source\MediaFoundationDecoder.cpp" />
+    <ClCompile Include="..\Source\MediaFoundationEncoder.cpp" />
+    <ClCompile Include="..\Source\MediaFoundationTransformer.cpp" />
+    <ClCompile Include="..\Source\PopH264.cpp" />
+    <ClCompile Include="..\Source\PopH264TestData.cpp" />
     <ClCompile Include="..\Source\PopH264_Version.cpp" />
+    <ClCompile Include="..\Source\SoyLib\src\memheap.cpp" />
+    <ClCompile Include="..\Source\SoyLib\src\SoyArray.cpp" />
+    <ClCompile Include="..\Source\SoyLib\src\SoyDebug.cpp" />
+    <ClCompile Include="..\Source\SoyLib\src\SoyFourcc.cpp" />
+    <ClCompile Include="..\Source\SoyLib\src\SoyH264.cpp" />
+    <ClCompile Include="..\Source\SoyLib\src\SoyPixels.cpp" />
+    <ClCompile Include="..\Source\SoyLib\src\SoyPlatform.cpp" />
+    <ClCompile Include="..\Source\SoyLib\src\SoyString.cpp" />
+    <ClCompile Include="..\Source\SoyLib\src\SoyTime.cpp" />
+    <ClCompile Include="..\Source\SoyLib\src\SoyTypes.cpp" />
+    <ClCompile Include="..\Source\TDecoder.cpp" />
+    <ClCompile Include="..\Source\TDecoderInstance.cpp" />
+    <ClCompile Include="..\Source\TEncoder.cpp" />
+    <ClCompile Include="..\Source\TEncoderInstance.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Source\FileReader.hpp" />
+    <ClInclude Include="..\Source\MediaFoundationDecoder.h" />
+    <ClInclude Include="..\Source\MediaFoundationEncoder.h" />
+    <ClInclude Include="..\Source\MediaFoundationTransformer.h" />
     <ClInclude Include="..\Source\PopH264.h" />
+    <ClInclude Include="..\Source\PopH264TestData.h" />
+    <ClInclude Include="..\Source\TDecoder.h" />
+    <ClInclude Include="..\Source\TDecoderInstance.h" />
+    <ClInclude Include="..\Source\TEncoder.h" />
+    <ClInclude Include="..\Source\TEncoderInstance.h" />
+    <ClInclude Include="..\Source\TInstanceManager.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{50fee5a7-a037-44cb-9731-999f44725f28}</ProjectGuid>

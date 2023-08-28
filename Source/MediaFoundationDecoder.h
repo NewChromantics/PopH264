@@ -8,7 +8,6 @@ namespace MediaFoundation
 	class TDecoder;
 }
 
-class IMFTransform;
 
 class MediaFoundation::TDecoder : public PopH264::TDecoder
 {
@@ -35,6 +34,4 @@ private:
 	bool			mSpsSet = false;
 	bool			mPpsSet = false;
 	bool			mSeiSet = false;
-
-	PopH264::TDecoderParams	mParams;
 };

@@ -15,7 +15,7 @@
 #define ENABLE_AVF
 #endif
 
-#if !defined(TARGET_LINUX)
+#if !defined(TARGET_LINUX) && !defined(TARGET_UWP)
 #define ENABLE_BROADWAY
 #endif
 

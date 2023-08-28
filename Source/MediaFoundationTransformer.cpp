@@ -13,6 +13,10 @@
 #include <codecapi.h>
 #include <Mferror.h>
 
+#if defined(TARGET_UWP)
+#include <icodecapi.h>	//	ICodecAPI for uwp
+#endif
+
 #pragma comment(lib,"dxva2.lib")	
 #pragma comment(lib,"evr.lib")	
 #pragma comment(lib,"mf.lib")	
@@ -386,7 +390,9 @@ std::string MediaFoundation::GetName(const GUID& Guid)
 	CASE_GUID(MF_MT_MIN_MASTERING_LUMINANCE);
 	CASE_GUID(MF_MT_DECODER_USE_MAX_RESOLUTION);
 	CASE_GUID(MF_MT_DECODER_MAX_DPB_COUNT);
+#if !defined(TARGET_UWP)
 	CASE_GUID(MF_MT_CUSTOM_VIDEO_PRIMARIES);
+#endif
 	CASE_GUID(MF_MT_YUV_MATRIX);
 	CASE_GUID(MF_MT_VIDEO_LIGHTING);
 	CASE_GUID(MF_MT_VIDEO_NOMINAL_RANGE);
@@ -402,7 +408,9 @@ std::string MediaFoundation::GetName(const GUID& Guid)
 	CASE_GUID(MF_MT_REALTIME_CONTENT);
 	CASE_GUID(MF_MT_DEFAULT_STRIDE);
 	CASE_GUID(MF_MT_PALETTE);
+#if !defined(TARGET_UWP)
 	CASE_GUID(MF_MT_AM_FORMAT_TYPE);
+#endif
 	CASE_GUID(MF_MT_VIDEO_PROFILE);
 	CASE_GUID(MF_MT_VIDEO_LEVEL);
 	CASE_GUID(MF_MT_MPEG_START_TIME_CODE);
@@ -438,8 +446,10 @@ std::string MediaFoundation::GetName(const GUID& Guid)
 	CASE_GUID(MF_MT_DV_AAUX_CTRL_PACK_1);
 	CASE_GUID(MF_MT_DV_VAUX_SRC_PACK);
 	CASE_GUID(MF_MT_DV_VAUX_CTRL_PACK);
+#if !defined(TARGET_UWP)
 	CASE_GUID(MF_MT_ARBITRARY_HEADER);
 	CASE_GUID(MF_MT_ARBITRARY_FORMAT);
+#endif
 	CASE_GUID(MF_MT_IMAGE_LOSS_TOLERANT);
 	CASE_GUID(MF_MT_MPEG4_SAMPLE_DESCRIPTION);
 	CASE_GUID(MF_MT_MPEG4_CURRENT_SAMPLE_ENTRY);
@@ -759,9 +769,12 @@ MediaFoundation::TActivateList MediaFoundation::EnumTransforms(const GUID& Categ
 	
 	TActivateList Activates;
 	IMFAttributes* Attributes = nullptr;
+#if defined(TARGET_UWP)
+	throw std::runtime_error("UWP needs MFTEnum2 replacement");
+#else
 	auto Result = MFTEnum2(Category, Flags, InputFilter, OutputFilter, Attributes, &Activates.mActivates, &Activates.mCount);
 	IsOkay(Result, "MFTEnum2");
-
+#endif
 	return Activates;
 }
 
