@@ -1,3 +1,14 @@
+#if UNITY_EDITOR_WIN
+	//	not supported
+#elif UNITY_EDITOR_OSX
+	#define ENCODER_SUPPORTS_RGBA_INPUT
+#elif UNITY_IPHONE || UNITY_STANDALONE_OSX
+	#define ENCODER_SUPPORTS_RGBA_INPUT
+#else
+	//	not supported
+#endif
+
+
 using UnityEngine;
 using System.Collections;					// required for Coroutines
 using System.Runtime.InteropServices;		// required for DllImport
@@ -11,10 +22,13 @@ using System.Collections.Generic;
 /// </summary>
 public static class PopH264
 {
-#if UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
-	private const string PluginName = "PopH264";	//	libPopH264.dylib
-#elif UNITY_EDITOR_WIN
+//	need to place editor defines first as we can be in mac editor, but windows target.
+#if UNITY_EDITOR_WIN
 	private const string PluginName = "PopH264";	//	PopH264.dll
+#elif UNITY_EDITOR_OSX
+	private const string PluginName = "PopH264";	//	libPopH264.dylib
+#elif UNITY_STANDALONE_OSX
+	private const string PluginName = "PopH264";	//	libPopH264.dylib
 #elif UNITY_WSA
 	private const string PluginName = "PopH264.Uwp.dll";	//	PopH264.Uwp.dll
 #elif UNITY_IPHONE
@@ -80,7 +94,7 @@ public static class PopH264
 		RGBA			=3,
 		BGRA			=4,
 		BGR				=5,
-		YYuv_8888_Full	=6,
+		YYuv_8888_Full	=6,	//	poph264 doesnt like this as an input
 		YYuv_8888_Ntsc	=7,
 		Depth16mm		=8,
 		Chroma_U		=9,
@@ -88,6 +102,8 @@ public static class PopH264
 		ChromaUV_88		=11,
 		ChromaVU_88		=12,
 		Luma_Ntsc		=13,
+
+		Yuv_8_8_8 = 99,
 
 
 		ChromaU_8 = Chroma_U,
@@ -517,12 +533,18 @@ public static class PopH264
 	[System.Serializable]
 	public struct EncoderFrameMeta
 	{
-		public int	Width;
-		public int	Height;
-		public int	LumaSize;	//	bytes
-		public int	ChromaUSize;	//	bytes
-		public int	ChromaVSize;	//	bytes
-		public bool	Keyframe;
+		public int			Width;
+		public int			Height;
+		public int			LumaSize;	//	bytes
+		public int			ChromaUSize;	//	bytes
+		public int			ChromaVSize;	//	bytes
+		public bool			Keyframe;
+		public string		Format;
+		public PixelFormat	PixelFormat
+		{
+			get { PixelFormat value = PixelFormat.Invalid;	PixelFormat.TryParse(this.Format,out value);	return value; }
+			set { this.Format = value.ToString(); }
+		}
 	}
 	
 	[System.Serializable]
@@ -595,39 +617,89 @@ public static class PopH264
 		
 		public void PushFrameGreyscale(byte[] Luma,int Width,int Height,bool Keyframe=false)
 		{
-			PushYuvFrame( Luma, null, null, Width, Height, Keyframe );
+			PushFrame( Luma, null, null, Width, Height, PixelFormat.Greyscale, Keyframe );
+		}
+
+		void RgbToYuv(byte r,byte g,byte b,out byte Luma,out byte ChromaU,out byte ChromaV)
+		{
+			var rf = r / 255.0;
+			var gf = g / 255.0;
+			var bf = b / 255.0;
+			//	very quick conversion, should clarify if BT709 or what colour space it is
+			var lf = rf * 0.299 + gf * 0.587 + bf * 0.114;
+			var uf = rf * (-0.14713) - gf * 0.28886 + bf * 0.436;
+			var vf = rf * 0.615 - gf * 0.51499 - bf * 0.10001;
+			Luma = (byte)(lf * 255.0);
+			ChromaU = (byte)((uf * 255.0) + 127.0);
+			ChromaV = (byte)((vf * 255.0) + 127.0);
 		}
 		
 		public void PushFrameRGBA(byte[] Rgba,int Width,int Height,bool Keyframe=false)
 		{
-			//	todo: convert to yuv
-			var Grey = new byte[Width*Height];
-			for ( var i=0;	i<Grey.Length;	i++ )
+			//	macos & ios supports RGBA input
+#if ENCODER_SUPPORTS_RGBA_INPUT
+			//	unity texture2D data is often... the wrong size.
+			if ( Rgba.Length > (Width*Height*4) )
+			{
+				var RgbaSlice = new ArraySegment<byte>( Rgba, 0, Width*Height*4 );
+				var RgbaClip = RgbaSlice.ToArray();
+				PushFrame( RgbaClip, null, null, Width, Height, PixelFormat.RGBA, Keyframe );
+			}
+			else
+			{
+				PushFrame( Rgba, null, null, Width, Height, PixelFormat.RGBA, Keyframe );
+			}
+#else
+			var HalfWidth = Width/2;
+			var HalfHeight = Height/2;
+			var LumaSize = Width * Height;
+			var ChromaSize = HalfWidth * HalfHeight;
+			var YuvPixels = new byte[LumaSize+ChromaSize+ChromaSize];
+			var LumaPlane = new ArraySegment<byte>(YuvPixels, 0, LumaSize);
+			var ChromaUPlane = new ArraySegment<byte>(YuvPixels, LumaSize, ChromaSize);
+			var ChromaVPlane = new ArraySegment<byte>(YuvPixels, LumaSize+ChromaSize, ChromaSize);
+			byte Luma,ChromaU,ChromaV;
+			for ( var i=0;	i<Width*Height;	i++ )
 			{
 				var RgbaIndex = i * 4;
 				var r = Rgba[RgbaIndex+0];
 				var g = Rgba[RgbaIndex+1];
 				var b = Rgba[RgbaIndex+2];
 				var a = Rgba[RgbaIndex+3];
-				Grey[i] = r;
+				RgbToYuv( r,g,b,out Luma,out ChromaU,out ChromaV);
+				var x = i % Width;
+				var y = i / Width;
+				var Chromax = x / 2;
+				var Chromay = y/2;
+				var Chromai = Chromax + (Chromay * HalfWidth );
+				LumaPlane[i] = Luma;
+				ChromaUPlane[Chromai] = ChromaU;
+				ChromaVPlane[Chromai] = ChromaV;
 			}
-			PushFrameGreyscale( Grey, Width, Height, Keyframe );
+			//	push as one plane with a format (mediafoundation & avf support this better)
+			PushFrame( YuvPixels, null, null, Width, Height, PixelFormat.Yuv_8_8_8, Keyframe );
+			//PushFrame( LumaPlane, ChromaUPlane, ChromaVPlane, Width, Height, PixelFormat.Yuv_8_8_8, Keyframe );
+#endif
 		}
-		
-		public void PushYuvFrame(byte[] Luma,byte[] ChromaU,byte[] ChromaV,int Width,int Height,bool Keyframe=false)
+
+
+		public void PushFrame(byte[] Plane0,byte[] Plane1,byte[] Plane2,int Width,int Height,PixelFormat Format,bool Keyframe=false)
 		{
 			EncoderFrameMeta FrameMeta;
 			FrameMeta.Width = Width;
 			FrameMeta.Height = Height;
 			FrameMeta.Keyframe = Keyframe;
-			FrameMeta.LumaSize = (Luma!=null) ? Luma.Length : 0;
-			FrameMeta.ChromaUSize = (ChromaU!=null) ? ChromaU.Length : 0;
-			FrameMeta.ChromaVSize = (ChromaV!=null) ? ChromaV.Length : 0;
+			FrameMeta.LumaSize = (Plane0!=null) ? Plane0.Length : 0;
+			FrameMeta.ChromaUSize = (Plane1!=null) ? Plane1.Length : 0;
+			FrameMeta.ChromaVSize = (Plane2!=null) ? Plane2.Length : 0;
+			//FrameMeta.PixelFormat = Format;
+			FrameMeta.Format = Format.ToString();
+
 			
 			var MetaJson = JsonUtility.ToJson(FrameMeta);
 			var MetaJsonAscii = System.Text.ASCIIEncoding.ASCII.GetBytes(MetaJson + "\0");
 			var ErrorBuffer = new byte[200];
-			PopH264_EncoderPushFrame( Instance.Value, MetaJsonAscii, Luma, ChromaU, ChromaV, ErrorBuffer, ErrorBuffer.Length );
+			PopH264_EncoderPushFrame( Instance.Value, MetaJsonAscii, Plane0, Plane1, Plane2, ErrorBuffer, ErrorBuffer.Length );
 
 			var Error = GetString(ErrorBuffer);
 			if ( !String.IsNullOrEmpty(Error) )
