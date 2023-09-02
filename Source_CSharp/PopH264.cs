@@ -677,11 +677,15 @@ public static class PopH264
 				ChromaVPlane[Chromai] = ChromaV;
 			}
 			//	push as one plane with a format (mediafoundation & avf support this better)
-			PushFrame( YuvPixels, null, null, Width, Height, PixelFormat.Yuv_8_8_8, Keyframe );
+			PushFrameYuvI420( YuvPixels, Width, Height, Keyframe );
 			//PushFrame( LumaPlane, ChromaUPlane, ChromaVPlane, Width, Height, PixelFormat.Yuv_8_8_8, Keyframe );
 #endif
 		}
 
+		public void PushFrameYuvI420(byte[] YuvI420,int Width,int Height,bool Keyframe=false)
+		{
+			PushFrame( YuvI420, null, null, Width, Height, PixelFormat.Yuv_8_8_8, Keyframe );
+		}
 
 		public void PushFrame(byte[] Plane0,byte[] Plane1,byte[] Plane2,int Width,int Height,PixelFormat Format,bool Keyframe=false)
 		{
