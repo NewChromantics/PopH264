@@ -48,6 +48,8 @@ public static class PopH264
 	private static extern int	PopH264_PopFrame(int Instance,byte[] Plane0,int Plane0Size,byte[] Plane1,int Plane1Size,byte[] Plane2,int Plane2Size);
 
 
+	[DllImport(PluginName, CallingConvention = CallingConvention.Cdecl)]
+	private static extern int			PopH264_GetTestData(byte[] Name,byte[] Buffer,int BufferSize);
 	//	gr: these numbers don't matter in PopH264, need a better way to map these across depedencies
 	//		other than matching strings
 	//	for use with PopYuv shader, these enum values should match the shader
@@ -478,6 +480,19 @@ public static class PopH264
 			return FrameMeta.Value.FrameNumber;
 		}
 
+	public static byte[] GetH264TestData(string TestDataName)
+	{
+		var H264DataBuffer = new Byte[1024 * 1024 * 1];
+		var TestDataNameAscii = System.Text.ASCIIEncoding.ASCII.GetBytes(TestDataName + "\0");
+		var DataSize = PopH264_GetTestData(TestDataNameAscii,H264DataBuffer,H264DataBuffer.Length);
+		if ( DataSize == 0 )
+			throw new Exception($"No such test data named {TestDataName}");
+		if ( DataSize < 0 )
+			throw new Exception($"Error getting test data named {TestDataName}");
+			
+		var ClippedDataView = new ArraySegment<byte>(H264DataBuffer,0,DataSize);
+		var ClippedData = ClippedDataView.ToArray();
+		return ClippedData;
 	}
 }
 
