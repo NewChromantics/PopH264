@@ -48,8 +48,26 @@ public static class PopH264
 	private static extern int	PopH264_PopFrame(int Instance,byte[] Plane0,int Plane0Size,byte[] Plane1,int Plane1Size,byte[] Plane2,int Plane2Size);
 
 
+
+
+	[DllImport(PluginName, CallingConvention = CallingConvention.Cdecl)]
+	private static extern int			PopH264_CreateEncoder(byte[] OptionsJson,byte[] ErrorBuffer,int ErrorBufferSize);
+	[DllImport(PluginName, CallingConvention = CallingConvention.Cdecl)]
+	private static extern void			PopH264_DestroyEncoder(int Instance);
+	[DllImport(PluginName, CallingConvention = CallingConvention.Cdecl)]
+	private static extern void			PopH264_EncoderPushFrame(int Instance,byte[] MetaJson,byte[] LumaData,byte[] ChromaUData,byte[] ChromaVData,byte[] ErrorBuffer,int ErrorBufferSize);
+	[DllImport(PluginName, CallingConvention = CallingConvention.Cdecl)]
+	private static extern void			PopH264_EncoderEndOfStream(int Instance);
+	[DllImport(PluginName, CallingConvention = CallingConvention.Cdecl)]
+	private static extern int			PopH264_EncoderPopData(int Instance,byte[] DataBuffer,int DataBufferSize);
+	[DllImport(PluginName, CallingConvention = CallingConvention.Cdecl)]
+	private static extern void			PopH264_EncoderPeekData(int Instance,byte[] MetaJsonBuffer,int MetaJsonBufferSize);
+
 	[DllImport(PluginName, CallingConvention = CallingConvention.Cdecl)]
 	private static extern int			PopH264_GetTestData(byte[] Name,byte[] Buffer,int BufferSize);
+
+
+
 	//	gr: these numbers don't matter in PopH264, need a better way to map these across depedencies
 	//		other than matching strings
 	//	for use with PopYuv shader, these enum values should match the shader
@@ -322,7 +340,7 @@ public static class PopH264
 		void CheckH264Frame(FrameInput Frame)
 		{
 			//	if we're getting raw fragmented packets (eg. from udp)
-			//	then the packets may not be real frames. 
+			//	then the packets may not be real frames.
 			//	maybe don't need to waste time checking any more, but certainly skip ultra small ones
 			if (Frame.Bytes.Length < 4)
 				return;
@@ -338,7 +356,7 @@ public static class PopH264
 					var Header = PopX.H264.ParseAvccProfile(HeaderBytes);
 					if ( Header.Profile!=PopX.H264.Profile.Baseline || Header.Level > 3 )
 					{
-						Debug.LogWarning("H264 SPS version " + Header.Profile + " " + Header.Level + " higher than supported (Baseline 3.0)"); 
+						Debug.LogWarning("H264 SPS version " + Header.Profile + " " + Header.Level + " higher than supported (Baseline 3.0)");
 					}
 				}
 			}
@@ -479,6 +497,182 @@ public static class PopH264
 
 			return FrameMeta.Value.FrameNumber;
 		}
+
+	}
+	
+	[System.Serializable]
+	public struct EncoderParams
+	{
+//	public string	Encoder = "avf"|"x264"
+//	public int		Quality = [0..9]				x264
+//	public int		AverageKbps = int				avf kiloBYTES
+//	public int		MaxKbps = int					avf kiloBYTES
+//	public bool		Realtime = true				avf: kVTCompressionPropertyKey_RealTime
+//	.MaxFrameBuffers = undefined	avf: kVTCompressionPropertyKey_MaxFrameDelayCount
+//	.MaxSliceBytes = number			avf: kVTCompressionPropertyKey_MaxH264SliceBytes
+//	.MaximisePowerEfficiency = true	avf: kVTCompressionPropertyKey_MaximizePowerEfficiency
+//	public int		ProfileLevel = 30(int)			Baseline only at the moment. 30=3.0, 41=4.1 etc this also matches the number in SPS. Default will try and pick correct for resolution or 3.0
+	};
+
+	[System.Serializable]
+	public struct EncoderFrameMeta
+	{
+		public int	Width;
+		public int	Height;
+		public int	LumaSize;	//	bytes
+		public int	ChromaUSize;	//	bytes
+		public int	ChromaVSize;	//	bytes
+		public bool	Keyframe;
+	}
+	
+	[System.Serializable]
+	public struct H264Frame
+	{
+		public byte[]		H264Data;
+		public EncodedFrameMeta	Meta;
+	}
+	
+	//	data coming out of PopH264_EncoderPeekData
+	[System.Serializable]
+	public struct EncodedFrameMeta
+	{
+	}
+	
+	//	data coming out of PopH264_EncoderPeekData
+	[System.Serializable]
+	public struct PoppedFrameMeta
+	{
+		public int					DataSize;	//	bytes
+		public EncodedFrameMeta		Meta;	//	all the meta sent to PopH264_EncoderPushFrame
+		public int?					EncodeDurationMs;	//	time it took to encode
+		public int?					DelayDurationMs;	//	time spent in queue before encoding (lag)
+		public int					OutputQueueCount;	//	time spent in queue before encoding (lag)
+	}
+
+	public class Encoder : IDisposable
+	{
+		int? Instance = null;
+		
+		public Encoder(EncoderParams? EncoderParams)
+		{
+			if ( !EncoderParams.HasValue )
+				EncoderParams = new EncoderParams();
+			
+			var ParamsJson = JsonUtility.ToJson(EncoderParams.Value);
+			var ParamsJsonAscii = System.Text.ASCIIEncoding.ASCII.GetBytes(ParamsJson + "\0");
+			var ErrorBuffer = new byte[200];
+			Instance = PopH264_CreateEncoder(ParamsJsonAscii, ErrorBuffer, ErrorBuffer.Length);
+			var Error = GetString(ErrorBuffer);
+			if (Instance.Value <= 0)
+				throw new System.Exception("Failed to create decoder instance;" + Error);
+			if (!String.IsNullOrEmpty(Error))
+			{
+				Debug.LogWarning("Created PopH264 decoder (" + Instance.Value + ") but error was not empty (length = " + Error.Length + ") " + Error);
+			}
+		}
+		
+		~Encoder()
+		{
+			Dispose();
+		}
+		
+		public void Dispose()
+		{
+			if (Instance.HasValue)
+				PopH264_DestroyEncoder(Instance.Value);
+			Instance = null;
+		}
+		
+		public void PushFrame(byte[] PixelData,int Width,int Height,TextureFormat Format,bool Keyframe=false)
+		{
+			if ( Format == TextureFormat.RGBA32 )
+				PushFrameRGBA(PixelData,Width,Height);
+			else if ( Format == TextureFormat.R8)
+				PushFrameGreyscale(PixelData,Width,Height);
+			else
+				throw new Exception($"Unhandled input format {Format}");
+		}
+		
+		public void PushFrameGreyscale(byte[] Luma,int Width,int Height,bool Keyframe=false)
+		{
+			PushYuvFrame( Luma, null, null, Width, Height, Keyframe );
+		}
+		
+		public void PushFrameRGBA(byte[] Rgba,int Width,int Height,bool Keyframe=false)
+		{
+			//	todo: convert to yuv
+			var Grey = new byte[Width*Height];
+			for ( var i=0;	i<Grey.Length;	i++ )
+			{
+				var RgbaIndex = i * 4;
+				var r = Rgba[RgbaIndex+0];
+				var g = Rgba[RgbaIndex+1];
+				var b = Rgba[RgbaIndex+2];
+				var a = Rgba[RgbaIndex+3];
+				Grey[i] = r;
+			}
+			PushFrameGreyscale( Grey, Width, Height, Keyframe );
+		}
+		
+		public void PushYuvFrame(byte[] Luma,byte[] ChromaU,byte[] ChromaV,int Width,int Height,bool Keyframe=false)
+		{
+			EncoderFrameMeta FrameMeta;
+			FrameMeta.Width = Width;
+			FrameMeta.Height = Height;
+			FrameMeta.Keyframe = Keyframe;
+			FrameMeta.LumaSize = (Luma!=null) ? Luma.Length : 0;
+			FrameMeta.ChromaUSize = (ChromaU!=null) ? ChromaU.Length : 0;
+			FrameMeta.ChromaVSize = (ChromaV!=null) ? ChromaV.Length : 0;
+			
+			var MetaJson = JsonUtility.ToJson(FrameMeta);
+			var MetaJsonAscii = System.Text.ASCIIEncoding.ASCII.GetBytes(MetaJson + "\0");
+			var ErrorBuffer = new byte[200];
+			PopH264_EncoderPushFrame( Instance.Value, MetaJsonAscii, Luma, ChromaU, ChromaV, ErrorBuffer, ErrorBuffer.Length );
+
+			var Error = GetString(ErrorBuffer);
+			if ( !String.IsNullOrEmpty(Error) )
+				throw new Exception($"PopH264.Encoder.PushFrame error {Error}");
+		}
+		
+		public void PushEndOfStream()
+		{
+			PopH264_EncoderEndOfStream( Instance.Value );
+		}
+		
+		public H264Frame? PopFrame()
+		{
+			var MetaJsonBuffer = new byte[1024*20];
+			PopH264_EncoderPeekData(Instance.Value, MetaJsonBuffer,MetaJsonBuffer.Length);
+			var MetaJson = GetString(MetaJsonBuffer);
+			var PoppedFrameMeta = JsonUtility.FromJson<PoppedFrameMeta>(MetaJson);
+			
+			Debug.Log($"PopFrame() -> {MetaJson}");
+			//	any data pending?
+			////	gr: how do we know stream is finished?
+			if ( PoppedFrameMeta.DataSize == 0 )
+			{
+				Debug.Log($"No pending frame to pop-> {MetaJson}");
+				return null;
+			}
+			
+			H264Frame Frame;
+			//	todo: pool these buffers
+			Frame.H264Data = new byte[PoppedFrameMeta.DataSize];
+			Frame.Meta = PoppedFrameMeta.Meta;
+			
+			var BytesWritten = PopH264_EncoderPopData( Instance.Value, Frame.H264Data, Frame.H264Data.Length );
+			//	returns 0 if there is no Data to pop.
+			if ( BytesWritten == 0 )
+			{
+				Debug.LogWarning($"Popped 0 bytes for frame; but frame expected; Meta={MetaJson}");
+				return null;
+			}
+			if ( BytesWritten < 0 )
+				throw new Exception($"Error from PopH264_EncoderPopData; {BytesWritten}; Meta={MetaJson}");
+
+			return Frame;
+		}
+	}
 
 	public static byte[] GetH264TestData(string TestDataName)
 	{
