@@ -692,9 +692,15 @@ SoyPixelsFormat::Type MediaFoundation::GetPixelFormat(const GUID& Guid)
 
 SoyPixelsFormat::Type MediaFoundation::GetPixelFormat(Soy::TFourcc Fourcc)
 {
+	//	https://gix.github.io/media-types/
 	switch (Fourcc.mFourcc32)
 	{
 	case MediaFoundation::GetFourcc("NV12"):	return SoyPixelsFormat::Nv12;
+	
+		//	UWP
+		//	Yvu_8_88
+	case MediaFoundation::GetFourcc("NV21"):	return SoyPixelsFormat::Nv21;	//	Yvu_8_88
+	case MediaFoundation::GetFourcc("420O"):	return SoyPixelsFormat::Nv21;	//	Yvu_8_88 MFVideoFormat_420O
 	//case MediaFoundation::GetFourcc("IYUV"):	return SoyPixelsFormat::Yvu_8_8_8_Full;
 	//case MediaFoundation::GetFourcc("I420"):	return SoyPixelsFormat::Yvu_8_8_8_Full;
 	}
