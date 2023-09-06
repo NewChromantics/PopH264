@@ -770,11 +770,11 @@ MediaFoundation::TActivateList MediaFoundation::EnumTransforms(const GUID& Categ
 	TActivateList Activates;
 	IMFAttributes* Attributes = nullptr;
 #if defined(TARGET_UWP)
-	throw std::runtime_error("UWP needs MFTEnum2 replacement");
+	auto Result = MFTEnumEx(Category, Flags, InputFilter, OutputFilter, &Activates.mActivates, &Activates.mCount);
 #else
 	auto Result = MFTEnum2(Category, Flags, InputFilter, OutputFilter, Attributes, &Activates.mActivates, &Activates.mCount);
-	IsOkay(Result, "MFTEnum2");
 #endif
+	IsOkay(Result, "MFTEnum2");
 	return Activates;
 }
 
