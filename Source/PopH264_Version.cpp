@@ -52,7 +52,7 @@ namespace PopH264
 	//const Soy::TVersion	Version(VERSION_MAJOR,VERSION_MINOR,VERSION_PATCH);
 	constexpr int	VersionMajor = 1;
 	constexpr int	VersionMinor = 8;
-	constexpr int	VersionPatch = 1;
+	constexpr int	VersionPatch = 2;
 }
 
 
