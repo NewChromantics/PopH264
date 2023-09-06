@@ -103,7 +103,8 @@ public static class PopH264
 		ChromaVU_88		=12,
 		Luma_Ntsc		=13,
 
-		Yuv_8_8_8 = 99,
+		Yuv_8_8_8 = 100,
+		Yuv_8_88 = 101,
 
 
 		ChromaU_8 = Chroma_U,
@@ -650,6 +651,20 @@ public static class PopH264
 				PushFrame( Rgba, null, null, Width, Height, PixelFormat.RGBA, Keyframe );
 			}
 #else
+			//	UWP only seems to accept 8_88/NV12
+			//	apple supports either
+			//	windows supports 8_8_8/nv21
+			#if UNITY_WSA
+			PushFrameRGBAToYuv8_88(Rgba,Width,Height,Keyframe);
+			#else
+			PushFrameRGBAToYuvI420(Rgba,Width,Height,Keyframe);
+			#endif
+#endif
+		}
+		
+		//	I420 or NV12 - 3 planes, luma, chroma, chroma
+		public void PushFrameRGBAToYuvI420(byte[] Rgba,int Width,int Height,bool Keyframe=false)
+		{
 			var HalfWidth = Width/2;
 			var HalfHeight = Height/2;
 			var LumaSize = Width * Height;
@@ -679,12 +694,50 @@ public static class PopH264
 			//	push as one plane with a format (mediafoundation & avf support this better)
 			PushFrameYuvI420( YuvPixels, Width, Height, Keyframe );
 			//PushFrame( LumaPlane, ChromaUPlane, ChromaVPlane, Width, Height, PixelFormat.Yuv_8_8_8, Keyframe );
-#endif
+		}
+		
+		//	420O or NV21 - 2 planes, chroma interleaved
+		public void PushFrameRGBAToYuv8_88(byte[] Rgba,int Width,int Height,bool Keyframe=false)
+		{
+			var HalfWidth = Width/2;
+			var HalfHeight = Height/2;
+			var LumaSize = Width * Height;
+			var ChromaSize = HalfWidth * HalfHeight;
+			var YuvPixels = new byte[LumaSize+ChromaSize+ChromaSize];
+			var LumaPlane = new ArraySegment<byte>(YuvPixels, 0, LumaSize);
+			var ChromaUVPlane = new ArraySegment<byte>(YuvPixels, LumaSize, ChromaSize+ChromaSize);
+			byte Luma,ChromaU,ChromaV;
+			for ( var i=0;	i<Width*Height;	i++ )
+			{
+				var RgbaIndex = i * 4;
+				var r = Rgba[RgbaIndex+0];
+				var g = Rgba[RgbaIndex+1];
+				var b = Rgba[RgbaIndex+2];
+				var a = Rgba[RgbaIndex+3];
+				RgbToYuv( r,g,b,out Luma,out ChromaU,out ChromaV);
+				var x = i % Width;
+				var y = i / Width;
+				var Chromax = x / 2;
+				var Chromay = y / 2;
+				var Chromai = Chromax + (Chromay * HalfWidth);
+				Chromai *= 2;
+				
+				LumaPlane[i] = Luma;
+				ChromaUVPlane[Chromai+0] = ChromaU;
+				ChromaUVPlane[Chromai+1] = ChromaV;
+			}
+			//	push as one plane with a format (mediafoundation & avf support this better)
+			PushFrameYuv8_88( YuvPixels, Width, Height, Keyframe );
 		}
 
-		public void PushFrameYuvI420(byte[] YuvI420,int Width,int Height,bool Keyframe=false)
+		public void PushFrameYuvI420(byte[] Yuv8_8_8,int Width,int Height,bool Keyframe=false)
 		{
-			PushFrame( YuvI420, null, null, Width, Height, PixelFormat.Yuv_8_8_8, Keyframe );
+			PushFrame( Yuv8_8_8, null, null, Width, Height, PixelFormat.Yuv_8_8_8, Keyframe );
+		}
+		
+		public void PushFrameYuv8_88(byte[] Yuv8_88,int Width,int Height,bool Keyframe=false)
+		{
+			PushFrame( Yuv8_88, null, null, Width, Height, PixelFormat.Yuv_8_88, Keyframe );
 		}
 
 		public void PushFrame(byte[] Plane0,byte[] Plane1,byte[] Plane2,int Width,int Height,PixelFormat Format,bool Keyframe=false)
