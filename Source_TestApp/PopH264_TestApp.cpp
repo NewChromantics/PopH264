@@ -135,7 +135,7 @@ std::vector<uint8_t> LoadFile(const std::string& Filename)
 		throw std::runtime_error( std::string("Failed to open ") + Filename );
 
 	std::vector<uint8_t> FileContents;
-	std::array<uint8_t,1024*1024> Buffer;
+	std::vector<uint8_t> Buffer(1*1024*1024);
 	fseek(File, 0, SEEK_SET);
 	while (!feof(File))
 	{
