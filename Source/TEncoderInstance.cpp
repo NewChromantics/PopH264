@@ -138,7 +138,7 @@ SoyPixelsImpl& GetDummyPixels(SoyPixelsMeta Meta)
 	return DummyPixels;
 }
 
-void PopH264::TEncoderInstance::PushFrame(const std::string& Meta,const uint8_t* LumaData,const uint8_t* ChromaUData,const uint8_t* ChromaVData)
+void PopH264::TEncoderInstance::PushFrame(const std::string& Meta,const uint8_t* LumaDataPtr,const uint8_t* ChromaUDataPtr,const uint8_t* ChromaVDataPtr)
 {
 	std::string ParseError;
 	auto Json = json11::Json::parse( Meta, ParseError );
@@ -152,23 +152,59 @@ void PopH264::TEncoderInstance::PushFrame(const std::string& Meta,const uint8_t*
 	auto FormatName = Json[POPH264_ENCODEFRAME_KEY_FORMAT].string_value();
 
 	//	check for data/size mismatch
-	if ( LumaData && LumaSize==0 )
+	if ( LumaDataPtr && LumaSize==0 )
 		throw Soy::AssertException("Luma pointer but zero LumaSize");
-	if ( !LumaData && LumaSize!=0 )
+	if ( !LumaDataPtr && LumaSize!=0 )
 		throw Soy::AssertException("Luma null but LumaSize nonzero");
 	
-	if ( ChromaUData && ChromaUSize==0 )
+	if ( ChromaUDataPtr && ChromaUSize==0 )
 		throw Soy::AssertException("ChromaU pointer but zero ChromaUSize");
-	if ( !ChromaUData && ChromaUSize!=0 )
+	if ( !ChromaUDataPtr && ChromaUSize!=0 )
 		throw Soy::AssertException("ChromaU null but ChromaUSize nonzero");
 	
-	if ( ChromaVData && ChromaVSize==0 )
+	if ( ChromaVDataPtr && ChromaVSize==0 )
 		throw Soy::AssertException("ChromaV pointer but zero ChromaVSize");
-	if ( !ChromaVData && ChromaVSize!=0 )
+	if ( !ChromaVDataPtr && ChromaVSize!=0 )
 		throw Soy::AssertException("ChromaV null but ChromaVSize nonzero");
 	
+	std::span LumaData( const_cast<uint8_t*>(LumaDataPtr), LumaSize );
+	std::span ChromaUData( const_cast<uint8_t*>(ChromaUDataPtr), ChromaUSize );
+	std::span ChromaVData( const_cast<uint8_t*>(ChromaVDataPtr), ChromaVSize );
+
+	
+	//	look out for striped data and make a single pixel buffer
+	if ( !LumaData.empty() && !ChromaUData.empty() && ChromaVData.empty() )
+	{
+		SoyPixelsMeta YuvMeta(Width, Height, SoyPixelsFormat::Yuv_8_88);
+		BufferArray<SoyPixelsMeta, 3> YuvMetas;
+		YuvMeta.GetPlanes(GetArrayBridge(YuvMetas));
+		
+		auto ChromaUVData = ChromaUData;
+		auto* StripedLumaData = LumaData.data();
+		auto* StripedChromaUVData = LumaData.data() + YuvMetas[0].GetDataSize();
+		if ( StripedLumaData==LumaData.data() && StripedChromaUVData==ChromaUVData.data() )
+		{
+			auto TotalSize = LumaSize + ChromaUVData.size();
+			SoyPixelsRemote PixelsStriped( StripedLumaData, TotalSize, YuvMeta );
+			mEncoder->Encode( PixelsStriped, Meta, Keyframe );
+			return;
+		}
+		
+		//	gr: we don't support 2 planes below, so take a slow path and stripe the data
+		std::Debug << "Warning, slow path: 2 plane YUV turning into striped YUV data" << std::endl;
+		std::vector<uint8_t> StripedData;
+		std::copy( LumaData.begin(), LumaData.end(), std::back_inserter(StripedData) );
+		std::copy( ChromaUVData.begin(), ChromaUVData.end(), std::back_inserter(StripedData) );
+		SoyPixelsRemote PixelsStriped( StripedData.data(), StripedData.size(), YuvMeta );
+		mEncoder->Encode( PixelsStriped, Meta, Keyframe );
+		return;
+	}
+
+	
+	
+	
 	//	check for special case of 1 plane
-	if (LumaData && !ChromaUData && !ChromaVData)
+	if ( !LumaData.empty() && ChromaUData.empty() && ChromaVData.empty() )
 	{
 		auto PixelFormat = SoyPixelsFormat::Greyscale;
 		//	only one plane
@@ -189,7 +225,7 @@ void PopH264::TEncoderInstance::PushFrame(const std::string& Meta,const uint8_t*
 			}
 		}
 
-		SoyPixelsRemote LumaPixels(const_cast<uint8_t*>(LumaData), Width, Height, LumaSize, PixelFormat );
+		SoyPixelsRemote LumaPixels( LumaData.data(), Width, Height, LumaData.size(), PixelFormat );
 		
 		#if defined(TARGET_IOS)
 		{
@@ -224,33 +260,33 @@ void PopH264::TEncoderInstance::PushFrame(const std::string& Meta,const uint8_t*
 		return;
 	}
 
-	if ( LumaData && ChromaUData && ChromaVData )
+	if ( !LumaData.empty() && !ChromaUData.empty() && !ChromaVData.empty() )
 	{
 		SoyPixelsMeta YuvMeta(Width, Height, SoyPixelsFormat::Yuv_8_8_8);
-
+		
 		BufferArray<SoyPixelsMeta, 3> YuvMetas;
 		YuvMeta.GetPlanes(GetArrayBridge(YuvMetas));
 		auto WidthChroma = YuvMetas[1].GetWidth();
 		auto HeightChroma = YuvMetas[1].GetHeight();
-
+		
 		//	look out for striped data and make a single pixel buffer
 		{
-			auto* StripedLumaData = LumaData;
-			auto* StripedChromaUData = LumaData + YuvMetas[0].GetDataSize();
+			auto* StripedLumaData = LumaData.data();
+			auto* StripedChromaUData = LumaData.data() + YuvMetas[0].GetDataSize();
 			auto* StripedChromaVData = StripedChromaUData + YuvMetas[1].GetDataSize();
-			if ( StripedLumaData==LumaData && StripedChromaUData==ChromaUData && StripedChromaVData==ChromaVData )
+			if ( StripedLumaData==LumaData.data() && StripedChromaUData==ChromaUData.data() && StripedChromaVData==ChromaVData.data() )
 			{
 				auto TotalSize = LumaSize + ChromaUSize + ChromaVSize;
-				SoyPixelsRemote PixelsStriped( const_cast<uint8_t*>(LumaData), TotalSize, YuvMeta );
+				SoyPixelsRemote PixelsStriped( LumaData.data(), TotalSize, YuvMeta );
 				mEncoder->Encode( PixelsStriped, Meta, Keyframe );
 				return;
 			}
 		}
 		
 		//	yuv_8_8_8
-		SoyPixelsRemote PixelsY( const_cast<uint8_t*>(LumaData), Width, Height, LumaSize, SoyPixelsFormat::Luma );
-		SoyPixelsRemote PixelsU( const_cast<uint8_t*>(ChromaUData), WidthChroma, HeightChroma, ChromaUSize, SoyPixelsFormat::ChromaU_8 );
-		SoyPixelsRemote PixelsV( const_cast<uint8_t*>(ChromaVData), WidthChroma, HeightChroma, ChromaVSize, SoyPixelsFormat::ChromaV_8 );
+		SoyPixelsRemote PixelsY( LumaData.data(), Width, Height, LumaSize, SoyPixelsFormat::Luma );
+		SoyPixelsRemote PixelsU( ChromaUData.data(), WidthChroma, HeightChroma, ChromaUSize, SoyPixelsFormat::ChromaU_8 );
+		SoyPixelsRemote PixelsV( ChromaVData.data(), WidthChroma, HeightChroma, ChromaVSize, SoyPixelsFormat::ChromaV_8 );
 		
 		mEncoder->Encode( PixelsY, PixelsU, PixelsV, Meta, Keyframe );
 		return;

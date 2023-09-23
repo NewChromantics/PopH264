@@ -412,7 +412,7 @@ void EncoderYuv8_88Test(int Width,int Height,const char* EncoderName="")
 			std::this_thread::sleep_for(std::chrono::milliseconds(100));
 			continue;
 		}
-		std::Debug << "Encoder packet: x" << FrameSize << std::endl;
+		std::Debug << "Encoder got encoded packet: x" << FrameSize << std::endl;
 	}
 	
 	PopH264_DestroyEncoder(Handle);
