@@ -696,6 +696,140 @@ TEST_P(PopH264_Decode_Tests,DecodeFile)
 
 
 
+
+
+
+
+
+
+
+
+class EncodeTestParams_t
+{
+public:
+	std::string		InputImageFilename;
+};
+
+class PopH264_Encode_Tests : public testing::TestWithParam<EncodeTestParams_t>
+{
+};
+
+auto EncodeTestValues = ::testing::Values
+(
+ EncodeTestParams_t{.InputImageFilename="Cat.jpg"}
+);
+	
+INSTANTIATE_TEST_SUITE_P( PopH264_Encode_Tests, PopH264_Encode_Tests, EncodeTestValues );
+
+
+
+TEST_P(PopH264_Encode_Tests,EncodeFile)
+{
+	auto Params = GetParam();
+	
+	auto InputImage = DecodeFileFirstFrame( Params.InputImageFilename );
+	
+	std::stringstream OptionsJson;
+	OptionsJson << "{";
+	OptionsJson << "\"VerboseDebug\":true";
+	OptionsJson << "}";
+	
+	std::array<char,1024> ErrorBuffer = {0};
+	auto Encoder = PopH264_CreateEncoder( OptionsJson.str().c_str(), ErrorBuffer.data(), ErrorBuffer.size() );
+	if ( Encoder == PopH264_NullInstance )
+	{
+		std::stringstream Error;
+		Error << "Failed to allocate Encoder with filename=" << Params.InputImageFilename << ". Error=" << ErrorBuffer.data();
+		throw std::runtime_error(Error.str());
+	}
+	
+	//	write image
+	{
+		//	gr: would be nice if encode image meta is same as decoded image meta
+		std::stringstream TestMetaJson;
+		TestMetaJson << "{";
+		TestMetaJson << "\"Width\":" << InputImage.mWidth << ",";
+		TestMetaJson << "\"Height\":" << InputImage.mHeight << ",";
+		if ( !InputImage.mPlane0.empty() )
+			TestMetaJson << "\"LumaSize\":" << InputImage.mPlane0.size() << ",";
+		if ( !InputImage.mPlane1.empty() )
+			TestMetaJson << "\"ChromaUSize\":" << InputImage.mPlane1.size() << ",";
+		if ( !InputImage.mPlane2.empty() )
+			TestMetaJson << "\"ChromaVSize\":" << InputImage.mPlane2.size() << ",";
+		TestMetaJson << "\"Format\":\"" << InputImage.mFormat << "\",";
+		TestMetaJson << "\"TestMeta\":\"PurpleMonkeyDishwasher\"";
+		TestMetaJson << "}";
+		
+		PopH264_EncoderPushFrame( Encoder, TestMetaJson.str().c_str(), InputImage.mPlane0.data(), InputImage.mPlane1.data(), InputImage.mPlane2.data(), ErrorBuffer.data(), ErrorBuffer.size() );
+		PopH264_EncoderEndOfStream(Encoder);
+	}
+
+	DecodeResults_t Results;
+	
+	//	read out encoded packets
+	for ( auto i=0;	i<1000;	i++ )
+	{
+		std::this_thread::sleep_for( std::chrono::milliseconds(100) );
+		
+		//	read meta first to make sure test data is propogated out again
+		std::array<char,1000> MetaJsonBuffer = {0};
+		PopH264_EncoderPeekData(Encoder, MetaJsonBuffer.data(), MetaJsonBuffer.size() );
+		std::string MetaJson(MetaJsonBuffer.data());
+		std::Debug << "PopH264_EncoderPeekData meta: " << MetaJson << std::endl;
+		PopJson::Value_t Meta(MetaJson);
+		
+		//	check for test data
+		{
+			auto TestString = "PurpleMonkeyDishwasher";
+			auto FoundPos = std::string(MetaJson).find(TestString);
+			if (FoundPos == std::string::npos)
+			{
+				std::Debug << "Test string missing from meta " << TestString << std::endl;
+			}
+		}
+		
+		if ( Meta.HasKey("Error",MetaJson) )
+		{
+			auto Error = Meta.GetValue("Error",MetaJson).GetString(MetaJson);
+			EXPECT_EQ( Error.empty(), true ) << "Error found in peek meta; " << Error;
+			break;
+		}
+		
+		//	gr: can we have EOF and a frame in the same packet?
+		//	gr: should we? (no!)
+		if ( Meta.HasKey("EndOfStream",MetaJson) )
+		{
+			Results.HadEndOfStream = true;
+			break;
+		}
+		
+		std::array<uint8_t,1024*100> PacketBuffer;
+		auto FrameSize = PopH264_EncoderPopData( Encoder, PacketBuffer.data(), PacketBuffer.size() );
+		if ( FrameSize < 0 )
+		{
+			std::this_thread::sleep_for(std::chrono::milliseconds(100));
+			continue;
+		}
+		
+		std::Debug << "Encoder packet: x" << FrameSize << std::endl;
+		std::span PacketData( PacketBuffer.data(), PacketBuffer.size() );
+		
+	}
+	PopH264_DestroyEncoder(Encoder);
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
 class PopH264_General_Tests : public testing::TestWithParam<bool>
 {
 protected:
