@@ -46,6 +46,12 @@
     <ClCompile Include="..\Source\SoyLib\src\SoyAssert.cpp">
       <Filter>Source Files\SoyLib</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source_TestApp\googletest\googletest\src\gtest-all.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source_TestApp\PopJsonCpp\PopJson.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\SoyLib\src\SoyFilesystem.h">
