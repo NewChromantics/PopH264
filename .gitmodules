@@ -10,3 +10,6 @@
 [submodule "TestData"]
 	path = TestData
 	url = https://github.com/NewChromantics/PopH264TestData.git
+[submodule "Source_TestApp/googletest"]
+	path = Source_TestApp/googletest
+	url = https://github.com/google/googletest.git
