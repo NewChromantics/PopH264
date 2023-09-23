@@ -165,7 +165,7 @@ $(OUT_FILES): $(OUT_FILE_SOURCES)
 $(OUT_APP): $(APP_OBJECTS) $(OUT_LIB)
 	$(info Building test app $(OUT_APP))
 	mkdir -p $(BUILD_DIR)
-	$(CC) $(APP_LINK_FLAGS) $(APP_OBJECTS) -o $@ -L$(BUILD_DIR) -l$(LIB_NAME) $(APP_LINK_LIBS)
+	$(CC) $(APP_LINK_FLAGS) $(APP_INCLUDES) $(APP_OBJECTS) -o $@ -L$(BUILD_DIR) -l$(LIB_NAME) $(APP_LINK_LIBS)
 
 $(OUT_LIB): $(LIB_OBJECTS) $(OUT_FILES)
 	$(info Building library $(OUT_LIB))
