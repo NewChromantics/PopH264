@@ -478,9 +478,10 @@ class PopH264_Decode_Tests : public testing::TestWithParam<DecodeTestParams_t>
 auto DecodeTestValues = ::testing::Values
 (
  DecodeTestParams_t{"RainbowGradient.h264", .ExpectedResults{.FrameCount=1,.HadEndOfStream=true} },
+ DecodeTestParams_t{"GreyscaleGradient.h264", .ExpectedResults{.FrameCount=1,.HadEndOfStream=true} },
  DecodeTestParams_t{"Cat.jpg", .ExpectedResults{.FrameCount=1,.HadEndOfStream=true} }
 );
-
+	
 INSTANTIATE_TEST_SUITE_P( PopH264_Decode_Tests, PopH264_Decode_Tests, DecodeTestValues );
 
 
