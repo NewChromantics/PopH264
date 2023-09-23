@@ -575,6 +575,11 @@ protected:
 };
 
 
+TEST(PopH264_General_Tests, PopJsonUnitTest )
+{
+	EXPECT_NO_THROW( PopJson::UnitTest() );
+}
+
 TEST(PopH264_General_Tests,OldMain)
 {
 	GTEST_SKIP();
