@@ -460,13 +460,28 @@ int main()
 class DecodedImage_t
 {
 public:
+	SoyPixelsFormat::Type	GetFormat()
+	{
+		switch ( mPlaneFormats.size() )
+		{
+			case 0:	return SoyPixelsFormat::Invalid;
+			case 1:	return mPlaneFormats[0];
+			case 2: return SoyPixelsFormat::GetMergedFormat( mPlaneFormats[0], mPlaneFormats[1] );
+			case 3: return SoyPixelsFormat::GetMergedFormat( mPlaneFormats[0], mPlaneFormats[1], mPlaneFormats[2] );
+			default: break;
+		}
+		std::stringstream Error;
+		Error << "Don't know how to combine " << mPlaneFormats.size() << " pixel formats together";
+		throw std::runtime_error(Error.str());
+	}
+	
 	std::vector<uint8_t>	mPlane0;
 	std::vector<uint8_t>	mPlane1;
 	std::vector<uint8_t>	mPlane2;
 	std::string				mMetaJson;
 	int						mWidth = 0;
 	int						mHeight = 0;
-	std::string				mFormat;
+	std::vector<SoyPixelsFormat::Type>	mPlaneFormats;
 };
 
 
@@ -561,17 +576,29 @@ DecodedImage_t DecodeFileFirstFrame(std::string_view Filename,std::string_view D
 
 		DecodedImage_t Image;
 		Image.mMetaJson = MetaJson;
-		Image.mPlane0.resize( 1 * 1024*1024 );
-		Image.mPlane1.resize( 1 * 1024*1024 );
-		Image.mPlane2.resize( 1 * 1024*1024 );
 		
 		//	pull out image meta
 		auto PlaneMetas = Meta.GetValue("Planes", MetaJson);
-		auto Plane0Meta = PlaneMetas.GetValue(0, MetaJson);
-		Image.mWidth = Plane0Meta.GetValue("Width",MetaJson).GetInteger(MetaJson);
-		Image.mHeight = Plane0Meta.GetValue("Height",MetaJson).GetInteger(MetaJson);
-		Image.mFormat = Plane0Meta.GetValue("Format",MetaJson).GetString(MetaJson);
+		for ( auto Plane=0;	Plane<PlaneMetas.GetChildCount();	Plane++ )
+		{
+			auto Plane0Meta = PlaneMetas.GetValue(Plane, MetaJson);
+			if ( Plane == 0 )
+			{
+				Image.mWidth = Plane0Meta.GetValue("Width",MetaJson).GetInteger(MetaJson);
+				Image.mHeight = Plane0Meta.GetValue("Height",MetaJson).GetInteger(MetaJson);
+			}
+			auto FormatName = Plane0Meta.GetValue("Format",MetaJson).GetString(MetaJson);
+			auto Format = SoyPixelsFormat::ToType(FormatName);
+			Image.mPlaneFormats.push_back(Format);
 
+			auto DataSize = Plane0Meta.GetValue("DataSize",MetaJson).GetInteger(MetaJson);
+			if ( Plane == 0 )
+				Image.mPlane0.resize( DataSize );
+			if ( Plane == 1 )
+				Image.mPlane1.resize( DataSize );
+			if ( Plane == 2 )
+				Image.mPlane2.resize( DataSize );
+		}
 
 		auto FrameNumber = PopH264_PopFrame( Decoder, Image.mPlane0.data(), Image.mPlane0.size(), Image.mPlane1.data(), Image.mPlane1.size(), Image.mPlane2.data(), Image.mPlane2.size() );
 		std::cerr  << "Decoded testdata; " << MetaJson << " FrameNumber=" << FrameNumber << " Should be " << FirstFrameNumber << std::endl;
@@ -756,11 +783,16 @@ TEST_P(PopH264_Encode_Tests,EncodeFile)
 			TestMetaJson << "\"ChromaUSize\":" << InputImage.mPlane1.size() << ",";
 		if ( !InputImage.mPlane2.empty() )
 			TestMetaJson << "\"ChromaVSize\":" << InputImage.mPlane2.size() << ",";
-		TestMetaJson << "\"Format\":\"" << InputImage.mFormat << "\",";
+		auto Format = InputImage.GetFormat();
+		TestMetaJson << "\"Format\":\"" << Format << "\",";
 		TestMetaJson << "\"TestMeta\":\"PurpleMonkeyDishwasher\"";
 		TestMetaJson << "}";
 		
 		PopH264_EncoderPushFrame( Encoder, TestMetaJson.str().c_str(), InputImage.mPlane0.data(), InputImage.mPlane1.data(), InputImage.mPlane2.data(), ErrorBuffer.data(), ErrorBuffer.size() );
+		std::string Error( ErrorBuffer.data() );
+		EXPECT_EQ( Error.empty(), true ) << "PopH264_EncoderPushFrame() error " << Error;
+		if ( !Error.empty() )
+			throw std::runtime_error( std::string("PopH264_EncoderPushFrame() error ") + Error );
 		PopH264_EncoderEndOfStream(Encoder);
 	}
 
@@ -778,22 +810,15 @@ TEST_P(PopH264_Encode_Tests,EncodeFile)
 		std::Debug << "PopH264_EncoderPeekData meta: " << MetaJson << std::endl;
 		PopJson::Value_t Meta(MetaJson);
 		
-		//	check for test data
-		{
-			auto TestString = "PurpleMonkeyDishwasher";
-			auto FoundPos = std::string(MetaJson).find(TestString);
-			if (FoundPos == std::string::npos)
-			{
-				std::Debug << "Test string missing from meta " << TestString << std::endl;
-			}
-		}
-		
 		if ( Meta.HasKey("Error",MetaJson) )
 		{
 			auto Error = Meta.GetValue("Error",MetaJson).GetString(MetaJson);
 			EXPECT_EQ( Error.empty(), true ) << "Error found in peek meta; " << Error;
 			break;
 		}
+		
+		//	any packets ready to pop?
+		auto OutputQueueCount = Meta.GetValue("OutputQueueCount",MetaJson).GetInteger( MetaJson );
 		
 		//	gr: can we have EOF and a frame in the same packet?
 		//	gr: should we? (no!)
@@ -803,12 +828,21 @@ TEST_P(PopH264_Encode_Tests,EncodeFile)
 			break;
 		}
 		
+		if ( OutputQueueCount == 0 )
+			continue;
 		std::array<uint8_t,1024*100> PacketBuffer;
 		auto FrameSize = PopH264_EncoderPopData( Encoder, PacketBuffer.data(), PacketBuffer.size() );
 		if ( FrameSize < 0 )
-		{
-			std::this_thread::sleep_for(std::chrono::milliseconds(100));
 			continue;
+		
+		//	check for test data presence
+		{
+			auto TestString = "PurpleMonkeyDishwasher";
+			auto FoundPos = std::string(MetaJson).find(TestString);
+			if (FoundPos == std::string::npos)
+			{
+				std::Debug << "Test string missing from meta " << TestString << std::endl;
+			}
 		}
 		
 		std::Debug << "Encoder packet: x" << FrameSize << std::endl;
