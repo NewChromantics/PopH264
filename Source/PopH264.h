@@ -5,8 +5,11 @@
 	it probably isn't strict C at the moment, but no classes, namespaces etc.
 */
 
-#include <stdint.h>
+//	constant for invalid instance numbers, to avoid use of magic-number 0 around code bases
+enum { PopH264_NullInstance=0 };
 
+#include <stdbool.h>
+#include <stdint.h>
 
 #if !defined(__export)
 
