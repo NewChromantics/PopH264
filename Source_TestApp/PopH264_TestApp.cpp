@@ -4,6 +4,13 @@
 #include "SoyPixels.h"
 #include <thread>
 
+#include "gtest/gtest.h"
+
+#if GTEST_HAS_FILE_SYSTEM
+#error This build will error in sandbox mac apps
+#endif
+
+
 #if !defined(TARGET_WINDOWS) && defined(_MSC_VER)
 #define TARGET_WINDOWS
 #endif
@@ -118,25 +125,27 @@ int fopen_s(FILE **f, const char *name, const char *mode)
 
 #include "SoyFilesystem.h"
 
-bool LoadFile(const std::string& Filename,ArrayBridge<uint8_t>& Data)
+std::vector<uint8_t> LoadFile(const std::string& Filename)
 {
 	FILE* File = nullptr;
 	auto Error = fopen_s(&File,Filename.c_str(), "rb");
-	if (!File)
-		return false;
+	if ( !File )
+		throw std::runtime_error( std::string("Failed to open ") + Filename );
+
+	std::vector<uint8_t> FileContents;
+	std::array<uint8_t,1024*1024> Buffer;
 	fseek(File, 0, SEEK_SET);
 	while (!feof(File))
 	{
-		uint8_t Buffer[1024 * 100];
-		auto BytesRead = fread(Buffer, 1, sizeof(Buffer), File);
-		auto BufferArray = GetRemoteArray(Buffer, BytesRead, BytesRead);
-		Data.PushBackArray(BufferArray);
+		auto BytesRead = fread( Buffer.data(), 1, Buffer.size(), File );
+		auto DataRead = std::span( Buffer.data(), BytesRead );
+		std::copy( DataRead.begin(), DataRead.end(), std::back_inserter(FileContents ) );
 	}
 	fclose(File);
-	return true;
+	return FileContents;
 }
 
-bool LoadDataFromFilename(const char* DataFilename,ArrayBridge<uint8_t>&& Data)
+std::vector<uint8_t> LoadDataFromFilename(std::string_view DataFilename)
 {
 	//	change this to detect absolute paths rather than just trying random combinations
 	std::vector<std::string> TryFilenames;
@@ -151,41 +160,43 @@ bool LoadDataFromFilename(const char* DataFilename,ArrayBridge<uint8_t>&& Data)
 
 	for ( auto& Filename : TryFilenames )
 	{
-		if ( LoadFile( Filename, Data ) )
-			return true;
+		try
+		{
+			auto Data = LoadFile( Filename );
+			return Data;
+		}
+		catch(std::exception& e)
+		{
+		}
 	}
-	return false;
+	
+	//	load from api
+	std::vector<uint8_t> Buffer;
+	Buffer.resize( 1 * 1024 * 1024 );
+	std::string DataFilenameWithTerminator(DataFilename);
+	
+	auto TestDataSize = PopH264_GetTestData( DataFilenameWithTerminator.c_str(), Buffer.data(), Buffer.size() );
+	if ( TestDataSize < 0 )
+		throw std::runtime_error("Missing test data");
+	if ( TestDataSize == 0 )
+		throw std::runtime_error("PopH264_GetTestData unexpectedly returned zero-length test data");
+	if ( TestDataSize > Buffer.size() )
+	{
+		std::stringstream Debug;
+		Debug << "Buffer (" << Buffer.size() << " bytes) for test data (" << TestDataSize << ") not big enough";
+		throw std::runtime_error(Debug.str());
+	}
+
+	Buffer.resize(TestDataSize);
+	return Buffer;
 }
 
-//	gr: 1mb too big for windows on stack
-uint8_t TestDataBuffer[1 * 1024 * 1024];
 
 void DecoderTest(const char* TestDataName,CompareFunc_t* Compare,const char* DecoderName,size_t DataRepeat=1)
 {
 	std::Debug << "DecoderTest(" << (TestDataName?TestDataName:"<null>") << "," << (DecoderName?DecoderName:"<null>") << ")" << std::endl;
-	Array<uint8_t> TestData;
 
-	if (!LoadDataFromFilename(TestDataName, GetArrayBridge(TestData)))
-	{
-		//	gr: using int (auto) here, causes some resolve problem with GetRemoteArray below
-		auto TestDataSize = PopH264_GetTestData(TestDataName, TestDataBuffer, std::size(TestDataBuffer));
-		if ( TestDataSize < 0 )
-			throw std::runtime_error("Missing test data");
-		if ( TestDataSize == 0 )
-			throw std::runtime_error("PopH264_GetTestData unexpectedly returned zero-length test data");
-		if (TestDataSize > std::size(TestDataBuffer))
-		{
-			std::stringstream Debug;
-			Debug << "Buffer for test data (" << TestDataSize << ") not big enough";
-			throw std::runtime_error(Debug.str());
-		}
-		//	gr: debug here as on Android GetRemoteArray with TestDataSize=auto was making a remote array of zero bytes
-		//std::Debug << "making TestDataArray..." << std::endl;
-		auto TestDataArray = GetRemoteArray(TestDataBuffer, TestDataSize, TestDataSize);
-		//std::Debug << "TestDataSize=" << TestDataSize << " TestDataArray.GetSize=" << TestDataArray.GetDataSize() << std::endl;
-		TestData.PushBackArray(TestDataArray);
-		//std::Debug << "TestData.PushBackArray() " << TestData.GetDataSize() << std::endl;
-	}
+	auto TestData = LoadDataFromFilename( TestDataName );
 
 	std::stringstream OptionsStr;
 	OptionsStr << "{";
@@ -199,14 +210,14 @@ void DecoderTest(const char* TestDataName,CompareFunc_t* Compare,const char* Dec
 	std::Debug << "PopH264_CreateDecoder()" << std::endl;
 	auto Handle = PopH264_CreateDecoder(Options,ErrorBuffer,std::size(ErrorBuffer));
 
-	std::Debug << "TestData (" << (TestDataName?TestDataName:"<null>") << ") Size: " << TestData.GetDataSize() << std::endl;
+	std::Debug << "TestData (" << (TestDataName?TestDataName:"<null>") << ") Size: " << TestData.size() << std::endl;
 	
 	int FirstFrameNumber = 9999 - 100;
 	for (auto Iteration = 0; Iteration < DataRepeat; Iteration++)
 	{
 		auto LastIteration = Iteration == (DataRepeat - 1);
 		FirstFrameNumber += 100;
-		auto Result = PopH264_PushData(Handle, TestData.GetArray(), TestData.GetDataSize(), FirstFrameNumber);
+		auto Result = PopH264_PushData(Handle, TestData.data(), TestData.size(), FirstFrameNumber);
 		if (Result < 0)
 			throw std::runtime_error("DecoderTest: PushData error");
 
@@ -248,39 +259,12 @@ void DecoderTest(const char* TestDataName,CompareFunc_t* Compare,const char* Dec
 }
 
 
-
-void LoadTestData(Array<uint8_t>& TestData,const char* TestDataName)
-{
-	if ( LoadDataFromFilename(TestDataName, GetArrayBridge(TestData)) )
-		return;
-		
-	//	gr: using int (auto) here, causes some resolve problem with GetRemoteArray below
-	size_t TestDataSize = PopH264_GetTestData(TestDataName, TestDataBuffer, std::size(TestDataBuffer));
-	if ( TestDataSize < 0 )
-		throw std::runtime_error("Missing test data");
-	if ( TestDataSize == 0 )
-		throw std::runtime_error("PopH264_GetTestData unexpectedly returned zero-length test data");
-	if (TestDataSize > std::size(TestDataBuffer))
-	{
-		std::stringstream Debug;
-		Debug << "Buffer for test data (" << TestDataSize << ") not big enough";
-		throw std::runtime_error(Debug.str());
-	}
-	//	gr: debug here as on Android GetRemoteArray with TestDataSize=auto was making a remote array of zero bytes
-	//std::Debug << "making TestDataArray..." << std::endl;
-	auto TestDataArray = GetRemoteArray(TestDataBuffer, TestDataSize, TestDataSize);
-	//std::Debug << "TestDataSize=" << TestDataSize << " TestDataArray.GetSize=" << TestDataArray.GetDataSize() << std::endl;
-	TestData.PushBackArray(TestDataArray);
-	//std::Debug << "TestData.PushBackArray() " << TestData.GetDataSize() << std::endl;
-}
-
 //	give the decoder loads of data to decode, then try and destroy the decoder
 //	whilst its still decoding (to crash android)
 void DestroyMidDecodeTest(const char* TestDataName,CompareFunc_t* Compare,const char* DecoderName)
 {
 	std::Debug << __PRETTY_FUNCTION__ << "(" << (TestDataName?TestDataName:"<null>") << "," << (DecoderName?DecoderName:"<null>") << ")" << std::endl;
-	Array<uint8_t> TestData;
-	LoadTestData(TestData,TestDataName);
+	auto TestData = LoadDataFromFilename(TestDataName);
 
 	std::stringstream OptionsStr;
 	OptionsStr << "{";
@@ -294,7 +278,7 @@ void DestroyMidDecodeTest(const char* TestDataName,CompareFunc_t* Compare,const 
 	std::Debug << "PopH264_CreateDecoder()" << std::endl;
 	auto Handle = PopH264_CreateDecoder(Options,ErrorBuffer,std::size(ErrorBuffer));
 
-	std::Debug << "TestData (" << (TestDataName?TestDataName:"<null>") << ") Size: " << TestData.GetDataSize() << std::endl;
+	std::Debug << "TestData (" << (TestDataName?TestDataName:"<null>") << ") Size: " << TestData.size() << std::endl;
 	
 	size_t DataRepeat = 500;
 	int FirstFrameNumber = 9999 - 100;
@@ -302,7 +286,7 @@ void DestroyMidDecodeTest(const char* TestDataName,CompareFunc_t* Compare,const 
 	{
 		auto LastIteration = Iteration == (DataRepeat - 1);
 		FirstFrameNumber += 100;
-		auto Result = PopH264_PushData(Handle, TestData.GetArray(), TestData.GetDataSize(), FirstFrameNumber);
+		auto Result = PopH264_PushData(Handle, TestData.data(), TestData.size(), FirstFrameNumber);
 		if (Result < 0)
 			throw std::runtime_error("DecoderTest: PushData error");
 
@@ -447,14 +431,131 @@ void SafeDecoderTest(const char* TestDataName,CompareFunc_t* Compare,const char*
 }
 
 
+
 int main()
 {
 #if defined(TARGET_WINDOWS)
 	Platform::CaptureStdErr();
 #endif
 	
-	SafeDecoderTest("Cat.jpg", nullptr, nullptr );
 	
+	// Must be called prior to running any tests
+	testing::InitGoogleTest();
+	
+	static bool BreakOnTestError = true;
+	if ( BreakOnTestError )
+		GTEST_FLAG_SET(break_on_failure,true);
+	
+	const auto ReturnCode = RUN_ALL_TESTS();
+	
+	if ( ReturnCode != 0 )
+		throw std::runtime_error("Integration tests failed. See GoogleTest logs above");
+	
+	std::cerr << "Integration tests succeeded!" << std::endl;
+}
+
+
+class DecodeTestParams_t
+{
+public:
+	std::string		Filename;
+	std::string		DecoderName;
+};
+
+class PopH264_Decode_Tests : public testing::TestWithParam<DecodeTestParams_t>
+{
+};
+
+auto DecodeTestValues = ::testing::Values
+(
+ DecodeTestParams_t{"RainbowGradient.h264"},
+ DecodeTestParams_t{"Cat.jpg"}
+);
+
+INSTANTIATE_TEST_SUITE_P( PopH264_Decode_Tests, PopH264_Decode_Tests, DecodeTestValues );
+
+
+
+TEST_P(PopH264_Decode_Tests,DecodeFile)
+{
+	auto Params = GetParam();
+	
+	auto TestData = LoadDataFromFilename(Params.Filename);
+	
+	std::stringstream OptionsJson;
+	OptionsJson << "{";
+	if ( !Params.DecoderName.empty() )
+		OptionsJson << "\"Decoder\":\"" << Params.DecoderName << "\",";
+	OptionsJson << "\"VerboseDebug\":true";
+	OptionsJson << "}";
+	
+	std::array<char,1024> ErrorBuffer = {0};
+	auto Decoder = PopH264_CreateDecoder( OptionsJson.str().c_str(), ErrorBuffer.data(), ErrorBuffer.size() );
+	if ( Decoder == PopH264_NullInstance )
+	{
+		std::stringstream Error;
+		Error << "Failed to allocate decoder with filename=" << Params.Filename << ", decoder=" << Params.DecoderName << ". Error=" << ErrorBuffer.data();
+		throw std::runtime_error(Error.str());
+	}
+	
+	//	push input data
+	int FirstFrameNumber = 9999;
+	{
+		auto Result = PopH264_PushData( Decoder, TestData.data(), TestData.size(), FirstFrameNumber );
+		if (Result < 0)
+			throw std::runtime_error("DecoderTest: PushData error");
+		PopH264_PushEndOfStream( Decoder );
+	}
+	
+	//	pop frames
+	//	todo: add a proper timeout instead of loop*pause
+	for ( auto i=0;	i<1000;	i++ )
+	{
+		std::this_thread::sleep_for( std::chrono::milliseconds(100) );
+		
+		std::array<char,1000> MetaJsonBuffer = {0};
+		PopH264_PeekFrame( Decoder, MetaJsonBuffer.data(), MetaJsonBuffer.size() );
+		std::string MetaJson(MetaJsonBuffer.data());
+		
+		static uint8_t Plane0[1024 * 1024];
+		static uint8_t Plane1[1024 * 1024];
+		static uint8_t Plane2[1024 * 1024];
+		auto FrameNumber = PopH264_PopFrame( Decoder, Plane0, std::size(Plane0), Plane1, std::size(Plane1), Plane2, std::size(Plane2));
+		std::cerr  << "Decoded testdata; " << MetaJson << " FrameNumber=" << FrameNumber << " Should be " << FirstFrameNumber << std::endl;
+		bool IsValid = FrameNumber >= 0;
+		if ( !IsValid )
+			continue;
+
+		//	read EOF
+		//	read error
+		
+		EXPECT_EQ( FrameNumber, FirstFrameNumber );
+		
+		break;
+	}
+	
+	//	deallocate
+	PopH264_DestroyDecoder( Decoder );
+	
+	//	compare with expected results
+	
+}
+
+
+
+class PopH264_General_Tests : public testing::TestWithParam<bool>
+{
+protected:
+};
+
+
+TEST(PopH264_General_Tests,OldMain)
+{
+	GTEST_SKIP();
+	
+	SafeDecoderTest("RainbowGradient.h264", nullptr, nullptr );
+	SafeDecoderTest("Cat.jpg", nullptr, nullptr );
+
 	//if ( false )
 	{
 		EncoderGreyscaleTest();
@@ -507,15 +608,12 @@ int main()
 	//SafeDecoderTest("RainbowGradient.h264", CompareRainbow);
 	//SafeDecoderTest("RainbowGradient.h264",CompareRainbow);
 	
-	return 0;
 	
 #if defined(TEST_ASSETS)
 	SafeDecoderTest("GreyscaleGradient.h264",CompareGreyscale);
 #endif
 
 	EncoderGreyscaleTest();
-	
-	return 0;
 }
 
 #if !defined(TEST_ASSETS)
