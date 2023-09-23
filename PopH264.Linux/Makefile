@@ -47,9 +47,16 @@ $(SOY_PATH)/src/SoyH264.cpp \
 $(SOY_PATH)/src/SoyFourcc.cpp \
 $(SOY_PATH)/src/SoyThread.cpp \
 
+
+APP_INCLUDES = \
+-I$(PROJECT_PATH)/Source_TestApp/googletest/googletest/include	\
+-I$(PROJECT_PATH)/Source_TestApp/googletest/googletest/
+
 APP_SRC_FILES =	\
 $(PROJECT_PATH)/Source_TestApp/PopH264_TestApp.cpp	\
-$(SOY_PATH)/src/SoyFilesystem.cpp
+$(SOY_PATH)/src/SoyFilesystem.cpp \
+$(PROJECT_PATH)/Source_TestApp/googletest/googletest/src/gtest-all.cc \
+$(PROJECT_PATH)/Source_TestApp/PopJsonCpp/PopJson.cpp \
 
 #$(PROJECT_PATH)/Source_TestApp/PopH264_TestAssetGenerator.cpp	\
 

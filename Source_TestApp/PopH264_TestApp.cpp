@@ -5,8 +5,10 @@
 #include <thread>
 
 #include "gtest/gtest.h"
+#if defined(TARGET_OSX)
 #if GTEST_HAS_FILE_SYSTEM
 #error This build will error in sandbox mac apps
+#endif
 #endif
 
 #include "PopJsonCpp/PopJson.hpp"

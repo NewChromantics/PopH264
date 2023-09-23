@@ -155,7 +155,10 @@ include $(CLEAR_VARS)
 
 LOCAL_C_INCLUDES += \
 $(LOCAL_PATH)/$(SOY_PATH)/src	\
-$(LOCAL_PATH)/$(SRC)/Source/
+$(LOCAL_PATH)/$(SRC)/Source/	\
+$(LOCAL_PATH)/$(SRC)/Source_TestApp/googletest/googletest/	\
+$(LOCAL_PATH)/$(SRC)/Source_TestApp/googletest/googletest/include/	\
+
 
 # missing
 #LOCAL_WHOLE_STATIC_LIBRARIES += libsigchain
@@ -183,6 +186,8 @@ LOCAL_LDFLAGS	+= -Wl,-rpath,.
 
 LOCAL_SRC_FILES  := \
 $(SRC)/Source_TestApp/PopH264_TestApp.cpp \
+$(SRC)/Source_TestApp/googletest/googletest/src/gtest-all.cc \
+$(SRC)/Source_TestApp/PopJsonCpp/PopJson.cpp \
 
 # soy lib files
 LOCAL_SRC_FILES  += \
