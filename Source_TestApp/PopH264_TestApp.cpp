@@ -5,11 +5,11 @@
 #include <thread>
 
 #include "gtest/gtest.h"
-
 #if GTEST_HAS_FILE_SYSTEM
 #error This build will error in sandbox mac apps
 #endif
 
+#include "PopJsonCpp/PopJson.hpp"
 
 #if !defined(TARGET_WINDOWS) && defined(_MSC_VER)
 #define TARGET_WINDOWS
@@ -442,16 +442,17 @@ int main()
 	// Must be called prior to running any tests
 	testing::InitGoogleTest();
 	
-	static bool BreakOnTestError = true;
+	static bool BreakOnTestError = false;
 	if ( BreakOnTestError )
 		GTEST_FLAG_SET(break_on_failure,true);
 	
 	const auto ReturnCode = RUN_ALL_TESTS();
 	
 	if ( ReturnCode != 0 )
-		throw std::runtime_error("Integration tests failed. See GoogleTest logs above");
+		return ReturnCode;
 	
 	std::cerr << "Integration tests succeeded!" << std::endl;
+	return 0;
 }
 
 
@@ -509,6 +510,7 @@ TEST_P(PopH264_Decode_Tests,DecodeFile)
 	
 	//	pop frames
 	//	todo: add a proper timeout instead of loop*pause
+	bool HadEndOfStream = false;
 	for ( auto i=0;	i<1000;	i++ )
 	{
 		std::this_thread::sleep_for( std::chrono::milliseconds(100) );
@@ -516,7 +518,8 @@ TEST_P(PopH264_Decode_Tests,DecodeFile)
 		std::array<char,1000> MetaJsonBuffer = {0};
 		PopH264_PeekFrame( Decoder, MetaJsonBuffer.data(), MetaJsonBuffer.size() );
 		std::string MetaJson(MetaJsonBuffer.data());
-		
+		PopJson::Value_t Meta(MetaJson);
+
 		static uint8_t Plane0[1024 * 1024];
 		static uint8_t Plane1[1024 * 1024];
 		static uint8_t Plane2[1024 * 1024];
@@ -526,13 +529,23 @@ TEST_P(PopH264_Decode_Tests,DecodeFile)
 		if ( !IsValid )
 			continue;
 
-		//	read EOF
-		//	read error
+		if ( Meta.HasKey("Error",MetaJson) )
+		{
+			auto Error = Meta.GetValue("Error",MetaJson).GetString(MetaJson);
+			EXPECT_EQ( Error.empty(), true ) << "Error found in peek meta; " << Error;
+			break;
+		}
+		
+		if ( Meta.HasKey("EndOfStream",MetaJson) )
+		{
+			HadEndOfStream = true;
+			break;
+		}
 		
 		EXPECT_EQ( FrameNumber, FirstFrameNumber );
-		
-		break;
 	}
+	
+	EXPECT_EQ( HadEndOfStream, true );
 	
 	//	deallocate
 	PopH264_DestroyDecoder( Decoder );
