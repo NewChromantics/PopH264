@@ -456,6 +456,21 @@ int main()
 }
 
 
+
+class DecodedImage_t
+{
+public:
+	std::vector<uint8_t>	mPlane0;
+	std::vector<uint8_t>	mPlane1;
+	std::vector<uint8_t>	mPlane2;
+	std::string				mMetaJson;
+	int						mWidth = 0;
+	int						mHeight = 0;
+	std::string				mFormat;
+};
+
+
+
 class DecodeResults_t
 {
 public:
@@ -483,6 +498,118 @@ auto DecodeTestValues = ::testing::Values
 );
 	
 INSTANTIATE_TEST_SUITE_P( PopH264_Decode_Tests, PopH264_Decode_Tests, DecodeTestValues );
+
+
+
+
+DecodedImage_t DecodeFileFirstFrame(std::string_view Filename,std::string_view DecoderName={})
+{
+	auto TestData = LoadDataFromFilename(Filename);
+	
+	std::stringstream OptionsJson;
+	OptionsJson << "{";
+	if ( !DecoderName.empty() )
+		OptionsJson << "\"Decoder\":\"" << DecoderName << "\",";
+	OptionsJson << "\"VerboseDebug\":true";
+	OptionsJson << "}";
+	
+	std::array<char,1024> ErrorBuffer = {0};
+	auto Decoder = PopH264_CreateDecoder( OptionsJson.str().c_str(), ErrorBuffer.data(), ErrorBuffer.size() );
+	if ( Decoder == PopH264_NullInstance )
+	{
+		std::stringstream Error;
+		Error << "Failed to allocate decoder with filename=" << Filename << ", decoder=" << DecoderName << ". Error=" << ErrorBuffer.data();
+		throw std::runtime_error(Error.str());
+	}
+	
+	//	push input data
+	int FirstFrameNumber = 9999;
+	{
+		auto Result = PopH264_PushData( Decoder, TestData.data(), TestData.size(), FirstFrameNumber );
+		if (Result < 0)
+			throw std::runtime_error("DecoderTest: PushData error");
+		PopH264_PushEndOfStream( Decoder );
+	}
+	
+	//	pop frames
+	//	todo: add a proper timeout instead of loop*pause
+	DecodeResults_t Results;
+	
+	for ( auto i=0;	i<1000;	i++ )
+	{
+		std::this_thread::sleep_for( std::chrono::milliseconds(100) );
+		
+		std::array<char,1000> MetaJsonBuffer = {0};
+		PopH264_PeekFrame( Decoder, MetaJsonBuffer.data(), MetaJsonBuffer.size() );
+		std::string MetaJson(MetaJsonBuffer.data());
+		PopJson::Value_t Meta(MetaJson);
+		
+		if ( Meta.HasKey("Error",MetaJson) )
+		{
+			auto Error = Meta.GetValue("Error",MetaJson).GetString(MetaJson);
+			EXPECT_EQ( Error.empty(), true ) << "Error found in peek meta; " << Error;
+			break;
+		}
+		
+		//	gr: can we have EOF and a frame in the same packet?
+		//	gr: should we? (no!)
+		if ( Meta.HasKey("EndOfStream",MetaJson) )
+		{
+			Results.HadEndOfStream = true;
+			break;
+		}
+
+		DecodedImage_t Image;
+		Image.mMetaJson = MetaJson;
+		Image.mPlane0.resize( 1 * 1024*1024 );
+		Image.mPlane1.resize( 1 * 1024*1024 );
+		Image.mPlane2.resize( 1 * 1024*1024 );
+		
+		//	pull out image meta
+		auto PlaneMetas = Meta.GetValue("Planes", MetaJson);
+		auto Plane0Meta = PlaneMetas.GetValue(0, MetaJson);
+		Image.mWidth = Plane0Meta.GetValue("Width",MetaJson).GetInteger(MetaJson);
+		Image.mHeight = Plane0Meta.GetValue("Height",MetaJson).GetInteger(MetaJson);
+		Image.mFormat = Plane0Meta.GetValue("Format",MetaJson).GetString(MetaJson);
+
+
+		auto FrameNumber = PopH264_PopFrame( Decoder, Image.mPlane0.data(), Image.mPlane0.size(), Image.mPlane1.data(), Image.mPlane1.size(), Image.mPlane2.data(), Image.mPlane2.size() );
+		std::cerr  << "Decoded testdata; " << MetaJson << " FrameNumber=" << FrameNumber << " Should be " << FirstFrameNumber << std::endl;
+		bool IsValid = FrameNumber >= 0;
+		if ( !IsValid )
+			continue;
+		
+		Results.FrameCount++;
+
+		EXPECT_EQ( FrameNumber, FirstFrameNumber );
+		
+		PopH264_DestroyDecoder( Decoder );
+		
+		return Image;
+	}
+	
+	//	deallocate
+	PopH264_DestroyDecoder( Decoder );
+	
+	
+	//	compare with expected results
+	//EXPECT_EQ( Results.HadEndOfStream, Params.ExpectedResults.HadEndOfStream );
+	//EXPECT_EQ( Results.FrameCount, Params.ExpectedResults.FrameCount );
+	
+	throw std::runtime_error( std::string("Failed to decode file ")+std::string(Filename) );
+}
+
+
+
+
+
+
+//	this is essentially the same as DecodeFile but using this utility function
+TEST_P(PopH264_Decode_Tests,DecodeFileFirstFrame)
+{
+	auto Params = GetParam();
+	auto Image = DecodeFileFirstFrame( Params.Filename, Params.DecoderName );
+}
 
 
 
