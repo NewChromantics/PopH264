@@ -13,3 +13,6 @@
 [submodule "Source_TestApp/googletest"]
 	path = Source_TestApp/googletest
 	url = https://github.com/google/googletest.git
+[submodule "Source_TestApp/PopJsonCpp"]
+	path = Source_TestApp/PopJsonCpp
+	url = https://github.com/NewChromantics/PopJsonCpp.git
