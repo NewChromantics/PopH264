@@ -23,6 +23,8 @@ public:
 public:
 	std::shared_ptr<std::vector<uint8_t>>	mData;
 	std::string								mInputMeta;	//	original input meta json
+	bool									mEndOfStream = false;
+	std::string								mError;
 };
 
 
@@ -49,6 +51,8 @@ public:
 	
 protected:
 	void			OnOutputPacket(TPacket& Packet);
+	void			OnError(std::string_view Error);
+	void			OnFinished();
 
 	//	returns frame number used as PTS and stores meta
 	size_t			PushFrameMeta(const std::string& Meta);

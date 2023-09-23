@@ -25,6 +25,22 @@ void PopH264::TEncoder::OnOutputPacket(TPacket& Packet)
 	H264::SplitNalu( Packet.GetData(), OutputPacket );
 }
 
+void PopH264::TEncoder::OnError(std::string_view Error)
+{
+	TPacket Packet;
+	Packet.mError = Error;
+	mOnOutputPacket( Packet );
+}
+
+void PopH264::TEncoder::OnFinished()
+{
+	TPacket Packet;
+	Packet.mEndOfStream = true;
+	mOnOutputPacket( Packet );
+}
+
+
+
 
 
 size_t PopH264::TEncoder::PushFrameMeta(const std::string& Meta)

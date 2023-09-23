@@ -97,10 +97,12 @@ Avf::TEncoderParams::TEncoderParams(json11::Json& Options)
 class Avf::TCompressor
 {
 public:
-	TCompressor(TEncoderParams& Params,const SoyPixelsMeta& Meta,std::function<void(std::span<uint8_t>,size_t)> OnPacket);
+	TCompressor(TEncoderParams& Params,const SoyPixelsMeta& Meta,std::function<void(std::span<uint8_t>,size_t)> OnPacket,std::function<void(std::string_view Error)> OnFinished);
 	~TCompressor();
 	
 	void	OnCompressed(OSStatus status, VTEncodeInfoFlags infoFlags,CMSampleBufferRef sampleBuffer);
+	void	OnCompressionFinished();
+	void	OnError(std::string_view Error);
 	void	Flush();
 
 	void	Encode(CVPixelBufferRef PixelBuffer,size_t FrameNumber,bool Keyframe);
@@ -110,7 +112,8 @@ private:
 	
 private:
 	std::function<void(std::span<uint8_t>,size_t)>	mOnPacket;
-	
+	std::function<void(std::string_view Error)>		mOnFinished;
+
 	VTCompressionSessionRef	mSession = nil;
 	dispatch_queue_t		mQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
 };
@@ -118,25 +121,39 @@ private:
 void OnCompressedCallback(void *outputCallbackRefCon,void *sourceFrameRefCon, OSStatus status, VTEncodeInfoFlags infoFlags,CMSampleBufferRef sampleBuffer)
 {
 	//	https://chromium.googlesource.com/external/webrtc/+/6c78307a21252c2dbd704f6d5e92a220fb722ed4/webrtc/modules/video_coding/codecs/h264/h264_video_toolbox_encoder.mm#588
+	if ( !outputCallbackRefCon )
+	{
+		std::Debug << "OnCompressedCallback missing this" << std::endl;
+		return;
+	}
+	
+	auto* This = static_cast<Avf::TCompressor*>(outputCallbackRefCon);
 	try
 	{
-		auto* This = static_cast<Avf::TCompressor*>(outputCallbackRefCon);
 		This->OnCompressed(status,infoFlags,sampleBuffer);
+		
+		//	gr: I think if we have this callback, it's when everything is done
+		//		not per-frame (that's a different callback!)
+		This->OnCompressionFinished();
 	}
 	catch(std::exception& e)
 	{
 		std::Debug << "Exception with OnCompressed callback; " << e.what() << std::endl;
+		This->OnError(e.what());
 	}
 }
 
 
 
-Avf::TCompressor::TCompressor(TEncoderParams& Params,const SoyPixelsMeta& Meta,std::function<void(std::span<uint8_t>,size_t)> OnPacket) :
-	mOnPacket	( OnPacket )
+Avf::TCompressor::TCompressor(TEncoderParams& Params,const SoyPixelsMeta& Meta,std::function<void(std::span<uint8_t>,size_t)> OnPacket,std::function<void(std::string_view Error)> OnFinished) :
+	mOnPacket	( OnPacket ),
+	mOnFinished	( OnFinished )
 {
 	if ( !mOnPacket )
 		throw Soy::AssertException("OnPacket callback missing in Avf::TCompressor");
-	
+	if ( !mOnFinished )
+		throw Soy::AssertException("OnFinished callback missing in Avf::TCompressor");
+
 	//h264Encoder = [H264HwEncoderImpl alloc];
 	//	[h264Encoder initWithConfiguration];
 #if defined(EXECUTE_ON_DISPATCH_QUEUE)
@@ -441,7 +458,7 @@ void Avf::TCompressor::OnCompressed(OSStatus status, VTEncodeInfoFlags infoFlags
 	//	if flags & dropped, report
 	if ( status != 0 || infoFlags != 0 )
 	{
-		//std::Debug << __PRETTY_FUNCTION__ << "( status=" << status << " infoFlags=" << infoFlags << ")" << std::endl;
+		std::Debug << __PRETTY_FUNCTION__ << "( status=" << status << " infoFlags=" << infoFlags << ")" << std::endl;
 	}
 	
 	CMFormatDescriptionRef FormatDescription = CMSampleBufferGetFormatDescription(SampleBuffer);
@@ -529,12 +546,23 @@ void Avf::TCompressor::OnCompressed(OSStatus status, VTEncodeInfoFlags infoFlags
 	*/
 }
 
+
+void Avf::TCompressor::OnCompressionFinished()
+{
+	mOnFinished( std::string_view() );
+}
+
+void Avf::TCompressor::OnError(std::string_view Error)
+{
+	mOnFinished(Error);
+}
+
 void Avf::TCompressor::OnPacket(std::span<uint8_t> Data,size_t FrameNumber)
 {
 	//	fill output with nalu header
 	std::vector<uint8_t> NaluPacket{0,0,0,1};
 
-	static bool Debug = false;
+	static bool Debug = true;
 	if ( Debug )
 	{
 		//	content type should already be here
@@ -583,7 +611,7 @@ void Avf::TCompressor::Encode(CVPixelBufferRef PixelBuffer,size_t FrameNumber,bo
 		CFRelease(PixelBuffer);
 		
 		//	expecting this output to be async
-		static bool Debug = false;
+		static bool Debug = true;
 		if ( Debug )
 		{
 			auto FrameDropped = ( OutputFlags & kVTEncodeInfo_FrameDropped) != 0;
@@ -626,8 +654,15 @@ void Avf::TEncoder::AllocEncoder(const SoyPixelsMeta& Meta)
 	{
 		this->OnPacketCompressed( PacketData, FrameNumber );
 	};
+	auto OnFinished = [this](std::string_view Error)
+	{
+		if ( !Error.empty() )
+			this->OnError( Error );
+		else
+			this->OnFinished();
+	};
 
-	mCompressor.reset( new TCompressor( mParams, Meta, OnPacket ) );
+	mCompressor.reset( new TCompressor( mParams, Meta, OnPacket, OnFinished ) );
 	mPixelMeta = Meta;
 }
 

@@ -303,23 +303,29 @@ void PopH264::TEncoderInstance::PeekPacket(json11::Json::object& Meta)
 	if (mPackets.IsEmpty())
 		return;
 
-	size_t DataSize = 0;
-	std::string InputMeta;
+	TPacket Packet;
 	{
-		std::lock_guard<std::mutex> Lock(mPacketsLock);
+		std::scoped_lock Lock(mPacketsLock);
 		auto& Packet0 = mPackets[0];
-		DataSize = Packet0.mData ? Packet0.mData->size() : 0;
-		InputMeta = Packet0.mInputMeta;
+		Packet = Packet0;
 	}
 
 	//	write meta
+	auto DataSize = Packet.mData ? Packet.mData->size() : 0;
 	Meta["DataSize"] = static_cast<int>(DataSize);
-	if (!InputMeta.empty())
+
+	if ( !Packet.mError.empty() )
+		Meta["Error"] = Packet.mError;
+
+	if ( Packet.mEndOfStream )
+		Meta["EndOfStream"] = Packet.mEndOfStream;
+
+	if ( !Packet.mInputMeta.empty() )
 	{
 		using namespace json11;
 		//	we're expecting json, so make it an object
 		std::string ParseError;
-	auto MetaObject = Json::parse(InputMeta, ParseError);
+		auto MetaObject = Json::parse( Packet.mInputMeta, ParseError );
 
 		//	this shouldn't come up, as we've already parsed it on input, but just in case
 		if (!ParseError.empty())
