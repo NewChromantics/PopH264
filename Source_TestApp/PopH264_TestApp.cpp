@@ -745,7 +745,9 @@ class PopH264_Encode_Tests : public testing::TestWithParam<EncodeTestParams_t>
 
 auto EncodeTestValues = ::testing::Values
 (
- EncodeTestParams_t{.InputImageFilename="Cat.jpg"}
+	EncodeTestParams_t{.InputImageFilename="RainbowGradient.h264"},
+	EncodeTestParams_t{.InputImageFilename="GreyscaleGradient.h264"},
+	EncodeTestParams_t{.InputImageFilename="Cat.jpg"}
 );
 	
 INSTANTIATE_TEST_SUITE_P( PopH264_Encode_Tests, PopH264_Encode_Tests, EncodeTestValues );
