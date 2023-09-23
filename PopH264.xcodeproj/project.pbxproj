@@ -260,6 +260,8 @@
 		BFEF6A1F2469963B000A1F88 /* SoyH264.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFDB2BAB2448B4CE009EC370 /* SoyH264.cpp */; };
 		BFF1C6EA22E3C65800AFDFD5 /* BroadwayAll.c in Sources */ = {isa = PBXBuildFile; fileRef = BFF1C6E822E3C65800AFDFD5 /* BroadwayAll.c */; };
 		BFF1C71222E3CF8B00AFDFD5 /* SoyArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFF1C70F22E3CF8B00AFDFD5 /* SoyArray.cpp */; };
+		BFF3542C2ABF3936000F8372 /* gtest-all.cc in Sources */ = {isa = PBXBuildFile; fileRef = BFF3542B2ABF3936000F8372 /* gtest-all.cc */; };
+		BFF3542D2ABF3936000F8372 /* gtest-all.cc in Sources */ = {isa = PBXBuildFile; fileRef = BFF3542B2ABF3936000F8372 /* gtest-all.cc */; };
 		BFFBE95524582ED000E9BE1B /* PopH264TestData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFBE95324582ED000E9BE1B /* PopH264TestData.cpp */; };
 		BFFBE95624582ED000E9BE1B /* PopH264TestData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFBE95324582ED000E9BE1B /* PopH264TestData.cpp */; };
 		BFFBE961245835CD00E9BE1B /* SoyFilesystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFBE960245835CD00E9BE1B /* SoyFilesystem.cpp */; };
@@ -570,6 +572,10 @@
 		BFF1C6E822E3C65800AFDFD5 /* BroadwayAll.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = BroadwayAll.c; path = Source/BroadwayAll.c; sourceTree = "<group>"; };
 		BFF1C70E22E3CF8A00AFDFD5 /* SoyArray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SoyArray.h; path = Source/SoyLib/src/SoyArray.h; sourceTree = "<group>"; };
 		BFF1C70F22E3CF8B00AFDFD5 /* SoyArray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SoyArray.cpp; path = Source/SoyLib/src/SoyArray.cpp; sourceTree = "<group>"; };
+		BFF354282ABF390B000F8372 /* googletest */ = {isa = PBXFileReference; lastKnownFileType = folder; path = googletest; sourceTree = "<group>"; };
+		BFF3542B2ABF3936000F8372 /* gtest-all.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "gtest-all.cc"; path = "googletest/googletest/src/gtest-all.cc"; sourceTree = "<group>"; };
+		BFF3542E2ABF3A0D000F8372 /* PopH264_Osx_TestApp.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = PopH264_Osx_TestApp.xcconfig; sourceTree = "<group>"; };
+		BFF354302ABF3AFA000F8372 /* PopH264_Ios_TestApp.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = PopH264_Ios_TestApp.xcconfig; sourceTree = "<group>"; };
 		BFFBE95324582ED000E9BE1B /* PopH264TestData.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PopH264TestData.cpp; path = Source/PopH264TestData.cpp; sourceTree = "<group>"; };
 		BFFBE95424582ED000E9BE1B /* PopH264TestData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PopH264TestData.h; path = Source/PopH264TestData.h; sourceTree = "<group>"; };
 		BFFBE960245835CD00E9BE1B /* SoyFilesystem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SoyFilesystem.cpp; path = Source/SoyLib/src/SoyFilesystem.cpp; sourceTree = SOURCE_ROOT; };
@@ -968,6 +974,10 @@
 		BFC471782447506B00A2DA70 /* Source_TestApp */ = {
 			isa = PBXGroup;
 			children = (
+				BFF3542E2ABF3A0D000F8372 /* PopH264_Osx_TestApp.xcconfig */,
+				BFF354302ABF3AFA000F8372 /* PopH264_Ios_TestApp.xcconfig */,
+				BFF3542A2ABF3917000F8372 /* googletest */,
+				BFF354282ABF390B000F8372 /* googletest */,
 				BFE7AAD625D943EA006F48F1 /* PopH264_TestAppIos_Info.plist */,
 				BFFBE95F245835B400E9BE1B /* SoyLib */,
 				BFC471792447509600A2DA70 /* PopH264_TestApp.cpp */,
@@ -1048,6 +1058,14 @@
 				BFD607791EA16F0A0035C814 /* IUnityInterface.h */,
 			);
 			name = Unity;
+			sourceTree = "<group>";
+		};
+		BFF3542A2ABF3917000F8372 /* googletest */ = {
+			isa = PBXGroup;
+			children = (
+				BFF3542B2ABF3936000F8372 /* gtest-all.cc */,
+			);
+			name = googletest;
 			sourceTree = "<group>";
 		};
 		BFFBE95F245835B400E9BE1B /* SoyLib */ = {
@@ -1547,6 +1565,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BFF3542D2ABF3936000F8372 /* gtest-all.cc in Sources */,
 				BFE7AADF25D9456A006F48F1 /* SoyFilesystem.cpp in Sources */,
 				BFE7AADC25D94565006F48F1 /* SoyFilesystem.mm in Sources */,
 				BFE7AADD25D9456A006F48F1 /* SoyPixels.cpp in Sources */,
@@ -1688,6 +1707,7 @@
 				BF9F2B592A4F5E0200D7261A /* FileReader.cpp in Sources */,
 				BFFBE9722458389B00E9BE1B /* SoyPixels.cpp in Sources */,
 				BFFBE97924587F7600E9BE1B /* json11.cpp in Sources */,
+				BFF3542C2ABF3936000F8372 /* gtest-all.cc in Sources */,
 				BFFBE974245838B000E9BE1B /* SoyFilesystem.mm in Sources */,
 				BFC4717B2447509600A2DA70 /* PopH264_TestApp.cpp in Sources */,
 			);
@@ -1829,7 +1849,7 @@
 		};
 		BF23A41E25D941600060DE06 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = BF151FF52384795600A70EBF /* PopH264_Ios.xcconfig */;
+			baseConfigurationReference = BFF354302ABF3AFA000F8372 /* PopH264_Ios_TestApp.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -1864,7 +1884,7 @@
 		};
 		BF23A41F25D941600060DE06 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = BF151FF52384795600A70EBF /* PopH264_Ios.xcconfig */;
+			baseConfigurationReference = BFF354302ABF3AFA000F8372 /* PopH264_Ios_TestApp.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -2104,7 +2124,7 @@
 		};
 		BFC4717524474FFA00A2DA70 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = BF004B6724FD3CAC00DC6A90 /* PopH264_Osx.xcconfig */;
+			baseConfigurationReference = BFF3542E2ABF3A0D000F8372 /* PopH264_Osx_TestApp.xcconfig */;
 			buildSettings = {
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
@@ -2116,10 +2136,6 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = X52DR36JY2;
 				ENABLE_HARDENED_RUNTIME = YES;
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					TARGET_OSX,
-					"DEBUG=1",
-				);
 				INFOPLIST_FILE = "$(SRCROOT)/Source_Osx/PopH264_Osx_Info.plist";
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				ONLY_ACTIVE_ARCH = YES;
@@ -2129,6 +2145,7 @@
 		};
 		BFC4717624474FFA00A2DA70 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = BFF3542E2ABF3A0D000F8372 /* PopH264_Osx_TestApp.xcconfig */;
 			buildSettings = {
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
@@ -2140,7 +2157,6 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = X52DR36JY2;
 				ENABLE_HARDENED_RUNTIME = YES;
-				GCC_PREPROCESSOR_DEFINITIONS = TARGET_OSX;
 				INFOPLIST_FILE = "$(SRCROOT)/Source_Osx/PopH264_Osx_Info.plist";
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				PRODUCT_NAME = PopH264_TestApp;

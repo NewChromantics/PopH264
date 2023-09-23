@@ -1,0 +1,13 @@
+#include "../Source_Ios/PopH264_Ios.xcconfig"
+
+//	https://github.com/google/googletest/issues/2195
+//	google test's global initialisers (from TEST()) throw in mac sandboxed mode (when launching from finder/open)
+//	because it cannot get a result from getcwd(). It feels like there would be more problems than this...
+GOOGLETEST_PREPROCESSORS=GTEST_HAS_FILE_SYSTEM=0
+GOOGLETEST_INCLUDE="Source_TestApp/googletest/googletest/include"
+GOOGLETEST_SRCINCLUDE="Source_TestApp/googletest/googletest/"
+
+
+GCC_PREPROCESSOR_DEFINITIONS = $(GCC_PREPROCESSOR_DEFINITIONS) $(GOOGLETEST_PREPROCESSORS)
+
+HEADER_SEARCH_PATHS = $(HEADER_SEARCH_PATHS) $(GOOGLETEST_INCLUDE) $(GOOGLETEST_SRCINCLUDE)
