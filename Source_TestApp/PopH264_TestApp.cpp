@@ -456,11 +456,19 @@ int main()
 }
 
 
+class DecodeResults_t
+{
+public:
+	bool			HadEndOfStream = false;
+	int				FrameCount = 0;
+};
+
 class DecodeTestParams_t
 {
 public:
 	std::string		Filename;
 	std::string		DecoderName;
+	DecodeResults_t	ExpectedResults;
 };
 
 class PopH264_Decode_Tests : public testing::TestWithParam<DecodeTestParams_t>
@@ -469,8 +477,8 @@ class PopH264_Decode_Tests : public testing::TestWithParam<DecodeTestParams_t>
 
 auto DecodeTestValues = ::testing::Values
 (
- DecodeTestParams_t{"RainbowGradient.h264"},
- DecodeTestParams_t{"Cat.jpg"}
+ DecodeTestParams_t{"RainbowGradient.h264", .ExpectedResults{.FrameCount=1,.HadEndOfStream=true} },
+ DecodeTestParams_t{"Cat.jpg", .ExpectedResults{.FrameCount=1,.HadEndOfStream=true} }
 );
 
 INSTANTIATE_TEST_SUITE_P( PopH264_Decode_Tests, PopH264_Decode_Tests, DecodeTestValues );
@@ -510,7 +518,8 @@ TEST_P(PopH264_Decode_Tests,DecodeFile)
 	
 	//	pop frames
 	//	todo: add a proper timeout instead of loop*pause
-	bool HadEndOfStream = false;
+	DecodeResults_t Results;
+	
 	for ( auto i=0;	i<1000;	i++ )
 	{
 		std::this_thread::sleep_for( std::chrono::milliseconds(100) );
@@ -519,6 +528,21 @@ TEST_P(PopH264_Decode_Tests,DecodeFile)
 		PopH264_PeekFrame( Decoder, MetaJsonBuffer.data(), MetaJsonBuffer.size() );
 		std::string MetaJson(MetaJsonBuffer.data());
 		PopJson::Value_t Meta(MetaJson);
+		
+		if ( Meta.HasKey("Error",MetaJson) )
+		{
+			auto Error = Meta.GetValue("Error",MetaJson).GetString(MetaJson);
+			EXPECT_EQ( Error.empty(), true ) << "Error found in peek meta; " << Error;
+			break;
+		}
+		
+		//	gr: can we have EOF and a frame in the same packet?
+		//	gr: should we? (no!)
+		if ( Meta.HasKey("EndOfStream",MetaJson) )
+		{
+			Results.HadEndOfStream = true;
+			break;
+		}
 
 		static uint8_t Plane0[1024 * 1024];
 		static uint8_t Plane1[1024 * 1024];
@@ -528,30 +552,18 @@ TEST_P(PopH264_Decode_Tests,DecodeFile)
 		bool IsValid = FrameNumber >= 0;
 		if ( !IsValid )
 			continue;
-
-		if ( Meta.HasKey("Error",MetaJson) )
-		{
-			auto Error = Meta.GetValue("Error",MetaJson).GetString(MetaJson);
-			EXPECT_EQ( Error.empty(), true ) << "Error found in peek meta; " << Error;
-			break;
-		}
 		
-		if ( Meta.HasKey("EndOfStream",MetaJson) )
-		{
-			HadEndOfStream = true;
-			break;
-		}
+		Results.FrameCount++;
 		
 		EXPECT_EQ( FrameNumber, FirstFrameNumber );
 	}
-	
-	EXPECT_EQ( HadEndOfStream, true );
 	
 	//	deallocate
 	PopH264_DestroyDecoder( Decoder );
 	
 	//	compare with expected results
-	
+	EXPECT_EQ( Results.HadEndOfStream, Params.ExpectedResults.HadEndOfStream );
+	EXPECT_EQ( Results.FrameCount, Params.ExpectedResults.FrameCount );
 }
 
 
