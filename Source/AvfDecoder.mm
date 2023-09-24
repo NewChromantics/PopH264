@@ -135,6 +135,8 @@ private:
 	
 	bool					mAllowSpsPpsToRecreateSession = true;	//	if true, then a new sps & pps appearing recreates session
 	
+	PopH264::FrameNumber_t	mLastFrameNumber = PopH264::FrameNumberInvalid;
+	
 	//	pending packets we need before we can create the session
 	std::vector<uint8_t>	mNaluSps;
 	std::vector<uint8_t>	mNaluPps;
@@ -272,7 +274,8 @@ void Avf::TDecompressor::CreateDecoderSession(CFPtr<CMFormatDescriptionRef> Inpu
 		auto Same = CMFormatDescriptionEqual( mInputFormat.mObject, InputFormat.mObject );
 		if ( Same )
 		{
-			std::Debug << "Skipping CreateDecoderSession() with duplicate input format" << std::endl;
+			if ( mParams.mVerboseDebug )
+				std::Debug << "Skipping CreateDecoderSession() with duplicate input format" << std::endl;
 			return;
 		}
 	}
@@ -602,6 +605,10 @@ void Avf::TDecompressorH264::Decode(PopH264::TInputNaluPacket& Packet)
 
 	//	try and create the session in case we've got the SPS & PPS we need
 	CreateSession();
+
+	//	dont need the warning below if we were going to drop it anyway
+	if ( !DecodePacket )
+		return;
 	
 	//	no decompression session yet, drop packet
 	//	could be packet before SPS/PPS and we ignore it
@@ -612,19 +619,40 @@ void Avf::TDecompressorH264::Decode(PopH264::TInputNaluPacket& Packet)
 		return;
 	}
 
-	if ( !DecodePacket )
-		return;
-	
 	auto NaluSize = GetFormatNaluPrefixType();
 	H264::ConvertNaluPrefix( Packet.mData, NaluSize );
 	
 	uint64_t FrameNumber = Packet.mFrameNumber;
+	
+	static bool AllowDuplicateFrameNumbers = true;
+	
+	if ( !AllowDuplicateFrameNumbers )
+	{
+		//	if the frame number is the same, we're going to have trouble resolving which frame is which
+		//	auto-increment duplicates, then error if user passes an old frame
+		//	gr: move this to generic frame handling
+		if ( FrameNumber == mLastFrameNumber )
+		{
+			FrameNumber = mLastFrameNumber+1;
+			std::Debug << "Warning: duplicate frame number input " << mLastFrameNumber << ", auto-incrementing to " << FrameNumber << std::endl;
+		}
+	}
+	//	gr: does this need to fail?
+	if ( FrameNumber < mLastFrameNumber )
+	{
+		std::Debug << "Warning: next frame number (" << FrameNumber << ") in the past, last frame number=" << mLastFrameNumber << std::endl;
+		//FrameNumber = mLastFrameNumber+1;
+	}
+
 	std::chrono::milliseconds PresentationTime(FrameNumber);
 	std::chrono::milliseconds DecodeTime(FrameNumber);
 	std::chrono::milliseconds Duration(16ull);
 	auto SampleBuffer = CreateSampleBuffer( Nalu, PresentationTime, DecodeTime, Duration, mInputFormat.mObject );
 	
+	std::Debug << "Decode " << magic_enum::enum_name(H264PacketType) << " frame=" << FrameNumber << "..." << std::endl;
 	DecodeSample(SampleBuffer, FrameNumber);
+	
+	mLastFrameNumber = FrameNumber;
 }
 
 
