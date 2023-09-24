@@ -255,7 +255,12 @@ void Avf::TDecompressorJpeg::CreateDecoder(std::span<uint8_t> JpegData)
 	CFPtr<CMFormatDescriptionRef> FormatDesc;
 	auto Result = CMVideoFormatDescriptionCreate( Allocator, Codec, JpegMeta.mWidth, JpegMeta.mHeight, Extensions, &FormatDesc.mObject );
 	Avf::IsOkay( Result, "CMVideoFormatDescriptionCreate jpeg");
-	CreateDecoderSession( FormatDesc, H264::TSpsParams() );
+	
+	H264::TSpsParams ImageParams;
+	ImageParams.mWidth = JpegMeta.mWidth;
+	ImageParams.mHeight = JpegMeta.mHeight;
+
+	CreateDecoderSession( FormatDesc, ImageParams );
 }
 
 bool Avf::TDecompressor::HasSession()
@@ -306,8 +311,7 @@ void Avf::TDecompressor::CreateDecoderSession(CFPtr<CMFormatDescriptionRef> Inpu
 	{
 		std::Debug << "Warning: Format width/height (" << Width << "x" << Height << ") doesn't match Sps cropped width/height " << CroppedWidth << "x" << CroppedHeight << "(uncropped " << SpsParams.mWidth << "x" << SpsParams.mHeight << ")" << std::endl;
 	}
-	//	gr: does H264 need this?
-	//		jpeg doesn't
+	//	gr: neither h264 nor jpeg seem to need this
 	//CFDictionarySetValue(destinationPixelBufferAttributes,kCVPixelBufferWidthKey, CFNumberCreate(NULL, kCFNumberSInt32Type, &Width));
 	//CFDictionarySetValue(destinationPixelBufferAttributes, kCVPixelBufferHeightKey, CFNumberCreate(NULL, kCFNumberSInt32Type, &Height));
 	
