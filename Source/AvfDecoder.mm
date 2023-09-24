@@ -106,7 +106,7 @@ public:
 	void				OnDecodeError(const char* Error,CMTime PresentationTime);
 
 protected:
-	void				CreateDecoderSession(CFPtr<CMFormatDescriptionRef> InputFormat);
+	void				CreateDecoderSession(CFPtr<CMFormatDescriptionRef> InputFormat,H264::TSpsParams SpsParams);
 	bool				HasSession();
 	void				FreeSession();
 	virtual void		DecodeSample(CFPtr<CMSampleBufferRef> FrameData,size_t FrameNumber);
@@ -210,8 +210,23 @@ void Avf::TDecompressorH264::CreateSession()
 			return;
 	}
 	
+	//	gr: don't let our bad sps decoding code stop decoding
+	H264::TSpsParams SpsParams;
+	try
+	{
+		//	gr: strip nalu prefix (ParseSps should do this!)
+		auto SpsPrefixLength = H264::GetNaluLength( mNaluSps );
+		auto SpsData = std::span(mNaluSps);
+		SpsData = SpsData.subspan( SpsPrefixLength );
+		SpsParams = H264::ParseSps( SpsData );
+	}
+	catch(std::exception& e)
+	{
+		std::Debug << "Warning: Failed to parse SPS before creating format; " << e.what() << std::endl;
+	}
+	
 	auto InputFormat = Avf::GetFormatDescriptionH264( mNaluSps, mNaluPps, GetFormatNaluPrefixType() );
-	CreateDecoderSession(InputFormat);
+	CreateDecoderSession( InputFormat, SpsParams );
 	
 	//	throw away the old sps/pps, so we can tell when we've got a new format
 	mNaluSps.clear();
@@ -238,7 +253,7 @@ void Avf::TDecompressorJpeg::CreateDecoder(std::span<uint8_t> JpegData)
 	CFPtr<CMFormatDescriptionRef> FormatDesc;
 	auto Result = CMVideoFormatDescriptionCreate( Allocator, Codec, JpegMeta.mWidth, JpegMeta.mHeight, Extensions, &FormatDesc.mObject );
 	Avf::IsOkay( Result, "CMVideoFormatDescriptionCreate jpeg");
-	CreateDecoderSession( FormatDesc );
+	CreateDecoderSession( FormatDesc, H264::TSpsParams() );
 }
 
 bool Avf::TDecompressor::HasSession()
@@ -246,7 +261,7 @@ bool Avf::TDecompressor::HasSession()
 	return mSession.mObject != nullptr;
 }
 
-void Avf::TDecompressor::CreateDecoderSession(CFPtr<CMFormatDescriptionRef> InputFormat)
+void Avf::TDecompressor::CreateDecoderSession(CFPtr<CMFormatDescriptionRef> InputFormat,H264::TSpsParams SpsParams)
 {
 	//	but skip if format is the same
 	//	todo: may need to allow user to force this... or should inputformat be null'd when session is gone?
@@ -266,7 +281,8 @@ void Avf::TDecompressor::CreateDecoderSession(CFPtr<CMFormatDescriptionRef> Inpu
 	//if ( HasSession() )
 	//	return;
 	FreeSession();
-	std::cerr << __FUNCTION__ << std::endl;
+	
+	std::cerr << "CreateDecoderSession with sps " << SpsParams.mWidth << "x" << SpsParams.mHeight << " profile=" << SpsParams.mProfile << " level=" << SpsParams.mLevel << std::endl;
 	
 	
 	mInputFormat = InputFormat;
@@ -280,7 +296,13 @@ void Avf::TDecompressor::CreateDecoderSession(CFPtr<CMFormatDescriptionRef> Inpu
 	
 	SInt32 Width = size_cast<SInt32>( FormatPixelMeta.GetWidth() );
 	SInt32 Height = size_cast<SInt32>( FormatPixelMeta.GetHeight() );
+	auto CroppedWidth = SpsParams.GetCroppedWidth();
+	auto CroppedHeight = SpsParams.GetCroppedHeight();
 	
+	if ( Width != CroppedWidth || Height != CroppedHeight )
+	{
+		std::Debug << "Warning: Format width/height (" << Width << "x" << Height << ") doesn't match Sps cropped width/height " << CroppedWidth << "x" << CroppedHeight << "(uncropped " << SpsParams.mWidth << "x" << SpsParams.mHeight << ")" << std::endl;
+	}
 	//	gr: does H264 need this?
 	//		jpeg doesn't
 	//CFDictionarySetValue(destinationPixelBufferAttributes,kCVPixelBufferWidthKey, CFNumberCreate(NULL, kCFNumberSInt32Type, &Width));
