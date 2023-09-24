@@ -3,7 +3,7 @@
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
-    <IncludePath>$(ProjectDir)..\Source_TestApp\googletest\googletest\;$(ProjectDir)..\Source_TestApp\googletest\googletest\include;$(ProjectDir)..\Source\SoyLib\src;$(ProjectDir)..\Source\Json11;$(SolutionDir)..\Build\PopH264_$(Configuration)_$(Platform)\;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)..\Source_TestApp\googletest\googletest\;$(ProjectDir)..\Source_TestApp\googletest\googletest\include;$(ProjectDir)..\Source\SoyLib\src;$(ProjectDir)..\Source\Json11;$(SolutionDir)..\Build\PopH264_$(Configuration)_$(Platform)\;$(OutDir);$(IncludePath)</IncludePath>
     <LibraryPath>$(OutDir);$(SolutionDir)..\Build\PopH264_$(Configuration)_$(Platform)\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup>
