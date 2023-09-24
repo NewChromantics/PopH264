@@ -493,6 +493,14 @@ class DecodeResults_t
 public:
 	int				FrameCount = 0;
 	bool			HadEndOfStream = false;
+	
+	friend std::ostream& operator<<(std::ostream& os, const DecodeResults_t& Params)
+	{
+		os << "DecodeResults_t-->";
+		os << " FrameCount=" << Params.FrameCount;
+		os << " HadEndOfStream=" << Params.HadEndOfStream;
+		return os;
+	}
 };
 
 class DecodeTestParams_t
@@ -501,6 +509,15 @@ public:
 	std::string		Filename;
 	std::string		DecoderName;
 	DecodeResults_t	ExpectedResults;
+	
+	friend std::ostream& operator<<(std::ostream& os, const DecodeTestParams_t& Params)
+	{
+		os << "DecodeTestParams_t-->";
+		os << " Filename=" << Params.Filename;
+		os << " DecoderName=" << Params.DecoderName;
+		os << " ExpectedResults=" << Params.ExpectedResults;
+		return os;
+	}
 };
 
 class PopH264_Decode_Tests : public testing::TestWithParam<DecodeTestParams_t>
@@ -741,6 +758,14 @@ class EncodeTestParams_t
 {
 public:
 	std::string		InputImageFilename;
+	
+	friend std::ostream& operator<<(std::ostream& os, const EncodeTestParams_t& Params)
+	{
+		os << "EncodeTestParams_t-->";
+		os << " InputImageFilename=" << Params.InputImageFilename;
+		return os;
+	}
+	
 };
 
 class PopH264_Encode_Tests : public testing::TestWithParam<EncodeTestParams_t>
