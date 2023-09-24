@@ -816,7 +816,7 @@ TEST_P(PopH264_Encode_Tests,EncodeFile)
 	bool HadEndOfStream = false;
 	
 	//	read out encoded packets
-	for ( auto i=0;	i<1000;	i++ )
+	for ( auto i=0;	i<50;	i++ )
 	{
 		std::this_thread::sleep_for( std::chrono::milliseconds(100) );
 		
