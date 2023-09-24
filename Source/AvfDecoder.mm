@@ -103,7 +103,7 @@ public:
 
 	//	public for delegate access
 	void				OnDecodedFrame(OSStatus Status,CVImageBufferRef ImageBuffer,VTDecodeInfoFlags Flags,CMTime PresentationTimeStamp );
-	void				OnDecodeError(const char* Error,CMTime PresentationTime);
+	void				OnDecodeError(std::string_view Error,CMTime PresentationTime);
 
 protected:
 	void				CreateDecoderSession(CFPtr<CMFormatDescriptionRef> InputFormat,H264::TSpsParams SpsParams);
@@ -227,7 +227,7 @@ void Avf::TDecompressorH264::CreateSession()
 		std::Debug << "Warning: Failed to parse SPS before creating format; " << e.what() << std::endl;
 	}
 	
-	auto InputFormat = Avf::GetFormatDescriptionH264( mNaluSps, mNaluPps, GetFormatNaluPrefixType() );
+	auto InputFormat = Avf::GetFormatDescriptionH264( mNaluSps, mNaluPps, GetFormatNaluPrefixType(), mParams.StripH264EmulationPrevention() );
 	CreateDecoderSession( InputFormat, SpsParams );
 	
 	//	throw away the old sps/pps, so we can tell when we've got a new format
@@ -276,6 +276,8 @@ void Avf::TDecompressor::CreateDecoderSession(CFPtr<CMFormatDescriptionRef> Inpu
 	
 	if ( CheckFormatSame && mInputFormat )
 	{
+		//	gr: we can use VTDecompressionSessionCanAcceptFormatDescription() to retain the current session
+		
 		auto Same = CMFormatDescriptionEqual( mInputFormat.mObject, InputFormat.mObject );
 		if ( Same )
 		{
@@ -387,6 +389,9 @@ Avf::TDecompressor::~TDecompressor()
 
 void Avf::TDecompressor::FreeSession()
 {
+	if ( !mSession )
+		return;
+	
 	try
 	{
 		Flush();
@@ -426,9 +431,9 @@ void Avf::TDecompressor::OnDecodedFrame(OSStatus Status,CVImageBufferRef ImageBu
 	mOnFrame( PixelBuffer, FrameNumber );
 }
 
-void Avf::TDecompressor::OnDecodeError(const char* Error,CMTime PresentationTimeStamp)
+void Avf::TDecompressor::OnDecodeError(std::string_view Error,CMTime PresentationTimeStamp)
 {
-	if ( Error == nullptr )
+	if ( Error.empty() )
 		Error = "<null>";
 	std::Debug << __PRETTY_FUNCTION__ << Error << std::endl;
 	std::string ErrorStr(Error);
@@ -586,7 +591,6 @@ void Avf::TDecompressorH264::Decode(PopH264::TInputNaluPacket& Packet)
 	bool DecodePacket = true;
 	
 	//	do not push SPS, PPS or SEI packets to decoder
-	//	SEI gives -12349 error
 	if ( H264PacketType == H264NaluContent::SequenceParameterSet )
 	{
 		mNaluSps = Packet.mData;
@@ -599,6 +603,7 @@ void Avf::TDecompressorH264::Decode(PopH264::TInputNaluPacket& Packet)
 	}
 	else if ( H264PacketType == H264NaluContent::SupplimentalEnhancementInformation )
 	{
+		//	SEI gives -12349 error
 		if ( !mParams.mDecodeSei )
 		{
 			mNaluSei = Packet.mData;

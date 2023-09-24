@@ -66,6 +66,8 @@ public:
 	TDecoderParams(){};
 	TDecoderParams(json11::Json& Params);
 
+	bool		StripH264EmulationPrevention()	{	return mStripEmulationPrevention;	}
+
 public:
 	std::string	mDecoderName;
 	//	gr: because unity doesn't let us initialise structs, we need to try and make
@@ -78,7 +80,8 @@ public:
 	bool		mDropBadFrames = false;
 	bool		mDecodeSei = false;			//	SEI on Avf gives us an error, so we skip it
 	bool		mAsyncDecompression = false;	//	Avf experimental async decompression, which may or may not go on a background thread 
-
+	bool		mStripEmulationPrevention = false;
+	
 	//	on android, these are used to configure the format, and might affect input buffer sizes
 	//	if zero, they're unused
 	int32_t		mWidthHint = 640;

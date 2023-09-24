@@ -183,6 +183,8 @@ std::shared_ptr<PopH264::TInputNaluPacket> PopH264::TDecoder::PopNextPacket()
 		else
 		{
 			//	if this packet contains multiple nalu packets, split it here
+			//	gr: https://developer.apple.com/forums/thread/14212
+			//		we need to NOT split packets if theyre the same frame. IDRs can be multiple packets, but apple needs them together
 			std::vector<std::shared_ptr<TInputNaluPacket>> SplitPackets;
 			
 			auto OnSplitNalu = [&](std::span<uint8_t> Nalu)

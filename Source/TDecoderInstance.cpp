@@ -106,7 +106,8 @@ PopH264::TDecoderParams::TDecoderParams(json11::Json& Options)
 	SetBool( POPH264_DECODER_KEY_LOWPOWERMODE, mLowPowerMode);
 	SetBool( POPH264_DECODER_KEY_DROPBADFRAMES, mDropBadFrames );
 	SetBool( POPH264_DECODER_KEY_DECODESEI, mDecodeSei );
-
+	SetBool( POPH264_DECODER_KEY_STRIPEMULATIONPREVENTION, mStripEmulationPrevention );
+	
 	SetInt( POPH264_DECODER_KEY_WIDTHHINT, mWidthHint );
 	SetInt( POPH264_DECODER_KEY_HEIGHTHINT, mHeightHint );
 	SetInt( POPH264_DECODER_KEY_INPUTSIZEHINT, mInputSizeHint );
