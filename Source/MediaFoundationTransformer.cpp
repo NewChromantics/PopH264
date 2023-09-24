@@ -39,7 +39,7 @@ namespace MediaFoundation
 	TActivateList	EnumTransforms(const GUID& Category);
 	TActivateMeta	GetBestTransform(const GUID& Category, const ArrayBridge<Soy::TFourcc>& InputFilter, const ArrayBridge<Soy::TFourcc>& OutputFilter);
 	
-	Soy::AutoReleasePtr<IMFSample>		CreateSample(std::span<uint8_t> Data, Soy::TFourcc Fourcc, uint64_t SampleTime100Nano);
+	Soy::AutoReleasePtr<IMFSample>		CreateSample(std::span<uint8_t> Data, Soy::TFourcc Fourcc, std::chrono::milliseconds SampleTime, std::chrono::milliseconds SampleDuration);
 	Soy::AutoReleasePtr<IMFMediaBuffer>	CreateBuffer(std::span<uint8_t> Data);
 	Soy::AutoReleasePtr<IMFMediaBuffer>	CreateBuffer(DWORD Size, DWORD Alignment);
 	Soy::AutoReleasePtr<IMFSample>		CreateSample(DWORD Size, DWORD Alignment);
@@ -1259,9 +1259,14 @@ Soy::AutoReleasePtr<IMFMediaBuffer> MediaFoundation::CreateBuffer(DWORD Size, DW
 }
 
 
-Soy::AutoReleasePtr<IMFSample> MediaFoundation::CreateSample(std::span<uint8_t> Data,Soy::TFourcc Fourcc, uint64_t SampleTime100Nano)
+Soy::AutoReleasePtr<IMFSample> MediaFoundation::CreateSample(std::span<uint8_t> Data,Soy::TFourcc Fourcc,std::chrono::milliseconds SampleTime, std::chrono::milliseconds SampleDuration)
 {
-//#pragma message("This binary will not load on windows 7")
+	//	ms -> nano = *1000000
+	//	sample data is in 100-nano second units
+	auto SampleTime100Nano = SampleTime.count() * (1000000 / 100);
+	auto SampleDuration100Nano = SampleDuration.count() * (1000000 / 100);
+		
+	//#pragma message("This binary will not load on windows 7")
 	auto Buffer = CreateBuffer(Data);
 
 	Soy::AutoReleasePtr<IMFSample> pSample;
@@ -1276,8 +1281,9 @@ Soy::AutoReleasePtr<IMFSample> MediaFoundation::CreateSample(std::span<uint8_t> 
 	Result = pSample.mObject->SetSampleTime(SampleTime100Nano);
 	IsOkay(Result, "CreateSample - SetSampleTime");
 
-	//CHECK_HR(reConstructedVideoSample->SetSampleTime(llVideoTimeStamp), "Error setting the recon video sample time.\n");
-	//CHECK_HR(reConstructedVideoSample->SetSampleDuration(llSampleDuration), "Error setting recon video sample duration.\n");
+	//	encoder samples require a duration
+	Result = pSample.mObject->SetSampleDuration(SampleDuration100Nano);
+	IsOkay(Result, "CreateSample - SetSampleDuration");
 
 	return pSample;
 }
@@ -1402,8 +1408,9 @@ bool MediaFoundation::TTransformer::PushFrame(std::span<uint8_t> Data, int64_t F
 		}
 	};
 
-	//	note: timestamp is 
-	auto pSample = CreateSample( Data, Soy::TFourcc("H264"), FrameNumber );
+	std::chrono::milliseconds Duration(16);
+	std::chrono::milliseconds Timestamp(FrameNumber);
+	auto pSample = CreateSample( Data, Soy::TFourcc("H264"), Timestamp, Duration );
 
 	DebugInputStatus();
 
