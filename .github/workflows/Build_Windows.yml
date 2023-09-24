@@ -16,31 +16,26 @@ jobs:
       matrix:
         config:
          - name: Windows Dll x64
-           project: PopH264
            BuildPlatform: x64
            BuildConfiguration: Release
            OutputDirectory: Windows/PopH264_Release_x64
 
          - name: Windows Static x64
-           project: PopH264
            BuildPlatform: x64
            BuildConfiguration: Static
            OutputDirectory: Windows/PopH264_Static_x64
 
          - name: Windows Uwp x64
-           project: PopH264.Uwp
            BuildPlatform: "x64 Uwp" # Solution platform
            BuildConfiguration: Release
            OutputDirectory: Windows/PopH264_Uwp_Release_x64
 
          - name: Windows Uwp Arm64
-           project: PopH264.Uwp
            BuildPlatform: "ARM64 Uwp" # solution platform
            BuildConfiguration: Release
            OutputDirectory: Windows/PopH264_Uwp_Arm64
 
          - name: Windows Uwp Arm
-           project: PopH264.Uwp
            BuildPlatform: "ARM Uwp" # solution platform
            BuildConfiguration: Release
            OutputDirectory: Windows/PopH264_Uwp_Arm
@@ -56,13 +51,12 @@ jobs:
       
       - name: Build ${{ matrix.config.name }}
         id: Build
-        uses: NewChromantics/PopAction_BuildWindows@v1.2.2
+        uses: NewChromantics/PopAction_BuildWindows@v1.3.0
         with:
           BuildSolution: PopH264.visualstudio/PopH264.sln
           BuildPlatform: ${{ matrix.config.BuildPlatform }}
           BuildConfiguration: ${{ matrix.config.BuildConfiguration }}
           OutputDirectory: ${{ github.workspace }}\${{ matrix.config.OutputDirectory }}\ # need an absolute path here, must end with trailing slash
-          project: ${{ matrix.config.project }}
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3
