@@ -2,6 +2,7 @@
 #include <sstream>
 #include "PopH264.h"
 #include "SoyPixels.h"
+#include "SoyH264.h"
 #include <thread>
 
 #include "gtest/gtest.h"
@@ -444,6 +445,14 @@ int main()
 	// Must be called prior to running any tests
 	testing::InitGoogleTest();
 	
+	std::string_view GTestFilter = "";
+	//std::string_view GTestFilter = "**DecodeFile**";
+	if ( !GTestFilter.empty() )
+	{
+		using namespace testing;
+		GTEST_FLAG(filter) = std::string(GTestFilter);
+	}
+	
 	static bool BreakOnTestError = false;
 	if ( BreakOnTestError )
 		GTEST_FLAG_SET(break_on_failure,true);
@@ -491,14 +500,18 @@ public:
 class DecodeResults_t
 {
 public:
-	int				FrameCount = 0;
-	bool			HadEndOfStream = false;
+	int					FrameCount = 0;
+	int					Width = 0;
+	int					Height = 0;
+	H264Profile::Type	Profile = H264Profile::Invalid;
 	
 	friend std::ostream& operator<<(std::ostream& os, const DecodeResults_t& Params)
 	{
 		os << "DecodeResults_t-->";
 		os << " FrameCount=" << Params.FrameCount;
-		os << " HadEndOfStream=" << Params.HadEndOfStream;
+		os << " Width=" << Params.Width;
+		os << " Height=" << Params.Height;
+		os << " Profile=" << Params.Profile;
 		return os;
 	}
 };
@@ -526,13 +539,16 @@ class PopH264_Decode_Tests : public testing::TestWithParam<DecodeTestParams_t>
 
 auto DecodeTestValues = ::testing::Values
 (
- DecodeTestParams_t{.Filename="RainbowGradient.h264", .ExpectedResults{.FrameCount=1,.HadEndOfStream=true} },
- DecodeTestParams_t{.Filename="GreyscaleGradient.h264", .ExpectedResults{.FrameCount=1,.HadEndOfStream=true} },
- DecodeTestParams_t{.Filename="Cat.jpg", .ExpectedResults{.FrameCount=1,.HadEndOfStream=true} }
+ //	depth.h264 has IDRs before SPS/PPS
+ //DecodeTestParams_t{.Filename="TestData/Depth.h264", .ExpectedResults{.FrameCount=1,.HadEndOfStream=true} },
+// DecodeTestParams_t{.Filename="TestData/Colour.h264", .ExpectedResults{.FrameCount=1,.Width=640,.Height=480,.Profile=H264Profile::Baseline} },
+// DecodeTestParams_t{.Filename="TestData/Main5.h264", .ExpectedResults{.FrameCount=1,.HadEndOfStream=true} },
+ DecodeTestParams_t{.Filename="RainbowGradient.h264", .ExpectedResults{.FrameCount=1,.Width=96,.Height=256,.Profile=H264Profile::Baseline} },
+ DecodeTestParams_t{.Filename="GreyscaleGradient.h264", .ExpectedResults{.FrameCount=1,.Width=10,.Height=256,.Profile=H264Profile::Baseline} },
+ DecodeTestParams_t{.Filename="Cat.jpg", .ExpectedResults{.FrameCount=1,.Width=64,.Height=20} }
  //	gr: broadway doesn't emit end of stream atm
  //DecodeTestParams_t{.Filename="RainbowGradient.h264", .DecoderName="Broadway", .ExpectedResults{.FrameCount=1,.HadEndOfStream=true} },
  //DecodeTestParams_t{.Filename="GreyscaleGradient.h264", .DecoderName="Broadway", .ExpectedResults{.FrameCount=1,.HadEndOfStream=true} },
- //DecodeTestParams_t{.Filename="Cat.jpg", .DecoderName="Broadway", .ExpectedResults{.FrameCount=1,.HadEndOfStream=true} }
 );
 	
 INSTANTIATE_TEST_SUITE_P( PopH264_Decode_Tests, PopH264_Decode_Tests, DecodeTestValues );
@@ -540,7 +556,9 @@ INSTANTIATE_TEST_SUITE_P( PopH264_Decode_Tests, PopH264_Decode_Tests, DecodeTest
 
 
 
-DecodedImage_t DecodeFileFirstFrame(std::string_view Filename,std::string_view DecoderName={})
+//	throws when we hit a decode error
+//	exits cleanly only if we get an EOF
+void DecodeFileFrames(std::string_view Filename,std::function<bool(DecodedImage_t)> OnDecodedImage,std::string_view DecoderName={})
 {
 	auto TestData = LoadDataFromFilename(Filename);
 	
@@ -571,7 +589,7 @@ DecodedImage_t DecodeFileFirstFrame(std::string_view Filename,std::string_view D
 	
 	//	pop frames
 	//	todo: add a proper timeout instead of loop*pause
-	DecodeResults_t Results;
+	bool HadEndOfStream = false;
 	
 	for ( auto i=0;	i<1000;	i++ )
 	{
@@ -585,15 +603,16 @@ DecodedImage_t DecodeFileFirstFrame(std::string_view Filename,std::string_view D
 		if ( Meta.HasKey("Error",MetaJson) )
 		{
 			auto Error = Meta.GetValue("Error",MetaJson).GetString(MetaJson);
-			EXPECT_EQ( Error.empty(), true ) << "Error found in peek meta; " << Error;
-			break;
+			//	deallocate
+			PopH264_DestroyDecoder( Decoder );
+			throw std::runtime_error( Error );
 		}
 		
 		//	gr: can we have EOF and a frame in the same packet?
 		//	gr: should we? (no!)
 		if ( Meta.HasKey("EndOfStream",MetaJson) )
 		{
-			Results.HadEndOfStream = true;
+			HadEndOfStream = true;
 			break;
 		}
 
@@ -629,26 +648,47 @@ DecodedImage_t DecodeFileFirstFrame(std::string_view Filename,std::string_view D
 		if ( !IsValid )
 			continue;
 		
-		Results.FrameCount++;
-
-		EXPECT_EQ( FrameNumber, FirstFrameNumber );
+		bool Continue = OnDecodedImage( Image );
 		
-		PopH264_DestroyDecoder( Decoder );
-		
-		return Image;
+		//	caller wants to break early
+		if ( !Continue )
+		{
+			PopH264_DestroyDecoder( Decoder );
+			return;
+		}
 	}
 	
 	//	deallocate
 	PopH264_DestroyDecoder( Decoder );
-	
-	
-	//	compare with expected results
-	//EXPECT_EQ( Results.HadEndOfStream, Params.ExpectedResults.HadEndOfStream );
-	//EXPECT_EQ( Results.FrameCount, Params.ExpectedResults.FrameCount );
-	
-	throw std::runtime_error( std::string("Failed to decode file ")+std::string(Filename) );
+
+	if ( !HadEndOfStream )
+	{
+		throw std::runtime_error("Decoding timed out (Never got EndOfStream)");
+	}
 }
 
+
+DecodedImage_t DecodeFileFirstFrame(std::string_view Filename,std::string_view DecoderName={})
+{
+	DecodedImage_t FirstImage;
+	bool HadImage = false;
+	
+	auto OnDecodedImage = [&](DecodedImage_t Image)
+	{
+		//	only need first frame
+		FirstImage = Image;
+		HadImage = true;
+		return false;
+	};
+	DecodeResults_t Results;
+
+	DecodeFileFrames( Filename, OnDecodedImage, DecoderName );
+
+	if ( !HadImage )
+		throw std::runtime_error( std::string(Filename) + " decoded no frames");
+	
+	return FirstImage;
+}
 
 
 
@@ -667,81 +707,25 @@ TEST_P(PopH264_Decode_Tests,DecodeFile)
 {
 	auto Params = GetParam();
 	
-	auto TestData = LoadDataFromFilename(Params.Filename);
-	
-	std::stringstream OptionsJson;
-	OptionsJson << "{";
-	if ( !Params.DecoderName.empty() )
-		OptionsJson << "\"Decoder\":\"" << Params.DecoderName << "\",";
-	OptionsJson << "\"VerboseDebug\":true";
-	OptionsJson << "}";
-	
-	std::array<char,1024> ErrorBuffer = {0};
-	auto Decoder = PopH264_CreateDecoder( OptionsJson.str().c_str(), ErrorBuffer.data(), ErrorBuffer.size() );
-	if ( Decoder == PopH264_NullInstance )
-	{
-		std::stringstream Error;
-		Error << "Failed to allocate decoder with filename=" << Params.Filename << ", decoder=" << Params.DecoderName << ". Error=" << ErrorBuffer.data();
-		throw std::runtime_error(Error.str());
-	}
-	
-	//	push input data
-	int FirstFrameNumber = 9999;
-	{
-		auto Result = PopH264_PushData( Decoder, TestData.data(), TestData.size(), FirstFrameNumber );
-		if (Result < 0)
-			throw std::runtime_error("DecoderTest: PushData error");
-		PopH264_PushEndOfStream( Decoder );
-	}
-	
-	//	pop frames
-	//	todo: add a proper timeout instead of loop*pause
 	DecodeResults_t Results;
 	
-	for ( auto i=0;	i<1000;	i++ )
+	auto OnDecodedImage = [&](DecodedImage_t Image)
 	{
-		std::this_thread::sleep_for( std::chrono::milliseconds(100) );
-		
-		std::array<char,1000> MetaJsonBuffer = {0};
-		PopH264_PeekFrame( Decoder, MetaJsonBuffer.data(), MetaJsonBuffer.size() );
-		std::string MetaJson(MetaJsonBuffer.data());
-		PopJson::Value_t Meta(MetaJson);
-		
-		if ( Meta.HasKey("Error",MetaJson) )
-		{
-			auto Error = Meta.GetValue("Error",MetaJson).GetString(MetaJson);
-			EXPECT_EQ( Error.empty(), true ) << "Error found in peek meta; " << Error;
-			break;
-		}
-		
-		//	gr: can we have EOF and a frame in the same packet?
-		//	gr: should we? (no!)
-		if ( Meta.HasKey("EndOfStream",MetaJson) )
-		{
-			Results.HadEndOfStream = true;
-			break;
-		}
-
-		static uint8_t Plane0[1024 * 1024];
-		static uint8_t Plane1[1024 * 1024];
-		static uint8_t Plane2[1024 * 1024];
-		auto FrameNumber = PopH264_PopFrame( Decoder, Plane0, std::size(Plane0), Plane1, std::size(Plane1), Plane2, std::size(Plane2));
-		std::cerr  << "Decoded testdata; " << MetaJson << " FrameNumber=" << FrameNumber << " Should be " << FirstFrameNumber << std::endl;
-		bool IsValid = FrameNumber >= 0;
-		if ( !IsValid )
-			continue;
-		
+		Results.Width = Image.mWidth;
+		Results.Height = Image.mHeight;
+		//	get h264 meta
+		//Results.Profile = Image.
 		Results.FrameCount++;
-		
-		EXPECT_EQ( FrameNumber, FirstFrameNumber );
-	}
+		return true;
+	};
 	
-	//	deallocate
-	PopH264_DestroyDecoder( Decoder );
+	DecodeFileFrames( Params.Filename, OnDecodedImage, Params.DecoderName );
 	
 	//	compare with expected results
-	EXPECT_EQ( Results.HadEndOfStream, Params.ExpectedResults.HadEndOfStream );
 	EXPECT_EQ( Results.FrameCount, Params.ExpectedResults.FrameCount );
+	EXPECT_EQ( Results.Width, Params.ExpectedResults.Width );
+	EXPECT_EQ( Results.Height, Params.ExpectedResults.Height );
+	EXPECT_EQ( Results.Profile, Params.ExpectedResults.Profile );
 }
 
 
@@ -829,7 +813,7 @@ TEST_P(PopH264_Encode_Tests,EncodeFile)
 		PopH264_EncoderEndOfStream(Encoder);
 	}
 
-	DecodeResults_t Results;
+	bool HadEndOfStream = false;
 	
 	//	read out encoded packets
 	for ( auto i=0;	i<1000;	i++ )
@@ -857,7 +841,7 @@ TEST_P(PopH264_Encode_Tests,EncodeFile)
 		//	gr: should we? (no!)
 		if ( Meta.HasKey("EndOfStream",MetaJson) )
 		{
-			Results.HadEndOfStream = true;
+			HadEndOfStream = true;
 			break;
 		}
 		
