@@ -471,20 +471,11 @@ int main()
 class DecodedImage_t
 {
 public:
-	SoyPixelsFormat::Type	GetFormat()
-	{
-		switch ( mPlaneFormats.size() )
-		{
-			case 0:	return SoyPixelsFormat::Invalid;
-			case 1:	return mPlaneFormats[0];
-			case 2: return SoyPixelsFormat::GetMergedFormat( mPlaneFormats[0], mPlaneFormats[1] );
-			case 3: return SoyPixelsFormat::GetMergedFormat( mPlaneFormats[0], mPlaneFormats[1], mPlaneFormats[2] );
-			default: break;
-		}
-		std::stringstream Error;
-		Error << "Don't know how to combine " << mPlaneFormats.size() << " pixel formats together";
-		throw std::runtime_error(Error.str());
-	}
+	DecodedImage_t()	{};
+	DecodedImage_t(SoyPixelsImpl& Pixels);
+	
+	SoyPixelsFormat::Type	GetFormat();
+
 	
 	std::vector<uint8_t>	mPlane0;
 	std::vector<uint8_t>	mPlane1;
@@ -495,7 +486,25 @@ public:
 	std::vector<SoyPixelsFormat::Type>	mPlaneFormats;
 };
 
+DecodedImage_t::DecodedImage_t(SoyPixelsImpl& Pixels)
+{
+	throw std::runtime_error("todo: pixels -> decoded image");
+}
 
+SoyPixelsFormat::Type DecodedImage_t::GetFormat()
+{
+	switch ( mPlaneFormats.size() )
+	{
+		case 0:	return SoyPixelsFormat::Invalid;
+		case 1:	return mPlaneFormats[0];
+		case 2: return SoyPixelsFormat::GetMergedFormat( mPlaneFormats[0], mPlaneFormats[1] );
+		case 3: return SoyPixelsFormat::GetMergedFormat( mPlaneFormats[0], mPlaneFormats[1], mPlaneFormats[2] );
+		default: break;
+	}
+	std::stringstream Error;
+	Error << "Don't know how to combine " << mPlaneFormats.size() << " pixel formats together";
+	throw std::runtime_error(Error.str());
+}
 
 class DecodeResults_t
 {
@@ -555,11 +564,49 @@ INSTANTIATE_TEST_SUITE_P( PopH264_Decode_Tests, PopH264_Decode_Tests, DecodeTest
 
 
 
+void GenerateFakeImages(std::string_view Filename,std::function<bool(DecodedImage_t)> OnDecodedImage)
+{
+	if ( Filename == "128x128_Greyscale" )
+	{
+		SoyPixels Pixels( SoyPixelsMeta(128, 128, SoyPixelsFormat::Greyscale) );
+		DecodedImage_t Image( Pixels );
+		OnDecodedImage( Image );
+		return;
+	}
+	
+	if ( Filename == "128x128_Yuv_8_8_8" )
+	{
+		SoyPixels Pixels( SoyPixelsMeta(128, 128, SoyPixelsFormat::Yuv_8_8_8) );
+		DecodedImage_t Image( Pixels );
+		OnDecodedImage( Image );
+		return;
+	}
+	
+	if ( Filename == "128x128_Yuv_8_88" )
+	{
+		SoyPixels Pixels( SoyPixelsMeta(128, 128, SoyPixelsFormat::Yuv_8_88) );
+		DecodedImage_t Image( Pixels );
+		OnDecodedImage( Image );
+		return;
+	}
+	
+}
+
 
 //	throws when we hit a decode error
 //	exits cleanly only if we get an EOF
 void DecodeFileFrames(std::string_view Filename,std::function<bool(DecodedImage_t)> OnDecodedImage,std::string_view DecoderName={})
 {
+	//	fake images
+	try
+	{
+		GenerateFakeImages( Filename, OnDecodedImage );
+	}
+	catch(std::exception& e)
+	{
+		//	not fake image
+	}
+	
 	auto TestData = LoadDataFromFilename(Filename);
 	
 	std::stringstream OptionsJson;
@@ -758,9 +805,12 @@ class PopH264_Encode_Tests : public testing::TestWithParam<EncodeTestParams_t>
 
 auto EncodeTestValues = ::testing::Values
 (
-	EncodeTestParams_t{.InputImageFilename="RainbowGradient.h264"},
-	EncodeTestParams_t{.InputImageFilename="GreyscaleGradient.h264"},
-	EncodeTestParams_t{.InputImageFilename="Cat.jpg"}
+ EncodeTestParams_t{.InputImageFilename="RainbowGradient.h264"},
+ EncodeTestParams_t{.InputImageFilename="GreyscaleGradient.h264"},
+ EncodeTestParams_t{.InputImageFilename="Cat.jpg"},
+ EncodeTestParams_t{.InputImageFilename="128x128_Greyscale"},
+ EncodeTestParams_t{.InputImageFilename="128x128_Yuv_8_8_8"},
+ EncodeTestParams_t{.InputImageFilename="128x128_Yuv_8_88"}
 );
 	
 INSTANTIATE_TEST_SUITE_P( PopH264_Encode_Tests, PopH264_Encode_Tests, EncodeTestValues );
