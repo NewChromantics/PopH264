@@ -37,7 +37,7 @@ namespace MediaFoundation
 	std::ostream& operator<<(std::ostream &out, const TActivateMeta& in);
 	
 	TActivateList	EnumTransforms(const GUID& Category);
-	TActivateMeta	GetBestTransform(const GUID& Category, const ArrayBridge<Soy::TFourcc>& InputFilter, const ArrayBridge<Soy::TFourcc>& OutputFilter);
+	TActivateMeta	GetBestTransform(const GUID& Category,std::span<Soy::TFourcc> InputFilter,std::span<Soy::TFourcc> OutputFilter);
 	
 	Soy::AutoReleasePtr<IMFSample>		CreateSample(std::span<uint8_t> Data, Soy::TFourcc Fourcc, std::chrono::milliseconds SampleTime, std::chrono::milliseconds SampleDuration);
 	Soy::AutoReleasePtr<IMFMediaBuffer>	CreateBuffer(std::span<uint8_t> Data);
@@ -787,7 +787,7 @@ MediaFoundation::TActivateList MediaFoundation::EnumTransforms(const GUID& Categ
 
 //	get the best activate which matches the input list, and output list
 //	sorted results by hardware, then highest input, then highest output
-MediaFoundation::TActivateMeta MediaFoundation::GetBestTransform(const GUID& Category,const ArrayBridge<Soy::TFourcc>& InputFilter,const ArrayBridge<Soy::TFourcc>& OutputFilter)
+MediaFoundation::TActivateMeta MediaFoundation::GetBestTransform(const GUID& Category,std::span<Soy::TFourcc> InputFilter,std::span<Soy::TFourcc> OutputFilter)
 {
 	auto Transformers = EnumTransforms(Category);
 	TActivateMeta MatchingTransform;
@@ -807,21 +807,23 @@ MediaFoundation::TActivateMeta MediaFoundation::GetBestTransform(const GUID& Cat
 	};
 
 	//	get the indexes of MatchList that match
-	auto GetMatchingIndexes = [](BufferArray<Soy::TFourcc, 20>& List,const ArrayBridge<Soy::TFourcc>& MatchList)
+	auto GetMatchingIndexes = [](std::span<Soy::TFourcc> List,std::span<Soy::TFourcc> MatchList)
 	{
 		BufferArray<int, 20> MatchingInputIndexes;
-		for (auto mi = 0; mi < MatchList.GetSize(); mi++)
+		for (auto mi = 0; mi < MatchList.size(); mi++)
 		{
 			auto Match = MatchList[mi];
-			auto ListIndex = List.FindIndex(Match);
-			if (ListIndex == -1)
+			auto ListMatchIt = std::find( List.begin(), List.end(), Match );
+			
+			if ( ListMatchIt == List.end() )
 				continue;
+
 			MatchingInputIndexes.PushBack(mi);
 		}
 		return MatchingInputIndexes;
 	};
 
-	auto GetLowestMatchingIndex = [&](BufferArray<Soy::TFourcc, 20>& List,const ArrayBridge<Soy::TFourcc>& MatchList)
+	auto GetLowestMatchingIndex = [&](std::span<Soy::TFourcc> List,std::span<Soy::TFourcc> MatchList)
 	{
 		auto MatchingIndexes = GetMatchingIndexes( List, MatchList );
 		if (MatchingIndexes.IsEmpty())
@@ -835,23 +837,18 @@ MediaFoundation::TActivateMeta MediaFoundation::GetBestTransform(const GUID& Cat
 	{
 		std::Debug << "Transformer: " << Meta << std::endl;
 
-		auto BestInputIndex = GetLowestMatchingIndex(Meta.mInputs, InputFilter);
-		auto BestOutputIndex = GetLowestMatchingIndex(Meta.mOutputs, OutputFilter);
+		auto BestInputIndex = GetLowestMatchingIndex(Meta.GetInputs(), InputFilter);
+		auto BestOutputIndex = GetLowestMatchingIndex(Meta.GetOutputs(), OutputFilter);
 		//	not a match
 		if (BestInputIndex==-1 || BestOutputIndex==-1)
 			return;
-		//	Catch programming error
-		if (BestInputIndex >= InputFilter.GetSize())
-			throw Soy::AssertException("Internal Error: Input index out of bounds");
-		if (BestOutputIndex >= OutputFilter.GetSize())
-			throw Soy::AssertException("Internal Error: Output index out of bounds");
 
 		//	calc a score
 		auto Score = 0;
 		if (Meta.mHardwareAccelerated)
 			Score += HardwareScore;
-		Score += (InputFilter.GetSize() - BestInputIndex) * InputScore;
-		Score += (OutputFilter.GetSize() - BestOutputIndex) * OutputScore;
+		Score += (InputFilter.size() - BestInputIndex) * InputScore;
+		Score += (OutputFilter.size() - BestOutputIndex) * OutputScore;
 		AddMatch(Meta, InputFilter[BestInputIndex], OutputFilter[BestOutputIndex], Score);
 	};
 
@@ -859,7 +856,7 @@ MediaFoundation::TActivateMeta MediaFoundation::GetBestTransform(const GUID& Cat
 
 	if (MatchingTransformScore == 0)
 	{
-		throw Soy::AssertException("No transformers matching the input/output filters");
+		throw std::runtime_error("No transformers matching the input/output filters");
 	}
 
 	return MatchingTransform;
@@ -867,7 +864,7 @@ MediaFoundation::TActivateMeta MediaFoundation::GetBestTransform(const GUID& Cat
 
 
 
-MediaFoundation::TTransformer::TTransformer(TransformerCategory::Type Category, const ArrayBridge<Soy::TFourcc>&& InputFormats, const ArrayBridge<Soy::TFourcc>&& OutputFormats,bool VerboseDebug) :
+MediaFoundation::TTransformer::TTransformer(TransformerCategory::Type Category,std::span<Soy::TFourcc> InputFormats, std::span<Soy::TFourcc> OutputFormats,bool VerboseDebug) :
 	mVerboseDebug	( VerboseDebug )
 {
 	auto CategoryGuid = GetGuid(Category);
@@ -1554,7 +1551,8 @@ bool MediaFoundation::TTransformer::PopFrame(std::vector<uint8_t>& Data,int64_t&
 	EndOfStream = false;
 
 	if (!mTransformer)
-		throw Soy::AssertException("Transformer is null");
+		throw std::runtime_error("Transformer is null");
+
 
 	//	input format isn't set, cannot set output format yet and can't pop anything
 	if ( !mInputFormatSet )

@@ -54,6 +54,9 @@ public:
 	TActivateMeta() {}
 	TActivateMeta(IMFActivate& Activate);
 
+	std::span<Soy::TFourcc>			GetInputs()		{	return std::span( mInputs.GetArray(), mInputs.GetSize() );	}
+	std::span<Soy::TFourcc>			GetOutputs()	{	return std::span( mOutputs.GetArray(), mOutputs.GetSize() );	}
+
 public:
 	std::string						mName;
 	bool							mHardwareAccelerated = false;
@@ -66,7 +69,7 @@ public:
 class MediaFoundation::TTransformer
 {
 public:
-	TTransformer(TransformerCategory::Type Category,const ArrayBridge<Soy::TFourcc>&& InputFormats, const ArrayBridge<Soy::TFourcc>&& OutputFormats,bool VerboseDebug);
+	TTransformer(TransformerCategory::Type Category,std::span<Soy::TFourcc> InputFormats,std::span<Soy::TFourcc> OutputFormats,bool VerboseDebug);
 	~TTransformer();
 
 public:

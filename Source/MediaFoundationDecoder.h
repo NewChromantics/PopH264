@@ -23,9 +23,10 @@ private:
 	size_t			PopFrames();
 
 	void			SetInputFormat(ContentType::Type ContentType);
+	void			CreateTransformer(ContentType::Type ContentType);
 
 private:
-	std::mutex						mTransformerLock;
+	std::recursive_mutex			mTransformerLock;
 	std::shared_ptr<TTransformer>	mTransformer;
 	
 	//	gr: only push SPS once per stream

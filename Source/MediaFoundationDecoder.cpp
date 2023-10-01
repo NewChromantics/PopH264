@@ -29,42 +29,7 @@ namespace MediaFoundation
 MediaFoundation::TDecoder::TDecoder(PopH264::TDecoderParams& Params,PopH264::OnDecodedFrame_t OnDecodedFrame,PopH264::OnFrameError_t OnFrameError) :
 	PopH264::TDecoder	( Params, OnDecodedFrame, OnFrameError )
 {
-	//	move this to first data setup, so we know what kind of transformer to make, in case jpeg is pushed
-	//	or... do we try and make a h264 transformer anyway in the rare case of a jpeg so we know support
-	Soy::TFourcc InputFourccs[] = { "H264" };
-	//Soy::TFourcc InputFourccs[] = { "MJPG" };
-	Soy::TFourcc OutputFourccs[] = { "NV12" };
-	auto Inputs = FixedRemoteArray(InputFourccs);
-	auto Outputs = FixedRemoteArray(OutputFourccs);
-
-	mTransformer.reset(new MediaFoundation::TTransformer(TransformerCategory::VideoDecoder, GetArrayBridge(Inputs), GetArrayBridge(Outputs), mParams.mVerboseDebug ));
-
-	try
-	{
-		mTransformer->SetLowLatencyMode(!Params.mAllowBuffering);
-	}
-	catch (std::exception& e)
-	{
-		std::Debug << "Failed to set low-latency mode; " << e.what() << std::endl;
-	}
-
-	try
-	{
-		mTransformer->SetLowPowerMode(Params.mLowPowerMode);
-	}
-	catch (std::exception& e)
-	{
-		std::Debug << "Failed to set low power mode; " << e.what() << std::endl;
-	}
-
-	try
-	{
-		mTransformer->SetDropBadFrameMode(Params.mDropBadFrames);
-	}
-	catch (std::exception& e)
-	{
-		std::Debug << "Failed to set drop bad frames mode; " << e.what() << std::endl;
-	}
+	//	todo: let user specifiy a decoder/content type in params so we can allocate -and fail- a new tranformer immediately
 }
 
 MediaFoundation::TDecoder::~TDecoder()
@@ -74,8 +39,67 @@ MediaFoundation::TDecoder::~TDecoder()
 	mTransformer.reset();
 }
 
+void MediaFoundation::TDecoder::CreateTransformer(ContentType::Type ContentType)
+{
+	std::scoped_lock Lock(mTransformerLock);
+	if ( mTransformer )
+		throw std::runtime_error("Transformer already allocated");
+
+	std::array<Soy::TFourcc,1> Inputs;
+	if ( ContentType == ContentType::Jpeg )
+	{
+		Inputs[0] = "MJPG";
+	}
+	else if ( ContentType == ContentType::Unknown )
+	{
+		//	assuming H264!
+		Inputs[0] = "H264";
+	}
+	else
+	{
+		std::stringstream Error;
+		Error << "Unhandled content type " << ContentType << " for CreateTransformer()";
+		throw std::runtime_error(Error.str());
+	}
+
+	Soy::TFourcc Outputs[] = { "NV12" };
+
+	mTransformer.reset(new MediaFoundation::TTransformer(TransformerCategory::VideoDecoder, std::span(Inputs), std::span(Outputs), mParams.mVerboseDebug ));
+
+	try
+	{
+		mTransformer->SetLowLatencyMode(!mParams.mAllowBuffering);
+	}
+	catch (std::exception& e)
+	{
+		std::Debug << "Failed to set low-latency mode; " << e.what() << std::endl;
+	}
+
+	try
+	{
+		mTransformer->SetLowPowerMode(mParams.mLowPowerMode);
+	}
+	catch (std::exception& e)
+	{
+		std::Debug << "Failed to set low power mode; " << e.what() << std::endl;
+	}
+
+	try
+	{
+		mTransformer->SetDropBadFrameMode(mParams.mDropBadFrames);
+	}
+	catch (std::exception& e)
+	{
+		std::Debug << "Failed to set drop bad frames mode; " << e.what() << std::endl;
+	}
+}
+
 void MediaFoundation::TDecoder::SetInputFormat(ContentType::Type ContentType)
 {
+	std::scoped_lock Lock(mTransformerLock);
+	if ( !mTransformer )
+		CreateTransformer(ContentType);
+
 	if (mTransformer->IsInputFormatReady())
 		return;
 
@@ -135,11 +159,6 @@ void MediaFoundation::TDecoder::SetInputFormat(ContentType::Type ContentType)
 
 bool MediaFoundation::TDecoder::DecodeNextPacket()
 {
-	std::scoped_lock Lock(mTransformerLock);
-	if ( !mTransformer )
-		return false;
-	auto& Transformer = *mTransformer;
-
 	//	try and pop even if we dont push data in, in case bail early
 	PopFrames();
 
@@ -161,6 +180,17 @@ bool MediaFoundation::TDecoder::DecodeNextPacket()
 		NaluType = H264::GetPacketType(NextPacket.GetData());
 		//std::Debug << "MediaFoundation got " << magic_enum::enum_name(NaluType) << " x" << Nalu.GetSize() << std::endl;
 	}
+
+	std::scoped_lock Lock(mTransformerLock);
+	if ( !mTransformer )
+	{
+		std::Debug << "No transformer, unpopping packet... " << std::endl;
+		UnpopPacket(pNextPacket);
+		return false;
+	}
+	auto& Transformer = *mTransformer;
+
+
 
 	bool PushData = true;
 	bool PushTwice = false;
@@ -276,6 +306,11 @@ bool MediaFoundation::TDecoder::DecodeNextPacket()
 //	maybe this can/should be on another thread
 size_t MediaFoundation::TDecoder::PopFrames()
 {
+	std::scoped_lock Lock(mTransformerLock);
+	//	may not have a transformer if data hasn't been input yet
+	if ( !mTransformer )
+		return 0;
+
 	size_t FramesPushed = 0;
 	int LoopSafety = 10;
 	bool PopAgain = true;

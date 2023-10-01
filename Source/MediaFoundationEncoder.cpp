@@ -55,12 +55,10 @@ MediaFoundation::TEncoderParams::TEncoderParams(json11::Json& Options)
 MediaFoundation::TEncoder::TEncoder(TEncoderParams Params,std::function<void(PopH264::TPacket&)> OnOutputPacket) :
 	PopH264::TEncoder	( OnOutputPacket )
 {
-	Soy::TFourcc InputFourccs[] = { "NV12" };
-	Soy::TFourcc OutputFourccs[] = { "H264" };
-	auto Inputs = FixedRemoteArray(InputFourccs);
-	auto Outputs = FixedRemoteArray(OutputFourccs);
+	Soy::TFourcc Inputs[] = { "NV12" };
+	Soy::TFourcc Outputs[] = { "H264" };
 
-	mTransformer.reset(new MediaFoundation::TTransformer(TransformerCategory::VideoEncoder, GetArrayBridge(Inputs), GetArrayBridge(Outputs), Params.mVerboseDebug ));
+	mTransformer.reset(new MediaFoundation::TTransformer(TransformerCategory::VideoEncoder, std::span(Inputs), std::span(Outputs), Params.mVerboseDebug ));
 }
 
 MediaFoundation::TEncoder::~TEncoder()
