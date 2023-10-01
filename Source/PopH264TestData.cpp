@@ -210,7 +210,7 @@ void GetTestFileData(FixedRemoteArray<const uint8_t>& InputData,ArrayBridge<uint
 	auto OutputMaxSize = OutputData.MaxSize();
 	auto CopySize = std::min(OutputMaxSize,FullSize);
 	
-	std::Debug << __PRETTY_FUNCTION__ << "FullSize=" << FullSize << " OutputMaxSize=" << OutputMaxSize << " CopySize=" << CopySize << std::endl;
+	//std::Debug << __PRETTY_FUNCTION__ << "FullSize=" << FullSize << " OutputMaxSize=" << OutputMaxSize << " CopySize=" << CopySize << std::endl;
 	
 	OutputData.Copy( InputData, CopySize );
 }

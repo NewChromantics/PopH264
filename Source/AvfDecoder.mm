@@ -703,7 +703,7 @@ void Avf::TDecompressor::DecodeSample(CFPtr<CMSampleBufferRef> SampleBuffer,size
 		
 		//std::Debug << "decompressing " << Packet.mTimecode << "..." << std::endl;
 		//Soy::TScopeTimer Timer("VTDecompressionSessionDecodeFrame", 0, OnFinished, true );
-		Soy::TScopeTimerPrint Timer("VTDecompressionSessionDecodeFrame", 0 );
+		Soy::TScopeTimerPrint Timer("VTDecompressionSessionDecodeFrame", 10 );
 		auto Result = VTDecompressionSessionDecodeFrame( mSession.mObject, SampleBuffer.mObject, Flags, nullptr, &FlagsOut );
 		Timer.Stop();
 		//std::Debug << "Decompress " << Packet.mTimecode << " took " << DecodeDuration << "; error=" << (int)Result << std::endl;
