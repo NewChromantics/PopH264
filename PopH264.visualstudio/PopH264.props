@@ -5,7 +5,6 @@
   <PropertyGroup>
     <IncludePath>$(ProjectDir)..\Source\SoyLib\src;$(ProjectDir)..\Source\Broadway\Decoder\inc;$(ProjectDir)..\Source\Json11;$(IncludePath)</IncludePath>
     <IntDir>$(SolutionDir)$(ProjectName)_$(Platform)_$(Configuration)\Temp\</IntDir>
-    <OutDir>$(SolutionDir)..\Build\$(MSBuildProjectName)_$(Configuration)_$(Platform)\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
