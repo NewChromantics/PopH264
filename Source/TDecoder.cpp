@@ -66,26 +66,103 @@ void PopH264::TDecoder::CheckDecoderUpdates()
 	CheckUpdates();
 }
 
+ContentType::Type DetectPacketContentType(std::span<uint8_t> PacketData)
+{
+	if ( Jpeg::IsJpegHeader(PacketData) )
+		return ContentType::Jpeg;
+	
+	return ContentType::Unknown;
+}
 
 
 void PopH264::TDecoder::Decode(std::span<uint8_t> PacketData,FrameNumber_t FrameNumber,ContentType::Type ContentType)
 {
-	//	todo? if this is the first data, detect non-poph264/nalu input formats (eg. jpeg), that we dont want to split
-
+	//	if unknown content, try and detect it here
+	//	gr: if we have previously detected it... keep detecting here?
+	if ( ContentType == ContentType::Unknown )
+	{
+		ContentType = DetectPacketContentType( PacketData );
+	}
+	
 	if ( ContentType == ContentType::EndOfFile )
 	{
 		//	mark that we expect no more data after this
 		mPendingDataFinished = true;
 	}
 	
+	
+	std::vector<std::span<uint8_t>> NewPacketDatas;
+	NewPacketDatas.push_back( PacketData );
+	
+	//	gr: we DO want to split SPS & PPS & SEI...
+	if ( ContentType == ContentType::Unknown /*|| ContentType == ContentType::H264 */)
+	{
+		try
+		{
+			auto SubPackets = H264::SplitNalu(PacketData);
+			
+			static bool SplitAllPackets = true;
+			
+			if ( SplitAllPackets )
+			{
+				//	leave same-packet types together
+				NewPacketDatas = SubPackets;
+			}
+			else
+			{
+				//	pop out sps, pps, sei
+				NewPacketDatas.clear();
+				while ( !SubPackets.empty() )
+				{
+					auto& SubPacket = SubPackets[0];
+					auto H264Content = H264::GetPacketType( SubPacket );
+					if ( H264Content == H264NaluContent::SequenceParameterSet ||
+						H264Content == H264NaluContent::PictureParameterSet ||
+						H264Content == H264NaluContent::SupplimentalEnhancementInformation )
+					{
+						NewPacketDatas.push_back( SubPacket );
+						SubPackets.erase( SubPackets.begin() );
+					}
+					else
+					{
+						break;
+					}
+				}
+				
+				//	keep the rest of the subpackets as one big packet
+				if ( !SubPackets.empty() )
+				{
+					auto FirstPacket = SubPackets[0];
+					auto LastPacket = SubPackets[ SubPackets.size()-1 ];
+					auto RemainingDataStart = FirstPacket.begin();
+					auto RemainingDataEnd = LastPacket.end();
+					auto RemainingPacket = std::span( RemainingDataStart, RemainingDataEnd );
+					NewPacketDatas.push_back( RemainingPacket );
+				}
+			}
+		}
+		catch (std::exception& e)
+		{
+			//	 probably not h264?
+			std::Debug << "SplitNalu() error; " << e.what() << std::endl;
+		}
+	}
+	
 	//	now split when popped, in case this data isn't actually H264 data
 	{
+		std::vector<std::shared_ptr<TInputNaluPacket>> NewPackets;
+		for ( auto& NewPacketData : NewPacketDatas )
+		{
+			std::shared_ptr<TInputNaluPacket> pPacket( new TInputNaluPacket() );
+			std::copy( NewPacketData.begin(), NewPacketData.end(), std::back_inserter(pPacket->mData) );
+			pPacket->mFrameNumber = FrameNumber;
+			pPacket->mContentType = ContentType;
+			NewPackets.push_back(pPacket);
+		}
+		
 		std::scoped_lock Lock(mPendingDataLock);
-		std::shared_ptr<TInputNaluPacket> pPacket( new TInputNaluPacket() );
-		std::copy( PacketData.begin(), PacketData.end(), std::back_inserter(pPacket->mData) );
-		pPacket->mFrameNumber = FrameNumber;
-		pPacket->mContentType = ContentType;
-		mPendingDatas.PushBack(pPacket);
+		for ( auto& NewPacket : NewPackets )
+			mPendingDatas.PushBack(NewPacket);
 	}
 	
 	while ( true )
@@ -167,40 +244,13 @@ std::shared_ptr<PopH264::TInputNaluPacket> PopH264::TDecoder::PopNextPacket()
 		}
 		
 		NextPacket = mPendingDatas.PopAt(0);
-		std::span<uint8_t> NextPacketData( NextPacket->mData );
 		
-		//	todo: detect non h264 packets here (if first)
-		if ( Jpeg::IsJpegHeader(NextPacketData) )
-		{
-			//	detected jpeg, dont attempt split
-			std::Debug << "Detected Jpeg packet, skipping nalu split" << std::endl;
-			NextPacket->mContentType = ContentType::Jpeg;
-		}
-		else if ( NextPacket->mData.empty() )
-		{
-			//	do nothing with empty packets (just retaining content type)
-		}
-		else
-		{
-			//	if this packet contains multiple nalu packets, split it here
-			//	gr: https://developer.apple.com/forums/thread/14212
-			//		we need to NOT split packets if theyre the same frame. IDRs can be multiple packets, but apple needs them together
-			std::vector<std::shared_ptr<TInputNaluPacket>> SplitPackets;
-			
-			auto OnSplitNalu = [&](std::span<uint8_t> Nalu)
-			{
-				std::shared_ptr<TInputNaluPacket> pPacket( new TInputNaluPacket() );
-				std::copy( Nalu.begin(), Nalu.end(), std::back_inserter(pPacket->mData) );
-				pPacket->mFrameNumber = NextPacket->mFrameNumber;
-				SplitPackets.push_back( pPacket );
-			};
-			H264::SplitNalu( NextPacket->GetData(), OnSplitNalu );
-			
-			//	if we split multiple re-insert back into the list
-			NextPacket = SplitPackets[0];
-			for ( auto i=1;	i<SplitPackets.size();	i++ )
-				mPendingDatas.PushBack(SplitPackets[i]);
-		}
+		//	gr: don't split nalus. input data should be frame-seperated anyway
+		//		we sometimes get IDR packets, which are 2 packets, for one frame (eg, top & bottom half)
+		//		if we try and decode seperately, some decoders (apple) will fail with bad-data
+		//	gr: https://developer.apple.com/forums/thread/14212
+		//		we need to NOT split packets if theyre the same frame. IDRs can be multiple packets, but apple needs them together
+		//	gr: but why did we split it in the first place... easier debugging?...
 	}
 	
 	return NextPacket;
