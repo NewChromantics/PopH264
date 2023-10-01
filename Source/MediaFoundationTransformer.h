@@ -107,6 +107,7 @@ private:
 public:
 	Soy::AutoReleasePtr<IMFTransform>	mTransformer;
 private:
+public:
 	DWORD			mInputStreamId = 0;
 	DWORD			mOutputStreamId = 0;
 	bool			mInputFormatSet = false;

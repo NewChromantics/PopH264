@@ -62,7 +62,7 @@ void MediaFoundation::TDecoder::CreateTransformer(ContentType::Type ContentType)
 		throw std::runtime_error(Error.str());
 	}
 
-	Soy::TFourcc Outputs[] = { "NV12" };
+	//	jpeg MFT decoder also has YUY2
 
 	mTransformer.reset(new MediaFoundation::TTransformer(TransformerCategory::VideoDecoder, std::span(Inputs), std::span(Outputs), mParams.mVerboseDebug ));
 
@@ -120,16 +120,30 @@ void MediaFoundation::TDecoder::SetInputFormat(ContentType::Type ContentType)
 	}
 	else if ( ContentType == ContentType::Jpeg )
 	{
+		//	https://learn.microsoft.com/en-us/windows/win32/medfound/basic-mft-processing-model?redirectedfrom=MSDN#set-media-types
+		auto Configure = [&](IMFMediaType& MediaType)
+		{
+			EnumAttributes(MediaType);
+		};
+		mTransformer->SetInputFormat('GPJM',Configure);
+	}
+	else if ( ContentType == ContentType::Jpeg )
+	{
 		//	I think we can reuse mjpeg for jpeg, when there's no jpeg decoders
 		IMFMediaType* InputMediaType = nullptr;
 		auto Result = MFCreateMediaType(&InputMediaType);
 		IsOkay(Result, "MFCreateMediaType");
 		Result = InputMediaType->SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Video);
 		IsOkay(Result, "InputMediaType->SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Video)");
-		auto InputFormatGuid = MFVideoFormat_MJPG;	//	'MJPG'
+		
+		//auto InputFormatGuid = MFVideoFormat_MJPG;	//	'MJPG'
+		Soy::TFourcc InputFormat("MJPG");
+		auto InputFormatGuid = GetGuid(InputFormat);
 		Result = InputMediaType->SetGUID(MF_MT_SUBTYPE, InputFormatGuid);
 		IsOkay(Result, "InputMediaType->SetGUID(MF_MT_SUBTYPE)");
-
+		
+		//	apparently a working version, which doesnt set an input
+		//	https://stackoverflow.com/questions/9111362/media-foundation-mftransform-to-convert-mfsample-from-mjpg-to-yuy2-or-rgb24/9681384#9681384
 		mTransformer->SetInputFormat(*InputMediaType);
 	}
 	else
@@ -167,15 +181,46 @@ bool MediaFoundation::TDecoder::DecodeNextPacket()
 		return false;
 	auto& NextPacket = *pNextPacket;
 
+	try
+	{
+		if ( NextPacket.mContentType == ContentType::Jpeg )
+		{
+			DecodeJpegPacket( *pNextPacket );
+		}
+		else
+		{
+			DecodeH264Packet( *pNextPacket );
+		}
+	}
+	catch(std::exception& e)
+	{
+		UnpopPacket( pNextPacket );
+		throw;
+	}
+
+	PopFrames();
+	return true;
+}
+
+
+
+void MediaFoundation::TDecoder::DecodeJpegPacket(PopH264::TInputNaluPacket& NextPacket)
+{
+	SetInputFormat( NextPacket.mContentType );
+}
+
+void MediaFoundation::TDecoder::DecodeH264Packet(PopH264::TInputNaluPacket& NextPacket)
+{
 	H264NaluContent::Type NaluType = H264NaluContent::EndOfStream;
+
 	if ( NextPacket.mContentType == ContentType::EndOfFile )
 	{
 		NaluType = H264NaluContent::EndOfStream;
 	}
 	else
 	{
-		//	gr: this will change to come from PopNalu to sync with meta
 		SetInputFormat( NextPacket.mContentType );
+
 
 		NaluType = H264::GetPacketType(NextPacket.GetData());
 		//std::Debug << "MediaFoundation got " << magic_enum::enum_name(NaluType) << " x" << Nalu.GetSize() << std::endl;
@@ -183,13 +228,9 @@ bool MediaFoundation::TDecoder::DecodeNextPacket()
 
 	std::scoped_lock Lock(mTransformerLock);
 	if ( !mTransformer )
-	{
-		std::Debug << "No transformer, unpopping packet... " << std::endl;
-		UnpopPacket(pNextPacket);
-		return false;
-	}
-	auto& Transformer = *mTransformer;
+		throw std::runtime_error("No transformer");
 
+	auto& Transformer = *mTransformer;
 
 
 	bool PushData = true;
@@ -251,10 +292,11 @@ bool MediaFoundation::TDecoder::DecodeNextPacket()
 		if (!Transformer.PushFrame( NextPacket.GetData(), NextPacket.mFrameNumber ) )
 		{
 			//	data was rejected
-			UnpopPacket(pNextPacket);
+			//UnpopPacket(pNextPacket);
 			//	gr: important, always show this
 			//if (mVerboseDebug)
 				std::Debug << __PRETTY_FUNCTION__ << " rejected " << NaluType << " unpopped" << std::endl;
+			throw std::runtime_error("Packet rejected");
 		}
 		else
 		{
@@ -295,11 +337,6 @@ bool MediaFoundation::TDecoder::DecodeNextPacket()
 		Transformer.ProcessCommand(MFT_MESSAGE_COMMAND_DRAIN);
 	}
 
-	//	pop any frames that have come out in the mean time
-	PopFrames();
-
-	//	even if we didn't get a frame, try to decode again as we processed a packet
-	return true;
 }
 
 //	return number of frames pushed (out)

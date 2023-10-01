@@ -3,6 +3,8 @@
 #include "MediaFoundationTransformer.h"
 #include "TDecoder.h"
 
+class TInputNaluPacket;
+
 namespace MediaFoundation
 {
 	class TDecoder;
@@ -20,6 +22,9 @@ public:
 
 private:
 	virtual bool	DecodeNextPacket() override;
+	void			DecodeH264Packet(PopH264::TInputNaluPacket& Packet);
+	void			DecodeJpegPacket(PopH264::TInputNaluPacket& Packet);
+
 	size_t			PopFrames();
 
 	void			SetInputFormat(ContentType::Type ContentType);

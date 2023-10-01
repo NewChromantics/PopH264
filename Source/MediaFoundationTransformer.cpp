@@ -1100,20 +1100,31 @@ void MediaFoundation::TTransformer::ProcessCommand(MFT_MESSAGE_TYPE Command)
 void MediaFoundation::TTransformer::SetInputFormat(IMFMediaType& MediaType)
 {
 	auto& Transformer = *this->mTransformer;
-	/* gr: not implemented on all transforms
+	
 	{
 		DWORD InputStreamIds[10];
 		DWORD OutputStreamIds[10];
-		auto Result = Decoder.GetStreamIDs(std::size(InputStreamIds), InputStreamIds, std::size(OutputStreamIds), OutputStreamIds);
-		IsOkay(Result, "GetStreamIDs");
+		auto Result = Transformer.GetStreamIDs(std::size(InputStreamIds), InputStreamIds, std::size(OutputStreamIds), OutputStreamIds);
+		if ( Result != E_NOTIMPL )
+			IsOkay(Result, "GetStreamIDs");
 	}
-	*/
-	auto Set = [&]()
+	
+
+	try
 	{
-		auto Result = Transformer.SetInputType(0, &MediaType, 0);
-		IsOkay(Result, "SetInputType");
-	};
-	LockTransformer(Set);
+		auto Set = [&]()
+		{
+			auto Result = Transformer.SetInputType(0, &MediaType, 0);
+			IsOkay(Result, "SetInputType");
+		};
+		LockTransformer(Set);
+	}
+	catch(std::exception& e)
+	{
+		std::stringstream Error;
+		Error << "Failed to set input type on transformer; " << e.what();
+		throw std::runtime_error(Error.str());
+	}
 	
 	//	gr: are these needed?
 	// gr: this errors when called on encoder on win11 VM
