@@ -131,8 +131,6 @@ public:
 private:
 	void					CreateSession();
 	
-	H264::NaluPrefix::Type	GetFormatNaluPrefixType()	{	return H264::NaluPrefix::ThirtyTwo;	}
-	
 	bool					mAllowSpsPpsToRecreateSession = true;	//	if true, then a new sps & pps appearing recreates session
 	
 	PopH264::FrameNumber_t	mLastFrameNumber = PopH264::FrameNumberInvalid;
@@ -227,7 +225,8 @@ void Avf::TDecompressorH264::CreateSession()
 		std::Debug << "Warning: Failed to parse SPS before creating format; " << e.what() << std::endl;
 	}
 	
-	auto InputFormat = Avf::GetFormatDescriptionH264( mNaluSps, mNaluPps, GetFormatNaluPrefixType(), mParams.StripH264EmulationPrevention() );
+	
+	auto InputFormat = Avf::GetFormatDescriptionH264( mNaluSps, mNaluPps, H264::NaluPrefix::ThirtyTwo, mParams.StripH264EmulationPrevention() );
 	CreateDecoderSession( InputFormat, SpsParams );
 	
 	//	throw away the old sps/pps, so we can tell when we've got a new format
@@ -569,10 +568,12 @@ void Avf::TDecompressorH264::Decode(PopH264::TInputNaluPacket& Packet)
 		EndOfStream = true;
 
 	H264NaluContent::Type H264PacketType = H264NaluContent::Invalid;
-	auto Nalu = Packet.GetData();
-	if ( Nalu.size() > 0 )
 	{
-		H264PacketType = H264::GetPacketType(Nalu);
+		auto Nalu = Packet.GetData();
+		if ( Nalu.size() > 0 )
+		{
+			H264PacketType = H264::GetPacketType(Nalu);
+		}
 	}
 	if ( H264PacketType == H264NaluContent::EndOfStream )
 		EndOfStream = true;
@@ -585,7 +586,7 @@ void Avf::TDecompressorH264::Decode(PopH264::TInputNaluPacket& Packet)
 	}
 
 	if ( mParams.mVerboseDebug )
-		std::Debug << "Popped Nalu " << H264PacketType << " x" << Nalu.size() << "bytes" << std::endl;
+		std::Debug << "Popped Nalu " << H264PacketType << " x" << Packet.GetData().size() << "bytes" << std::endl;
 
 	//	some packets the avf decoder will error on, never decode them.
 	bool DecodePacket = true;
@@ -628,8 +629,9 @@ void Avf::TDecompressorH264::Decode(PopH264::TInputNaluPacket& Packet)
 		return;
 	}
 
-	auto NaluSize = GetFormatNaluPrefixType();
-	H264::ConvertNaluPrefix( Packet.mData, NaluSize );
+	auto RequiredNaluFormat = Avf::GetFormatInputNaluPrefix(mInputFormat.mObject);
+	//auto NaluSize = GetFormatNaluPrefixType();
+	H264::ConvertNaluPrefix( Packet.mData, RequiredNaluFormat );
 	
 	uint64_t FrameNumber = Packet.mFrameNumber;
 	
@@ -656,7 +658,8 @@ void Avf::TDecompressorH264::Decode(PopH264::TInputNaluPacket& Packet)
 	std::chrono::milliseconds PresentationTime(FrameNumber);
 	std::chrono::milliseconds DecodeTime(FrameNumber);
 	std::chrono::milliseconds Duration(16ull);
-	auto SampleBuffer = CreateSampleBuffer( Nalu, PresentationTime, DecodeTime, Duration, mInputFormat.mObject );
+	auto PacketData = Packet.GetData();
+	auto SampleBuffer = CreateSampleBuffer( PacketData, PresentationTime, DecodeTime, Duration, mInputFormat.mObject );
 	
 	std::Debug << "Decode " << magic_enum::enum_name(H264PacketType) << " frame=" << FrameNumber << "..." << std::endl;
 	DecodeSample(SampleBuffer, FrameNumber);
@@ -694,6 +697,10 @@ void Avf::TDecompressor::DecodeSample(CFPtr<CMSampleBufferRef> SampleBuffer,size
 	
 	bool RecreateStream = false;
 	{
+		//	gr: here we could detect wrong nalu input
+		//	gr: this will fail for jpeg though, so should be somewhere else
+		//auto RequiredNaluFormat = Avf::GetFormatInputNaluPrefix( mInputFormat.mObject );
+		
 		//std::Debug << "decompressing " << Packet.mTimecode << "..." << std::endl;
 		//Soy::TScopeTimer Timer("VTDecompressionSessionDecodeFrame", 0, OnFinished, true );
 		Soy::TScopeTimerPrint Timer("VTDecompressionSessionDecodeFrame", 0 );
