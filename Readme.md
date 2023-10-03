@@ -225,6 +225,7 @@ Some notes to save investigation (this is gathered from debugging and reading ou
 - `HEVC/H265` encoder takes only `NV12`
 - `H264 QCom hardware encoder` takes only `NV12`
 - `H264 MFT encoder` (Microsoft's software encoder) takes `NV12` `IYUV` `YV12` `YUY2`
+- `VP9/VP8 hardware encoder` (extension) takes `NV12` `IYUV` `YV12` `YUY2`
 
 Broadway
 -----------------
