@@ -15,53 +15,23 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\Source\Json11\json11.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Static|x64'">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="..\Source\SoyLib\src\memheap.cpp" />
     <ClCompile Include="..\Source\SoyLib\src\SoyArray.cpp" />
     <ClCompile Include="..\Source\SoyLib\src\SoyAssert.cpp" />
     <ClCompile Include="..\Source\SoyLib\src\SoyDebug.cpp" />
-    <ClCompile Include="..\Source\SoyLib\src\SoyFilesystem.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Static|x64'">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="..\Source\SoyLib\src\SoyPixels.cpp" />
     <ClCompile Include="..\Source\SoyLib\src\SoyString.cpp" />
     <ClCompile Include="..\Source\SoyLib\src\SoyTime.cpp" />
     <ClCompile Include="..\Source\SoyLib\src\SoyTypes.cpp" />
     <ClCompile Include="..\Source_TestApp\googletest\googletest\src\gtest-all.cc" />
     <ClCompile Include="..\Source_TestApp\PopH264_TestApp.cpp" />
-    <ClCompile Include="..\Source_TestApp\PopH264_TestAssetGenerator.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Static|x64'">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="..\Source_TestApp\PopJsonCpp\PopJson.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Source\Json11\json11.hpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Static|x64'">true</ExcludedFromBuild>
-    </ClInclude>
     <ClInclude Include="..\Source\SoyLib\src\SoyArray.h" />
     <ClInclude Include="..\Source\SoyLib\src\SoyAssert.h" />
     <ClInclude Include="..\Source\SoyLib\src\SoyDebug.h" />
     <ClInclude Include="..\Source\SoyLib\src\SoyFilesystem.h" />
-    <ClInclude Include="..\Source\SoyLib\src\SoyPixels.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Static|x64'">true</ExcludedFromBuild>
-    </ClInclude>
-    <ClInclude Include="..\Source\SoyLib\src\SoyString.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Static|x64'">true</ExcludedFromBuild>
-    </ClInclude>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

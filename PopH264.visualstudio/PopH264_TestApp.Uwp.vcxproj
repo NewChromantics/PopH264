@@ -27,8 +27,16 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\Source\SoyLib\src\memheap.cpp" />
+    <ClCompile Include="..\Source\SoyLib\src\SoyArray.cpp" />
+    <ClCompile Include="..\Source\SoyLib\src\SoyDebug.cpp" />
+    <ClCompile Include="..\Source\SoyLib\src\SoyPixels.cpp" />
+    <ClCompile Include="..\Source\SoyLib\src\SoyString.cpp" />
+    <ClCompile Include="..\Source\SoyLib\src\SoyTime.cpp" />
+    <ClCompile Include="..\Source\SoyLib\src\SoyTypes.cpp" />
     <ClCompile Include="..\Source_TestApp\googletest\googletest\src\gtest-all.cc" />
     <ClCompile Include="..\Source_TestApp\PopH264_TestApp.cpp" />
+    <ClCompile Include="..\Source_TestApp\PopJsonCpp\PopJson.cpp" />
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="..\Source_Uwp\App.appxmanifest">

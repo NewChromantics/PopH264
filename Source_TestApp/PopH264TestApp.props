@@ -3,16 +3,17 @@
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
-    <IncludePath>$(ProjectDir)..\Source_TestApp\googletest\googletest\;$(ProjectDir)..\Source_TestApp\googletest\googletest\include;$(ProjectDir)..\Source\SoyLib\src;$(ProjectDir)..\Source\Json11;$(OutDir);$(IncludePath)</IncludePath>
-    <LibraryPath>$(OutDir);$(SolutionDir)..\Build\PopH264_$(Configuration)_$(Platform)\;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)..\Source_TestApp\googletest\googletest\;$(ProjectDir)..\Source_TestApp\googletest\googletest\include;$(ProjectDir)..\Source\SoyLib\src;$(ProjectDir)..\Source\Json11;$(OutDir);$(OutDir)..\PopH264$(PlatformExtension)\;$(OutDir)PopH264$(PlatformExtension)\;$(IncludePath)</IncludePath>
+    <LibraryPath>$(OutDir);$(OutDir)..\PopH264$(PlatformExtension)\;$(OutDir)PopH264$(PlatformExtension)\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
+    <Link />
     <Link>
-      <AdditionalDependencies>PopH264.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>PopH264$(PlatformExtension).lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup />

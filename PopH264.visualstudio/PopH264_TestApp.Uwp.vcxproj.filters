@@ -4,6 +4,9 @@
     <Filter Include="Source">
       <UniqueIdentifier>{34256f74-9d84-4dd9-8219-d2aba029edd6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\SoyLib">
+      <UniqueIdentifier>{e016bf50-5a0b-4bd4-956d-b5a75c10b066}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Source_TestApp\PopH264_TestApp.cpp">
@@ -11,6 +14,30 @@
     </ClCompile>
     <ClCompile Include="..\Source_TestApp\googletest\googletest\src\gtest-all.cc">
       <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\SoyLib\src\memheap.cpp">
+      <Filter>Source\SoyLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\SoyLib\src\SoyArray.cpp">
+      <Filter>Source\SoyLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source_TestApp\PopJsonCpp\PopJson.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\SoyLib\src\SoyTypes.cpp">
+      <Filter>Source\SoyLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\SoyLib\src\SoyTime.cpp">
+      <Filter>Source\SoyLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\SoyLib\src\SoyString.cpp">
+      <Filter>Source\SoyLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\SoyLib\src\SoyPixels.cpp">
+      <Filter>Source\SoyLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\SoyLib\src\SoyDebug.cpp">
+      <Filter>Source\SoyLib</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

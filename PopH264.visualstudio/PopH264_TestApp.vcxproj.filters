@@ -13,16 +13,7 @@
     <ClCompile Include="..\Source_TestApp\PopH264_TestApp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source_TestApp\PopH264_TestAssetGenerator.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\SoyLib\src\SoyFilesystem.cpp">
-      <Filter>Source Files\SoyLib</Filter>
-    </ClCompile>
     <ClCompile Include="..\Source\SoyLib\src\SoyPixels.cpp">
-      <Filter>Source Files\SoyLib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Json11\json11.cpp">
       <Filter>Source Files\SoyLib</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\SoyLib\src\SoyString.cpp">
@@ -55,15 +46,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\SoyLib\src\SoyFilesystem.h">
-      <Filter>Source Files\SoyLib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\SoyLib\src\SoyPixels.h">
-      <Filter>Source Files\SoyLib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Json11\json11.hpp">
-      <Filter>Source Files\SoyLib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\SoyLib\src\SoyString.h">
       <Filter>Source Files\SoyLib</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\SoyLib\src\SoyDebug.h">
