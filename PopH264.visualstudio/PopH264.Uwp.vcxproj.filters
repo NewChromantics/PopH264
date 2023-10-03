@@ -77,9 +77,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Source\PopH264.h">
-      <Filter>Source</Filter>
-    </ClInclude>
     <ClInclude Include="..\Source\FileReader.hpp">
       <Filter>Source</Filter>
     </ClInclude>
@@ -110,5 +107,10 @@
     <ClInclude Include="..\Source\MediaFoundationEncoder.h">
       <Filter>Source</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CopyFileToFolders Include="..\Source\PopH264.h">
+      <Filter>Source</Filter>
+    </CopyFileToFolders>
   </ItemGroup>
 </Project>

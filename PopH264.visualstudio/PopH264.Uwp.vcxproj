@@ -55,7 +55,7 @@
     <ClInclude Include="..\Source\MediaFoundationDecoder.h" />
     <ClInclude Include="..\Source\MediaFoundationEncoder.h" />
     <ClInclude Include="..\Source\MediaFoundationTransformer.h" />
-    <ClInclude Include="..\Source\PopH264.h" />
+    <CopyFileToFolders Include="..\Source\PopH264.h" />
     <ClInclude Include="..\Source\PopH264TestData.h" />
     <ClInclude Include="..\Source\TDecoder.h" />
     <ClInclude Include="..\Source\TDecoderInstance.h" />
