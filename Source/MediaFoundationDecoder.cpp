@@ -63,6 +63,8 @@ void MediaFoundation::TDecoder::CreateTransformer(ContentType::Type ContentType)
 	}
 
 	//	jpeg MFT decoder also has YUY2
+	//Soy::TFourcc Outputs[] = { "YUY2" };
+	Soy::TFourcc Outputs[] = { "NV12" };
 
 	mTransformer.reset(new MediaFoundation::TTransformer(TransformerCategory::VideoDecoder, std::span(Inputs), std::span(Outputs), mParams.mVerboseDebug ));
 
