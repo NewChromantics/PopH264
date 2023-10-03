@@ -219,6 +219,13 @@ MediaFoundation
 - If you try and decode any Nalu before SPS, you get no error, but no output. This include PPS before SPS.
 - If you submit an IDR keyframe twice, you should get a frame straight away. (PopH264 now always does this; `todo: option to disable this!`)
 
+MediaFoundation Hololens 2
+-----------
+Some notes to save investigation (this is gathered from debugging and reading output from visual studio, but PopH264 could do with more APIs to get this information)
+- `HEVC/H265` encoder takes only `NV12`
+- `H264 QCom hardware encoder` takes only `NV12`
+- `H264 MFT encoder` (Microsoft's software encoder) takes `NV12` `IYUV` `YV12` `YUY2`
+
 Broadway
 -----------------
 - If you try and decode an IDR keyframe once then end the stream, you will get no frame out. It requires submitting the frame a second time to get the frame out.
