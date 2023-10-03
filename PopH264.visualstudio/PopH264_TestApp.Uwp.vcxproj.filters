@@ -45,4 +45,12 @@
       <Filter>Source</Filter>
     </AppxManifest>
   </ItemGroup>
+  <ItemGroup>
+    <CopyFileToFolders Include="x64\Debug\PopH264.Uwp\PopH264.Uwp.dll">
+      <Filter>Source</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="ARM64\Debug\PopH264.Uwp\PopH264.Uwp.dll">
+      <Filter>Source</Filter>
+    </CopyFileToFolders>
+  </ItemGroup>
 </Project>
