@@ -111,7 +111,6 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(ProjectDir)..\Source\SoyLib\src;$(ProjectDir)..\Source\Json11;$(SolutionDir)..\Build\PopH264_$(Configuration)_$(Platform)\;$(IncludePath)</IncludePath>
     <IntDir>$(SolutionDir)$(ProjectName)_$(Platform)_$(Configuration)\Temp\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
