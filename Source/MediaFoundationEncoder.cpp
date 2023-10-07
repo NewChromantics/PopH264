@@ -55,10 +55,7 @@ MediaFoundation::TEncoderParams::TEncoderParams(json11::Json& Options)
 MediaFoundation::TEncoder::TEncoder(TEncoderParams Params,std::function<void(PopH264::TPacket&)> OnOutputPacket) :
 	PopH264::TEncoder	( OnOutputPacket )
 {
-	Soy::TFourcc Inputs[] = { "NV12" };
-	Soy::TFourcc Outputs[] = { "H264" };
-
-	mTransformer.reset(new MediaFoundation::TTransformer(TransformerCategory::VideoEncoder, std::span(Inputs), std::span(Outputs), Params.mVerboseDebug ));
+	//	todo: allow some params to create transformer immediately
 }
 
 MediaFoundation::TEncoder::~TEncoder()
@@ -67,13 +64,10 @@ MediaFoundation::TEncoder::~TEncoder()
 }
 
 
-void MediaFoundation::TEncoder::SetOutputFormat(TEncoderParams Params,size_t Width,size_t Height)
+void MediaFoundation::TEncoder::SetOutputFormat(TTransformer& Transformer,SoyPixelsMeta ImageMeta)
 {
-	if (mTransformer->IsOutputFormatSet())
-		return;
-
-	auto& Transformer = *mTransformer->mTransformer;
-	
+	if ( !Transformer.mTransformer )
+		throw std::runtime_error("Transformer(sub transformer) not initialised correctly");
 	Soy::AutoReleasePtr<IMFMediaType> pMediaType;
 
 	static bool UseNewFormat = true;
@@ -86,7 +80,7 @@ void MediaFoundation::TEncoder::SetOutputFormat(TEncoderParams Params,size_t Wid
 	{
 		//	gr: this doesn't always work, but probe it for defaults like kbps
 		auto OutputFormatIndex = 0;
-		auto Result = Transformer.GetOutputAvailableType(0, OutputFormatIndex, &pMediaType.mObject);
+		auto Result = Transformer.mTransformer->GetOutputAvailableType(0, OutputFormatIndex, &pMediaType.mObject);
 		IsOkay(Result, "GetOutputAvailableType");
 	}
 	auto* MediaType = pMediaType.mObject;
@@ -102,10 +96,10 @@ void MediaFoundation::TEncoder::SetOutputFormat(TEncoderParams Params,size_t Wid
 
 	//	setup required encoder things
 	//	kbps required, must be >0
-	if (Params.mAverageKbps == 0)
+	if (mParams.mAverageKbps == 0)
 		throw Soy::AssertException("Encoder AverageKbps must be above zero");
 	{
-		auto BitRate = Params.mAverageKbps * 1024 * 8;
+		auto BitRate = mParams.mAverageKbps * 1024 * 8;
 		auto Result = MediaType->SetUINT32(MF_MT_AVG_BITRATE, BitRate);
 		IsOkay(Result, "Set encoder bitrate MF_MT_AVG_BITRATE");
 	}
@@ -126,6 +120,8 @@ void MediaFoundation::TEncoder::SetOutputFormat(TEncoderParams Params,size_t Wid
 	{
 		//auto Width = 640;
 		//auto Height = 400;
+		auto Width = ImageMeta.GetWidth();
+		auto Height = ImageMeta.GetHeight();
 		auto Result = MFSetAttributeSize(MediaType, MF_MT_FRAME_SIZE, Width, Height);
 		IsOkay(Result, "MF_MT_FRAME_SIZE");
 	}
@@ -141,7 +137,7 @@ void MediaFoundation::TEncoder::SetOutputFormat(TEncoderParams Params,size_t Wid
 	//		but docs say its optional
 	//if (Params.mProfileLevel != 0)
 	{
-		double Level = Params.mProfileLevel / 10;	//	30 -> 3.1
+		double Level = mParams.mProfileLevel / 10;	//	30 -> 3.1
 		auto Result = MediaType->SetDouble(MF_MT_MPEG2_LEVEL, Level);
 		IsOkay(Result, "Set encoder level MF_MT_MPEG2_LEVEL");
 	}
@@ -154,20 +150,36 @@ void MediaFoundation::TEncoder::SetOutputFormat(TEncoderParams Params,size_t Wid
 		IsOkay(Result, "Set encoder quality CODECAPI_AVEncCommonQuality");
 	}
 	*/
-	mTransformer->SetOutputFormat(*MediaType);
+	Transformer.SetOutputFormat(*MediaType);
 }
 
-
-void MediaFoundation::TEncoder::SetInputFormat(SoyPixelsMeta PixelsMeta)
+void MediaFoundation::TEncoder::SetFormat(SoyPixelsMeta ImageMeta)
 {
-	if (mTransformer->IsInputFormatSet())
-		return;
+	//	encoder needs to set output type before input type
+	//	and we need to know the resolution before we can set it
+	//	https://docs.microsoft.com/en-us/windows/win32/medfound/h-264-video-encoder
 	
-	Soy::TFourcc InputFormat = GetFourcc(PixelsMeta.GetFormat());
+	//	we also need to pick a transformer that supports our input format
+	//	gr: here, we should also fallback to something that we can then do a slow path and do pixel conversion
+	//		in c++
+	Soy::TFourcc InputFormat = GetFourcc(ImageMeta.GetFormat());
+	Soy::TFourcc Inputs[] = { InputFormat };
+	Soy::TFourcc Outputs[] = { "H264" };
 
+	std::shared_ptr<MediaFoundation::TTransformer> Transformer;
+	Transformer.reset(new MediaFoundation::TTransformer(TransformerCategory::VideoEncoder, std::span(Inputs), std::span(Outputs), mParams.mVerboseDebug ));
+		
+	SetOutputFormat( *Transformer, ImageMeta );
+	SetInputFormat( *Transformer, ImageMeta, InputFormat );
+
+	mTransformer = Transformer;
+}
+
+void MediaFoundation::TEncoder::SetInputFormat(TTransformer& Transformer,SoyPixelsMeta PixelsMeta,Soy::TFourcc InputFormat)
+{
 	//	gr: check against supported formats, as error later could be vague
 	{
-		auto& SupportedFormats = mTransformer->mActivate.mInputs;// mSupportedInputFormats;
+		auto& SupportedFormats = Transformer.mActivate.mInputs;// mSupportedInputFormats;
 		if (!SupportedFormats.Find(InputFormat))
 		{
 			std::stringstream Error;
@@ -197,7 +209,7 @@ void MediaFoundation::TEncoder::SetInputFormat(SoyPixelsMeta PixelsMeta)
 		}
 		
 	};
-	mTransformer->SetInputFormat(InputFormat, Configure);
+	Transformer.SetInputFormat(InputFormat, Configure);
 }
 
 void MediaFoundation::TEncoder::Encode(const SoyPixelsImpl& Luma, const SoyPixelsImpl& ChromaU, const SoyPixelsImpl& ChromaV, const std::string& Meta, bool Keyframe)
@@ -207,28 +219,9 @@ void MediaFoundation::TEncoder::Encode(const SoyPixelsImpl& Luma, const SoyPixel
 }
 
 
-void MediaFoundation::TEncoder::Encode(const SoyPixelsImpl& _Pixels, const std::string& Meta, bool Keyframe)
+void MediaFoundation::TEncoder::Encode(const SoyPixelsImpl& EncodePixels, const std::string& Meta, bool Keyframe)
 {
-	const SoyPixelsImpl* pEncodePixels = &_Pixels;
-
-	//	work out if we need to change formats to one that's supported
-	SoyPixels ConvertedPixels;
-	auto EncodeFormat = GetInputFormat(_Pixels.GetFormat());
-	if (EncodeFormat != _Pixels.GetFormat())
-	{
-		Soy::TScopeTimerPrint Timer("MediaFoundation::TEncoder::Encode re-encode", 2);
-		ConvertedPixels.Copy(_Pixels);
-		ConvertedPixels.SetFormat(EncodeFormat);
-		pEncodePixels = &ConvertedPixels;
-	}
-	auto& EncodePixels = *pEncodePixels;
-
-	//	encoder needs to set output type before input type
-	//	and we need to know the resolution before we can set it
-	//	https://docs.microsoft.com/en-us/windows/win32/medfound/h-264-video-encoder
-	SetOutputFormat(mParams, EncodePixels.GetWidth(), EncodePixels.GetHeight());
-	
-	SetInputFormat(EncodePixels.GetMeta());
+	SetFormat( EncodePixels.GetMeta() );
 
 	auto FrameNumber = PushFrameMeta(Meta);
 

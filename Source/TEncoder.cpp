@@ -69,5 +69,5 @@ std::string PopH264::TEncoder::GetFrameMeta(size_t FrameNumber)
 
 	std::stringstream Error;
 	Error << "No frame meta matching frame number " << FrameNumber;
-	throw Soy::AssertException(Error);
+	throw std::runtime_error(Error.str());
 }

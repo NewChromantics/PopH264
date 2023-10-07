@@ -48,8 +48,9 @@ private:
 	virtual void	Encode(const SoyPixelsImpl& Pixels, const std::string& Meta, bool Keyframe) override;
 	virtual void	FinishEncoding() override;
 	
-	void			SetInputFormat(SoyPixelsMeta PixelsMeta);
-	void			SetOutputFormat(TEncoderParams Params,size_t Width,size_t Height);
+	void			SetFormat(SoyPixelsMeta ImageMeta);
+	void			SetInputFormat(TTransformer& Transformer,SoyPixelsMeta PixelsMeta,Soy::TFourcc InputFormat);
+	void			SetOutputFormat(TTransformer& Transformer,SoyPixelsMeta ImageMeta);
 	SoyPixelsFormat::Type	GetInputFormat(SoyPixelsFormat::Type Format);
 
 	//	returns true if there are more to try

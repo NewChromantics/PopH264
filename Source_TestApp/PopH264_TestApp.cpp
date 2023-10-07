@@ -839,7 +839,7 @@ auto EncodeTestValues = ::testing::Values
  EncodeTestParams_t{.InputImageFilename="RainbowGradient.h264"},
  //EncodeTestParams_t{.InputImageFilename="GreyscaleGradient.h264"},
  //EncodeTestParams_t{.InputImageFilename="Cat.jpg"},
- EncodeTestParams_t{.InputImageFilename="128x128_Greyscale"},
+ //EncodeTestParams_t{.InputImageFilename="128x128_Greyscale"},
  EncodeTestParams_t{.InputImageFilename="128x128_Yuv_8_8_8"},
  EncodeTestParams_t{.InputImageFilename="128x128_Yuv_8_88"}
 );

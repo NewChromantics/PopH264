@@ -914,7 +914,7 @@ bool MediaFoundation::TTransformer::IsInputFormatReady()
 		{
 			std::stringstream Error;
 			Error << "Not ready for input data";
-			throw Soy::AssertException(Error);
+			throw std::runtime_error(Error.str());
 		}
 	}
 
