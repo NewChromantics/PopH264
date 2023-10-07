@@ -892,9 +892,8 @@ TEST_P(PopH264_Encode_Tests,EncodeFile)
 		{
 			PopH264_EncoderPushFrame( Encoder, TestMetaJson.str().c_str(), InputImage.mPlane0.data(), InputImage.mPlane1.data(), InputImage.mPlane2.data(), ErrorBuffer.data(), ErrorBuffer.size() );
 			std::string Error( ErrorBuffer.data() );
-			EXPECT_EQ( Error.empty(), true ) << "PopH264_EncoderPushFrame() error " << Error;
 			if ( !Error.empty() )
-				throw std::runtime_error( std::string("PopH264_EncoderPushFrame() error ") + Error );
+				FAIL() << "PopH264_EncoderPushFrame() error; " << Error;
 		}
 		PopH264_EncoderEndOfStream(Encoder);
 	}
