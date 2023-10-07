@@ -264,11 +264,15 @@ bool MediaFoundation::TEncoder::FlushOutputFrame()
 		mTransformer->PopFrame( *Packet.mData, FrameNumber, Meta, EndOfStream);
 
 		if (EndOfStream)
-			throw std::runtime_error("Todo: handle EndOfStream");
+			OnFinished();
 
 		//	no packet
 		if ( Packet.mData->empty() )
+		{
+			if (EndOfStream)
+				OnFinished();
 			return false;
+		}
 
 		try
 		{
@@ -280,6 +284,8 @@ bool MediaFoundation::TEncoder::FlushOutputFrame()
 		}
 		
 		OnOutputPacket(Packet);
+		if (EndOfStream)
+			OnFinished();
 		return true;
 	}
 	catch (std::exception& e)
@@ -331,7 +337,18 @@ SoyPixelsFormat::Type MediaFoundation::TEncoder::GetInputFormat(SoyPixelsFormat:
 
 void MediaFoundation::TEncoder::FinishEncoding()
 {
+	auto Transformer = mTransformer;
+	if ( !Transformer )
+		throw std::runtime_error("No transformer");
 
+	Transformer->PushEndOfStream();
+
+	while (true)
+	{
+		auto More = FlushOutputFrame();
+		if (!More)
+			break;
+	}
 }
 
 

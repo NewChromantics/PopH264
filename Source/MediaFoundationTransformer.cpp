@@ -39,7 +39,7 @@ namespace MediaFoundation
 	TActivateList	EnumTransforms(const GUID& Category);
 	TActivateMeta	GetBestTransform(const GUID& Category,std::span<Soy::TFourcc> InputFilter,std::span<Soy::TFourcc> OutputFilter);
 	
-	Soy::AutoReleasePtr<IMFSample>		CreateSample(std::span<uint8_t> Data, Soy::TFourcc Fourcc, std::chrono::milliseconds SampleTime, std::chrono::milliseconds SampleDuration);
+	Soy::AutoReleasePtr<IMFSample>		CreateSample(std::span<uint8_t> Data,std::chrono::milliseconds SampleTime, std::chrono::milliseconds SampleDuration);
 	Soy::AutoReleasePtr<IMFMediaBuffer>	CreateBuffer(std::span<uint8_t> Data);
 	Soy::AutoReleasePtr<IMFMediaBuffer>	CreateBuffer(DWORD Size, DWORD Alignment);
 	Soy::AutoReleasePtr<IMFSample>		CreateSample(DWORD Size, DWORD Alignment);
@@ -1267,7 +1267,7 @@ Soy::AutoReleasePtr<IMFMediaBuffer> MediaFoundation::CreateBuffer(DWORD Size, DW
 }
 
 
-Soy::AutoReleasePtr<IMFSample> MediaFoundation::CreateSample(std::span<uint8_t> Data,Soy::TFourcc Fourcc,std::chrono::milliseconds SampleTime, std::chrono::milliseconds SampleDuration)
+Soy::AutoReleasePtr<IMFSample> MediaFoundation::CreateSample(std::span<uint8_t> Data,std::chrono::milliseconds SampleTime, std::chrono::milliseconds SampleDuration)
 {
 	//	ms -> nano = *1000000
 	//	sample data is in 100-nano second units
@@ -1418,7 +1418,7 @@ bool MediaFoundation::TTransformer::PushFrame(std::span<uint8_t> Data, int64_t F
 
 	std::chrono::milliseconds Duration(16);
 	std::chrono::milliseconds Timestamp(FrameNumber);
-	auto pSample = CreateSample( Data, Soy::TFourcc("H264"), Timestamp, Duration );
+	auto pSample = CreateSample( Data, Timestamp, Duration );
 
 	DebugInputStatus();
 

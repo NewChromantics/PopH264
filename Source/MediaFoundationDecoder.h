@@ -31,6 +31,7 @@ private:
 	void			CreateTransformer(ContentType::Type ContentType);
 
 private:
+	//	gr: this doesn't need a lock, just atomic nulling
 	std::recursive_mutex			mTransformerLock;
 	std::shared_ptr<TTransformer>	mTransformer;
 	
