@@ -1710,3 +1710,8 @@ bool MediaFoundation::TTransformer::PopFrame(std::vector<uint8_t>& Data,int64_t&
 	//	assume there might be more packets
 	return true;
 }
+
+std::string MediaFoundation::TTransformer::GetName()
+{
+	return mActivate.mName;
+}

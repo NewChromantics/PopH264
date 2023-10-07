@@ -403,3 +403,11 @@ MFT_DECODER_EXPOSE_OUTPUT_TYPES_IN_NATIVE_ORDER	Specifies whether a decoder expo
 	}
 	*/
 
+std::string MediaFoundation::TEncoder::GetEncoderName()
+{
+	auto Transformer = mTransformer;
+	if ( !Transformer )
+		return {};
+
+	return Transformer->GetName();
+}

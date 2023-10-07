@@ -394,3 +394,11 @@ void PopH264::TEncoderInstance::AddOnNewFrameCallback(std::function<void()> Call
 	mOnNewPacket = Callback;
 }
 
+std::string PopH264::TEncoderInstance::GetEncoderName()
+{
+	auto Encoder = mEncoder;
+	if ( !Encoder )
+		return {};
+
+	return Encoder->GetEncoderName();
+}

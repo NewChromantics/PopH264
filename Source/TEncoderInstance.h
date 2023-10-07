@@ -56,6 +56,9 @@ public:
 	//bool			PopFrame(TFrame& Frame);
 	//void			PushFrame(const SoyPixelsImpl& Frame,int32_t FrameNumber,std::chrono::milliseconds DecodeDurationMs);
 	
+	//	meta
+	std::string		GetEncoderName();
+
 public:
 	std::function<void()>	mOnNewPacket;	//	called when a new packet is decoded and ready to be popped
 	

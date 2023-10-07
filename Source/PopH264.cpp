@@ -405,7 +405,11 @@ __export void PopH264_EncoderPeekData(int32_t Instance,char* MetaJsonBuffer,int3
 
 			//	add generic meta
 			MetaJson["OutputQueueCount"] = static_cast<int32_t>(Encoder->GetPacketQueueCount());
-			
+
+			auto EncoderName = Encoder->GetEncoderName();
+			if ( !EncoderName.empty() )
+				MetaJson["EncoderName"] = EncoderName;
+
 			Encoder->PeekPacket(MetaJson);
 		}
 		catch(std::exception& e)

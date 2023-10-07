@@ -49,6 +49,8 @@ public:
 	virtual void	Encode(const SoyPixelsImpl& Pixels,const std::string& Meta,bool Keyframe)=0;
 	virtual void	FinishEncoding()=0;
 	
+	virtual std::string	GetEncoderName()	{	return {};	}
+
 protected:
 	void			OnOutputPacket(TPacket& Packet);
 	void			OnError(std::string_view Error);

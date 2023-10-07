@@ -84,6 +84,7 @@ public:
 
 	IMFMediaType&	GetOutputMediaType();	//	get access to media type to read output meta
 	SoyPixelsMeta	GetOutputPixelMeta();
+	std::string		GetName();				//	get name of low level transformer
 
 	void			SetOutputFormat(IMFMediaType& MediaType);
 
