@@ -1684,8 +1684,11 @@ bool MediaFoundation::TTransformer::PopFrame(std::vector<uint8_t>& Data,int64_t&
 
 	try
 	{
-		auto Result = output_buffer.pSample->GetSampleTime(&FrameNumber);
+		LONGLONG SampleTime100Nano = 0;
+		auto Result = output_buffer.pSample->GetSampleTime(&SampleTime100Nano);
 		IsOkay(Result, "GetSampleTime");
+		//	convert to milliseconds which is what we input
+		FrameNumber = SampleTime100Nano / (1000000 / 100);
 	}
 	catch (std::exception& e)
 	{
