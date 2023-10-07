@@ -155,6 +155,8 @@ void MediaFoundation::TEncoder::SetOutputFormat(TTransformer& Transformer,SoyPix
 
 void MediaFoundation::TEncoder::SetFormat(SoyPixelsMeta ImageMeta)
 {
+	if ( mTransformer )
+		return;
 	//	encoder needs to set output type before input type
 	//	and we need to know the resolution before we can set it
 	//	https://docs.microsoft.com/en-us/windows/win32/medfound/h-264-video-encoder
