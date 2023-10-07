@@ -43,6 +43,18 @@ std::string Platform::GetAppResourcesDirectory()
 }
 #endif
 
+template<typename ARRAY,typename MATCHTYPE>
+int FindIndex(const ARRAY& Array, const MATCHTYPE& Match)
+{
+	for ( auto i=0;	i<Array.size();	i++ )
+	{
+		auto& Element = Array[i];
+		if ( Element != Match )
+			continue;
+		return i;
+	}
+	return -1;
+}
 
 extern void MakeGreyscalePng(const char* Filename);
 extern void CompareGreyscale(const char* MetaJson,uint8_t* Plane0Data,uint8_t* Plane1Data,uint8_t* Plane2Data);
@@ -488,7 +500,11 @@ public:
 
 DecodedImage_t::DecodedImage_t(SoyPixelsImpl& Pixels)
 {
-	throw std::runtime_error("todo: pixels -> decoded image");
+	std::span<uint8_t> PixelsData( Pixels.GetPixelsArray().GetArray(), Pixels.GetPixelsArray().GetDataSize() );
+	std::copy( PixelsData.begin(), PixelsData.end(), std::back_inserter(mPlane0) );
+	mPlaneFormats.push_back(Pixels.GetFormat() );
+	mWidth = Pixels.GetWidth();
+	mHeight = Pixels.GetHeight();
 }
 
 SoyPixelsFormat::Type DecodedImage_t::GetFormat()
@@ -600,6 +616,9 @@ void GenerateFakeImages(std::string_view Filename,std::function<bool(DecodedImag
 		return;
 	}
 	
+	std::stringstream Error;
+	Error << "No fake image named " << Filename;
+	throw std::runtime_error(Error.str());
 }
 
 
@@ -611,6 +630,7 @@ void DecodeFileFrames(std::string_view Filename,std::function<bool(DecodedImage_
 	try
 	{
 		GenerateFakeImages( Filename, OnDecodedImage );
+		return;
 	}
 	catch(std::exception& e)
 	{
@@ -799,6 +819,7 @@ class EncodeTestParams_t
 {
 public:
 	std::string		InputImageFilename;
+	int				EncodeFrameCount = 10;
 	
 	friend std::ostream& operator<<(std::ostream& os, const EncodeTestParams_t& Params)
 	{
@@ -815,12 +836,12 @@ class PopH264_Encode_Tests : public testing::TestWithParam<EncodeTestParams_t>
 
 auto EncodeTestValues = ::testing::Values
 (
- EncodeTestParams_t{.InputImageFilename="RainbowGradient.h264"}
+ EncodeTestParams_t{.InputImageFilename="RainbowGradient.h264"},
  //EncodeTestParams_t{.InputImageFilename="GreyscaleGradient.h264"},
  //EncodeTestParams_t{.InputImageFilename="Cat.jpg"},
- //EncodeTestParams_t{.InputImageFilename="128x128_Greyscale"},
- //EncodeTestParams_t{.InputImageFilename="128x128_Yuv_8_8_8"},
- //EncodeTestParams_t{.InputImageFilename="128x128_Yuv_8_88"}
+ EncodeTestParams_t{.InputImageFilename="128x128_Greyscale"},
+ EncodeTestParams_t{.InputImageFilename="128x128_Yuv_8_8_8"},
+ EncodeTestParams_t{.InputImageFilename="128x128_Yuv_8_88"}
 );
 	
 INSTANTIATE_TEST_SUITE_P( PopH264_Encode_Tests, PopH264_Encode_Tests, EncodeTestValues );
@@ -863,18 +884,26 @@ TEST_P(PopH264_Encode_Tests,EncodeFile)
 		auto Format = InputImage.GetFormat();
 		TestMetaJson << "\"Format\":\"" << Format << "\",";
 		TestMetaJson << "\"TestMeta\":\"PurpleMonkeyDishwasher\"";
-		TestMetaJson << "}";
+		//TestMetaJson << ",\"Keyframe\":true";
 		
-		PopH264_EncoderPushFrame( Encoder, TestMetaJson.str().c_str(), InputImage.mPlane0.data(), InputImage.mPlane1.data(), InputImage.mPlane2.data(), ErrorBuffer.data(), ErrorBuffer.size() );
-		std::string Error( ErrorBuffer.data() );
-		EXPECT_EQ( Error.empty(), true ) << "PopH264_EncoderPushFrame() error " << Error;
-		if ( !Error.empty() )
-			throw std::runtime_error( std::string("PopH264_EncoderPushFrame() error ") + Error );
+		TestMetaJson << "}";
+
+		for ( auto PushCount=0;	PushCount<Params.EncodeFrameCount;	PushCount++ )
+		{
+			PopH264_EncoderPushFrame( Encoder, TestMetaJson.str().c_str(), InputImage.mPlane0.data(), InputImage.mPlane1.data(), InputImage.mPlane2.data(), ErrorBuffer.data(), ErrorBuffer.size() );
+			std::string Error( ErrorBuffer.data() );
+			EXPECT_EQ( Error.empty(), true ) << "PopH264_EncoderPushFrame() error " << Error;
+			if ( !Error.empty() )
+				throw std::runtime_error( std::string("PopH264_EncoderPushFrame() error ") + Error );
+		}
 		PopH264_EncoderEndOfStream(Encoder);
 	}
 
 	bool HadEndOfStream = false;
-	
+	//	todo: re-decode packets to make sure we can decode what we encode
+	//std::vector<std::vector<uint8_t>> Packets;
+	std::vector<H264NaluContent::Type> H264PacketTypes;
+
 	//	read out encoded packets
 	for ( auto i=0;	i<50;	i++ )
 	{
@@ -884,13 +913,13 @@ TEST_P(PopH264_Encode_Tests,EncodeFile)
 		std::array<char,1000> MetaJsonBuffer = {0};
 		PopH264_EncoderPeekData(Encoder, MetaJsonBuffer.data(), MetaJsonBuffer.size() );
 		std::string MetaJson(MetaJsonBuffer.data());
-		std::Debug << "PopH264_EncoderPeekData meta: " << MetaJson << std::endl;
+		//std::Debug << "PopH264_EncoderPeekData meta: " << MetaJson << std::endl;
 		PopJson::Value_t Meta(MetaJson);
 		
 		if ( Meta.HasKey("Error",MetaJson) )
 		{
 			auto Error = Meta.GetValue("Error",MetaJson).GetString(MetaJson);
-			EXPECT_EQ( Error.empty(), true ) << "Error found in peek meta; " << Error;
+			ADD_FAILURE() << "Error found in peek meta; " << Error;
 			break;
 		}
 		
@@ -922,14 +951,54 @@ TEST_P(PopH264_Encode_Tests,EncodeFile)
 			}
 		}
 		
-		std::Debug << "Encoder packet: x" << FrameSize << std::endl;
 		std::span PacketData( PacketBuffer.data(), PacketBuffer.size() );
-		
+		auto PacketType = H264::GetPacketType(PacketData);
+
+		std::Debug << "Encoder packet: " << PacketType << " x" << FrameSize << std::endl;
+		H264PacketTypes.push_back(PacketType);
 	}
 	PopH264_DestroyEncoder(Encoder);
 
-}
+	//	the encoder should output at least
+	//	SPS (before first frame)
+	//	PPS
+	//	Keyframe
+	//	EOS (last)
+	if ( H264PacketTypes.empty() )
+		FAIL() << "didn't encode any packets";
 
+	EXPECT_EQ( HadEndOfStream, true ) << "Didn't get an EndOfStream";
+
+	auto IsFrameContentType = [](H264NaluContent::Type Type)
+	{
+		switch( Type )
+		{
+		case H264NaluContent::Slice_CodedIDRPicture:
+		case H264NaluContent::Slice_NonIDRPicture:
+			return true;
+		default:
+			return false;
+		}
+	};
+
+	auto FramePacketCount = std::count_if( H264PacketTypes.begin(), H264PacketTypes.end(), IsFrameContentType );
+
+	EXPECT_EQ( FramePacketCount, Params.EncodeFrameCount );
+
+	if ( !H264PacketTypes.empty() )
+	{
+		auto SpsIndex = FindIndex( H264PacketTypes, H264NaluContent::SequenceParameterSet );
+		auto PpsIndex = FindIndex( H264PacketTypes, H264NaluContent::PictureParameterSet );
+		auto FirstKeyframe = FindIndex( H264PacketTypes, H264NaluContent::Slice_CodedIDRPicture );
+		//EXPECT_EQ( H264PacketTypes.back(), H264NaluContent::EndOfStream ) << "last packet decoded is not EOS";
+		EXPECT_NE( SpsIndex, -1 ) << "missing SPS packet";
+		EXPECT_NE( PpsIndex, -1 ) << "missing PPS packet";
+		EXPECT_NE( FirstKeyframe, -1 ) << "missing a keyframe packet";
+		
+		EXPECT_LE( SpsIndex, FirstKeyframe ) << "keyframe before SPS";
+		EXPECT_LE( SpsIndex, FirstKeyframe ) << "keyframe before PPS";
+	}
+}
 
 
 

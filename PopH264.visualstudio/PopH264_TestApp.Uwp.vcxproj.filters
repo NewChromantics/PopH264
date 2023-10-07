@@ -39,6 +39,9 @@
     <ClCompile Include="..\Source\SoyLib\src\SoyDebug.cpp">
       <Filter>Source\SoyLib</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source\SoyLib\src\SoyH264.cpp">
+      <Filter>Source\SoyLib</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="..\Source_Uwp\App.appxmanifest">
@@ -52,5 +55,10 @@
     <CopyFileToFolders Include="ARM64\Debug\PopH264.Uwp\PopH264.Uwp.dll">
       <Filter>Source</Filter>
     </CopyFileToFolders>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\Source\SoyLib\src\SoyH264.h">
+      <Filter>Source\SoyLib</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
