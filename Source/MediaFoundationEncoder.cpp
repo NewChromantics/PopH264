@@ -222,28 +222,45 @@ void MediaFoundation::TEncoder::Encode(const SoyPixelsImpl& Luma, const SoyPixel
 }
 
 
-void MediaFoundation::TEncoder::Encode(const SoyPixelsImpl& EncodePixels, const std::string& Meta, bool Keyframe)
+void MediaFoundation::TEncoder::Encode(const SoyPixelsImpl& Pixels, const std::string& Meta, bool Keyframe)
 {
-	SetFormat( EncodePixels.GetMeta() );
+	SetFormat( Pixels.GetMeta() );
 
 	auto FrameNumber = PushFrameMeta(Meta);
 
-	auto& PixelsArray = EncodePixels.GetPixelsArray();
+	//	can't push at the moment, save the frame
+	if ( !FlushInputFrames() )
+	{
+		AddPendingFrame( Pixels, FrameNumber, Meta, Keyframe );
+		FlushOutputFrames();
+		return;
+	}
+
+	if ( !PushInputFrame( Pixels, FrameNumber, Meta, Keyframe ) )
+	{
+		AddPendingFrame( Pixels, FrameNumber, Meta, Keyframe );
+		FlushOutputFrames();
+		return;
+	}
+
+	FlushOutputFrames();
+}
+
+bool MediaFoundation::TEncoder::PushInputFrame(const SoyPixelsImpl& Pixels,size_t FrameNumber, const std::string& Meta, bool Keyframe)
+{
+	auto& PixelsArray = Pixels.GetPixelsArray();
 	auto* PixelsBytes = const_cast<uint8_t*>(PixelsArray.GetArray());
 	std::span<uint8_t> PixelsSpan( PixelsBytes, PixelsArray.GetDataSize() );
 
 	auto IsInputReady = mTransformer->IsInputFormatReady();
-	if (!mTransformer->PushFrame(PixelsSpan, FrameNumber))
-	{
-		auto PostIsInputReady = mTransformer->IsInputFormatReady();
-		std::Debug << "Input rejected... dropping frame " << FrameNumber << " IsInputReady=" << IsInputReady << " PostIsInputReady=" << PostIsInputReady << std::endl;
-	}
-	else
-	{
-		auto PostIsInputReady = mTransformer->IsInputFormatReady();
-		std::Debug << "pushed frame " << FrameNumber << " IsInputReady=" << IsInputReady << " PostIsInputReady=" << PostIsInputReady << std::endl;
-	}
+	if ( !mTransformer->PushFrame(PixelsSpan, FrameNumber) )
+		return false;
 
+	return true;
+}
+
+void MediaFoundation::TEncoder::FlushOutputFrames()
+{
 	//	pop H264 frames that have been output
 	//	gr: other thread for this, and get as many as possible in one go
 	while (true)
@@ -252,7 +269,35 @@ void MediaFoundation::TEncoder::Encode(const SoyPixelsImpl& EncodePixels, const 
 		if (!More)
 			break;
 	}
-	
+
+}
+
+
+void MediaFoundation::TEncoder::AddPendingFrame(const SoyPixelsImpl& Pixels,size_t FrameNumber, const std::string& Meta, bool Keyframe)
+{
+	FrameImage_t Frame;
+	Frame.mFrameNumber = FrameNumber;
+	Frame.mKeyframe = Keyframe;
+	Frame.mMeta = Meta;
+	Frame.mPixels.reset( new SoyPixels(Pixels) );
+	mPendingInputFrames.push_back(Frame);
+	std::Debug << "Queued frame, now " << mPendingInputFrames.size() << " pending" << std::endl;
+}
+
+
+bool MediaFoundation::TEncoder::FlushInputFrames()
+{
+	while ( !mPendingInputFrames.empty() )
+	{
+		auto& Next = mPendingInputFrames[0];
+		auto& Pixels = *Next.mPixels;
+		if ( !PushInputFrame( Pixels, Next.mFrameNumber, Next.mMeta, Next.mKeyframe ) )
+			return false;
+
+		//	done, remove from pending!
+		mPendingInputFrames.erase( mPendingInputFrames.begin() );
+	}
+	return true;
 }
 
 bool MediaFoundation::TEncoder::FlushOutputFrame()

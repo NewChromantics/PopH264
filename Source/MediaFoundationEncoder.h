@@ -33,6 +33,15 @@ public:
 };
 
 
+//	mediafoundation's hardware encoders have limited space sometimes, so we can end up having to buffer up frames
+class FrameImage_t
+{
+public:
+	std::shared_ptr<SoyPixels>	mPixels;
+	std::string					mMeta;
+	size_t						mFrameNumber = 0;
+	bool						mKeyframe = false;
+};
 
 
 class MediaFoundation::TEncoder : public PopH264::TEncoder
@@ -57,8 +66,15 @@ private:
 
 	//	returns true if there are more to try
 	bool			FlushOutputFrame();
+	void			FlushOutputFrames();
+
+	//	returns false if we didn't finish flushing inputs. returns true if we can carry on (and put in more input)
+	bool			PushInputFrame(const SoyPixelsImpl& Pixels,size_t FrameNumber, const std::string& Meta, bool Keyframe);
+	bool			FlushInputFrames();
+	void			AddPendingFrame(const SoyPixelsImpl& Pixels,size_t FrameNumber, const std::string& Meta, bool Keyframe);
 
 private:
 	TEncoderParams					mParams;
 	std::shared_ptr<TTransformer>	mTransformer;
+	std::vector<FrameImage_t>		mPendingInputFrames;
 };
