@@ -90,6 +90,7 @@ public:
 	void			SetInputFormat(IMFMediaType& MediaType);
 	void			SetInputFormat(Soy::TFourcc Fourcc, std::function<void(IMFMediaType&)> ConfigMedia);
 	bool			IsInputFormatReady();
+	void			WaitForInputReady(std::chrono::milliseconds Timeout);	//	throw if it never becomes ready
 
 	bool			IsInputFormatSet() { return mInputFormatSet; }
 	bool			IsOutputFormatSet() { return mOutputFormatSet; }

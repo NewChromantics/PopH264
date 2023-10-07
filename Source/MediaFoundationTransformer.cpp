@@ -895,30 +895,46 @@ MediaFoundation::TTransformer::TTransformer(TransformerCategory::Type Category,s
 	}
 }
 
-bool MediaFoundation::TTransformer::IsInputFormatReady()
+void MediaFoundation::TTransformer::WaitForInputReady(std::chrono::milliseconds Timeout)
 {
-	//return mInputFormatSet;
-	auto& Transformer = *this->mTransformer;
-	{
-		DWORD StatusFlags = 0;
-		auto Result = Transformer.GetInputStatus(mInputStreamId, &StatusFlags);
-		if (Result == MF_E_TRANSFORM_TYPE_NOT_SET)
-			return false;
-		IsOkay(Result, "GetInputStatus");
-		//	gr: this seems to always be 1?
-		if ( mVerboseDebug )
-			std::Debug << __PRETTY_FUNCTION__ << " Input status is " << StatusFlags << std::endl;
+	auto Tries = 100;
+	auto Delay = Timeout.count() / Tries;
+	if ( Delay < 1 )
+		Delay = 1;
 
-		auto CanAcceptData = (StatusFlags & MFT_INPUT_STATUS_ACCEPT_DATA) != 0;
-		if (!CanAcceptData)
-		{
-			std::stringstream Error;
-			Error << "Not ready for input data";
-			throw std::runtime_error(Error.str());
-		}
+	for ( auto i=0;	i<100;	i++ )
+	{
+		auto InputReady = IsInputFormatReady();
+		std::Debug << "IsInputFormatReady = " << InputReady << std::endl;
+		if ( InputReady )
+			return;
+		std::this_thread::sleep_for( std::chrono::milliseconds(Delay) );
 	}
 
-	return true;
+	std::stringstream Error;
+	Error << "IsInputFormatReady never ready after " << Timeout;
+	throw std::runtime_error(Error.str());
+}
+
+
+bool MediaFoundation::TTransformer::IsInputFormatReady()
+{
+	auto& Transformer = *this->mTransformer;
+
+	DWORD StatusFlags = 0;
+	auto Result = Transformer.GetInputStatus(mInputStreamId, &StatusFlags);
+	if (Result == MF_E_TRANSFORM_TYPE_NOT_SET)
+		return false;
+	IsOkay(Result, "GetInputStatus");
+
+	if ( mVerboseDebug )
+		std::Debug << __PRETTY_FUNCTION__ << " Input status is " << StatusFlags << std::endl;
+
+	auto CanAcceptData = (StatusFlags & MFT_INPUT_STATUS_ACCEPT_DATA) != 0;
+	if ( CanAcceptData )
+		return true;
+
+	return false;
 }
 
 void MediaFoundation::TTransformer::LockTransformer(std::function<void()> Execute)
@@ -1133,15 +1149,14 @@ void MediaFoundation::TTransformer::SetInputFormat(IMFMediaType& MediaType)
 	ProcessCommand(MFT_MESSAGE_NOTIFY_BEGIN_STREAMING);
 	ProcessCommand(MFT_MESSAGE_NOTIFY_START_OF_STREAM);
 
+	//	the nvidia encoder takes a while to be ready...
 	try
 	{
-		auto InputReady = IsInputFormatReady();
-		if (mVerboseDebug)
-			std::Debug << "IsInputFormatReady = " << InputReady << std::endl;
+		WaitForInputReady( std::chrono::seconds(1) );
 	}
-	catch (std::exception& e)
+	catch(std::exception& e)
 	{
-		std::Debug << "Exception: " << e.what() << std::endl;
+		std::Debug << "WaitForInputReady failed; " << e.what() << std::endl;
 	}
 	mInputFormatSet = true;
 }
@@ -1150,18 +1165,13 @@ MediaFoundation::TTransformer::~TTransformer()
 {
 	if (mVerboseDebug)
 		std::Debug << __PRETTY_FUNCTION__ << std::endl;
+
 	if (mTransformer)
 	{
 		try
 		{
-			/*
-			auto FlushInputResult = mTransformer->FlushInputStream(0);
-			if (FlushInputResult != E_NOTIMPL)
-				IsOkay(FlushInputResult, "FlushInputStream");
-			auto FlushOutputResult = mTransformer->FlushOutputStream(0);
-			if (FlushOutputResult != E_NOTIMPL)
-				IsOkay(FlushOutputResult, "FlushOutputStream");
-			*/
+			ProcessCommand(MFT_MESSAGE_NOTIFY_END_STREAMING);
+			ProcessCommand(MFT_MESSAGE_NOTIFY_END_OF_STREAM);
 			//	gr: none of this is releasing memory
 			ProcessCommand(MFT_MESSAGE_COMMAND_FLUSH);
 			ProcessCommand(MFT_MESSAGE_COMMAND_DRAIN);
@@ -1184,11 +1194,11 @@ MediaFoundation::TTransformer::~TTransformer()
 				{
 					auto StreamId = InputStreamIds[i];
 					Result = mTransformer->DeleteInputStream(StreamId);
-					IsOkay(Result, "DeleteInputStream");
+					//	dont consider this a failure to cleanup
+					if ( Result != E_NOTIMPL )
+						IsOkay(Result, "DeleteInputStream");
 				}
 			}
-			//Result = mTransformer->DeleteInputStream(0);
-			//IsOkay(Result, "DeleteInputStream0");
 		}
 		catch (std::exception& e)
 		{

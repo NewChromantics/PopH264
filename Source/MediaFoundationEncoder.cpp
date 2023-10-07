@@ -53,7 +53,8 @@ MediaFoundation::TEncoderParams::TEncoderParams(json11::Json& Options)
 
 
 MediaFoundation::TEncoder::TEncoder(TEncoderParams Params,std::function<void(PopH264::TPacket&)> OnOutputPacket) :
-	PopH264::TEncoder	( OnOutputPacket )
+	PopH264::TEncoder	( OnOutputPacket ),
+	mParams				( Params )
 {
 	//	todo: allow some params to create transformer immediately
 }
@@ -106,7 +107,7 @@ void MediaFoundation::TEncoder::SetOutputFormat(TTransformer& Transformer,SoyPix
 
 	//	interlace mode must be set
 	{
-		auto Result = MediaType->SetUINT32(MF_MT_INTERLACE_MODE, 2);
+		auto Result = MediaType->SetUINT32(MF_MT_INTERLACE_MODE, MFVideoInterlace_Progressive);
 		IsOkay(Result, "MF_MT_INTERLACE_MODE");
 	}
 
@@ -231,9 +232,16 @@ void MediaFoundation::TEncoder::Encode(const SoyPixelsImpl& EncodePixels, const 
 	auto* PixelsBytes = const_cast<uint8_t*>(PixelsArray.GetArray());
 	std::span<uint8_t> PixelsSpan( PixelsBytes, PixelsArray.GetDataSize() );
 
+	auto IsInputReady = mTransformer->IsInputFormatReady();
 	if (!mTransformer->PushFrame(PixelsSpan, FrameNumber))
 	{
-		std::Debug << "Input rejected... dropping frame?" << std::endl;
+		auto PostIsInputReady = mTransformer->IsInputFormatReady();
+		std::Debug << "Input rejected... dropping frame " << FrameNumber << " IsInputReady=" << IsInputReady << " PostIsInputReady=" << PostIsInputReady << std::endl;
+	}
+	else
+	{
+		auto PostIsInputReady = mTransformer->IsInputFormatReady();
+		std::Debug << "pushed frame " << FrameNumber << " IsInputReady=" << IsInputReady << " PostIsInputReady=" << PostIsInputReady << std::endl;
 	}
 
 	//	pop H264 frames that have been output
