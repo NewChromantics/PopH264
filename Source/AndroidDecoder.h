@@ -187,8 +187,8 @@ private:
 
 private:
 	//	need SPS & PPS to create format, before we can create codec
-	Array<uint8_t>	mPendingSps;
-	Array<uint8_t>	mPendingPps;	
+	std::vector<uint8_t>	mPendingSps;
+	std::vector<uint8_t>	mPendingPps;
 	//std::shared_ptr<JniMediaFormat>		mFormat;	//	format for codec!
 	MediaCodec_t	mCodec = nullptr;
 	std::mutex		mCodecLock;

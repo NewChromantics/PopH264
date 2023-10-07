@@ -566,16 +566,16 @@ void Android::TDecoder::CreateCodec()
 		return;
 
 	//	fetch header packets	
-	PeekHeaderNalus( GetArrayBridge(mPendingSps), GetArrayBridge(mPendingPps) );
+	PeekHeaderNalus( mPendingSps, mPendingPps );
 	
 	//	need SPS & PPS 
-	if ( mPendingSps.IsEmpty() || mPendingPps.IsEmpty() )
+	if ( mPendingSps.empty() || mPendingPps.empty() )
 	{
 		std::stringstream Error;
 		Error << "CreateCodec still waiting for ";
-		if ( mPendingSps.IsEmpty() )
+		if ( mPendingSps.empty() )
 			Error << "SPS ";
-		if ( mPendingPps.IsEmpty() )
+		if ( mPendingPps.empty() )
 			Error << "PPS ";
 		throw Soy::AssertException(Error);
 	}	
@@ -697,7 +697,7 @@ void Android::TDecoder::CreateCodec()
 	{
 		try
 		{
-			auto Sps = H264::ParseSps( GetArrayBridge(mPendingSps) );
+			auto Sps = H264::ParseSps( mPendingSps );
 			std::Debug << "Extracted size " << Sps.mWidth << "x" << Sps.mHeight << " from sps (frame_crop_left_offset=" << Sps.frame_crop_left_offset << " frame_crop_right_offset=" << Sps.frame_crop_right_offset << " frame_crop_top_offset=" << Sps.frame_crop_top_offset << " frame_crop_bottom_offset=" << Sps.frame_crop_bottom_offset << std::endl;
 			Width = Sps.mWidth;
 			Height = Sps.mHeight;
@@ -728,11 +728,9 @@ void Android::TDecoder::CreateCodec()
 	//	magic leap version has nalu seperated SPS & PPS in csd-0
 	//	0001 sps 0001 pps
 	{
-		auto& Sps = mPendingSps;
-		auto& Pps = mPendingPps;
-		Array<uint8_t> SpsAndPps;
-		SpsAndPps.PushBackArray(Sps);
-		SpsAndPps.PushBackArray(Pps);
+		std::vector<uint8_t> SpsAndPps;
+		std::copy( mPendingSps.begin(), mPendingSps.end(), std::back_inserter(SpsAndPps) );
+		std::copy( mPendingPps.begin(), mPendingPps.end(), std::back_inserter(SpsAndPps) );
 		/*
 		AMEDIAFORMAT_KEY_CSD; # var introduced=28
     AMEDIAFORMAT_KEY_CSD_0; # var introduced=28
@@ -742,7 +740,7 @@ void Android::TDecoder::CreateCodec()
     AMEDIAFORMAT_KEY_CSD_HEVC; # var introduced=29
     */
 		//	gr: this isn't making a different (same profile, same level, same dimensions)
-		AMediaFormat_setBuffer( Format, AMEDIAFORMAT_KEY_CSD_AVC, SpsAndPps.GetArray(), SpsAndPps.GetDataSize() );
+		AMediaFormat_setBuffer( Format, AMEDIAFORMAT_KEY_CSD_AVC, SpsAndPps.data(), SpsAndPps.size() );
 	}
 
 

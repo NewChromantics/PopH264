@@ -112,7 +112,7 @@ protected:
 	virtual void	CheckUpdates() {};
 	
 	bool			HasPendingData()		{	return !mPendingDatas.IsEmpty();	}
-	void			PeekHeaderNalus(ArrayBridge<uint8_t>&& SpsBuffer,ArrayBridge<uint8_t>&& PpsBuffer);
+	void			PeekHeaderNalus(std::vector<uint8_t>& SpsBuffer,std::vector<uint8_t>& PpsBuffer);
 	std::shared_ptr<TInputNaluPacket>	PopNextPacket();
 	bool			PopNalu(ArrayBridge<uint8_t>&& Buffer,FrameNumber_t& FrameNumber);
 	void			UnpopPacket(std::shared_ptr<TInputNaluPacket> Packet);

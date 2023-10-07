@@ -100,46 +100,7 @@ void PopH264::TDecoder::Decode(std::span<uint8_t> PacketData,FrameNumber_t Frame
 		try
 		{
 			auto SubPackets = H264::SplitNalu(PacketData);
-			
-			static bool SplitAllPackets = true;
-			
-			if ( SplitAllPackets )
-			{
-				//	leave same-packet types together
-				NewPacketDatas = SubPackets;
-			}
-			else
-			{
-				//	pop out sps, pps, sei
-				NewPacketDatas.clear();
-				while ( !SubPackets.empty() )
-				{
-					auto& SubPacket = SubPackets[0];
-					auto H264Content = H264::GetPacketType( SubPacket );
-					if ( H264Content == H264NaluContent::SequenceParameterSet ||
-						H264Content == H264NaluContent::PictureParameterSet ||
-						H264Content == H264NaluContent::SupplimentalEnhancementInformation )
-					{
-						NewPacketDatas.push_back( SubPacket );
-						SubPackets.erase( SubPackets.begin() );
-					}
-					else
-					{
-						break;
-					}
-				}
-				
-				//	keep the rest of the subpackets as one big packet
-				if ( !SubPackets.empty() )
-				{
-					auto FirstPacket = SubPackets[0];
-					auto LastPacket = SubPackets[ SubPackets.size()-1 ];
-					auto RemainingDataStart = FirstPacket.begin();
-					auto RemainingDataEnd = LastPacket.end();
-					auto RemainingPacket = std::span( RemainingDataStart, RemainingDataEnd );
-					NewPacketDatas.push_back( RemainingPacket );
-				}
-			}
+			NewPacketDatas = SubPackets;
 		}
 		catch (std::exception& e)
 		{
@@ -279,7 +240,7 @@ bool PopH264::TDecoder::PopNalu(ArrayBridge<uint8_t>&& Buffer,FrameNumber_t& Fra
 	return true;
 }
 
-void PopH264::TDecoder::PeekHeaderNalus(ArrayBridge<uint8_t>&& SpsBuffer,ArrayBridge<uint8_t>&& PpsBuffer)
+void PopH264::TDecoder::PeekHeaderNalus(std::vector<uint8_t>& SpsBuffer,std::vector<uint8_t>& PpsBuffer)
 {
 	std::lock_guard<std::mutex> Lock( mPendingDataLock );
 	
@@ -289,23 +250,21 @@ void PopH264::TDecoder::PeekHeaderNalus(ArrayBridge<uint8_t>&& SpsBuffer,ArrayBr
 		auto NaluType = H264::GetPacketType(PendingNaluData);
 		if (NaluType == H264NaluContent::SequenceParameterSet)
 		{
-			FixedRemoteArray Data( PendingNaluData.data(), PendingNaluData.size() );
-			SpsBuffer.Copy(Data);
+			std::copy( PendingNaluData.begin(), PendingNaluData.end(), std::back_inserter(SpsBuffer) );
 		}
 		if (NaluType == H264NaluContent::PictureParameterSet)
 		{
-			FixedRemoteArray Data( PendingNaluData.data(), PendingNaluData.size() );
-			PpsBuffer.Copy(Data);
+			std::copy( PendingNaluData.begin(), PendingNaluData.end(), std::back_inserter(PpsBuffer) );
 		}
-		if ( !SpsBuffer.IsEmpty() && !PpsBuffer.IsEmpty() )
+		if ( !SpsBuffer.empty() && !PpsBuffer.empty() )
 			return;
 	}
 
-	if ( !SpsBuffer.IsEmpty() && !PpsBuffer.IsEmpty() )
+	if ( !SpsBuffer.empty() && !PpsBuffer.empty() )
 		return;
 
 	std::stringstream Debug;
-	Debug << __PRETTY_FUNCTION__ << " failed to find sps(x" << SpsBuffer.GetDataSize() << ") or Pps(x" << PpsBuffer.GetDataSize() << ")";
+	Debug << __PRETTY_FUNCTION__ << " failed to find sps(x" << SpsBuffer.size() << ") or Pps(x" << PpsBuffer.size() << ")";
 	throw Soy::AssertException(Debug);
 }
 
