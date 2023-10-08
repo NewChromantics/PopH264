@@ -42,12 +42,14 @@ Future
 
 - Web via Unity is very low down on my list personally, if anyone who is experienced in this field want's to help and/or guide me how to bridge js modules, interfacing and unity's integration/build, get in touch. (I have never used unity for a web build)
 
+
 Sponsorship/Funding
 ----------------------
 Whilst we do happily accept money, we currently haven't setup github sponsoring. If you wish to sponsor via a particular method, send bitcoin, leave an issue or get in touch; [graham@newchromantics.com](mailto:graham@newchromantics.com) / [@soylentgraham](http://www.twitter.com/soylentgraham)
 
 Rather than any trickle payments, we do encourage people to ask for commissioned new features/improvements/platform support. 
 Feel free to ask for them in issues, even if you have no budget. (But please submit bugs regardless!)
+
 
 Financial Contributers (Thank you!)
 -----------------------------
@@ -65,31 +67,19 @@ Installation
 
 Unity
 --------------------
-Install as a unity package using their scoped registry system;
-- In your project's `ProjectName/Packages/manifest.json` add
-```
-"scopedRegistries": [
-    {
-      "name": "New Chromantics Packages",
-      "url": "https://npm.pkg.github.com/@newchromantics",
-      "scopes": [
-        "com.newchromantics"
-      ]
-    }
-  ]
-```
-- Generate a github PAT (a personal access token in your github user-settings)
-- In your user directory (`~` on mac, `c:\users\yourname` on windows) add a `.upmconfig.toml` file and add an entry
-```
-[npmAuth."https://npm.pkg.github.com/@newchromantics"]
-token = "your_personal_access_token"
-email = "you@youremail.com"
-alwaysAuth = true
-```
-- ~Add `.npmrc` to `ProjectName/Packages/`~ it seems an `.npmrc`(npm authorisation file) file is not required
-- Add `"com.newchromantics.poph264": "1.3.3",` to `ProjectName/Packages/manifest.json`
-- Thanks to Peter Law http://enigma23.co.uk/blog/how-to-setup-github-packages-and-unity/
+Unity deployment is now done via the Unity Git Package repository https://github.com/NewChromantics/PopH264.UnityPackage
+- This repository is manually updated! so could be out of date. But the binaries & c# code is copied directly from the releases of this project
+- In the unity package manager add https://github.com/NewChromantics/PopH264.UnityPackage
+- Done!
 
+Unreal Support
+------------------
+- Work-in-progress plugin is here https://github.com/NewChromantics/PopH264_UnrealPlugin
+
+Swift/ui support
+-----------------
+There is a SwiftPackageManager compatible package at https://github.com/NewChromantics/PopH264.swiftpackage
+- This repository is manually updated! so could be out of date. But the binaries & c# code is copied directly from the releases of this project
 
 
 Platform Support
@@ -101,7 +91,7 @@ Any empty platforms are generally planned, but not yet implemented.
 | Windows x86    |                   |                   |                   |                   |
 | Windows x64    | Broadway          | MediaFoundation   |                   | MediaFoundation   |
 | Windows UWP Hololens1 |            |                   |                   |                   |
-| Windows UWP Hololens2 |            |                   |                   |                   |
+| Windows UWP Hololens2 |            | MediaFoundation   |                   | MediaFoundation   |
 | Linux arm64 for Nvidia Jetson Nano | Broadway |        | x264              | V4L2 (Nvidia)     |
 | Linux arm for Raspberry PI 1,2,Zero (untested) | Broadway |    | x264      |                   |
 | Linux arm for Raspberry PI 3 | Broadway |              | x264              |                   |
@@ -127,17 +117,6 @@ Android
 - But, android 8.0 doesn't support async buffers, and we haven't yet implemented non-async buffer access. See issue #52 https://github.com/NewChromantics/PopH264/issues/52
 - We support old & new apis by building for the old platform, then loading `libmediandk.so` at runtime (which is already loaded, not yet lazy-loaded) and finding android 9/10 symbols that we use.
 
-Unity Decoder Support
------------------------
-- Included is a c# CAPI wrapper with the option to run on a thread, (Can also be used synchronously) with texture2D output wrapper.
-
-Unity Encoder Support
------------------------
-- Still todo, but is a CAPI which can be easily implemented 
-
-Unreal Support
-------------------
-- Work-in-progress plugin is here https://github.com/NewChromantics/PopH264_UnrealPlugin
 
 Build Instructions
 =======================
@@ -180,10 +159,6 @@ Android
 
 Unity Development
 ==================
-Macos
-------------
-When building the plugin, build the OSX framework. The universal framework currently doesn't "install" (copy to /Unity/PopH264/Assets/PopH264)
-in `PopH264.cs` disable the define `POPH264_AS_FRAMEWORK` 
 
 Android
 -----------------
@@ -210,9 +185,10 @@ Web Integration
 - Currently webcodecs is under origin trial (or enabled by a flag in chrome). Register here https://developer.chrome.com/origintrials/#/view_trial/-7811493553674125311
 - WebCodecs only works under `https` (except localhost which can be http, but still requires an origin trial, with port! the example page has localhost original trial `<meta>`s)
 
-Misc Notes
+Developer Notes
 ============================
 The following are various notes which PopH264 handles. (Or at least, it should handle and there should be an issue covering it if not).
+Or just quirks found along the way that may help other developers.
 
 MediaFoundation
 --------------------
