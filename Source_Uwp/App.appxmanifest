@@ -16,7 +16,7 @@
   <Properties>
     <DisplayName>PopH264_Uwp_TestApp</DisplayName>
     <PublisherDisplayName>Graham</PublisherDisplayName>
-    <Logo>Icon.png</Logo>
+    <Logo>StoreLogo.png</Logo>
   </Properties>
 
   <Dependencies>
