@@ -78,6 +78,9 @@
     <Image Include="Square150x150Logo.scale-100.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
+    <Image Include="Square44x44Logo.scale-200.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
     <Image Include="Square44x44Logo.scale-400.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>

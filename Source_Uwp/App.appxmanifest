@@ -36,9 +36,6 @@
         Description="PopH264_Uwp_TestApp"
         BackgroundColor="cyan" Square150x150Logo="Square150x150Logo.png" Square44x44Logo="Square44x44Logo.png">
         <uap:DefaultTile>
-          <uap:ShowNameOnTiles>
-            <uap:ShowOn Tile="square150x150Logo"/>
-          </uap:ShowNameOnTiles>
         </uap:DefaultTile>
       </uap:VisualElements>
     </Application>
