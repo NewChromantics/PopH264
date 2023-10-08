@@ -35,6 +35,11 @@
     <ClInclude Include="..\Source\SoyLib\src\SoyFilesystem.h" />
     <ClInclude Include="..\Source\SoyLib\src\SoyH264.h" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="PopH264.vcxproj">
+      <Project>{64811728-cd20-4f2c-899b-e3bf3d4b032e}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{0A68B537-A889-4D4C-91EC-C452F23E97B3}</ProjectGuid>
