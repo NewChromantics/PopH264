@@ -30,6 +30,7 @@ public:
 	size_t	mAverageKbps = 2000;	//	REALLY high rate gives D3D error for nvidia encoder
 	size_t	mProfileLevel = 30;
 	bool	mVerboseDebug = false;
+	bool	mBufferAllInputs = true;	//	save all inputs to a queue
 };
 
 
@@ -41,6 +42,7 @@ public:
 	std::string					mMeta;
 	size_t						mFrameNumber = 0;
 	bool						mKeyframe = false;
+	bool						mEndOfStream = false;
 };
 
 
@@ -72,8 +74,11 @@ private:
 
 	//	returns false if we didn't finish flushing inputs. returns true if we can carry on (and put in more input)
 	bool			PushInputFrame(const SoyPixelsImpl& Pixels,size_t FrameNumber, const std::string& Meta, bool Keyframe);
+	bool			PushEndOfStream();
+
 	bool			FlushInputFrames();
 	void			AddPendingFrame(const SoyPixelsImpl& Pixels,size_t FrameNumber, const std::string& Meta, bool Keyframe);
+	void			AddPendingEndOfStream();
 
 private:
 	TEncoderParams					mParams;

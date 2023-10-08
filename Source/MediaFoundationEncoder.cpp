@@ -263,8 +263,7 @@ void MediaFoundation::TEncoder::Encode(const SoyPixelsImpl& Pixels, const std::s
 	std::scoped_lock Lock(mInputFrameLock);
 	auto FrameNumber = PushFrameMeta(Meta);
 
-	//	can't push at the moment, save the frame
-	if ( !FlushInputFrames() )
+	if ( mParams.mBufferAllInputs )
 	{
 		AddPendingFrame( Pixels, FrameNumber, Meta, Keyframe );
 		return;
@@ -304,6 +303,14 @@ void MediaFoundation::TEncoder::FlushOutputFrames()
 
 }
 
+void MediaFoundation::TEncoder::AddPendingEndOfStream()
+{
+	FrameImage_t Frame;
+	Frame.mEndOfStream = true;
+	mPendingInputFrames.push_back(Frame);
+	std::Debug << "Queued EOF frame, now " << mPendingInputFrames.size() << " pending" << std::endl;
+}
+
 
 void MediaFoundation::TEncoder::AddPendingFrame(const SoyPixelsImpl& Pixels,size_t FrameNumber, const std::string& Meta, bool Keyframe)
 {
@@ -322,8 +329,20 @@ bool MediaFoundation::TEncoder::FlushInputFrames()
 	while ( !mPendingInputFrames.empty() )
 	{
 		auto& Next = mPendingInputFrames[0];
-		auto& Pixels = *Next.mPixels;
-		if ( !PushInputFrame( Pixels, Next.mFrameNumber, Next.mMeta, Next.mKeyframe ) )
+
+		bool Pushed = false;
+
+		if ( Next.mEndOfStream )
+		{
+			Pushed = PushEndOfStream();
+		}
+		else
+		{
+			auto& Pixels = *Next.mPixels;
+			Pushed = PushInputFrame( Pixels, Next.mFrameNumber, Next.mMeta, Next.mKeyframe );
+		}
+
+		if ( !Pushed )
 			return false;
 
 		//	done, remove from pending!
@@ -416,6 +435,11 @@ SoyPixelsFormat::Type MediaFoundation::TEncoder::GetInputFormat(SoyPixelsFormat:
 }
 
 void MediaFoundation::TEncoder::FinishEncoding()
+{
+	AddPendingEndOfStream();
+}
+
+bool MediaFoundation::TEncoder::PushEndOfStream()
 {
 	auto Transformer = mTransformer;
 	if ( !Transformer )
