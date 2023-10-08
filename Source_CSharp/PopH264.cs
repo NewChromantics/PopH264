@@ -553,6 +553,7 @@ public static class PopH264
 	{
 		public byte[]		H264Data;
 		public EncodedFrameMeta	Meta;
+		public PoppedFrameMeta	EncoderMeta;
 	}
 	
 	//	data coming out of PopH264_EncoderPeekData
@@ -789,6 +790,7 @@ public static class PopH264
 			//	todo: pool these buffers
 			Frame.H264Data = new byte[PoppedFrameMeta.DataSize];
 			Frame.Meta = PoppedFrameMeta.Meta;
+			Frame.EncoderMeta = PoppedFrameMeta;
 			
 			var BytesWritten = PopH264_EncoderPopData( Instance.Value, Frame.H264Data, Frame.H264Data.Length );
 			//	returns 0 if there is no Data to pop.
