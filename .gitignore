@@ -28,6 +28,7 @@ build-iphonesimulator/
 PopH264.visualstudio/PopH264*/
 PopH264.visualstudio/ARM/
 PopH264.visualstudio/x64/
+PopH264.visualstudio/ARM64/
 
 *.user
 
