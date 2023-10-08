@@ -26,6 +26,9 @@ build-iphonesimulator/
 
 # visual studio temporary files
 PopH264.visualstudio/PopH264*/
+PopH264.visualstudio/ARM/
+PopH264.visualstudio/x64/
+
 *.user
 
 
@@ -53,4 +56,3 @@ Unity/PopH264/Assets/PopH264/
 
 # macos system files
 .DS_Store
-

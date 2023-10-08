@@ -69,6 +69,11 @@
   <ItemGroup>
     <ClInclude Include="..\Source\SoyLib\src\SoyH264.h" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="PopH264.Uwp.vcxproj">
+      <Project>{50fee5a7-a037-44cb-9731-999f44725f28}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{438CFD5E-AE1D-4D30-8361-C1D58C4DAFAC}</ProjectGuid>
     <Keyword>DynamicLibrary</Keyword>
