@@ -64,6 +64,8 @@ private:
 	void			SetOutputFormat(TTransformer& Transformer,SoyPixelsMeta ImageMeta);
 	SoyPixelsFormat::Type	GetInputFormat(SoyPixelsFormat::Type Format);
 
+	void			UpdateThread();		//	thread which keeps pushing pending frames and looking for new outputs
+
 	//	returns true if there are more to try
 	bool			FlushOutputFrame();
 	void			FlushOutputFrames();
@@ -76,5 +78,9 @@ private:
 private:
 	TEncoderParams					mParams;
 	std::shared_ptr<TTransformer>	mTransformer;
+	
+	std::thread						mUpdateThread;
+	std::mutex						mOutputFrameLock;
+	std::mutex						mInputFrameLock;
 	std::vector<FrameImage_t>		mPendingInputFrames;
 };

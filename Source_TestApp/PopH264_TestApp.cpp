@@ -912,7 +912,7 @@ TEST_P(PopH264_Encode_Tests,EncodeFile)
 		std::array<char,1000> MetaJsonBuffer = {0};
 		PopH264_EncoderPeekData(Encoder, MetaJsonBuffer.data(), MetaJsonBuffer.size() );
 		std::string MetaJson(MetaJsonBuffer.data());
-		//std::Debug << "PopH264_EncoderPeekData meta: " << MetaJson << std::endl;
+		std::Debug << "PopH264_EncoderPeekData meta: " << MetaJson << std::endl;
 		PopJson::Value_t Meta(MetaJson);
 		
 		if ( Meta.HasKey("Error",MetaJson) )

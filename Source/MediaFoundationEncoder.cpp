@@ -62,6 +62,11 @@ MediaFoundation::TEncoder::TEncoder(TEncoderParams Params,std::function<void(Pop
 MediaFoundation::TEncoder::~TEncoder()
 {
 	mTransformer.reset();
+	if ( mUpdateThread.joinable() )
+	{
+		mUpdateThread.join();
+		mUpdateThread = {};
+	}
 }
 
 
@@ -176,7 +181,36 @@ void MediaFoundation::TEncoder::SetFormat(SoyPixelsMeta ImageMeta)
 	SetInputFormat( *Transformer, ImageMeta, InputFormat );
 
 	mTransformer = Transformer;
+
+	auto UpdateThreadRunner = [this]()
+	{
+		try
+		{
+			this->UpdateThread();
+		}
+		catch(std::exception& e)
+		{
+			this->OnError(e.what());
+		}
+	};
+	mUpdateThread = std::thread(UpdateThreadRunner);
 }
+
+void MediaFoundation::TEncoder::UpdateThread()
+{
+	while ( true )
+	{
+		auto Transformer = mTransformer;
+		if ( !Transformer )
+			return;
+
+		FlushOutputFrames();
+		FlushInputFrames();
+
+		std::this_thread::sleep_for(std::chrono::milliseconds(30));
+	}
+}
+
 
 void MediaFoundation::TEncoder::SetInputFormat(TTransformer& Transformer,SoyPixelsMeta PixelsMeta,Soy::TFourcc InputFormat)
 {
@@ -226,24 +260,21 @@ void MediaFoundation::TEncoder::Encode(const SoyPixelsImpl& Pixels, const std::s
 {
 	SetFormat( Pixels.GetMeta() );
 
+	std::scoped_lock Lock(mInputFrameLock);
 	auto FrameNumber = PushFrameMeta(Meta);
 
 	//	can't push at the moment, save the frame
 	if ( !FlushInputFrames() )
 	{
 		AddPendingFrame( Pixels, FrameNumber, Meta, Keyframe );
-		FlushOutputFrames();
 		return;
 	}
 
 	if ( !PushInputFrame( Pixels, FrameNumber, Meta, Keyframe ) )
 	{
 		AddPendingFrame( Pixels, FrameNumber, Meta, Keyframe );
-		FlushOutputFrames();
 		return;
 	}
-
-	FlushOutputFrames();
 }
 
 bool MediaFoundation::TEncoder::PushInputFrame(const SoyPixelsImpl& Pixels,size_t FrameNumber, const std::string& Meta, bool Keyframe)
@@ -261,6 +292,7 @@ bool MediaFoundation::TEncoder::PushInputFrame(const SoyPixelsImpl& Pixels,size_
 
 void MediaFoundation::TEncoder::FlushOutputFrames()
 {
+	std::scoped_lock Lock(mOutputFrameLock);
 	//	pop H264 frames that have been output
 	//	gr: other thread for this, and get as many as possible in one go
 	while (true)
@@ -390,13 +422,6 @@ void MediaFoundation::TEncoder::FinishEncoding()
 		throw std::runtime_error("No transformer");
 
 	Transformer->PushEndOfStream();
-
-	while (true)
-	{
-		auto More = FlushOutputFrame();
-		if (!More)
-			break;
-	}
 }
 
 
