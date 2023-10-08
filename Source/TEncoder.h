@@ -61,9 +61,13 @@ protected:
 	//	gr: SOME frames will yield multiple packets (eg SPS & PPS) so some we need to keep around...
 	//		gotta work out a way to figure out what we can discard
 	std::string		GetFrameMeta(size_t FrameNumber);
+
+	bool			HasEncodingFinished()	{	return mHasOutputEndOfStream || mHasOutputError;	}
 	
 private:
 	std::function<void(TPacket&)>	mOnOutputPacket;
+	bool						mHasOutputEndOfStream = false;	//	we've sent out an EOF frame
+	bool						mHasOutputError = false;
 
 	std::mutex					mFrameMetaLock;
 	size_t						mFrameCount = 0;

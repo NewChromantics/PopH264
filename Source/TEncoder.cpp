@@ -30,6 +30,7 @@ void PopH264::TEncoder::OnError(std::string_view Error)
 	TPacket Packet;
 	Packet.mError = Error;
 	mOnOutputPacket( Packet );
+	mHasOutputError = true;
 }
 
 void PopH264::TEncoder::OnFinished()
@@ -37,6 +38,7 @@ void PopH264::TEncoder::OnFinished()
 	TPacket Packet;
 	Packet.mEndOfStream = true;
 	mOnOutputPacket( Packet );
+	mHasOutputEndOfStream = true;
 }
 
 

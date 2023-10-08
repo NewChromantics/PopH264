@@ -90,7 +90,8 @@ public:
 
 	void			SetInputFormat(IMFMediaType& MediaType);
 	void			SetInputFormat(Soy::TFourcc Fourcc, std::function<void(IMFMediaType&)> ConfigMedia);
-	bool			IsInputFormatReady();
+	bool			IsReadyForInput();
+	bool			HasOutputReady();
 	void			WaitForInputReady(std::chrono::milliseconds Timeout);	//	throw if it never becomes ready
 
 	bool			IsInputFormatSet() { return mInputFormatSet; }
@@ -105,6 +106,7 @@ private:
 	void			SetOutputFormat();
 	void			ProcessNextOutputPacket();
 	void			LockTransformer(std::function<void()> Run);
+	bool			IsAsync();
 
 public:
 	Soy::AutoReleasePtr<IMFTransform>	mTransformer;

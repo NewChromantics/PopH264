@@ -902,10 +902,10 @@ void MediaFoundation::TTransformer::WaitForInputReady(std::chrono::milliseconds 
 	if ( Delay < 1 )
 		Delay = 1;
 
-	for ( auto i=0;	i<100;	i++ )
+	for ( auto i=0;	i<Tries;	i++ )
 	{
-		auto InputReady = IsInputFormatReady();
-		std::Debug << "IsInputFormatReady = " << InputReady << std::endl;
+		auto InputReady = IsReadyForInput();
+		std::Debug << "IsReadyForInput = " << InputReady << std::endl;
 		if ( InputReady )
 			return;
 		std::this_thread::sleep_for( std::chrono::milliseconds(Delay) );
@@ -917,7 +917,7 @@ void MediaFoundation::TTransformer::WaitForInputReady(std::chrono::milliseconds 
 }
 
 
-bool MediaFoundation::TTransformer::IsInputFormatReady()
+bool MediaFoundation::TTransformer::IsReadyForInput()
 {
 	auto& Transformer = *this->mTransformer;
 
@@ -927,14 +927,54 @@ bool MediaFoundation::TTransformer::IsInputFormatReady()
 		return false;
 	IsOkay(Result, "GetInputStatus");
 
-	if ( mVerboseDebug )
-		std::Debug << __PRETTY_FUNCTION__ << " Input status is " << StatusFlags << std::endl;
+	bool CanAcceptData = (StatusFlags & MFT_INPUT_STATUS_ACCEPT_DATA) != 0;
 
-	auto CanAcceptData = (StatusFlags & MFT_INPUT_STATUS_ACCEPT_DATA) != 0;
+	if ( mVerboseDebug )
+		std::Debug << " Input status is " << StatusFlags << " CanAcceptData=" << (CanAcceptData?"true":"false") << std::endl;
+
 	if ( CanAcceptData )
 		return true;
 
 	return false;
+}
+
+bool MediaFoundation::TTransformer::HasOutputReady()
+{
+	auto& Transformer = *this->mTransformer;
+
+	DWORD StatusFlags = 0;
+	auto Result = Transformer.GetOutputStatus(&StatusFlags);
+	IsOkay(Result, "GetOutputStatus");
+	if (mVerboseDebug)
+		std::Debug << "Output status is " << StatusFlags << std::endl;
+
+	bool HasOutput = (StatusFlags & MFT_OUTPUT_STATUS_SAMPLE_READY) !=0;
+	if ( HasOutput )
+		return true;
+
+	return false;
+}
+
+bool MediaFoundation::TTransformer::IsAsync()
+{
+	if ( !mTransformer )
+		throw std::runtime_error("Tranformer::IsAsync with null transformer");
+
+	//	todo: cache this
+	Soy::AutoReleasePtr<IMFAttributes> Attributes;
+	auto& Transformer = *this->mTransformer;
+	auto Result = Transformer.GetAttributes(&Attributes.mObject);
+	IsOkay(Result, "GetAttributes for async check");
+	uint32_t IsAsync32 = 0;
+	Result = Attributes->GetUINT32(MF_TRANSFORM_ASYNC, &IsAsync32);
+
+	//	gr: should this always be present?
+	if (Result == MF_E_ATTRIBUTENOTFOUND)
+		return false;
+
+	IsOkay(Result, "Get MF_TRANSFORM_ASYNC attribute");
+	bool IsAsync = IsAsync32 != 0;
+	return IsAsync;
 }
 
 void MediaFoundation::TTransformer::LockTransformer(std::function<void()> Execute)
@@ -945,20 +985,11 @@ void MediaFoundation::TTransformer::LockTransformer(std::function<void()> Execut
 	//	https://docs.microsoft.com/en-us/windows/win32/medfound/asynchronous-mfts
 	//	this func locks, executes the lambda, then unlocks
 	
-	//	todo; cache this state
 	Soy::AutoReleasePtr<IMFAttributes> Attributes;
-	auto IsAsync = false;
-	{
-		auto Result = Transformer.GetAttributes(&Attributes.mObject);
-		IsOkay(Result, "GetAttributes for async check");
-		uint32_t IsAsync32 = 0;
-		Result = Attributes->GetUINT32(MF_TRANSFORM_ASYNC, &IsAsync32);
-		if (Result != MF_E_ATTRIBUTENOTFOUND)
-		{
-			IsOkay(Result, "Get MF_TRANSFORM_ASYNC attribute");
-			IsAsync = IsAsync32 != 0;
-		}
-	}
+	auto Result = Transformer.GetAttributes(&Attributes.mObject);
+	IsOkay(Result, "GetAttributes for async check");
+
+	auto IsAsync = this->IsAsync();
 
 	if (IsAsync)
 	{
@@ -970,6 +1001,8 @@ void MediaFoundation::TTransformer::LockTransformer(std::function<void()> Execut
 	Execute();
 
 	//	relock?
+	//	https://learn.microsoft.com/en-us/windows/win32/medfound/mf-transform-async-unlock
+	//	docs suggest we just unlock as we need it
 }
 
 void MediaFoundation::TTransformer::SetLowLatencyMode(bool Enable)
@@ -1150,9 +1183,10 @@ void MediaFoundation::TTransformer::SetInputFormat(IMFMediaType& MediaType)
 	ProcessCommand(MFT_MESSAGE_NOTIFY_START_OF_STREAM);
 
 	//	the nvidia encoder takes a while to be ready...
+	//	MFT transformer is instant
 	try
 	{
-		WaitForInputReady( std::chrono::seconds(1) );
+		WaitForInputReady( std::chrono::milliseconds(10) );
 	}
 	catch(std::exception& e)
 	{
@@ -1394,43 +1428,11 @@ bool MediaFoundation::TTransformer::PushFrame(std::span<uint8_t> Data, int64_t F
 
 	auto& Transformer = *mTransformer;
 
-	auto DebugInputStatus = [&]()
-	{
-		DWORD StatusFlags = 0;
-		auto Result = Transformer.GetInputStatus(mInputStreamId, &StatusFlags);
-		try
-		{
-			IsOkay(Result, "GetInputStatus");
-			if (mVerboseDebug)
-				std::Debug << __PRETTY_FUNCTION__ << " Input status is " << StatusFlags << std::endl;
-		}
-		catch (std::exception& e)
-		{
-			std::Debug << e.what() << std::endl;
-		}
-	};
-
-	auto DebugOutputStatus = [&]()
-	{
-		DWORD StatusFlags = 0;
-		auto Result = Transformer.GetOutputStatus(&StatusFlags);
-		try
-		{
-			IsOkay(Result, "GetOutputStatus");
-			if (mVerboseDebug)
-				std::Debug << "Output status is " << StatusFlags << std::endl;
-		}
-		catch (std::exception& e)
-		{
-			std::Debug << e.what() << std::endl;
-		}
-	};
-
 	std::chrono::milliseconds Duration(16);
 	std::chrono::milliseconds Timestamp(FrameNumber);
 	auto pSample = CreateSample( Data, Timestamp, Duration );
 
-	DebugInputStatus();
+	IsReadyForInput();
 
 	DWORD Flags = 0;
 	auto Result = Transformer.ProcessInput(mInputStreamId, pSample.mObject, Flags);
@@ -1442,7 +1444,7 @@ bool MediaFoundation::TTransformer::PushFrame(std::span<uint8_t> Data, int64_t F
 
 	IsOkay(Result, "Decoder.ProcessInput");
 
-	DebugInputStatus();
+	IsReadyForInput();
 	return true;
 }
 
@@ -1650,9 +1652,15 @@ bool MediaFoundation::TTransformer::PopFrame(std::vector<uint8_t>& Data,int64_t&
 		//			If the client calls ProcessOutput at any other time, the method returns E_UNEXPECTED.
 		//	therefore, if we get this result, there just isnt one ready?
 		//	gr: we get this error alongside actual output, so it's okay in non-async mode...
-		//		where do we store that info?
-		if ( mVerboseDebug )
-			std::Debug << "PopFrame() E_UNEXPECTED ProcessOutput - this is BAD if not async" << std::endl;
+		bool IsAsync = this->IsAsync();
+		if ( !IsAsync )
+			IsOkay( Result, "ProcessOutput (Non-async)");
+
+		//	if we've sent EOF, and there's no data pending... have we finished?
+		//	will this trigger early?
+		if (mInputSentEof)
+			EndOfStream = true;
+
 		return false;
 	}
 	else if (Result == MF_E_TRANSFORM_STREAM_CHANGE)

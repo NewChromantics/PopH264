@@ -198,7 +198,7 @@ void MediaFoundation::TEncoder::SetFormat(SoyPixelsMeta ImageMeta)
 
 void MediaFoundation::TEncoder::UpdateThread()
 {
-	while ( true )
+	while ( !HasEncodingFinished() )
 	{
 		auto Transformer = mTransformer;
 		if ( !Transformer )
@@ -282,7 +282,6 @@ bool MediaFoundation::TEncoder::PushInputFrame(const SoyPixelsImpl& Pixels,size_
 	auto* PixelsBytes = const_cast<uint8_t*>(PixelsArray.GetArray());
 	std::span<uint8_t> PixelsSpan( PixelsBytes, PixelsArray.GetDataSize() );
 
-	auto IsInputReady = mTransformer->IsInputFormatReady();
 	if ( !mTransformer->PushFrame(PixelsSpan, FrameNumber) )
 		return false;
 
@@ -446,6 +445,7 @@ bool MediaFoundation::TEncoder::PushEndOfStream()
 		throw std::runtime_error("No transformer");
 
 	Transformer->PushEndOfStream();
+	return true;
 }
 
 

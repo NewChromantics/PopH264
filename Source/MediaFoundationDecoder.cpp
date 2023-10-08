@@ -99,11 +99,16 @@ void MediaFoundation::TDecoder::CreateTransformer(ContentType::Type ContentType)
 void MediaFoundation::TDecoder::SetInputFormat(ContentType::Type ContentType)
 {
 	std::scoped_lock Lock(mTransformerLock);
-	if ( !mTransformer )
-		CreateTransformer(ContentType);
 
-	if (mTransformer->IsInputFormatReady())
+	//	already setup
+	if ( mTransformer )
 		return;
+
+	CreateTransformer(ContentType);
+
+	//	gr: this doesn't mean "is the input format setup", it means "is the encoder ready for data"
+	//if (mTransformer->IsReadyForInput())
+	//	return;
 
 
 	if ( ContentType == ContentType::Jpeg && false )

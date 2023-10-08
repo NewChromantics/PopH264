@@ -904,7 +904,7 @@ TEST_P(PopH264_Encode_Tests,EncodeFile)
 	std::vector<H264NaluContent::Type> H264PacketTypes;
 
 	//	read out encoded packets
-	for ( auto i=0;	i<50;	i++ )
+	for ( auto i=0;	i<200;	i++ )
 	{
 		std::this_thread::sleep_for( std::chrono::milliseconds(100) );
 		
