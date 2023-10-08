@@ -74,6 +74,14 @@
       <Project>{50fee5a7-a037-44cb-9731-999f44725f28}</Project>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="Square150x150Logo.scale-100.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
+    <Image Include="Square44x44Logo.scale-400.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{438CFD5E-AE1D-4D30-8361-C1D58C4DAFAC}</ProjectGuid>
     <Keyword>DynamicLibrary</Keyword>
