@@ -721,10 +721,17 @@ void Avf::TEncoder::OnPacketCompressed(std::span<uint8_t> Data,size_t FrameNumbe
 	
 	//std::Debug << "OnNalPacket( pts=" << FrameNumber << ", dts=" << DecodeOrderNumber << ")" << std::endl;
 	auto FrameMeta = GetFrameMeta(FrameNumber);
-			
+	FrameMeta.OnEncoded();
+	static bool DebugDuration = false;
+	if ( DebugDuration )
+	{
+		auto Duration = FrameMeta.GetEncodeDurationMs();
+		std::Debug << "Packet " << FrameNumber << " encode duration was " << Duration.count() << std::endl;
+	}
+	
 	PopH264::TPacket OutputPacket;
 	OutputPacket.mData.reset(new std::vector<uint8_t>());
-	OutputPacket.mInputMeta = FrameMeta;
+	OutputPacket.mEncodeMeta = FrameMeta;
 	std::copy( Data.begin(), Data.end(), std::back_inserter(*OutputPacket.mData) );
 	OnOutputPacket(OutputPacket);
 }

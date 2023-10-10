@@ -16,7 +16,7 @@ void PopH264::TEncoder::OnOutputPacket(TPacket& Packet)
 	auto OutputPacket = [&](std::span<uint8_t> Data)
 	{
 		TPacket NextPacket;
-		NextPacket.mInputMeta = Packet.mInputMeta;
+		NextPacket.mEncodeMeta = Packet.mEncodeMeta;
 		NextPacket.mData.reset(new std::vector<uint8_t>());
 		std::copy( Data.begin(), Data.end(), std::back_inserter( *NextPacket.mData ) );
 		mOnOutputPacket(NextPacket);
@@ -45,31 +45,29 @@ void PopH264::TEncoder::OnFinished()
 
 
 
-size_t PopH264::TEncoder::PushFrameMeta(const std::string& Meta)
+PopH264::FrameNumber_t PopH264::TEncoder::PushFrameMeta(const std::string& Meta)
 {
-	TEncoderFrameMeta FrameMeta;
-	FrameMeta.mFrameNumber = mFrameCount;
-	FrameMeta.mMeta = Meta;
-	mFrameMetas.PushBack(FrameMeta);
+	auto NewFrameNumber = mFrameCount;
 	mFrameCount++;
-	return FrameMeta.mFrameNumber;
+	
+	TEncoderFrameMeta FrameMeta;
+	FrameMeta.mInputMeta = Meta;
+	FrameMeta.mPushTime = EventTime_t::clock::now();
+	mFrameMetas.insert({ NewFrameNumber, FrameMeta });
+
+	return NewFrameNumber;
 }
 
-std::string PopH264::TEncoder::GetFrameMeta(size_t FrameNumber)
+PopH264::TEncoderFrameMeta PopH264::TEncoder::GetFrameMeta(FrameNumber_t FrameNumber)
 {
-	for (auto i = 0; i < mFrameMetas.GetSize(); i++)
+	auto Match = mFrameMetas.find(FrameNumber);
+	if ( Match == mFrameMetas.end() )
 	{
-		auto& FrameMeta = mFrameMetas[i];
-		if (FrameMeta.mFrameNumber != FrameNumber)
-			continue;
-
-		//	gr: for now, sometimes we get multiple packets for one frame, so we can't discard them all
-		//auto Meta = mFrameMetas.PopAt(i);
-		auto Meta = mFrameMetas[i];
-		return Meta.mMeta;
+		std::stringstream Error;
+		Error << "No frame meta matching frame number " << FrameNumber;
+		throw std::runtime_error(Error.str());
 	}
-
-	std::stringstream Error;
-	Error << "No frame meta matching frame number " << FrameNumber;
-	throw std::runtime_error(Error.str());
+	
+	auto& Meta = Match->second;
+	return Meta;
 }

@@ -5,6 +5,7 @@
 #include "SoyTime.h"
 #include <functional>
 #include <span>
+#include "TDecoderInstance.h"	//	EventTime_t
 
 class SoyPixelsImpl;
 
@@ -16,27 +17,48 @@ namespace PopH264
 	class TEncoderFrameMeta;
 }
 
+
+//	as packets are popped asynchronously to input, we need to keep meta
+//	associated with frames we use an arbritry number for frame (presentation
+//	time), we can also store other encoder per-frame meta here (timing)
+class PopH264::TEncoderFrameMeta
+{
+public:
+	std::string	mInputMeta;	//	meta provided by user to keep with frame
+	EventTime_t	mPushTime = EventTime_t::min();
+	EventTime_t	mEncodedTime = EventTime_t::min();
+
+	//	write encoded time if it hasn't been set
+	void		OnEncoded()
+	{
+		//	already set
+		if ( mEncodedTime != EventTime_t::min() )
+			return;
+		mEncodedTime = EventTime_t::clock::now();
+	}
+	
+	std::chrono::milliseconds	GetEncodeDurationMs()
+	{
+		if ( mPushTime == EventTime_t::min() || mEncodedTime == EventTime_t::min() )
+			return std::chrono::milliseconds(0);
+		auto Delta = mEncodedTime - mPushTime;
+		return std::chrono::duration_cast<std::chrono::milliseconds>( Delta );
+	}
+};
+
+
 class PopH264::TPacket
 {
 public:
 	std::span<uint8_t>		GetData()	{	return mData ? std::span<uint8_t>( mData->data(), mData->size() ) : std::span<uint8_t>();	}
+	std::string_view		GetInputMeta()	{	return mEncodeMeta.mInputMeta;	}
 public:
 	std::shared_ptr<std::vector<uint8_t>>	mData;
-	std::string								mInputMeta;	//	original input meta json
+	TEncoderFrameMeta						mEncodeMeta;	//	includes original input meta
 	bool									mEndOfStream = false;
 	std::string								mError;
 };
 
-
-//	as packets are popped asynchronously to input, we need to keep meta
-//	associated with frames we use an arbritry number for frame (presentation
-//	time)
-class PopH264::TEncoderFrameMeta
-{
-public:
-	size_t		mFrameNumber = 0;
-	std::string	mMeta;
-};
 
 
 class PopH264::TEncoder
@@ -57,12 +79,12 @@ protected:
 	void			OnFinished();
 
 	//	returns frame number used as PTS and stores meta
-	size_t			PushFrameMeta(const std::string& Meta);
+	FrameNumber_t		PushFrameMeta(const std::string& Meta);
 	//	gr: SOME frames will yield multiple packets (eg SPS & PPS) so some we need to keep around...
 	//		gotta work out a way to figure out what we can discard
-	std::string		GetFrameMeta(size_t FrameNumber);
+	TEncoderFrameMeta	GetFrameMeta(FrameNumber_t FrameNumber);
 
-	bool			HasEncodingFinished()	{	return mHasOutputEndOfStream || mHasOutputError;	}
+	bool				HasEncodingFinished()	{	return mHasOutputEndOfStream || mHasOutputError;	}
 	
 private:
 	std::function<void(TPacket&)>	mOnOutputPacket;
@@ -70,6 +92,6 @@ private:
 	bool						mHasOutputError = false;
 
 	std::mutex					mFrameMetaLock;
-	size_t						mFrameCount = 0;
-	Array<TEncoderFrameMeta>	mFrameMetas;
+	FrameNumber_t				mFrameCount = 0;
+	std::unordered_map<FrameNumber_t,TEncoderFrameMeta>	mFrameMetas;
 };

@@ -34,7 +34,7 @@ namespace PopH264
 	class PacketMeta_t;
 	class TInputNaluPacket;
 	typedef uint32_t FrameNumber_t;		//	this could be an index, or it could be time. Should essentially be a frame identifier
-	constexpr FrameNumber_t FrameNumberInvalid = 0;
+	constexpr FrameNumber_t FrameNumberInvalid = 0;	//	gr; should probably switch to uint32_t::max
 	
 	//	just shorthand names for cleaner constructors
 	typedef std::function<void(const SoyPixelsImpl&,FrameNumber_t,const ::json11::Json&)> OnDecodedFrame_t;

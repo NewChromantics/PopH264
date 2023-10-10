@@ -585,7 +585,7 @@ public static class PopH264
 		public int					DataSize;	//	bytes
 		public bool					EndOfStream;
 		public EncodedFrameMeta		Meta;	//	all the meta sent to PopH264_EncoderPushFrame
-		public int?					EncodeDurationMs;	//	time it took to encode
+		public int					EncodeDurationMs;	//	time it took to encode
 		public int?					DelayDurationMs;	//	time spent in queue before encoding (lag)
 		public int					OutputQueueCount;   //	time spent in queue before encoding (lag)
 		public string				EncoderName;		//	low level encoder name

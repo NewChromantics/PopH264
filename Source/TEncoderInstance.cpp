@@ -309,7 +309,7 @@ void PopH264::TEncoderInstance::PeekPacket(json11::Json::object& Meta)
 		auto& Packet0 = mPackets[0];
 		Packet = Packet0;
 	}
-
+	
 	//	write meta
 	auto DataSize = Packet.mData ? Packet.mData->size() : 0;
 	Meta[POPH264_ENCODEDFRAME_DATASIZE] = static_cast<int>(DataSize);
@@ -320,12 +320,17 @@ void PopH264::TEncoderInstance::PeekPacket(json11::Json::object& Meta)
 	if ( Packet.mEndOfStream )
 		Meta[POPH264_ENCODEDFRAME_ENDOFSTREAM] = Packet.mEndOfStream;
 
-	if ( !Packet.mInputMeta.empty() )
+	auto EncodeDuration = Packet.mEncodeMeta.GetEncodeDurationMs();
+	if ( EncodeDuration.count() != 0 )
+		Meta[POPH264_ENCODEDFRAME_ENCODEDURATIONMS] = static_cast<int>(EncodeDuration.count());
+
+	auto InputMeta = Packet.GetInputMeta();
+	if ( !InputMeta.empty() )
 	{
 		using namespace json11;
 		//	we're expecting json, so make it an object
 		std::string ParseError;
-		auto MetaObject = Json::parse( Packet.mInputMeta, ParseError );
+		auto MetaObject = Json::parse( std::string(InputMeta), ParseError );
 
 		//	this shouldn't come up, as we've already parsed it on input, but just in case
 		if (!ParseError.empty())
@@ -382,7 +387,10 @@ void PopH264::TEncoderInstance::OnNewPacket(TPacket& Packet)
 	}
 	
 	{
-		std::lock_guard<std::mutex> Lock(mPacketsLock);
+		std::scoped_lock Lock(mPacketsLock);
+		
+		//	gr: if a packet encode duration wasn't written, write one here with a warning, so the low level encoder is reminded to add it
+		Packet.mEncodeMeta.OnEncoded();
 		mPackets.PushBack(Packet);
 	}
 	
