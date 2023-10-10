@@ -371,6 +371,7 @@ __export int32_t PopH264_EncoderPopData(int32_t Instance,uint8_t* DataBuffer,int
 	auto Function = [&]() -> int32_t
 	{
 		auto Encoder = PopH264::EncoderInstanceManager.GetInstance(Instance);
+		//	gr: this should change to pop without copy - peek can peek size
 		//	no data buffer, just peeking size
 		if ( !DataBuffer || DataBufferSize <= 0 )
 			return size_cast<int32_t>(Encoder->PeekNextFrameSize());

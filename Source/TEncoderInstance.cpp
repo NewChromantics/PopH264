@@ -342,10 +342,12 @@ void PopH264::TEncoderInstance::PeekPacket(json11::Json::object& Meta)
 size_t PopH264::TEncoderInstance::PeekNextFrameSize()
 {
 	{
-		std::lock_guard<std::mutex> Lock(mPacketsLock);
+		std::scoped_lock Lock(mPacketsLock);
 		if ( !mPackets.IsEmpty() )
 		{
 			auto& Packet0 = mPackets[0];
+			if ( !Packet0.mData )
+				return 0;
 			return Packet0.mData->size();
 		}
 	}
