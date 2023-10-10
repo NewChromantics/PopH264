@@ -37,6 +37,7 @@ class Jpeg::Meta_t
 public:
 	uint32_t	mWidth = 0;
 	uint32_t	mHeight = 0;
+	uint8_t		mPrecision = 0;	//	gr: what is this scale?
 };
 
 Jpeg::Meta_t Jpeg::DecodeMeta(std::span<uint8_t> FileData)
@@ -70,12 +71,12 @@ Jpeg::Meta_t Jpeg::DecodeMeta(std::span<uint8_t> FileData)
 			if ( JfifTerm != 0 )
 				throw std::runtime_error("Missing terminator after JFIF");
 			//	read the rest of this block
-			auto BlockData = Reader.ReadBytes( BlockLength - 5 );
+			/*auto BlockData = */Reader.ReadBytes( BlockLength - 5 );
 		}
 		else if ( BlockId == 0xffc0 )
 		{
-			auto Precision = Reader.Read8();
 			Jpeg::Meta_t Meta;
+			Meta.mPrecision = Reader.Read8();
 			Meta.mHeight = Reader.Read16Reverse();
 			Meta.mWidth = Reader.Read16Reverse();
 			return Meta;
@@ -83,7 +84,7 @@ Jpeg::Meta_t Jpeg::DecodeMeta(std::span<uint8_t> FileData)
 		else
 		{
 			//	skip block
-			auto BlockData = Reader.ReadBytes(BlockLength);
+			/*auto BlockData = */Reader.ReadBytes(BlockLength);
 		}
 	}
 

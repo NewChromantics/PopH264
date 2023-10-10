@@ -300,11 +300,11 @@ Avf::TCompressor::TCompressor(TEncoderParams& Params,const SoyPixelsMeta& Meta,s
 
 		auto OsVersion = Platform::GetOsVersion();
 #if defined(TARGET_IOS)
-		auto MaxPowerSupported = true;
+		if ( true )
 #else
-		auto MaxPowerSupported = OsVersion.mMinor >= 14;
+		//auto MaxPowerSupported = OsVersion.mMinor >= 14;
+		if ( @available(macOS 10.14, *) )
 #endif
-		if ( MaxPowerSupported )
 		{
 			auto MaximisePE = Params.mMaximisePowerEfficiency ? kCFBooleanTrue : kCFBooleanFalse;
 			auto status = VTSessionSetProperty(mSession, kVTCompressionPropertyKey_MaximizePowerEfficiency, MaximisePE);

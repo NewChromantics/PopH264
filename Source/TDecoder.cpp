@@ -158,7 +158,7 @@ bool Jpeg::IsJpegHeader(std::span<uint8_t> FileData)
 	
 	//	sections follow this format
 	auto MarkerStart = Reader.Read8();
-	auto MarkerNumber = Reader.Read8();
+	/*auto MarkerNumber =*/ Reader.Read8();
 	auto MarkerSize = Reader.Read16();
 	
 	if ( MarkerStart != 0xff )
