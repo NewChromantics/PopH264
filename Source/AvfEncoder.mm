@@ -342,6 +342,11 @@ Avf::TCompressor::TCompressor(TEncoderParams& Params,const SoyPixelsMeta& Meta,s
 
 Avf::TCompressor::~TCompressor()
 {
+	//	assume callbacks here are now invalid so make sure they're not called
+	mOnPacket = [](std::span<uint8_t>,size_t){};
+	mOnFinished = [](std::string_view){};
+	
+	//	gr: dont need to flush? just kill session?
 	Flush();
 	
 	// End the session
