@@ -312,13 +312,13 @@ void PopH264::TEncoderInstance::PeekPacket(json11::Json::object& Meta)
 
 	//	write meta
 	auto DataSize = Packet.mData ? Packet.mData->size() : 0;
-	Meta["DataSize"] = static_cast<int>(DataSize);
+	Meta[POPH264_ENCODEDFRAME_DATASIZE] = static_cast<int>(DataSize);
 
 	if ( !Packet.mError.empty() )
-		Meta["Error"] = Packet.mError;
+		Meta[POPH264_ENCODEDFRAME_ERROR] = Packet.mError;
 
 	if ( Packet.mEndOfStream )
-		Meta["EndOfStream"] = Packet.mEndOfStream;
+		Meta[POPH264_ENCODEDFRAME_ENDOFSTREAM] = Packet.mEndOfStream;
 
 	if ( !Packet.mInputMeta.empty() )
 	{
@@ -330,11 +330,11 @@ void PopH264::TEncoderInstance::PeekPacket(json11::Json::object& Meta)
 		//	this shouldn't come up, as we've already parsed it on input, but just in case
 		if (!ParseError.empty())
 		{
-			Meta["Meta"] = std::string("PopH264 Unexpected parse error ") + ParseError;
+			Meta[POPH264_ENCODEDFRAME_INPUTMETA] = std::string("PopH264 Unexpected parse error ") + ParseError;
 		}
 		else
 		{
-			Meta["Meta"] = MetaObject;
+			Meta[POPH264_ENCODEDFRAME_INPUTMETA] = MetaObject;
 		}
 	}
 }

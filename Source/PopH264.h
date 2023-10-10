@@ -170,11 +170,15 @@ __export void				PopH264_EncoderEndOfStream(int32_t Instance);
 //	returns -1 on error
 __export int32_t			PopH264_EncoderPopData(int32_t Instance,uint8_t* DataBuffer,int32_t DataBufferSize);
 
+
+
 //	get meta for next packet as json. If MetaJsonSize isn't big enough, it writes as much as possible.
 //	members if pending data
-//		.DataSize			byte-size of packet (missing if no packet)
-//		.Meta				all meta passed in to PopH264_EncoderPushFrame
-//		.EncodeDurationMs	time it took to encode
+#define POPH264_ENCODEDFRAME_ERROR				"Error"
+#define POPH264_ENCODEDFRAME_ENDOFSTREAM		"EndOfStream"	//	no more data coming out
+#define POPH264_ENCODEDFRAME_DATASIZE			"DataSize"	//	byte-size of packet (missing if no packet)
+#define POPH264_ENCODEDFRAME_INPUTMETA			"Meta"	//	all meta passed in to PopH264_EncoderPushFrame
+#define POPH264_ENCODEDFRAME_ENCODEDURATIONMS	"EncodeDurationMs"	//	time from push to compress
 //		.DelayDurationMs	time spent in queue before encoding (lag)
 //	members regardless of pending data
 //		.OutputQueueCount	number of packets waiting to be popped
