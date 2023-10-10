@@ -640,6 +640,11 @@ public static class PopH264
 				throw new Exception($"Unhandled input format {Format}");
 		}
 		
+		public void PushFrame(byte[] PixelData,int Width,int Height,PixelFormat Format,bool Keyframe=false)
+		{
+			PushFrame( PixelData, null, null, Width, Height, Format, Keyframe );
+		}
+		
 		public void PushFrameGreyscale(byte[] Luma,int Width,int Height,bool Keyframe=false)
 		{
 			PushFrame( Luma, null, null, Width, Height, PixelFormat.Greyscale, Keyframe );
