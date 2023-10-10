@@ -332,9 +332,9 @@ void EncoderGreyscaleTest()
 	)V0G0N";
 	
 	//	testing the apple encoder
-	char ErrorBuffer[1000] = {0};
-	auto Handle = PopH264_CreateEncoder(EncoderOptionsJson, ErrorBuffer, std::size(ErrorBuffer) );
-	std::cerr << "PopH264_CreateEncoder handle=" << Handle << " error=" << ErrorBuffer << std::endl;
+	std::array<char,100> ErrorBuffer={0};
+	auto Handle = PopH264_CreateEncoder(EncoderOptionsJson, ErrorBuffer.data(), ErrorBuffer.size() );
+	std::cerr << "PopH264_CreateEncoder handle=" << Handle << " error=" << std::string(ErrorBuffer.data()) << std::endl;
 	
 	//	encode a test image
 	const uint8_t TestImage[128*128]={128};
@@ -346,8 +346,8 @@ void EncoderGreyscaleTest()
 		"LumaSize":16384
 	}
 	)V0G0N";
-	PopH264_EncoderPushFrame( Handle, TestMetaJson, TestImage, nullptr, nullptr, ErrorBuffer, std::size(ErrorBuffer) );
-	std::cerr  << "PopH264_EncoderPushFrame error=" << ErrorBuffer << std::endl;
+	PopH264_EncoderPushFrame( Handle, TestMetaJson, TestImage, nullptr, nullptr, ErrorBuffer.data(), ErrorBuffer.size() );
+	std::cerr  << "PopH264_EncoderPushFrame error=" << std::string(ErrorBuffer.data()) << std::endl;
 	
 	//	todo: decode it again
 	
@@ -1018,6 +1018,23 @@ protected:
 TEST(PopH264_General_Tests, PopJsonUnitTest )
 {
 	EXPECT_NO_THROW( PopJson::UnitTest() );
+}
+
+
+
+TEST(PopH264_General_Tests, EncoderPopNull )
+{
+	std::array<char,100> ErrorBuffer={0};
+	auto EncoderOptionsJson = "{}";
+	auto Encoder = PopH264_CreateEncoder(EncoderOptionsJson, ErrorBuffer.data(), ErrorBuffer.size() );
+	std::cerr << "PopH264_CreateEncoder Encoder=" << Encoder << " error=" << std::string(ErrorBuffer.data()) << std::endl;
+	
+	//	gr: this was crashing when passing for popping null on apple. It should not crash
+	//
+	//	gr: seems like it was only when there was a frame or EOF to pop?
+	PopH264_EncoderEndOfStream(Encoder);
+	auto Bytes = PopH264_EncoderPopData( Encoder, nullptr, 0 );
+	PopH264_DestroyEncoder(Encoder);
 }
 
 TEST(PopH264_General_Tests,OldMain)
