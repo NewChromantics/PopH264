@@ -374,7 +374,7 @@ bool MediaFoundation::TEncoder::FlushOutputFrame()
 
 		try
 		{
-			Packet.mInputMeta = this->GetFrameMeta(FrameNumber);
+			Packet.mEncodeMeta = this->GetFrameMeta(FrameNumber);
 		}
 		catch (std::exception& e)
 		{

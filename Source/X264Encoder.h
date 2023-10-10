@@ -48,7 +48,7 @@ public:
 class X264::TEncoder : public PopH264::TEncoder
 {
 public:
-	static inline const char*	Name = "x264";
+	static inline std::string_view	Name = "x264";
 	
 public:
 	TEncoder(TEncoderParams& Params,std::function<void(PopH264::TPacket&)> OnOutputPacket);
@@ -57,6 +57,8 @@ public:
 	virtual void		Encode(const SoyPixelsImpl& Luma, const SoyPixelsImpl& ChromaU, const SoyPixelsImpl& ChromaV, const std::string& Meta, bool Keyframe) override;
 	virtual void		Encode(const SoyPixelsImpl& Luma,const std::string& Meta,bool Keyframe) override;
 	virtual void		FinishEncoding() override;
+
+	virtual std::string	GetEncoderName() override	{	return std::string(Name);	}
 
 	static std::string	GetVersion();
 

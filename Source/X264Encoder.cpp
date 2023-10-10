@@ -347,7 +347,7 @@ void X264::TEncoder::Encode(x264_picture_t* InputPicture)
 		//	gr: DTS is 0 all of the time, I think there's a setting to allow out of order
 		PopH264::TPacket OutputPacket;
 		OutputPacket.mData.reset(new std::vector<uint8_t>());
-		OutputPacket.mInputMeta = FrameMeta;
+		OutputPacket.mEncodeMeta = FrameMeta;
 		std::copy( Data.begin(), Data.end(), std::back_inserter(*OutputPacket.mData) );
 		OnOutputPacket(OutputPacket);
 	};
