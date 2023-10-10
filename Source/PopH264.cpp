@@ -371,20 +371,29 @@ __export int32_t PopH264_EncoderPopData(int32_t Instance,uint8_t* DataBuffer,int
 	auto Function = [&]() -> int32_t
 	{
 		auto Encoder = PopH264::EncoderInstanceManager.GetInstance(Instance);
-		//	gr: this should change to pop without copy - peek can peek size
-		//	no data buffer, just peeking size
+
+		//	sanitise input, but this should error!
 		if ( !DataBuffer || DataBufferSize <= 0 )
-			return size_cast<int32_t>(Encoder->PeekNextFrameSize());
+		{
+			DataBuffer = nullptr;
+			DataBufferSize = 0;
+		}
 		
 		auto Buffer = std::span( DataBuffer, DataBufferSize );
-		auto Packet = Encoder->PopPacket();
-		auto PacketData = Packet.GetData();
-		if ( PacketData.size() > Buffer.size() )
+
+		//	check buffer size before we pop.
+		//	allow pop of 0 to pop without copy & discard.
+		auto NextPacketSize = Encoder->PeekNextFrameSize();
+		bool BufferTooSmall = NextPacketSize > Buffer.size();
+		if ( !Buffer.empty() && BufferTooSmall )
 		{
 			std::stringstream Error;
-			Error << "Popping packet x" << PacketData.size() << " but buffer is only x" << Buffer.size() << " bytes";
+			Error << "Popping packet x" << NextPacketSize << " but buffer is only x" << Buffer.size() << " bytes";
 			throw std::runtime_error(Error.str());
 		}
+		
+		auto Packet = Encoder->PopPacket();
+		auto PacketData = Packet.GetData();
 		std::copy( PacketData.begin(), PacketData.end(), Buffer.begin() );
 		
 		return PacketData.size();
