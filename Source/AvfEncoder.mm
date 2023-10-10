@@ -134,7 +134,9 @@ void OnCompressedCallback(void *outputCallbackRefCon,void *sourceFrameRefCon, OS
 		
 		//	gr: I think if we have this callback, it's when everything is done
 		//		not per-frame (that's a different callback!)
-		This->OnCompressionFinished();
+		//	gr: doesn't seem to be the case...
+		//		VTCompressionSessionCompleteFrames() should be blocking until all output though
+		//This->OnCompressionFinished();
 	}
 	catch(std::exception& e)
 	{
@@ -351,8 +353,13 @@ Avf::TCompressor::~TCompressor()
 
 void Avf::TCompressor::Flush()
 {
+	//	docs:
+	//	https://developer.apple.com/documentation/videotoolbox/1428303-vtcompressionsessioncompletefram
+	//	If completeUntilPresentationTimeStamp is non-numeric, all pending frames are emitted before the function returns.
+	//	therefore, after this returns, we can emit finished
 	auto Error = VTCompressionSessionCompleteFrames( mSession, kCMTimeInvalid );
 	IsOkay(Error,"VTCompressionSessionCompleteFrames");
+	OnCompressionFinished();
 }
 
 
