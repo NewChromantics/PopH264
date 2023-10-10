@@ -520,15 +520,30 @@ public static class PopH264
 	[System.Serializable]
 	public struct EncoderParams
 	{
-//	public string	Encoder = "avf"|"x264"
-//	public int		Quality = [0..9]				x264
-//	public int		AverageKbps = int				avf kiloBYTES
-//	public int		MaxKbps = int					avf kiloBYTES
-//	public bool		Realtime = true				avf: kVTCompressionPropertyKey_RealTime
-//	.MaxFrameBuffers = undefined	avf: kVTCompressionPropertyKey_MaxFrameDelayCount
-//	.MaxSliceBytes = number			avf: kVTCompressionPropertyKey_MaxH264SliceBytes
-//	.MaximisePowerEfficiency = true	avf: kVTCompressionPropertyKey_MaximizePowerEfficiency
-//	public int		ProfileLevel = 30(int)			Baseline only at the moment. 30=3.0, 41=4.1 etc this also matches the number in SPS. Default will try and pick correct for resolution or 3.0
+		//	gr: these are commented out whilst the c++ code doesn't handle 0/false as defaults as anything in the c# struct WILL be present
+		//		in json
+		public bool		VerboseDebug;	//	extra debug in stderr
+
+		//public string	Encoder;	// = "avf"|"x264", mediafoundation etc. todo: need to specify lower-level encoder too
+		//public int		Quality = [0..9]				x264
+		//public int		AverageKbps = int				avf kiloBYTES
+		//public int		MaxKbps = int					avf kiloBYTES
+		//public bool		Realtime = true				avf: kVTCompressionPropertyKey_RealTime, on nvidia/V4L2, this is "max performance" setting
+		//public int		ProfileLevel = 30(int)			Baseline only at the moment. 30=3.0, 41=4.1 etc this also matches the number in SPS. Default will try and pick correct for resolution or 3.0
+		//	avf - kVTCompressionPropertyKey_MaxFrameDelayCount
+		//	mediafoundation - internal frame buffering cap
+		//	0 will only push frames immediately and drop frames that can't be pushed (depending on platform)
+		//public int	MaxFrameBuffers;
+
+		//	avf
+		//public int	MaxSliceBytes;			avf: kVTCompressionPropertyKey_MaxH264SliceBytes
+		//public bool	MaximisePowerEfficiency;	avf: kVTCompressionPropertyKey_MaximizePowerEfficiency
+		//	avf
+		//public int	KeyFrameFrequency;		//	hint at keyframe every N frames
+
+		//	nvidia
+		//#define POPH264_ENCODER_KEY_CONSTANTBITRATE		"ConstantBitRate"	//	else variable
+		//#define POPH264_ENCODER_KEY_SLICELEVELENCODING	"SliceLevelEncoding"
 	};
 
 	[System.Serializable]
@@ -554,6 +569,7 @@ public static class PopH264
 		public byte[]		H264Data;
 		public EncodedFrameMeta	Meta;
 		public PoppedFrameMeta	EncoderMeta;
+		public bool			EndOfStream => EncoderMeta.EndOfStream;
 	}
 	
 	//	data coming out of PopH264_EncoderPeekData
@@ -567,6 +583,7 @@ public static class PopH264
 	public struct PoppedFrameMeta
 	{
 		public int					DataSize;	//	bytes
+		public bool					EndOfStream;
 		public EncodedFrameMeta		Meta;	//	all the meta sent to PopH264_EncoderPushFrame
 		public int?					EncodeDurationMs;	//	time it took to encode
 		public int?					DelayDurationMs;	//	time spent in queue before encoding (lag)
@@ -576,12 +593,17 @@ public static class PopH264
 
 	public class Encoder : IDisposable
 	{
-		int? Instance = null;
+		int?	Instance = null;
+		bool	VerboseLogging = false;
+		System.Action<string> VerboseLog => VerboseLogging ? Debug.Log : (string x)=>{};	//	using a lambda getter means the source of the log is the caller, not here
+
 		
 		public Encoder(EncoderParams? EncoderParams)
 		{
 			if ( !EncoderParams.HasValue )
 				EncoderParams = new EncoderParams();
+			
+			this.VerboseLogging = EncoderParams.Value.VerboseDebug;
 			
 			var ParamsJson = JsonUtility.ToJson(EncoderParams.Value);
 			var ParamsJsonAscii = System.Text.ASCIIEncoding.ASCII.GetBytes(ParamsJson + "\0");
@@ -589,10 +611,10 @@ public static class PopH264
 			Instance = PopH264_CreateEncoder(ParamsJsonAscii, ErrorBuffer, ErrorBuffer.Length);
 			var Error = GetString(ErrorBuffer);
 			if (Instance.Value <= 0)
-				throw new System.Exception("Failed to create decoder instance;" + Error);
+				throw new System.Exception($"Failed to create decoder instance; {Error}");
 			if (!String.IsNullOrEmpty(Error))
 			{
-				Debug.LogWarning("Created PopH264 decoder (" + Instance.Value + ") but error was not empty (length = " + Error.Length + ") " + Error);
+				Debug.LogWarning($"Created PopH264 decoder ({Instance.Value}) but error was not empty; {Error}(length={Error.Length})");
 			}
 		}
 		
@@ -777,12 +799,30 @@ public static class PopH264
 			var MetaJson = GetString(MetaJsonBuffer);
 			var PoppedFrameMeta = JsonUtility.FromJson<PoppedFrameMeta>(MetaJson);
 			
-			Debug.Log($"PopFrame() -> {MetaJson}");
+			VerboseLog($"PopFrame() -> {MetaJson}");
+
+			//	finished? send a have-finished "frame"
+			if ( PoppedFrameMeta.EndOfStream )
+			{
+				H264Frame EofFrame;
+				EofFrame.EncoderMeta = PoppedFrameMeta;
+				EofFrame.Meta = default;
+				EofFrame.H264Data = Array.Empty<byte>();
+
+				//	if there are frames on the output queue... pop them off
+				if ( PoppedFrameMeta.OutputQueueCount > 0 )
+				{
+					VerboseLog($"Eof but popping next of {PoppedFrameMeta.OutputQueueCount} queued");
+					PopH264_EncoderPopData( Instance.Value, null, 0 );
+				}
+
+				return EofFrame;
+			}
+
 			//	any data pending?
-			////	gr: how do we know stream is finished?
 			if ( PoppedFrameMeta.DataSize == 0 )
 			{
-				Debug.Log($"No pending frame to pop-> {MetaJson}");
+				//Debug.Log($"No pending frame to pop-> {MetaJson}");
 				return null;
 			}
 			
