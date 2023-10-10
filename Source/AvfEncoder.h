@@ -39,7 +39,7 @@ public:
 class Avf::TEncoder : public PopH264::TEncoder
 {
 public:
-	static inline const char*	Name = "Avf";
+	static inline std::string_view	Name = "Avf";
 	
 public:
 	TEncoder(TEncoderParams& Params,std::function<void(PopH264::TPacket&)> OnOutputPacket);
@@ -49,6 +49,8 @@ public:
 	virtual void		Encode(const SoyPixelsImpl& Pixels,const std::string& Meta,bool Keyframe) override;
 	virtual void		FinishEncoding() override;
 	
+	virtual std::string	GetEncoderName() override	{	return std::string(Name);	}
+
 private:
 	void			AllocEncoder(const SoyPixelsMeta& Meta);
 	void			OnPacketCompressed(std::span<uint8_t> Data,size_t FrameNumber);
