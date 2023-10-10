@@ -6,6 +6,7 @@
 #include <functional>
 #include <span>
 #include "TDecoderInstance.h"	//	EventTime_t
+#include <unordered_map>
 
 class SoyPixelsImpl;
 
