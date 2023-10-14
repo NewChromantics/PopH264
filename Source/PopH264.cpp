@@ -266,12 +266,12 @@ __export int32_t PopH264_CreateDecoder(const char* OptionsJson, char* ErrorBuffe
 	catch (std::exception& e)
 	{
 		Soy::StringToBuffer(e.what(), ErrorBuffer, ErrorBufferLength);
-		return 0;
+		return PopH264_NullInstance;
 	}
 	catch (...)
 	{
 		Soy::StringToBuffer("Unknown exception", ErrorBuffer, ErrorBufferLength);
-		return 0;
+		return PopH264_NullInstance;
 	}
 }
 
@@ -306,13 +306,13 @@ __export int32_t PopH264_CreateEncoder(const char* OptionsJson,char* ErrorBuffer
 	{
 		std::Debug << __PRETTY_FUNCTION__ << " exception " << e.what() << std::endl;
 		Soy::StringToBuffer( e.what(), ErrorBuffer, ErrorBufferSize );
-		return -1;
+		return PopH264_NullInstance;
 	}
 	catch(...)
 	{
 		std::Debug << __PRETTY_FUNCTION__ << " unknown exception" << std::endl;
 		Soy::StringToBuffer("Unknown exception", ErrorBuffer, ErrorBufferSize );
-		return -1;
+		return PopH264_NullInstance;
 	}
 }
 
