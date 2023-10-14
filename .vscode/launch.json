@@ -25,8 +25,20 @@
 			"preLaunchTask": "Build Nvidia"
 		},
 		{
-			"name": "Debug gdb",
+			"name": "Debug with gdb",
 			"type": "gdb",
+			"request": "launch",
+			"target": "./Build/PopH264TestApp",
+			"program": "./Build/PopH264TestApp",
+			"cwd": "${workspaceRoot}",
+			"valuesFormatting": "parseText",
+			"printCalls": true,
+			"showDevDebugOutput": true,
+			"preLaunchTask": "Build"
+		},
+		{
+			"name": "Debug with vgdb",
+			"type": "vgdb",
 			"request": "launch",
 			"target": "./Build/PopH264TestApp",
 			"program": "./Build/PopH264TestApp",

@@ -36,8 +36,8 @@ PopH264.visualstudio/ARM64/
 # vscode files
 # gr: now including .vscode for the project config .jsons
 #.vscode
-.devcontainer
-
+# gr: now including .devcontainer to enable dev containers!
+#.devcontainer
 
 # linux build temp files
 *.o
