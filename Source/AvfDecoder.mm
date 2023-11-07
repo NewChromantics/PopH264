@@ -394,10 +394,11 @@ void Avf::TDecompressor::CreateDecoderSession(CFPtr<CMFormatDescriptionRef> Inpu
 	
 	try
 	{
-		auto Value = kCFBooleanFalse;
+		CFBooleanRef Value = kCFBooleanFalse;
 		auto Result = VTSessionCopyProperty( mSession.mObject, kVTDecompressionPropertyKey_UsingHardwareAcceleratedVideoDecoder, nullptr, &Value );
 		Avf::IsOkay(Result, "Reading kVTDecompressionPropertyKey_UsingHardwareAcceleratedVideoDecoder");
-		mIsHardwareAccelleratedSession = Value == kCFBooleanTrue;
+		mIsHardwareAccelleratedSession = CFBooleanGetValue(Value);
+		CFRelease(Value);
 	}
 	catch(std::exception& e)
 	{
