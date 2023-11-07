@@ -106,6 +106,8 @@ public:
 	void				OnDecodedFrame(OSStatus Status,CVImageBufferRef ImageBuffer,VTDecodeInfoFlags Flags,CMTime PresentationTimeStamp );
 	void				OnDecodeError(std::string_view Error,CMTime PresentationTime);
 
+	bool				IsHardwareAccellerated()	{	return mIsHardwareAccelleratedSession;	}
+	
 protected:
 	void				CreateDecoderSession(CFPtr<CMFormatDescriptionRef> InputFormat,H264::TSpsParams SpsParams);
 	bool				HasSession();
@@ -119,6 +121,7 @@ protected:
 	std::function<void(std::shared_ptr<TPixelBuffer>,PopH264::FrameNumber_t)>		mOnFrame;
 	std::function<void(const std::string&,PopH264::FrameNumber_t)>	mOnError;
 	PopH264::TDecoderParams				mParams;
+	bool								mIsHardwareAccelleratedSession = false;
 };
 
 
@@ -371,21 +374,35 @@ void Avf::TDecompressor::CreateDecoderSession(CFPtr<CMFormatDescriptionRef> Inpu
 	{
 		CFDictionarySetValue(decoderParameters,kVTVideoDecoderSpecification_EnableHardwareAcceleratedVideoDecoder, kCFBooleanTrue );
 	}
+	
 	{
-	const VTDecompressionOutputCallbackRecord callback = { OnDecompress, this };
+		const VTDecompressionOutputCallbackRecord callback = { OnDecompress, this };
+		
+		auto Result = VTDecompressionSessionCreate(
+												   Allocator,
+												   mInputFormat.mObject,
+												   decoderParameters,
+												   destinationPixelBufferAttributes,
+												   &callback,
+												   &mSession.mObject );
+		
+		CFRelease(destinationPixelBufferAttributes);
+		CFRelease(decoderParameters);
+		
+		Avf::IsOkay( Result, "TDecompressionSessionCreate" );
+	}
 	
-	auto Result = VTDecompressionSessionCreate(
-											   Allocator,
-											   mInputFormat.mObject,
-											   decoderParameters,
-											   destinationPixelBufferAttributes,
-											   &callback,
-											   &mSession.mObject );
-	
-	CFRelease(destinationPixelBufferAttributes);
-	CFRelease(decoderParameters);
-	
-	Avf::IsOkay( Result, "TDecompressionSessionCreate" );
+	try
+	{
+		auto Value = kCFBooleanFalse;
+		auto Result = VTSessionCopyProperty( mSession.mObject, kVTDecompressionPropertyKey_UsingHardwareAcceleratedVideoDecoder, nullptr, &Value );
+		Avf::IsOkay(Result, "Reading kVTDecompressionPropertyKey_UsingHardwareAcceleratedVideoDecoder");
+		mIsHardwareAccelleratedSession = Value == kCFBooleanTrue;
+	}
+	catch(std::exception& e)
+	{
+		std::cout << e.what() << std::endl;
+	}
 }
 
 Avf::TDecompressor::~TDecompressor()
@@ -874,6 +891,7 @@ bool Avf::TDecoder::DecodeNextPacket()
 		{
 			//std::Debug << "Decompressed pixel buffer " << PresentationTime << std::endl;
 			json11::Json::object Meta;
+			Meta["HardwareAccelerated"] = mDecompressor->IsHardwareAccellerated();
 			this->OnDecodedFrame( *pPixelBuffer, FrameNumber, Meta );
 		};
 		
