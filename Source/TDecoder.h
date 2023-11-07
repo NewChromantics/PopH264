@@ -67,13 +67,15 @@ public:
 	TDecoderParams(json11::Json& Params);
 
 	bool		StripH264EmulationPrevention()	{	return mStripEmulationPrevention;	}
+	bool		PreferFramesInOrder()			{	return !mDontReorderFrames;	}
 
 public:
 	std::string	mDecoderName;
 	//	gr: because unity doesn't let us initialise structs, we need to try and make
 	//		all bool options default to false for our ideal default.
 	bool		mVerboseDebug = false;
-	bool		mAllowBuffering = false;
+	bool		mAllowBuffering = false;		//	gr: this is off by default to get frames out ASAP. But we may prefer always in order!
+	bool		mDontReorderFrames = false;		//	gr: preference is frames in order, but buffering may conflict with this
 	bool		mDoubleDecodeKeyframe = false;
 	bool		mDrainOnKeyframe = false;
 	bool		mLowPowerMode = false;

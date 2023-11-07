@@ -707,7 +707,7 @@ void Avf::TDecompressor::DecodeSample(CFPtr<CMSampleBufferRef> SampleBuffer,size
 	VTDecodeInfoFlags FlagsOut = 0;
 	
 	//	gr: temporal means frames (may?) will be output in display order, OS will hold onto decoded frames
-	bool OutputFramesInOrder = mParams.mAllowBuffering;
+	bool OutputFramesInOrder = mParams.PreferFramesInOrder();
 	if ( OutputFramesInOrder )
 		Flags |= kVTDecodeFrame_EnableTemporalProcessing;
 	
