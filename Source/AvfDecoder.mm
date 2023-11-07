@@ -361,6 +361,9 @@ void Avf::TDecompressor::CreateDecoderSession(CFPtr<CMFormatDescriptionRef> Inpu
 	static bool AllowDroppedFrames = false;
 	CFDictionarySetValue(decoderParameters,kVTDecompressionPropertyKey_RealTime, AllowDroppedFrames ? kCFBooleanTrue : kCFBooleanFalse );
 	
+#if TARGET_OS_IPHONE
+	//	these don't exist on ios, always hardware accellerated!
+#else
 	//	always set enable until we have some "dont allow hardware" option
 	if ( mParams.mRequireHardwareDecoder )
 	{
@@ -374,6 +377,7 @@ void Avf::TDecompressor::CreateDecoderSession(CFPtr<CMFormatDescriptionRef> Inpu
 	{
 		CFDictionarySetValue(decoderParameters,kVTVideoDecoderSpecification_EnableHardwareAcceleratedVideoDecoder, kCFBooleanTrue );
 	}
+#endif
 	
 	{
 		const VTDecompressionOutputCallbackRecord callback = { OnDecompress, this };
@@ -395,14 +399,25 @@ void Avf::TDecompressor::CreateDecoderSession(CFPtr<CMFormatDescriptionRef> Inpu
 	try
 	{
 		CFBooleanRef Value = kCFBooleanFalse;
-		auto Result = VTSessionCopyProperty( mSession.mObject, kVTDecompressionPropertyKey_UsingHardwareAcceleratedVideoDecoder, nullptr, &Value );
+		
+#if TARGET_OS_IPHONE
+		//	https://chromium.googlesource.com/chromium/src/+/master/media/gpu/mac/vt_video_decode_accelerator_mac.cc
+		//	chromium uses a string, key missing on ios
+		//	but fails with "unsupported" (as does jpeg decoder)
+		auto Key = CFSTR("UsingHardwareAcceleratedVideoDecoder");
+		//	but we know it is hardware accellerated on ios (but is the jpeg decoder?)
+		mIsHardwareAccelleratedSession = true;
+#else
+		auto Key = kVTDecompressionPropertyKey_UsingHardwareAcceleratedVideoDecoder;
+#endif
+		auto Result = VTSessionCopyProperty( mSession.mObject, Key, nullptr, &Value );
 		Avf::IsOkay(Result, "Reading kVTDecompressionPropertyKey_UsingHardwareAcceleratedVideoDecoder");
 		mIsHardwareAccelleratedSession = CFBooleanGetValue(Value);
 		CFRelease(Value);
 	}
 	catch(std::exception& e)
 	{
-		std::cout << e.what() << std::endl;
+		std::cout << e.what() << " (resulting IsHardwareAccelleratedSession=" << mIsHardwareAccelleratedSession << ")" << std::endl;
 	}
 }
 
