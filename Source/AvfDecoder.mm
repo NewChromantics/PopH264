@@ -358,6 +358,20 @@ void Avf::TDecompressor::CreateDecoderSession(CFPtr<CMFormatDescriptionRef> Inpu
 	static bool AllowDroppedFrames = false;
 	CFDictionarySetValue(decoderParameters,kVTDecompressionPropertyKey_RealTime, AllowDroppedFrames ? kCFBooleanTrue : kCFBooleanFalse );
 	
+	//	always set enable until we have some "dont allow hardware" option
+	if ( mParams.mRequireHardwareDecoder )
+	{
+		CFDictionarySetValue(decoderParameters,kVTVideoDecoderSpecification_RequireHardwareAcceleratedVideoDecoder, kCFBooleanTrue );
+	}
+	else if ( mParams.mRequireSoftwareDecoder )
+	{
+		CFDictionarySetValue(decoderParameters,kVTVideoDecoderSpecification_EnableHardwareAcceleratedVideoDecoder, kCFBooleanFalse );
+	}
+	else
+	{
+		CFDictionarySetValue(decoderParameters,kVTVideoDecoderSpecification_EnableHardwareAcceleratedVideoDecoder, kCFBooleanTrue );
+	}
+	{
 	const VTDecompressionOutputCallbackRecord callback = { OnDecompress, this };
 	
 	auto Result = VTDecompressionSessionCreate(
