@@ -81,6 +81,8 @@ public:
 	bool		mDecodeSei = false;			//	SEI on Avf gives us an error, so we skip it
 	bool		mAsyncDecompression = false;	//	Avf experimental async decompression, which may or may not go on a background thread 
 	bool		mStripEmulationPrevention = false;
+	bool		mRequireHardwareDecoder = false;
+	bool		mRequireSoftwareDecoder = false;
 	
 	//	on android, these are used to configure the format, and might affect input buffer sizes
 	//	if zero, they're unused
