@@ -450,7 +450,8 @@ void SafeDecoderTest(const char* TestDataName,CompareFunc_t* Compare,const char*
 int main()
 {
 #if defined(TARGET_WINDOWS)
-	Platform::CaptureStdErr();
+	if ( Platform::IsDebuggerAttached() )
+		Platform::CaptureStdErr();
 #endif
 	
 	
