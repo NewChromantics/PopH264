@@ -2,7 +2,8 @@
 
 
 SDKROOT = appletvos
-IPHONEOS_DEPLOYMENT_TARGET = 13.0
+TVOS_DEPLOYMENT_TARGET = 16.0
+SUPPORTED_PLATFORMS = appletvsimulator appletvos
 
 
 //	gr: move to soy xcconfig
@@ -14,7 +15,7 @@ TARGET_ARCH[arch=arm64] = TARGET_ARCH_ARM64
 
 
 GCC_PREPROCESSOR_DEFINITIONS = $(inherited) TARGET_IOS $(TARGET_ARCH)
-INFOPLIST_FILE = $(SRCROOT)/Info.plist
+INFOPLIST_FILE = $(SRCROOT)/Source_Ios/PopH264_TvosStatic-Info.plist
 
 BROADWAY_PATH = $(SRCROOT)/Source/Broadway/Decoder
 HEADER_SEARCH_PATHS = $(HEADER_SEARCH_PATHS) $(inherited) $(BROADWAY_PATH)/inc

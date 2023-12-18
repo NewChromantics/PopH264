@@ -1,6 +1,7 @@
 #include "../Source_Osx/PopH264_Apple.xcconfig"
 
 MACOSX_DEPLOYMENT_TARGET = 10.13
+SDKROOT = macosx
 
 
 //	gr: move to soy xcconfig

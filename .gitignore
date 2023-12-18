@@ -18,8 +18,9 @@ xcuserdata/
 Pop*.Uwp/Release/
 Build/
 Unity/PopH264/Logs/
-build-iphoneos/
-build-iphonesimulator/
+
+# xcode internmediate dirs
+build-*/
 
 # built binaries, this list should be a reference to where binaries go
 
@@ -57,3 +58,4 @@ Unity/PopH264/Assets/PopH264/
 
 # macos system files
 .DS_Store
+
