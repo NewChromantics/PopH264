@@ -2,7 +2,7 @@
 #include "SoyPixels.h"
 #include "SoyAvf.h"
 #include "SoyFourcc.h"
-#include "SoyLib/src/magic_enum/include/magic_enum.hpp"
+#include "magic_enum.hpp"
 #include "json11.hpp"
 
 #include <CoreMedia/CMBase.h>

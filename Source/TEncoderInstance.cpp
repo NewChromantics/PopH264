@@ -1,6 +1,6 @@
 #include "TEncoderInstance.h"
 #include "SoyH264.h"
-#include "SoyLib/src/magic_enum/include/magic_enum.hpp"
+#include "magic_enum.hpp"
 #include "json11.hpp"
 #include "PopH264.h"
 

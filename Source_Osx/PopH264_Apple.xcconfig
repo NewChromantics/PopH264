@@ -17,6 +17,8 @@ GCC_C_LANGUAGE_STANDARD = c99
 
 BUILD_LIBRARY_FOR_DISTRIBUTION = YES
 
+BROADWAY_PATH = $(SRCROOT)/Source/Broadway/Decoder
+MAGICENUM_PATH = $(SRCROOT)/Source/SoyLib/src/magic_enum/include/magic_enum/
 
 
 PRODUCT_BUNDLE_IDENTIFIER = com.NewChromantics.$(PRODUCT_NAME:rfc1034identifier)

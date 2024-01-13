@@ -3,7 +3,7 @@
 #include "SoyLib/src/SoyDebug.h"
 #include "SoyLib/src/SoyPixels.h"
 #include "SoyH264.h"
-#include "SoyLib/src/magic_enum/include/magic_enum.hpp"
+#include "magic_enum.hpp"
 
 
 
