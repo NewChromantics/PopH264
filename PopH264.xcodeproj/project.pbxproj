@@ -440,6 +440,7 @@
 		BF3225772445F8DD00C74D4D /* TEncoder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TEncoder.cpp; path = Source/TEncoder.cpp; sourceTree = "<group>"; };
 		BF32257A244609C700C74D4D /* libx264.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libx264.a; path = Source/X264/osx/libx264.a; sourceTree = "<group>"; };
 		BF32257C244609D100C74D4D /* libx264.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libx264.a; path = Source/X264/Ios/lib/libx264.a; sourceTree = "<group>"; };
+		BF4366472B4B069100009182 /* PopH264_UniversalFramework.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = PopH264_UniversalFramework.xcconfig; sourceTree = "<group>"; };
 		BF44AAB1249FB65500C9D982 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS12.1.sdk/System/Library/Frameworks/AVFoundation.framework; sourceTree = DEVELOPER_DIR; };
 		BF459C7F21F7C97400CED59D /* TDecoderInstance.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TDecoderInstance.h; path = Source/TDecoderInstance.h; sourceTree = "<group>"; };
 		BF459CD521F7D5C700CED59D /* PopH264_Osx.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = PopH264_Osx.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -775,6 +776,7 @@
 		BF004B6424FD3CAC00DC6A90 /* Source_Osx */ = {
 			isa = PBXGroup;
 			children = (
+				BF4366472B4B069100009182 /* PopH264_UniversalFramework.xcconfig */,
 				BFAC70C52A9563D600D8734F /* PopH264_MacosDylib.xcconfig */,
 				BF1FA6EF28759D25002F03C5 /* PopH264_MacosStatic_Info.plist */,
 				BF459CDD21F7D60500CED59D /* PopH264_Osx_Info.plist */,
@@ -2169,18 +2171,18 @@
 		};
 		BF51B8C4256A7DBA004DE4C7 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = BF4366472B4B069100009182 /* PopH264_UniversalFramework.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
-				FULL_PRODUCT_NAME = "${PRODUCT_NAME}.xcframework";
 				PRODUCT_NAME = "$(PROJECT_NAME)";
 			};
 			name = Debug;
 		};
 		BF51B8C5256A7DBA004DE4C7 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = BF4366472B4B069100009182 /* PopH264_UniversalFramework.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
-				FULL_PRODUCT_NAME = "${PRODUCT_NAME}.xcframework";
 				PRODUCT_NAME = "$(PROJECT_NAME)";
 			};
 			name = Release;
