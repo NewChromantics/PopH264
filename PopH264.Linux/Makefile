@@ -20,6 +20,7 @@ LIB_INCLUDES = \
 -I$(SRC_PATH)/Broadway/Decoder	\
 -I$(SRC_PATH)/Broadway/Decoder/inc	\
 -I$(SOY_PATH)/src	\
+-I$(SOY_PATH)/src/magic_enum/include/magic_enum/	\
 -I$(SRC_PATH)/Json11	\
 
 LIB_SRC_FILES  = \
