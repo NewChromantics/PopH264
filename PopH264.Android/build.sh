@@ -1,6 +1,7 @@
 #!/bin/sh
 # gr: this should have been set by brew on osx
 #export ANDROID_NDK_HOME="/usr/local/share/android-ndk"
+#$HOMEBREW_PREFIX/share/android-ndk
 
 #echo "env vars"
 #env

@@ -592,6 +592,7 @@
 		BFFBE97B245DB65000E9BE1B /* AvfDecoder.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = AvfDecoder.mm; path = Source/AvfDecoder.mm; sourceTree = "<group>"; };
 		BFFC941A245DC0B900AEE711 /* SoyTypes_CoreFoundation.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SoyTypes_CoreFoundation.h; path = Source/SoyLib/src/SoyTypes_CoreFoundation.h; sourceTree = "<group>"; };
 		BFFC941D245EE17900AEE711 /* SoyMedia.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SoyMedia.h; path = Source/SoyLib/src/SoyMedia.h; sourceTree = "<group>"; };
+		BFFF90292B52E1F80096803A /* Android.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Android.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -808,6 +809,7 @@
 				BF53E82B22ECB934008253CD /* v0.21.0 */,
 				BF53E82622EC8B59008253CD /* PopH264.Lumin */,
 				BFF1C6E322E377D100AFDFD5 /* PopH264.Android */,
+				BFFF90272B52E1F70096803A /* PopH264.Android */,
 				BFD6076D1EA16ED20035C814 /* Source */,
 				BFC471782447506B00A2DA70 /* Source_TestApp */,
 				BF1A4329266B93B1004BA276 /* SrcWeb */,
@@ -1091,6 +1093,14 @@
 				BFFBE960245835CD00E9BE1B /* SoyFilesystem.cpp */,
 			);
 			name = SoyLib;
+			sourceTree = "<group>";
+		};
+		BFFF90272B52E1F70096803A /* PopH264.Android */ = {
+			isa = PBXGroup;
+			children = (
+				BFFF90292B52E1F80096803A /* Android.xcconfig */,
+			);
+			path = PopH264.Android;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -2242,21 +2252,15 @@
 		};
 		BFF1C6DF22E3769B00AFDFD5 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = BFFF90292B52E1F80096803A /* Android.xcconfig */;
 			buildSettings = {
-				ANDROID_ABI_ONLY = "armeabi-v7a";
-				ANDROID_NDK_HOME = "/opt/homebrew/share/android-ndk";
-				BUILD_TARGET_NAME = PopH264;
-				UNITY_ASSET_PLUGIN_PATH = "$(UNITY_OUTPUT_PATH)/Android";
 			};
 			name = Debug;
 		};
 		BFF1C6E022E3769B00AFDFD5 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = BFFF90292B52E1F80096803A /* Android.xcconfig */;
 			buildSettings = {
-				ANDROID_ABI_ONLY = "armeabi-v7a";
-				ANDROID_NDK_HOME = "/opt/homebrew/share/android-ndk";
-				BUILD_TARGET_NAME = PopH264;
-				UNITY_ASSET_PLUGIN_PATH = "$(UNITY_OUTPUT_PATH)/Android";
 			};
 			name = Release;
 		};

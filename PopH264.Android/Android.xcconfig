@@ -1,0 +1,20 @@
+#include "../Source/Version.xcconfig"
+
+//	gr: this should be in your env, but doesnt get evaluated by xcode
+HOMEBREW_PREFIX=/opt/homebrew
+
+
+//	configuration(env vars) for android build.sh when used from xcode
+ANDROID_NDK_HOME=$(HOMEBREW_PREFIX)/share/android-ndk
+//ANDROID_NDK_HOME="/opt/homebrew/share/android-ndk"
+//	or use unity's NDK copy
+ANDROID_NDK_HOME=/Applications/2022.3.14f1/PlaybackEngines/AndroidPlayer/NDK
+
+BUILD_TARGET_NAME = PopH264
+
+
+//	just for speed/testing param
+ANDROID_ABI_ONLY = armeabi-v7a
+
+//	no longer used
+//UNITY_ASSET_PLUGIN_PATH = $(UNITY_OUTPUT_PATH)/Android
