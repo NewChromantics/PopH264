@@ -6,7 +6,7 @@
 #include "TInstanceManager.h"
 #include "PopH264TestData.h"
 #include <iostream>
-
+#include "SoyLib/src/SoyH264.h"
 
 
 
@@ -556,6 +556,16 @@ void Test_Decoder_CreateAndDestroy();
 void Test_Decoder_DecodeRainbow();
 void Test_Decoder_DestroyMidDecodeRainbow();
 
+
+__export void PopH264_UnitTestThrows()
+{
+	H264::UnitTest();
+}
+
+
+
+//	todo: drop this
+//		these are not really unit tests, they're integration tests and should be covered by the test app's integration tests
 __export void PopH264_UnitTest(PopH264_UnitTestCallback* OnTestResult)
 {
 	try

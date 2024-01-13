@@ -44,6 +44,7 @@ __export int32_t			PopH264_GetTestData(const char* Name, uint8_t* Buffer, int32_
 
 //	some built in unit/system tests. Prints to stdout if no callback provided
 __export void				PopH264_UnitTest(PopH264_UnitTestCallback* OnTestResult);
+__export void				PopH264_UnitTestThrows();	//	for c++, this will throw an exception on error
 
 
 

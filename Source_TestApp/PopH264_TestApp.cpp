@@ -1021,6 +1021,12 @@ TEST(PopH264_General_Tests, PopJsonUnitTest )
 	EXPECT_NO_THROW( PopJson::UnitTest() );
 }
 
+TEST(PopH264_General_Tests, PopH264UnitTest )
+{
+	//PopH264_UnitTest(nullptr);
+	EXPECT_NO_THROW( PopH264_UnitTestThrows() );
+}
+
 
 
 TEST(PopH264_General_Tests, EncoderPopNull )
@@ -1080,9 +1086,6 @@ TEST(PopH264_General_Tests,OldMain)
 	MakeGreyscalePng("PopH264Test_GreyscaleGradient.png");
 	MakeRainbowPng("PopH264Test_RainbowGradient.png");
 #endif
-
-	std::cerr << "PopH264_UnitTests" << std::endl;
-	PopH264_UnitTest(nullptr);
 	
 	//	depth data has iframe, pps, sps order
 	SafeDecoderTest("TestData/Main5.h264", nullptr, nullptr );
