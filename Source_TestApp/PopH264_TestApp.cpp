@@ -565,6 +565,14 @@ class PopH264_Decode_Tests : public testing::TestWithParam<DecodeTestParams_t>
 
 auto DecodeTestValues = ::testing::Values
 (
+	//	data from ffmpeg's udp:// streaming protocol
+	//	ffmpeg -filter_complex ddagrab=output_idx=0:framerate=60:draw_mouse=0,hwdownload,format=bgra  -c:v libx264 -tune zerolatency -preset ultrafast -s 512x512 -r 60 -f h264 udp://127.0.0.1:10000
+	//	https://github.com/NewChromantics/PopH264/issues/80
+	DecodeTestParams_t{.Filename="TestData/FfmpegUdpStream_yuv420p.h264", .ExpectedResults{.FrameCount=563,.Width=960,.Height=540,.Profile=H264Profile::High4} },
+	//	this fails on apple as its yuv_444
+	//DecodeTestParams_t{.Filename="TestData/FfmpegUdpStream_yuv444.h264", .ExpectedResults{.FrameCount=563,.Width=960,.Height=540,.Profile=H264Profile::High4} },
+
+
 	// //	depth.h264 has IDRs before SPS/PPS
 	//DecodeTestParams_t{.Filename="TestData/Depth.h264", .ExpectedResults{.FrameCount=1} }
 	//DecodeTestParams_t{.Filename="TestData/Colour.h264", .ExpectedResults{.FrameCount=1,.Width=640,.Height=480,.Profile=H264Profile::Baseline} }
