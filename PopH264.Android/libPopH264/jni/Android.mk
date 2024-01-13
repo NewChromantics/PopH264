@@ -56,6 +56,7 @@ LOCAL_C_INCLUDES += \
 $(LOCAL_PATH)/$(SRC)/Source/Broadway/Decoder	\
 $(LOCAL_PATH)/$(SRC)/Source/Broadway/Decoder/inc	\
 $(LOCAL_PATH)/$(SOY_PATH)/src	\
+$(LOCAL_PATH)/$(SOY_PATH)/src/magic_enum/include/magic_enum/	\
 $(LOCAL_PATH)/$(SRC)/Source/Json11	\
 
 
@@ -155,7 +156,6 @@ include $(CLEAR_VARS)
 
 LOCAL_C_INCLUDES += \
 $(LOCAL_PATH)/$(SOY_PATH)/src	\
-$(LOCAL_PATH)/$(SOY_PATH)/src/magic_enum/include/magic_enum/	\
 $(LOCAL_PATH)/$(SRC)/Source/	\
 $(LOCAL_PATH)/$(SRC)/Source_TestApp/googletest/googletest/	\
 $(LOCAL_PATH)/$(SRC)/Source_TestApp/googletest/googletest/include/	\
