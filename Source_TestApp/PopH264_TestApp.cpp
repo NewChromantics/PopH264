@@ -565,11 +565,10 @@ class PopH264_Decode_Tests : public testing::TestWithParam<DecodeTestParams_t>
 
 auto DecodeTestValues = ::testing::Values
 (
- DecodeTestParams_t{.Filename="TestData/AppleSpatialRobotNutcracker.h264", .ExpectedResults{.FrameCount=563,.Width=960,.Height=540,.Profile=H264Profile::High4} },
- //	h265
- DecodeTestParams_t{.Filename="TestData/AppleSpatialRobotNutcracker.h265", .ExpectedResults{.FrameCount=563,.Width=960,.Height=540,.Profile=H264Profile::High4} },
-
- DecodeTestParams_t{.Filename="TestData/Issue83.h264", .ExpectedResults{.FrameCount=563,.Width=960,.Height=540,.Profile=H264Profile::High4} },
+	DecodeTestParams_t{.Filename="TestData/AppleSpatialRobotNutcracker.h264", .ExpectedResults{.FrameCount=68,.Width=1920,.Height=1080,.Profile=H264Profile::High4} },
+	//	hevc
+	//DecodeTestParams_t{.Filename="TestData/AppleSpatialRobotNutcracker.h265", .ExpectedResults{.FrameCount=563,.Width=960,.Height=540,.Profile=H264Profile::High4} },
+	DecodeTestParams_t{.Filename="TestData/Issue83.h264", .ExpectedResults{.FrameCount=563,.Width=1920,.Height=1080,.Profile=H264Profile::High4} },
 
 	//	data from ffmpeg's udp:// streaming protocol
 	//	ffmpeg -filter_complex ddagrab=output_idx=0:framerate=60:draw_mouse=0,hwdownload,format=bgra  -c:v libx264 -tune zerolatency -preset ultrafast -s 512x512 -r 60 -f h264 udp://127.0.0.1:10000
@@ -736,7 +735,7 @@ void DecodeFileFrames(std::string_view Filename,std::function<bool(DecodedImage_
 		}
 
 		auto FrameNumber = PopH264_PopFrame( Decoder, Image.mPlane0.data(), Image.mPlane0.size(), Image.mPlane1.data(), Image.mPlane1.size(), Image.mPlane2.data(), Image.mPlane2.size() );
-		std::cerr  << "Decoded testdata; " << MetaJson << " FrameNumber=" << FrameNumber << " Should be " << FirstFrameNumber << std::endl;
+		EXPECT_EQ( FrameNumber, FirstFrameNumber )<< "Decoded testdata; " << MetaJson << " FrameNumber=" << FrameNumber << " Should be " << FirstFrameNumber << std::endl;
 		bool IsValid = FrameNumber >= 0;
 		if ( !IsValid )
 			continue;
@@ -776,7 +775,8 @@ DecodedImage_t DecodeFileFirstFrame(std::string_view Filename,std::string_view D
 	DecodeResults_t Results;
 
 	DecodeFileFrames( Filename, OnDecodedImage, DecoderName );
-
+	
+	//EXPECT_EQ( HadImage, true ) << Filename << " decoded no frames";
 	if ( !HadImage )
 		throw std::runtime_error( std::string(Filename) + " decoded no frames");
 	
@@ -792,7 +792,15 @@ TEST_P(PopH264_Decode_Tests,DecodeFileFirstFrame)
 {
 	auto Params = GetParam();
 	std::cerr << "Decode first frame of " << Params.Filename << std::endl;
+	
+	//	throws if failed
 	auto Image = DecodeFileFirstFrame( Params.Filename, Params.DecoderName );
+	
+	//EXPECT_EQ( Results.FrameCount, Params.ExpectedResults.FrameCount );
+	EXPECT_EQ( Image.mWidth, Params.ExpectedResults.Width );
+	EXPECT_EQ( Image.mHeight, Params.ExpectedResults.Height );
+	//EXPECT_EQ( Results.Profile, Params.ExpectedResults.Profile );
+
 }
 
 
