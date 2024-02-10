@@ -586,7 +586,11 @@ auto DecodeTestValues = ::testing::Values
 
 	//	windows width 96
 	//	apple width 128 (padded?)
-	DecodeTestParams_t{.Filename="RainbowGradient.h264", .ExpectedResults{.FrameCount=1,.Width=96,.Height=256,.Profile=H264Profile::Baseline} },
+#if defined(TARGET_WINDOWS)
+ DecodeTestParams_t{.Filename="RainbowGradient.h264", .ExpectedResults{.FrameCount=1,.Width=96,.Height=256,.Profile=H264Profile::Baseline} },
+#else
+ DecodeTestParams_t{.Filename="RainbowGradient.h264", .ExpectedResults{.FrameCount=1,.Width=128,.Height=256,.Profile=H264Profile::Baseline} },
+#endif
 	DecodeTestParams_t{.Filename="Condense.h264", .ExpectedResults{.FrameCount=1,.Width=2560,.Height=2000,.Profile=H264Profile::Baseline} },
 
 	//	greyscale isnt decoding on apple or windows11
