@@ -458,8 +458,10 @@ int main()
 	// Must be called prior to running any tests
 	testing::InitGoogleTest();
 	
-	std::string_view GTestFilter = "";
-	//std::string_view GTestFilter = "**DecodeFile**";
+	//std::string_view GTestFilter = "";
+	//std::string_view GTestFilter = "**DecodeFileFirstFrame**";
+	std::string_view GTestFilter = "**DecodeFileFirstFrame_DripFeedData**";
+	
 	if ( !GTestFilter.empty() )
 	{
 		using namespace testing;
@@ -559,15 +561,27 @@ public:
 	}
 };
 
+
+//	params for DecodeFileFrames- the process, not the test
+class DecodeFileFramesParams_t
+{
+public:
+	std::string		mFilename;
+	std::string		mDecoderName;
+	size_t			mPushDataBlockSize = 0;	//	if 0, send everything. Used to drip feed data for testing
+};
+
 class PopH264_Decode_Tests : public testing::TestWithParam<DecodeTestParams_t>
 {
 };
 
 auto DecodeTestValues = ::testing::Values
 (
-	DecodeTestParams_t{.Filename="TestData/AppleSpatialRobotNutcracker.h264", .ExpectedResults{.FrameCount=68,.Width=1920,.Height=1080,.Profile=H264Profile::High4} },
 	//	hevc
-	//DecodeTestParams_t{.Filename="TestData/AppleSpatialRobotNutcracker.h265", .ExpectedResults{.FrameCount=563,.Width=960,.Height=540,.Profile=H264Profile::High4} },
+	//DecodeTestParams_t{.Filename="TestData/AppleSpatialRobotNutcracker.h265", .ExpectedResults{.FrameCount=68,.Width=1920,.Height=1080,.Profile=H264Profile::High4} },
+ 
+ 
+	DecodeTestParams_t{.Filename="TestData/AppleSpatialRobotNutcracker.h264", .ExpectedResults{.FrameCount=68,.Width=1920,.Height=1080,.Profile=H264Profile::High4} },
 	DecodeTestParams_t{.Filename="TestData/Issue83.h264", .ExpectedResults{.FrameCount=563,.Width=1920,.Height=1080,.Profile=H264Profile::High4} },
 
 	//	data from ffmpeg's udp:// streaming protocol
@@ -643,8 +657,11 @@ void GenerateFakeImages(std::string_view Filename,std::function<bool(DecodedImag
 
 //	throws when we hit a decode error
 //	exits cleanly only if we get an EOF
-void DecodeFileFrames(std::string_view Filename,std::function<bool(DecodedImage_t)> OnDecodedImage,std::string_view DecoderName={})
+void DecodeFileFrames(DecodeFileFramesParams_t Params,std::function<bool(DecodedImage_t)> OnDecodedImage)
 {
+	auto Filename = Params.mFilename;
+	auto DecoderName = Params.mDecoderName;
+	
 	//	fake images
 	try
 	{
@@ -675,11 +692,26 @@ void DecodeFileFrames(std::string_view Filename,std::function<bool(DecodedImage_
 	}
 	
 	//	push input data
+	//	when we do https://github.com/NewChromantics/PopH264/issues/87
+	//	we should require frame number 0 when we dont know the packet breaks
 	int FirstFrameNumber = 9999;
 	{
-		auto Result = PopH264_PushData( Decoder, TestData.data(), TestData.size(), FirstFrameNumber );
-		if (Result < 0)
-			throw std::runtime_error("DecoderTest: PushData error");
+		//	drip feed data
+		auto BlockSize = Params.mPushDataBlockSize;
+		if ( BlockSize == 0 )
+			BlockSize = TestData.size();
+		
+		for ( auto i=0;	i<TestData.size();	i+=BlockSize )
+		{
+			auto NextBlock = std::span(TestData);
+			NextBlock = NextBlock.subspan( i );
+			auto NextBlockSize = std::min( BlockSize, NextBlock.size() );
+			NextBlock = NextBlock.subspan( 0, NextBlockSize );
+			
+			auto Result = PopH264_PushData( Decoder, NextBlock.data(), NextBlock.size(), FirstFrameNumber );
+			if (Result < 0)
+				throw std::runtime_error("DecoderTest: PushData error");
+		}
 		PopH264_PushEndOfStream( Decoder );
 	}
 	
@@ -764,7 +796,7 @@ void DecodeFileFrames(std::string_view Filename,std::function<bool(DecodedImage_
 }
 
 
-DecodedImage_t DecodeFileFirstFrame(std::string_view Filename,std::string_view DecoderName={})
+DecodedImage_t DecodeFileFirstFrame(DecodeFileFramesParams_t Params)
 {
 	DecodedImage_t FirstImage;
 	bool HadImage = false;
@@ -776,42 +808,55 @@ DecodedImage_t DecodeFileFirstFrame(std::string_view Filename,std::string_view D
 		HadImage = true;
 		return false;
 	};
-	DecodeResults_t Results;
+	//DecodeResults_t Results;
 
-	DecodeFileFrames( Filename, OnDecodedImage, DecoderName );
+	DecodeFileFrames( Params, OnDecodedImage );
 	
 	//EXPECT_EQ( HadImage, true ) << Filename << " decoded no frames";
 	if ( !HadImage )
-		throw std::runtime_error( std::string(Filename) + " decoded no frames");
+		throw std::runtime_error( Params.mFilename + " decoded no frames");
 	
 	return FirstImage;
 }
 
 
-
-
-
-//	this is essentially the same as DecodeFile but using this utility function
-TEST_P(PopH264_Decode_Tests,DecodeFileFirstFrame)
+void PopH264_Decode_Tests_DecodeFileFirstFrame(const DecodeTestParams_t& Params,size_t DecodeFileBlockSize)
 {
-	auto Params = GetParam();
 	std::cerr << "Decode first frame of " << Params.Filename << std::endl;
 	
 	//	throws if failed
-	auto Image = DecodeFileFirstFrame( Params.Filename, Params.DecoderName );
+	DecodeFileFramesParams_t DecodeParams;
+	DecodeParams.mFilename = Params.Filename;
+	DecodeParams.mDecoderName = Params.DecoderName;
+	DecodeParams.mPushDataBlockSize = DecodeFileBlockSize;
+
+	auto Image = DecodeFileFirstFrame( DecodeParams );
 	
 	//EXPECT_EQ( Results.FrameCount, Params.ExpectedResults.FrameCount );
 	EXPECT_EQ( Image.mWidth, Params.ExpectedResults.Width );
 	EXPECT_EQ( Image.mHeight, Params.ExpectedResults.Height );
 	//EXPECT_EQ( Results.Profile, Params.ExpectedResults.Profile );
+}
 
+//	this is essentially the same as DecodeFile but using this utility function
+TEST_P(PopH264_Decode_Tests,DecodeFileFirstFrame)
+{
+	auto DecodeFileBlockSize = 0;
+	PopH264_Decode_Tests_DecodeFileFirstFrame( GetParam(), DecodeFileBlockSize );
+}
+
+TEST_P(PopH264_Decode_Tests,DecodeFileFirstFrame_DripFeedData)
+{
+	//	https://github.com/NewChromantics/PopH264/issues/89
+	GTEST_SKIP() << "todo: issue 89; drip-feeding data doesnt work";
+
+	auto DecodeFileBlockSize = 1024;
+	PopH264_Decode_Tests_DecodeFileFirstFrame( GetParam(), DecodeFileBlockSize );
 }
 
 
-
-TEST_P(PopH264_Decode_Tests,DecodeFile)
+void PopH264_Decode_Tests_DecodeFile(const DecodeTestParams_t& Params,size_t DecodeFileBlockSize)
 {
-	auto Params = GetParam();
 	std::cerr << "DecodeFile " << Params.Filename << std::endl;
 
 	DecodeResults_t Results;
@@ -827,13 +872,33 @@ TEST_P(PopH264_Decode_Tests,DecodeFile)
 		return true;
 	};
 	
-	DecodeFileFrames( Params.Filename, OnDecodedImage, Params.DecoderName );
+	DecodeFileFramesParams_t DecodeParams;
+	DecodeParams.mFilename = Params.Filename;
+	DecodeParams.mDecoderName = Params.DecoderName;
+	DecodeParams.mPushDataBlockSize = DecodeFileBlockSize;
+
+	DecodeFileFrames( DecodeParams, OnDecodedImage );
 	
 	//	compare with expected results
 	EXPECT_EQ( Results.FrameCount, Params.ExpectedResults.FrameCount );
 	EXPECT_EQ( Results.Width, Params.ExpectedResults.Width );
 	EXPECT_EQ( Results.Height, Params.ExpectedResults.Height );
 	//EXPECT_EQ( Results.Profile, Params.ExpectedResults.Profile );
+}
+
+TEST_P(PopH264_Decode_Tests,DecodeFile)
+{
+	auto DecodeFileBlockSize = 0;
+	PopH264_Decode_Tests_DecodeFile( GetParam(), DecodeFileBlockSize );
+}
+
+TEST_P(PopH264_Decode_Tests,DecodeFile_DripFeedData)
+{
+	//	https://github.com/NewChromantics/PopH264/issues/89
+	GTEST_SKIP() << "todo: issue 89; drip-feeding data doesnt work";
+
+	auto DecodeFileBlockSize = 1024;
+	PopH264_Decode_Tests_DecodeFile( GetParam(), DecodeFileBlockSize );
 }
 
 
@@ -883,7 +948,9 @@ TEST_P(PopH264_Encode_Tests,EncodeFile)
 {
 	auto Params = GetParam();
 	
-	auto InputImage = DecodeFileFirstFrame( Params.InputImageFilename );
+	DecodeFileFramesParams_t DecodeParams;
+	DecodeParams.mFilename = Params.InputImageFilename;
+	auto InputImage = DecodeFileFirstFrame( DecodeParams );
 	
 	std::stringstream OptionsJson;
 	OptionsJson << "{";
