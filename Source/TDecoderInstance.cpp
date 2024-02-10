@@ -419,7 +419,7 @@ void PopH264::TDecoderInstance::PushFrame(const SoyPixelsImpl& Frame,PopH264::Fr
 	//	if we get an invalid pixels we're assuming it's the EndOfStream packet
 	if ( !Frame.GetMeta().IsValid() && FrameNumber == 0 )
 	{
-		std::Debug << __PRETTY_FUNCTION__ << " detected EndOfStream frame" << std::endl;
+		//std::Debug << __PRETTY_FUNCTION__ << " detected EndOfStream frame" << std::endl;
 		NewFrame.mEndOfStream = true;
 	}
 	else

@@ -295,7 +295,8 @@ void Avf::TDecompressor::CreateDecoderSession(CFPtr<CMFormatDescriptionRef> Inpu
 	//	return;
 	FreeSession();
 	
-	std::cerr << "CreateDecoderSession with sps " << SpsParams.mWidth << "x" << SpsParams.mHeight << " profile=" << SpsParams.mProfile << " level=" << SpsParams.mLevel << std::endl;
+	//	gr: put this into output meta somewhere
+	//std::cerr << "CreateDecoderSession with sps " << SpsParams.mWidth << "x" << SpsParams.mHeight << " profile=" << SpsParams.mProfile << " level=" << SpsParams.mLevel << std::endl;
 	
 	
 	mInputFormat = InputFormat;
@@ -709,7 +710,7 @@ void Avf::TDecompressorH264::Decode(PopH264::TInputNaluPacket& Packet)
 	auto PacketData = Packet.GetData();
 	auto SampleBuffer = CreateSampleBuffer( PacketData, PresentationTime, DecodeTime, Duration, mInputFormat.mObject );
 	
-	std::Debug << "Decode " << magic_enum::enum_name(H264PacketType) << " frame=" << FrameNumber << "..." << std::endl;
+	//std::Debug << "Decode " << magic_enum::enum_name(H264PacketType) << " frame=" << FrameNumber << "..." << std::endl;
 	DecodeSample(SampleBuffer, FrameNumber);
 	
 	mLastFrameNumber = FrameNumber;
@@ -751,7 +752,7 @@ void Avf::TDecompressor::DecodeSample(CFPtr<CMSampleBufferRef> SampleBuffer,size
 		
 		//std::Debug << "decompressing " << Packet.mTimecode << "..." << std::endl;
 		//Soy::TScopeTimer Timer("VTDecompressionSessionDecodeFrame", 0, OnFinished, true );
-		Soy::TScopeTimerPrint Timer("VTDecompressionSessionDecodeFrame", 10 );
+		Soy::TScopeTimerPrint Timer("VTDecompressionSessionDecodeFrame", 60 );
 		auto Result = VTDecompressionSessionDecodeFrame( mSession.mObject, SampleBuffer.mObject, Flags, nullptr, &FlagsOut );
 		Timer.Stop();
 		//std::Debug << "Decompress " << Packet.mTimecode << " took " << DecodeDuration << "; error=" << (int)Result << std::endl;

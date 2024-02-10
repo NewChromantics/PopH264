@@ -711,7 +711,7 @@ void Test_Decoder_DecodeTestFile(const char* TestDataName, const char* DecoderNa
 			auto FrameNumber = PopH264_PopFrame(Handle, Plane0, std::size(Plane0), Plane1, std::size(Plane1), Plane2, std::size(Plane2));
 			std::stringstream Error;
 			Error << "Decoded testdata; " << MetaJson << " FrameNumber=" << FrameNumber << " Should be " << FirstFrameNumber;
-			std::Debug << Error.str() << std::endl;
+			//std::Debug << Error.str() << std::endl;
 			bool IsValid = FrameNumber >= 0;
 			if (!IsValid)
 			{
@@ -848,7 +848,7 @@ void Test_Decoder_DestroyMidDecode(const char* TestDataName, const char* Decoder
 			auto FrameNumber = PopH264_PopFrame(Handle, Plane0, std::size(Plane0), Plane1, std::size(Plane1), Plane2, std::size(Plane2));
 			std::stringstream Error;
 			Error << "Decoded testdata; " << MetaJson << " FrameNumber=" << FrameNumber << " Should be " << FirstFrameNumber;
-			std::Debug << Error.str() << std::endl;
+			//std::Debug << Error.str() << std::endl;
 			bool IsValid = FrameNumber >= 0;
 			if (!IsValid)
 			{

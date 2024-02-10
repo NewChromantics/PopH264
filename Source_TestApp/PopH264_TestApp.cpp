@@ -217,7 +217,7 @@ void DecoderTest(const char* TestDataName,CompareFunc_t* Compare,const char* Dec
 	OptionsStr << "{";
 	if ( DecoderName )
 		OptionsStr << "\"Decoder\":\"" << DecoderName << "\",";
-	OptionsStr << "\"VerboseDebug\":true";
+	OptionsStr << "\"VerboseDebug\":false";
 	OptionsStr << "}";
 	auto OptionsString = OptionsStr.str();
 	auto* Options = OptionsString.c_str();
@@ -285,7 +285,7 @@ void DestroyMidDecodeTest(const char* TestDataName,CompareFunc_t* Compare,const 
 	OptionsStr << "{";
 	if ( DecoderName )
 		OptionsStr << "\"Decoder\":\"" << DecoderName << "\",";
-	OptionsStr << "\"VerboseDebug\":true";
+	OptionsStr << "\"VerboseDebug\":false";
 	OptionsStr << "}";
 	auto OptionsString = OptionsStr.str();
 	auto* Options = OptionsString.c_str();
@@ -662,7 +662,7 @@ void DecodeFileFrames(std::string_view Filename,std::function<bool(DecodedImage_
 	OptionsJson << "{";
 	if ( !DecoderName.empty() )
 		OptionsJson << "\"Decoder\":\"" << DecoderName << "\",";
-	OptionsJson << "\"VerboseDebug\":true";
+	OptionsJson << "\"VerboseDebug\":false";
 	OptionsJson << "}";
 	
 	std::array<char,1024> ErrorBuffer = {0};
@@ -887,7 +887,7 @@ TEST_P(PopH264_Encode_Tests,EncodeFile)
 	
 	std::stringstream OptionsJson;
 	OptionsJson << "{";
-	OptionsJson << "\"VerboseDebug\":true";
+	//OptionsJson << "\"VerboseDebug\":true";
 	OptionsJson << "}";
 	
 	std::array<char,1024> ErrorBuffer = {0};
