@@ -19,9 +19,11 @@ namespace ContentType
 	//	fourcc content type enums
 	enum Type : uint32_t
 	{
-		Unknown		= 0,
-		Jpeg		= 'jpeg',
-		EndOfFile	= 'eof!'
+		Unknown			= 0,
+		Jpeg			= 'jpeg',
+		HEVC_Annexb		= 'HECV',
+		H264_Annexb		= 'H264',
+		EndOfFile		= 'eof!'
 	};
 }
 		

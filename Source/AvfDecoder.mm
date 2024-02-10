@@ -112,8 +112,14 @@ protected:
 	void				CreateDecoderSession(CFPtr<CMFormatDescriptionRef> InputFormat,H264::TSpsParams SpsParams);
 	bool				HasSession();
 	void				FreeSession();
+	void				DecodeSample(std::span<uint8_t> SampleData,PopH264::FrameNumber_t FrameNumber);
 	virtual void		DecodeSample(CFPtr<CMSampleBufferRef> FrameData,size_t FrameNumber);
+
+
+	PopH264::FrameNumber_t	ResolveFrameNumber(PopH264::FrameNumber_t FrameNumber);
+	PopH264::FrameNumber_t	mLastFrameNumber = PopH264::FrameNumberInvalid;
 	
+
 	
 	std::shared_ptr<AvfDecoderRenderer>	mDecoderRenderer;
 	CFPtr<VTDecompressionSessionRef>	mSession;
@@ -137,12 +143,35 @@ private:
 	
 	bool					mAllowSpsPpsToRecreateSession = true;	//	if true, then a new sps & pps appearing recreates session
 	
-	PopH264::FrameNumber_t	mLastFrameNumber = PopH264::FrameNumberInvalid;
-	
 	//	pending packets we need before we can create the session
 	std::vector<uint8_t>	mNaluSps;
 	std::vector<uint8_t>	mNaluPps;
 	std::vector<uint8_t>	mNaluSei;
+};
+
+//	gr; a LOT of this will be close to TDecompressorH264, but thats the same with jpeg anyway :)
+class Avf::TDecompressorHevc : public Avf::TDecompressor
+{
+public:
+	TDecompressorHevc(const PopH264::TDecoderParams& Params,std::function<void(std::shared_ptr<TPixelBuffer>,PopH264::FrameNumber_t)> OnFrame,std::function<void(const std::string&,PopH264::FrameNumber_t)> OnError);
+	
+	virtual void			Decode(PopH264::TInputNaluPacket& Packet) override;
+
+private:
+	void					CreateSession();
+	
+	bool					StoreHeaderPacket(std::span<uint8_t> PacketData,Hevc::NaluContent::Type PacketType);
+	
+	bool					mAllowSpsPpsToRecreateSession = true;	//	if true, then a new sps & pps appearing recreates session
+	
+	PopH264::FrameNumber_t	mLastFrameNumber = PopH264::FrameNumberInvalid;
+	
+	//	pending packets we need before we can create the session
+	std::vector<uint8_t>	mVps;
+	std::vector<uint8_t>	mSps;
+	std::vector<uint8_t>	mPps;
+	std::vector<uint8_t>	mPrefixSei;
+	std::vector<uint8_t>	mSuffixSei;
 };
 
 
@@ -192,6 +221,32 @@ Avf::TDecompressor::TDecompressor(const PopH264::TDecoderParams& Params,std::fun
 	mParams				( Params )
 {
 }
+
+PopH264::FrameNumber_t Avf::TDecompressor::ResolveFrameNumber(PopH264::FrameNumber_t FrameNumber)
+{
+	static bool AllowDuplicateFrameNumbers = true;
+	
+	if ( !AllowDuplicateFrameNumbers )
+	{
+		//	if the frame number is the same, we're going to have trouble resolving which frame is which
+		//	auto-increment duplicates, then error if user passes an old frame
+		//	gr: move this to generic frame handling
+		if ( FrameNumber == mLastFrameNumber )
+		{
+			FrameNumber = mLastFrameNumber+1;
+			std::Debug << "Warning: duplicate frame number input " << mLastFrameNumber << ", auto-incrementing to " << FrameNumber << std::endl;
+		}
+	}
+	//	gr: does this need to fail?
+	if ( FrameNumber < mLastFrameNumber )
+	{
+		std::Debug << "Warning: next frame number (" << FrameNumber << ") in the past, last frame number=" << mLastFrameNumber << std::endl;
+		//FrameNumber = mLastFrameNumber+1;
+	}
+
+	return FrameNumber;
+}
+
 
 Avf::TDecompressorH264::TDecompressorH264(const PopH264::TDecoderParams& Params,std::function<void(std::shared_ptr<TPixelBuffer>,PopH264::FrameNumber_t)> OnFrame,std::function<void(const std::string&,PopH264::FrameNumber_t)> OnError) :
 	TDecompressor	( Params, OnFrame, OnError )
@@ -265,6 +320,98 @@ void Avf::TDecompressorJpeg::CreateDecoder(std::span<uint8_t> JpegData)
 
 	CreateDecoderSession( FormatDesc, ImageParams );
 }
+
+
+
+Avf::TDecompressorHevc::TDecompressorHevc(const PopH264::TDecoderParams& Params,std::function<void(std::shared_ptr<TPixelBuffer>,PopH264::FrameNumber_t)> OnFrame,std::function<void(const std::string&,PopH264::FrameNumber_t)> OnError) :
+	TDecompressor	( Params, OnFrame, OnError )
+{
+	//	doesn't create a session until we've accumulate sps & pps
+}
+
+bool Avf::TDecompressorHevc::StoreHeaderPacket(std::span<uint8_t> PacketData,Hevc::NaluContent::Type PacketType)
+{
+	if ( PacketType == Hevc::NaluContent::NAL_UNIT_VPS )
+	{
+		mVps = std::vector( PacketData.begin(), PacketData.end() );
+		return true;
+	}
+	if ( PacketType == Hevc::NaluContent::NAL_UNIT_SPS )
+	{
+		mSps = std::vector( PacketData.begin(), PacketData.end() );
+		return true;
+	}
+	if ( PacketType == Hevc::NaluContent::NAL_UNIT_PPS )
+	{
+		mPps = std::vector( PacketData.begin(), PacketData.end() );
+		return true;
+	}
+	if ( PacketType == Hevc::NaluContent::NAL_UNIT_PREFIX_SEI )
+	{
+		mPrefixSei = std::vector( PacketData.begin(), PacketData.end() );
+		return true;
+	}
+	if ( PacketType == Hevc::NaluContent::NAL_UNIT_SUFFIX_SEI )
+	{
+		mSuffixSei = std::vector( PacketData.begin(), PacketData.end() );
+		return true;
+	}
+	
+	return false;
+}
+
+
+void Avf::TDecompressorHevc::CreateSession()
+{
+	Hevc::Headers_t Headers;
+	Headers.mVps = mVps;
+	Headers.mSps = mSps;
+	Headers.mPps = mPps;
+	Headers.mPrefixSei = mPrefixSei;
+	Headers.mSuffixSei = mSuffixSei;
+	if ( !Headers.IsComplete() )
+		return;
+
+	//	only create session if allowed
+	if ( HasSession() )
+	{
+		if ( !mAllowSpsPpsToRecreateSession )
+			return;
+	}
+	
+	//	fake for now
+	H264::TSpsParams SpsParams;
+	/*
+	//	gr: don't let our bad sps decoding code stop decoding
+	H264::TSpsParams SpsParams;
+	try
+	{
+		//	gr: strip nalu prefix (ParseSps should do this!)
+		auto SpsPrefixLength = H264::GetNaluLength( mNaluSps );
+		auto SpsData = std::span(mNaluSps);
+		SpsData = SpsData.subspan( SpsPrefixLength );
+		SpsParams = H264::ParseSps( SpsData );
+	}
+	catch(std::exception& e)
+	{
+		std::Debug << "Warning: Failed to parse SPS before creating format; " << e.what() << std::endl;
+	}
+	*/
+	
+	auto InputFormat = Avf::GetFormatDescriptionHevc( Headers, H264::NaluPrefix::ThirtyTwo, mParams.StripH264EmulationPrevention() );
+	CreateDecoderSession( InputFormat, SpsParams );
+	
+	//	throw away the old sps/pps, so we can tell when we've got a new format
+	mVps.clear();
+	mSps.clear();
+	mPps.clear();
+	mPrefixSei.clear();
+	mSuffixSei.clear();
+}
+
+
+
+
 
 bool Avf::TDecompressor::HasSession()
 {
@@ -598,15 +745,7 @@ void Avf::TDecompressorJpeg::Decode(PopH264::TInputNaluPacket& Packet)
 	CreateDecoder( JpegData );
 
 	//	gr: all jpeg samples need to have frame number 0
-	//uint64_t FrameNumber = 99;
-	uint64_t FrameNumber = Packet.mFrameNumber;
-	
-	std::chrono::milliseconds PresentationTime(FrameNumber);
-	std::chrono::milliseconds DecodeTime(FrameNumber);
-	std::chrono::milliseconds Duration(16ull);
-	auto SampleBuffer = CreateSampleBuffer( JpegData, PresentationTime, DecodeTime, Duration, mInputFormat.mObject );
-	
-	DecodeSample( SampleBuffer, FrameNumber );
+	DecodeSample( JpegData, Packet.mFrameNumber );
 }
 
 
@@ -635,7 +774,7 @@ void Avf::TDecompressorH264::Decode(PopH264::TInputNaluPacket& Packet)
 	}
 
 	if ( mParams.mVerboseDebug )
-		std::Debug << "Popped Nalu " << H264PacketType << " x" << Packet.GetData().size() << "bytes" << std::endl;
+		std::Debug << "Popped Nalu H264 packet " << H264PacketType << " x" << Packet.GetData().size() << "bytes" << std::endl;
 
 	//	some packets the avf decoder will error on, never decode them.
 	bool DecodePacket = true;
@@ -678,44 +817,86 @@ void Avf::TDecompressorH264::Decode(PopH264::TInputNaluPacket& Packet)
 		return;
 	}
 
-	auto RequiredNaluFormat = Avf::GetFormatInputNaluPrefix(mInputFormat.mObject);
+	auto RequiredNaluFormat = Avf::GetFormatInputH264NaluPrefix(mInputFormat.mObject);
 	//auto NaluSize = GetFormatNaluPrefixType();
 	H264::ConvertNaluPrefix( Packet.mData, RequiredNaluFormat );
 	
-	uint64_t FrameNumber = Packet.mFrameNumber;
-	
-	static bool AllowDuplicateFrameNumbers = true;
-	
-	if ( !AllowDuplicateFrameNumbers )
+	auto PacketData = Packet.GetData();
+	DecodeSample( PacketData, Packet.mFrameNumber );
+}
+
+void Avf::TDecompressorHevc::Decode(PopH264::TInputNaluPacket& Packet)
+{
+	bool EndOfStream = false;
+	if ( Packet.mContentType == ContentType::EndOfFile )
+		EndOfStream = true;
+
+	Hevc::NaluContent::Type PacketType = Hevc::NaluContent::Invalid;
 	{
-		//	if the frame number is the same, we're going to have trouble resolving which frame is which
-		//	auto-increment duplicates, then error if user passes an old frame
-		//	gr: move this to generic frame handling
-		if ( FrameNumber == mLastFrameNumber )
+		auto Nalu = Packet.GetData();
+		if ( Nalu.size() > 0 )
 		{
-			FrameNumber = mLastFrameNumber+1;
-			std::Debug << "Warning: duplicate frame number input " << mLastFrameNumber << ", auto-incrementing to " << FrameNumber << std::endl;
+			PacketType = Hevc::GetPacketType(Nalu);
 		}
 	}
-	//	gr: does this need to fail?
-	if ( FrameNumber < mLastFrameNumber )
+	if ( PacketType == Hevc::NaluContent::EndOfStream )
+		EndOfStream = true;
+	
+	if ( EndOfStream )
 	{
-		std::Debug << "Warning: next frame number (" << FrameNumber << ") in the past, last frame number=" << mLastFrameNumber << std::endl;
-		//FrameNumber = mLastFrameNumber+1;
+		//	synchronous flush
+		Flush();
+		return;
 	}
+
+	if ( mParams.mVerboseDebug )
+		std::Debug << "Popped Nalu Hevc packet " << PacketType << " x" << Packet.GetData().size() << "bytes" << std::endl;
+
+	//	need header packets for decoder
+	bool IsHeaderPacket = StoreHeaderPacket( Packet.mData, PacketType );
+	bool DecodePacket = IsHeaderPacket == false;
+		
+	//	try and create the session in case we've got the SPS & PPS we need
+	CreateSession();
+
+	//	dont need the warning below if we were going to drop it anyway
+	if ( !DecodePacket )
+		return;
+	
+	//	no decompression session yet, drop packet
+	//	could be packet before SPS/PPS and we ignore it
+	if ( !HasSession() )
+	{
+		if ( mParams.mVerboseDebug )
+			std::Debug << "Dropping Hevc frame (" << magic_enum::enum_name(PacketType) << ") as decompressor isn't ready (waiting for sps/pps)" << std::endl;
+		return;
+	}
+
+	auto RequiredNaluFormat = Avf::GetFormatInputHevcNaluPrefix(mInputFormat.mObject);
+	//auto NaluSize = GetFormatNaluPrefixType();
+	//	nalu same on h264 & hevc
+	H264::ConvertNaluPrefix( Packet.mData, RequiredNaluFormat );
+	
+	auto PacketData = Packet.GetData();
+	DecodeSample( PacketData, Packet.mFrameNumber );
+}
+
+
+void Avf::TDecompressor::DecodeSample(std::span<uint8_t> PacketData,PopH264::FrameNumber_t FrameNumber)
+{
+	FrameNumber = ResolveFrameNumber(FrameNumber);
 
 	std::chrono::milliseconds PresentationTime(FrameNumber);
 	std::chrono::milliseconds DecodeTime(FrameNumber);
 	std::chrono::milliseconds Duration(16ull);
-	auto PacketData = Packet.GetData();
 	auto SampleBuffer = CreateSampleBuffer( PacketData, PresentationTime, DecodeTime, Duration, mInputFormat.mObject );
 	
 	//std::Debug << "Decode " << magic_enum::enum_name(H264PacketType) << " frame=" << FrameNumber << "..." << std::endl;
 	DecodeSample(SampleBuffer, FrameNumber);
 	
 	mLastFrameNumber = FrameNumber;
-}
 
+}
 
 void Avf::TDecompressor::DecodeSample(CFPtr<CMSampleBufferRef> SampleBuffer,size_t FrameNumber)
 {
@@ -920,6 +1101,10 @@ bool Avf::TDecoder::DecodeNextPacket()
 		if ( NextPacket.mContentType == ContentType::Jpeg )
 		{
 			mDecompressor.reset( new TDecompressorJpeg( mParams, OnFrame, OnError ) );
+		}
+		else if ( NextPacket.mContentType == ContentType::HEVC_Annexb )
+		{
+			mDecompressor.reset( new TDecompressorHevc( mParams, OnFrame, OnError ) );
 		}
 		else
 		{

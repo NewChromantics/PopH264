@@ -154,6 +154,12 @@
 		BF53E82F22EDCABB008253CD /* TDecoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF53E82D22EDC989008253CD /* TDecoder.cpp */; };
 		BF587C7A244B57A2000745B9 /* SoyTypes.mm in Sources */ = {isa = PBXBuildFile; fileRef = BF587C79244B57A2000745B9 /* SoyTypes.mm */; };
 		BF587C7B244B57A2000745B9 /* SoyTypes.mm in Sources */ = {isa = PBXBuildFile; fileRef = BF587C79244B57A2000745B9 /* SoyTypes.mm */; };
+		BF72A6DB2B780A2200431AD3 /* SoyHevc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF72A6D92B780A0E00431AD3 /* SoyHevc.cpp */; };
+		BF72A6DC2B780A2200431AD3 /* SoyHevc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF72A6D92B780A0E00431AD3 /* SoyHevc.cpp */; };
+		BF72A6DD2B780A2200431AD3 /* SoyHevc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF72A6D92B780A0E00431AD3 /* SoyHevc.cpp */; };
+		BF72A6DE2B780A2700431AD3 /* SoyHevc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF72A6D92B780A0E00431AD3 /* SoyHevc.cpp */; };
+		BF72A6DF2B780A2700431AD3 /* SoyHevc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF72A6D92B780A0E00431AD3 /* SoyHevc.cpp */; };
+		BF72A6E02B780A2800431AD3 /* SoyHevc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF72A6D92B780A0E00431AD3 /* SoyHevc.cpp */; };
 		BF985EBE2876E98900F04399 /* AvfDecoder.mm in Sources */ = {isa = PBXBuildFile; fileRef = BFFBE97B245DB65000E9BE1B /* AvfDecoder.mm */; };
 		BF985EBF2876E98B00F04399 /* AvfEncoder.mm in Sources */ = {isa = PBXBuildFile; fileRef = BFC471812447523000A2DA70 /* AvfEncoder.mm */; };
 		BF985EC02876E99700F04399 /* BroadwayAll.c in Sources */ = {isa = PBXBuildFile; fileRef = BFF1C6E822E3C65800AFDFD5 /* BroadwayAll.c */; };
@@ -436,6 +442,8 @@
 		BF587C79244B57A2000745B9 /* SoyTypes.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = SoyTypes.mm; path = Source/SoyLib/src/SoyTypes.mm; sourceTree = "<group>"; };
 		BF65D707256573A700B3EE9A /* Readme.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = Readme.md; sourceTree = "<group>"; };
 		BF65D708256573A700B3EE9A /* License.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = License.md; sourceTree = "<group>"; };
+		BF72A6D92B780A0E00431AD3 /* SoyHevc.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SoyHevc.cpp; path = Source/SoyLib/src/SoyHevc.cpp; sourceTree = "<group>"; };
+		BF72A6DA2B780A0E00431AD3 /* SoyHevc.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = SoyHevc.hpp; path = Source/SoyLib/src/SoyHevc.hpp; sourceTree = "<group>"; };
 		BF8AB63721F20C41008E7E76 /* PopH264.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PopH264.h; path = Source/PopH264.h; sourceTree = "<group>"; };
 		BF8AB63821F20C41008E7E76 /* PopH264.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PopH264.cpp; path = Source/PopH264.cpp; sourceTree = "<group>"; };
 		BF8AB63B21F20D4C008E7E76 /* Broadway */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Broadway; path = Source/Broadway; sourceTree = "<group>"; };
@@ -936,6 +944,8 @@
 				BF1826AC24228D31006FEB93 /* SoyFourcc.h */,
 				BFDB2BAB2448B4CE009EC370 /* SoyH264.cpp */,
 				BFDB2BAC2448B4CF009EC370 /* SoyH264.h */,
+				BF72A6D92B780A0E00431AD3 /* SoyHevc.cpp */,
+				BF72A6DA2B780A0E00431AD3 /* SoyHevc.hpp */,
 				BFFC941D245EE17900AEE711 /* SoyMedia.h */,
 				BF0CCB2224A78D8D00596877 /* SoyMediaFormat.cpp */,
 				BF0CCB2324A78D8D00596877 /* SoyMediaFormat.h */,
@@ -1360,7 +1370,8 @@
 					};
 					BF459CD421F7D5C700CED59D = {
 						CreatedOnToolsVersion = 10.1;
-						ProvisioningStyle = Manual;
+						DevelopmentTeam = X52DR36JY2;
+						ProvisioningStyle = Automatic;
 					};
 					BF51B8C2256A7DBA004DE4C7 = {
 						CreatedOnToolsVersion = 12.0;
@@ -1475,6 +1486,7 @@
 				BF151FE72384788600A70EBF /* SoyAssert.cpp in Sources */,
 				BFC471A2244781CC00A2DA70 /* SoyString.mm in Sources */,
 				BF152082238595CD00A70EBF /* SoyRuntimeLibrary.cpp in Sources */,
+				BF72A6DD2B780A2200431AD3 /* SoyHevc.cpp in Sources */,
 				BF18269524226126006FEB93 /* json11.cpp in Sources */,
 				BF587C7B244B57A2000745B9 /* SoyTypes.mm in Sources */,
 				BF151FE52384788600A70EBF /* memheap.cpp in Sources */,
@@ -1516,6 +1528,7 @@
 				BF1D96052850CC74008E3758 /* SoyTime.cpp in Sources */,
 				BF1D95EE2850CC2A008E3758 /* TEncoder.cpp in Sources */,
 				BF1D96002850CC66008E3758 /* SoyRuntimeLibrary.cpp in Sources */,
+				BF72A6DC2B780A2200431AD3 /* SoyHevc.cpp in Sources */,
 				BF1D95F62850CC4C008E3758 /* SoyDebug.cpp in Sources */,
 				BF1D95FC2850CC5D008E3758 /* SoyPixels.cpp in Sources */,
 				BF1D95F32850CC45008E3758 /* SoyArray.cpp in Sources */,
@@ -1557,6 +1570,7 @@
 				BF1FA6C728759C7E002F03C5 /* SoyTime.cpp in Sources */,
 				BF1FA6C828759C7E002F03C5 /* TEncoder.cpp in Sources */,
 				BF1FA6C928759C7E002F03C5 /* SoyRuntimeLibrary.cpp in Sources */,
+				BF72A6DE2B780A2700431AD3 /* SoyHevc.cpp in Sources */,
 				BF1FA6CA28759C7E002F03C5 /* SoyDebug.cpp in Sources */,
 				BF1FA6CB28759C7E002F03C5 /* SoyPixels.cpp in Sources */,
 				BF1FA6CC28759C7E002F03C5 /* SoyArray.cpp in Sources */,
@@ -1613,6 +1627,7 @@
 				BFC471A1244781CC00A2DA70 /* SoyString.mm in Sources */,
 				BFF1C6EA22E3C65800AFDFD5 /* BroadwayAll.c in Sources */,
 				BF18269424226126006FEB93 /* json11.cpp in Sources */,
+				BF72A6DB2B780A2200431AD3 /* SoyHevc.cpp in Sources */,
 				BF587C7A244B57A2000745B9 /* SoyTypes.mm in Sources */,
 				BF53E82F22EDCABB008253CD /* TDecoder.cpp in Sources */,
 				BF459CF921F7DB4400CED59D /* SoyTime.mm in Sources */,
@@ -1654,6 +1669,7 @@
 				BF985EC82876E9CB00F04399 /* SoyRuntimeLibrary.cpp in Sources */,
 				BF985ED52876E9D900F04399 /* SoyTime.mm in Sources */,
 				BF985EC42876E9AD00F04399 /* PopH264TestData.cpp in Sources */,
+				BF72A6DF2B780A2700431AD3 /* SoyHevc.cpp in Sources */,
 				BF985EBE2876E98900F04399 /* AvfDecoder.mm in Sources */,
 				BF985ED32876E9CB00F04399 /* SoyDebug.mm in Sources */,
 				BF985EC72876E9CB00F04399 /* SoyFourcc.cpp in Sources */,
@@ -1695,6 +1711,7 @@
 				BFAD0A9629C6706100CF7EA6 /* SoyRuntimeLibrary.cpp in Sources */,
 				BFAD0A9729C6706100CF7EA6 /* SoyTime.mm in Sources */,
 				BFAD0A9829C6706100CF7EA6 /* PopH264TestData.cpp in Sources */,
+				BF72A6E02B780A2800431AD3 /* SoyHevc.cpp in Sources */,
 				BFAD0A9929C6706100CF7EA6 /* AvfDecoder.mm in Sources */,
 				BFAD0A9A29C6706100CF7EA6 /* SoyDebug.mm in Sources */,
 				BFAD0A9B29C6706100CF7EA6 /* SoyFourcc.cpp in Sources */,
@@ -1943,9 +1960,10 @@
 			baseConfigurationReference = BF004B6724FD3CAC00DC6A90 /* PopH264_Osx.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Manual;
-				DEVELOPMENT_TEAM = "";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = X52DR36JY2;
 				INFOPLIST_FILE = "$(SRCROOT)/Source_Osx/PopH264_Osx_Info.plist";
+				PRODUCT_BUNDLE_IDENTIFIER = com.NewChromantics.PopH264;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 			};
 			name = Debug;
@@ -1955,9 +1973,11 @@
 			baseConfigurationReference = BF004B6724FD3CAC00DC6A90 /* PopH264_Osx.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Manual;
-				DEVELOPMENT_TEAM = "";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = X52DR36JY2;
 				INFOPLIST_FILE = "$(SRCROOT)/Source_Osx/PopH264_Osx_Info.plist";
+				PRODUCT_BUNDLE_IDENTIFIER = com.NewChromantics.PopH264;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 			};
 			name = Release;

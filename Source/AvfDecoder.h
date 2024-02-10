@@ -16,6 +16,7 @@ namespace Avf
 	//	platform type (obj-c)
 	class TDecompressor;	//	base class
 	class TDecompressorH264;
+	class TDecompressorHevc;
 	class TDecompressorJpeg;
 
 	//	same as X264
