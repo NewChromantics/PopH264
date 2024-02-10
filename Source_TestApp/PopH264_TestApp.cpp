@@ -565,12 +565,19 @@ class PopH264_Decode_Tests : public testing::TestWithParam<DecodeTestParams_t>
 
 auto DecodeTestValues = ::testing::Values
 (
+ DecodeTestParams_t{.Filename="TestData/AppleSpatialRobotNutcracker.h264", .ExpectedResults{.FrameCount=563,.Width=960,.Height=540,.Profile=H264Profile::High4} },
+ //	h265
+ DecodeTestParams_t{.Filename="TestData/AppleSpatialRobotNutcracker.h265", .ExpectedResults{.FrameCount=563,.Width=960,.Height=540,.Profile=H264Profile::High4} },
+
+ DecodeTestParams_t{.Filename="TestData/Issue83.h264", .ExpectedResults{.FrameCount=563,.Width=960,.Height=540,.Profile=H264Profile::High4} },
+
 	//	data from ffmpeg's udp:// streaming protocol
 	//	ffmpeg -filter_complex ddagrab=output_idx=0:framerate=60:draw_mouse=0,hwdownload,format=bgra  -c:v libx264 -tune zerolatency -preset ultrafast -s 512x512 -r 60 -f h264 udp://127.0.0.1:10000
 	//	https://github.com/NewChromantics/PopH264/issues/80
 	DecodeTestParams_t{.Filename="TestData/FfmpegUdpStream_yuv420p.h264", .ExpectedResults{.FrameCount=563,.Width=960,.Height=540,.Profile=H264Profile::High4} },
 	//	this fails on apple as its yuv_444
 	//DecodeTestParams_t{.Filename="TestData/FfmpegUdpStream_yuv444.h264", .ExpectedResults{.FrameCount=563,.Width=960,.Height=540,.Profile=H264Profile::High4} },
+
 
 
 	// //	depth.h264 has IDRs before SPS/PPS
@@ -784,6 +791,7 @@ DecodedImage_t DecodeFileFirstFrame(std::string_view Filename,std::string_view D
 TEST_P(PopH264_Decode_Tests,DecodeFileFirstFrame)
 {
 	auto Params = GetParam();
+	std::cerr << "Decode first frame of " << Params.Filename << std::endl;
 	auto Image = DecodeFileFirstFrame( Params.Filename, Params.DecoderName );
 }
 
@@ -792,11 +800,13 @@ TEST_P(PopH264_Decode_Tests,DecodeFileFirstFrame)
 TEST_P(PopH264_Decode_Tests,DecodeFile)
 {
 	auto Params = GetParam();
-	
+	std::cerr << "DecodeFile " << Params.Filename << std::endl;
+
 	DecodeResults_t Results;
 	
 	auto OnDecodedImage = [&](DecodedImage_t Image)
 	{
+		std::cerr << "Got frame #" << Results.FrameCount << " meta=" << Image.mMetaJson << std::endl;
 		Results.Width = Image.mWidth;
 		Results.Height = Image.mHeight;
 		//	get h264 meta
