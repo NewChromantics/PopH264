@@ -71,6 +71,8 @@ ContentType::Type DetectPacketContentType(std::span<uint8_t> PacketData)
 	if ( Jpeg::IsJpegHeader(PacketData) )
 		return ContentType::Jpeg;
 	
+	throw std::runtime_error("todo: detect nalu and h264 vs hevc here");
+	
 	return ContentType::Unknown;
 }
 
