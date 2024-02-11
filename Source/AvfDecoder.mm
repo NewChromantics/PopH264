@@ -931,14 +931,12 @@ void Avf::TDecompressor::DecodeSample(CFPtr<CMSampleBufferRef> SampleBuffer,size
 	
 	//	gr: temporal means frames (may?) will be output in display order, OS will hold onto decoded frames
 	bool OutputFramesInOrder = mParams.PreferFramesInOrder();
-	OutputFramesInOrder=false;
 	if ( OutputFramesInOrder )
 		Flags |= kVTDecodeFrame_EnableTemporalProcessing;
 	
 	//	gr: async means frames may or may not be decoded in the background
 	//	gr: also we may have issues with sample buffer lifetime in async
 	bool AsyncDecompression = mParams.mAsyncDecompression;
-	AsyncDecompression= false;
 	if ( AsyncDecompression )
 		Flags |= kVTDecodeFrame_EnableAsynchronousDecompression;
 	
