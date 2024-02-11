@@ -21,8 +21,9 @@ namespace ContentType
 	{
 		Unknown			= 0,
 		Jpeg			= 'jpeg',
-		HEVC_Annexb		= 'HECV',
+		Hevc_Annexb		= 'Hevc',
 		H264_Annexb		= 'H264',
+		//	H264_Avcc size prefix 8, 16, 32
 		EndOfFile		= 'eof!'
 	};
 }

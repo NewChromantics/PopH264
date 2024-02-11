@@ -1,5 +1,6 @@
 #include "TDecoder.h"
 #include "SoyH264.h"
+#include "SoyHevc.hpp"
 #include <span>
 #include "json11.hpp"
 #include "FileReader.hpp"
@@ -70,9 +71,16 @@ ContentType::Type DetectPacketContentType(std::span<uint8_t> PacketData)
 {
 	if ( Jpeg::IsJpegHeader(PacketData) )
 		return ContentType::Jpeg;
+
+	if ( H264::IsNaluH264(PacketData) )
+		return ContentType::H264_Annexb;
 	
-	throw std::runtime_error("todo: detect nalu and h264 vs hevc here");
+	if ( Hevc::IsNaluHevc(PacketData) )
+		return ContentType::Hevc_Annexb;
 	
+	//	todo: keep searching for content type and split off "unknown" data
+	//	https://github.com/NewChromantics/PopH264/issues/86
+	//	throw here... should never have unknown data?
 	return ContentType::Unknown;
 }
 
@@ -97,7 +105,7 @@ void PopH264::TDecoder::Decode(std::span<uint8_t> PacketData,FrameNumber_t Frame
 	NewPacketDatas.push_back( PacketData );
 	
 	//	gr: we DO want to split SPS & PPS & SEI...
-	if ( ContentType == ContentType::Unknown /*|| ContentType == ContentType::H264 */)
+	if ( ContentType == ContentType::Unknown || ContentType == ContentType::H264_Annexb || ContentType == ContentType::Hevc_Annexb )
 	{
 		try
 		{

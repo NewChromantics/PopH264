@@ -833,10 +833,11 @@ void Avf::TDecompressorHevc::Decode(PopH264::TInputNaluPacket& Packet)
 
 	Hevc::NaluContent::Type PacketType = Hevc::NaluContent::Invalid;
 	{
-		auto Nalu = Packet.GetData();
-		if ( Nalu.size() > 0 )
+		auto PacketData = Packet.GetData();
+		if ( PacketData.size() > 0 )
 		{
-			PacketType = Hevc::GetPacketType(Nalu);
+			bool ExpectingNalu = true;
+			PacketType = Hevc::GetPacketType(PacketData,ExpectingNalu);
 		}
 	}
 	if ( PacketType == Hevc::NaluContent::EndOfStream )
@@ -868,7 +869,7 @@ void Avf::TDecompressorHevc::Decode(PopH264::TInputNaluPacket& Packet)
 	if ( !HasSession() )
 	{
 		if ( mParams.mVerboseDebug )
-			std::Debug << "Dropping Hevc frame (" << magic_enum::enum_name(PacketType) << ") as decompressor isn't ready (waiting for sps/pps)" << std::endl;
+			std::Debug << "Dropping Hevc frame (" << PacketType << ") as decompressor isn't ready (waiting for sps/pps)" << std::endl;
 		return;
 	}
 
@@ -1102,7 +1103,7 @@ bool Avf::TDecoder::DecodeNextPacket()
 		{
 			mDecompressor.reset( new TDecompressorJpeg( mParams, OnFrame, OnError ) );
 		}
-		else if ( NextPacket.mContentType == ContentType::HEVC_Annexb )
+		else if ( NextPacket.mContentType == ContentType::Hevc_Annexb )
 		{
 			mDecompressor.reset( new TDecompressorHevc( mParams, OnFrame, OnError ) );
 		}
