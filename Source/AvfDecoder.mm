@@ -831,15 +831,16 @@ void Avf::TDecompressorHevc::Decode(PopH264::TInputNaluPacket& Packet)
 	if ( Packet.mContentType == ContentType::EndOfFile )
 		EndOfStream = true;
 
-	Hevc::NaluContent::Type PacketType = Hevc::NaluContent::Invalid;
+	Hevc::PacketMeta_t PacketMeta;
 	{
 		auto PacketData = Packet.GetData();
 		if ( PacketData.size() > 0 )
 		{
 			bool ExpectingNalu = true;
-			PacketType = Hevc::GetPacketType(PacketData,ExpectingNalu);
+			PacketMeta = Hevc::GetPacketMeta(PacketData,ExpectingNalu);
 		}
 	}
+	auto PacketType = PacketMeta.mContentType;
 	if ( PacketType == Hevc::NaluContent::EndOfStream )
 		EndOfStream = true;
 	
@@ -850,19 +851,41 @@ void Avf::TDecompressorHevc::Decode(PopH264::TInputNaluPacket& Packet)
 		return;
 	}
 
+	
 	if ( mParams.mVerboseDebug )
-		std::Debug << "Popped Nalu Hevc packet " << PacketType << " x" << Packet.GetData().size() << "bytes" << std::endl;
+		std::Debug << "Popped Nalu Hevc packet " << PacketType << "(" << static_cast<int>(PacketType) <<" layer=" << PacketMeta.mLayer << ") x" << Packet.GetData().size() << "bytes" << std::endl;
 
 	//	need header packets for decoder
 	bool IsHeaderPacket = StoreHeaderPacket( Packet.mData, PacketType );
 	bool DecodePacket = IsHeaderPacket == false;
-		
+	
+	if ( PacketMeta.mLayer != 0 )
+		DecodePacket = false;
+	
 	//	try and create the session in case we've got the SPS & PPS we need
 	CreateSession();
 
+	//	gr; todo: skip random access support (RASL) packets
+	//	https://stackoverflow.com/questions/66122770/videotoolbox-hevc-decoding-failing-for-ios14-on-device
+	auto DoNotDecode = 
+	{
+		//	gr: trial & error, these all cause BadData error when decompressing
+		//Hevc::NaluContent::NAL_UNIT_CODED_SLICE_CRA,
+		//Hevc::NaluContent::NAL_UNIT_CODED_SLICE_TRAIL_R,
+		Hevc::NaluContent::NAL_UNIT_CODED_SLICE_RASL_N,
+		Hevc::NaluContent::NAL_UNIT_CODED_SLICE_RASL_R,
+		Hevc::NaluContent::NAL_UNIT_INVALID,
+	};
+	if ( std::find( DoNotDecode.begin(), DoNotDecode.end(), PacketType ) != DoNotDecode.end() )
+		DecodePacket = false;
+	
+
 	//	dont need the warning below if we were going to drop it anyway
 	if ( !DecodePacket )
+	{
+		//std::Debug << "Dropping Hevc packet (" << PacketType << ", layer=" << PacketMeta.mLayer << ")" << std::endl;
 		return;
+	}
 	
 	//	no decompression session yet, drop packet
 	//	could be packet before SPS/PPS and we ignore it
@@ -877,7 +900,9 @@ void Avf::TDecompressorHevc::Decode(PopH264::TInputNaluPacket& Packet)
 	//auto NaluSize = GetFormatNaluPrefixType();
 	//	nalu same on h264 & hevc
 	H264::ConvertNaluPrefix( Packet.mData, RequiredNaluFormat );
-	
+
+	//std::cerr << "Decoding Hevc frame " << PacketType << ", layer=" << PacketMeta.mLayer << "..." << std::endl;
+
 	auto PacketData = Packet.GetData();
 	DecodeSample( PacketData, Packet.mFrameNumber );
 }
@@ -906,12 +931,14 @@ void Avf::TDecompressor::DecodeSample(CFPtr<CMSampleBufferRef> SampleBuffer,size
 	
 	//	gr: temporal means frames (may?) will be output in display order, OS will hold onto decoded frames
 	bool OutputFramesInOrder = mParams.PreferFramesInOrder();
+	OutputFramesInOrder=false;
 	if ( OutputFramesInOrder )
 		Flags |= kVTDecodeFrame_EnableTemporalProcessing;
 	
 	//	gr: async means frames may or may not be decoded in the background
 	//	gr: also we may have issues with sample buffer lifetime in async
 	bool AsyncDecompression = mParams.mAsyncDecompression;
+	AsyncDecompression= false;
 	if ( AsyncDecompression )
 		Flags |= kVTDecodeFrame_EnableAsynchronousDecompression;
 	
