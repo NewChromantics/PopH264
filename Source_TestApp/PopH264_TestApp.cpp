@@ -458,10 +458,11 @@ int main()
 	// Must be called prior to running any tests
 	testing::InitGoogleTest();
 	
-	//std::string_view GTestFilter = "";
-	//std::string_view GTestFilter = "**DecodeFileFirstFrame**";
-	std::string_view GTestFilter = "**DecodeFileFirstFrame_DripFeedData**";
-	
+	std::string_view GTestFilter = "";
+	//GTestFilter = "**DecodeFileFirstFrame**";
+	//GTestFilter = "**DecodeFileFirstFrame_DripFeedData**";
+	//GTestFilter = "**DecodeFile**";
+
 	if ( !GTestFilter.empty() )
 	{
 		using namespace testing;
