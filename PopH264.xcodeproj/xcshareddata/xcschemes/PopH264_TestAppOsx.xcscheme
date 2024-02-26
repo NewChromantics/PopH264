@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "BFC4717024474FFA00A2DA70"
-               BuildableName = "PopH264_TestApp"
+               BuildableName = "PopH264_OsxTestApp"
                BlueprintName = "PopH264_OsxTestApp"
                ReferencedContainer = "container:PopH264.xcodeproj">
             </BuildableReference>
@@ -45,7 +45,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "BFC4717024474FFA00A2DA70"
-            BuildableName = "PopH264_TestApp"
+            BuildableName = "PopH264_OsxTestApp"
             BlueprintName = "PopH264_OsxTestApp"
             ReferencedContainer = "container:PopH264.xcodeproj">
          </BuildableReference>
@@ -72,7 +72,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "BFC4717024474FFA00A2DA70"
-            BuildableName = "PopH264_TestApp"
+            BuildableName = "PopH264_OsxTestApp"
             BlueprintName = "PopH264_OsxTestApp"
             ReferencedContainer = "container:PopH264.xcodeproj">
          </BuildableReference>
@@ -96,7 +96,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "BFC4717024474FFA00A2DA70"
-            BuildableName = "PopH264_TestApp"
+            BuildableName = "PopH264_OsxTestApp"
             BlueprintName = "PopH264_OsxTestApp"
             ReferencedContainer = "container:PopH264.xcodeproj">
          </BuildableReference>

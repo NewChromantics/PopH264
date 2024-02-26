@@ -1,5 +1,36 @@
 #include "../Source/Version.xcconfig"
 
+//	now auto
+//SDKROOT = iphoneos
+IPHONEOS_DEPLOYMENT_TARGET = 13.0
+MACOSX_DEPLOYMENT_TARGET = 10.13
+TVOS_DEPLOYMENT_TARGET = 14.0
+
+
+TARGET_ARCH[arch=i386] = TARGET_ARCH_INTEL
+TARGET_ARCH[arch=arm64e] = TARGET_ARCH_ARM64E
+TARGET_ARCH[arch=x86_64] = TARGET_ARCH_INTEL64
+TARGET_ARCH[arch=arm64] = TARGET_ARCH_ARM64
+
+
+TARGET_MACRO = TARGET_IOS
+TARGET_MACRO[sdk=macosx*] = TARGET_OSX
+
+//	SDK_NAME is an internal name, which evaluates to macossdk.10.4
+PRODUCT_SDK_NAME = Generic
+PRODUCT_SDK_NAME[sdk=macosx*] = Macos
+PRODUCT_SDK_NAME[sdk=iphoneos*] = Ios
+PRODUCT_SDK_NAME[sdk=iphonesimulator*] = IosSimulator
+PRODUCT_SDK_NAME[sdk=xros*] = Visionos
+PRODUCT_SDK_NAME[sdk=xrossimulator*] = VisionosSimulator
+PRODUCT_SDK_NAME[sdk=tvos*] = Tvos
+PRODUCT_SDK_NAME[sdk=tvossimulator*] = TvosSimulator
+
+//	gr: this doesn't change dynamically for different schemes, destinations etc
+//PRODUCT_NAME = PopH264_$(PRODUCT_SDK_NAME)
+
+
+
 //	this should add bitcode, but doesnt without BITCODE_GENERATION_MODE
 //OTHER_CFLAGS = -Wno-ambiguous-macro -fembed-bitcode
 //OTHER_LDFLAGS = -fembed-bitcode;
@@ -21,8 +52,10 @@ BROADWAY_PATH = $(SRCROOT)/Source/Broadway/Decoder
 MAGICENUM_PATH = $(SRCROOT)/Source/SoyLib/src/magic_enum/include/magic_enum/
 
 
-PRODUCT_BUNDLE_IDENTIFIER = com.NewChromantics.$(PRODUCT_NAME:rfc1034identifier)
 PRODUCT_NAME = $(TARGET_NAME)
+PRODUCT_BUNDLE_IDENTIFIER = com.NewChromantics.$(PRODUCT_NAME:rfc1034identifier)
+
+
 
 //	default clang warnings
 CLANG_ENABLE_OBJC_WEAK = YES

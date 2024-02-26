@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "1410"
+   LastUpgradeVersion = "1340"
    version = "1.3">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -14,9 +14,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "BFAD0A8F29C6706100CF7EA6"
-               BuildableName = "libPopH264_Tvos.a"
-               BlueprintName = "PopH264_TvosStatic"
+               BlueprintIdentifier = "BF985EB42876E95700F04399"
+               BuildableName = "libPopH264_Static.a"
+               BlueprintName = "PopH264_Static"
                ReferencedContainer = "container:PopH264.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -50,9 +50,9 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "BFAD0A8F29C6706100CF7EA6"
-            BuildableName = "libPopH264_Tvos.a"
-            BlueprintName = "PopH264_TvosStatic"
+            BlueprintIdentifier = "BF985EB42876E95700F04399"
+            BuildableName = "libPopH264_Static.a"
+            BlueprintName = "PopH264_Static"
             ReferencedContainer = "container:PopH264.xcodeproj">
          </BuildableReference>
       </MacroExpansion>

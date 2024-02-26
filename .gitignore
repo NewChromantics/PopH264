@@ -21,6 +21,9 @@ Unity/PopH264/Logs/
 build-iphoneos/
 build-iphonesimulator/
 build-xrsimulator/
+build-appletvos/
+build-appletvsimulator/
+build-xros/
 
 # built binaries, this list should be a reference to where binaries go
 
