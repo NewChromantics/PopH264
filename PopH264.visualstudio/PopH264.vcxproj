@@ -98,6 +98,7 @@
     <ClCompile Include="..\Source\SoyLib\src\SoyFilesystem.cpp" />
     <ClCompile Include="..\Source\SoyLib\src\SoyFourcc.cpp" />
     <ClCompile Include="..\Source\SoyLib\src\SoyH264.cpp" />
+    <ClCompile Include="..\Source\SoyLib\src\SoyHevc.cpp" />
     <ClCompile Include="..\Source\SoyLib\src\SoyPixels.cpp" />
     <ClCompile Include="..\Source\SoyLib\src\SoyPlatform.cpp" />
     <ClCompile Include="..\Source\SoyLib\src\SoyRuntimeLibrary.cpp" />
@@ -157,6 +158,7 @@
     <ClInclude Include="..\Source\PopH264TestData.h" />
     <ClInclude Include="..\Source\SoyAvf.h" />
     <ClInclude Include="..\Source\SoyLib\src\SoyFilesystem.h" />
+    <ClInclude Include="..\Source\SoyLib\src\SoyHevc.hpp" />
     <ClInclude Include="..\Source\SoyLib\src\SoyPlatform.h" />
     <ClInclude Include="..\Source\SoyLib\src\SoyRuntimeLibrary.h" />
     <ClInclude Include="..\Source\TDecoderInstance.h" />

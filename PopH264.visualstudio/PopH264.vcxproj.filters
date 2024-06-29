@@ -225,6 +225,9 @@
     <ClCompile Include="..\Source\PopH264_Version.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source\SoyLib\src\SoyHevc.cpp">
+      <Filter>SoyLib</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\SoyLib\src\Array.hpp">
@@ -487,6 +490,9 @@
     </ClInclude>
     <ClInclude Include="..\Source\FileReader.hpp">
       <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\SoyLib\src\SoyHevc.hpp">
+      <Filter>SoyLib</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
