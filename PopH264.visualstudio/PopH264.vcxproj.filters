@@ -10,9 +10,6 @@
     <Filter Include="Unity Source">
       <UniqueIdentifier>{38d16710-35c0-4ee2-89fd-1eed7bd8119e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Broadway">
-      <UniqueIdentifier>{0c422dd0-e47c-4f51-a2d7-9ff412f56902}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source\Json11">
       <UniqueIdentifier>{20bd4c59-d59a-47a1-a406-fd0c954511f1}</UniqueIdentifier>
     </Filter>
@@ -21,15 +18,6 @@
     </Filter>
     <Filter Include="IntelMedia">
       <UniqueIdentifier>{9236602d-c355-491e-8513-eac9ad797579}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="x264">
-      <UniqueIdentifier>{9c3124d0-7c4f-4498-acdc-43e97cf109f6}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="x264\x86">
-      <UniqueIdentifier>{fb8dffc9-7c16-4b30-a9cb-bc800a013126}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="x264\x64">
-      <UniqueIdentifier>{8f411c2b-1aee-4761-ac99-a378b4222ec9}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -66,108 +54,6 @@
     <ClCompile Include="..\Source\PopH264.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\BroadwayDecoder.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Broadway\Decoder\src\h264bsd_slice_header.c">
-      <Filter>Broadway</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Broadway\Decoder\src\h264bsd_storage.c">
-      <Filter>Broadway</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Broadway\Decoder\src\h264bsd_stream.c">
-      <Filter>Broadway</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Broadway\Decoder\src\h264bsd_transform.c">
-      <Filter>Broadway</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Broadway\Decoder\src\h264bsd_util.c">
-      <Filter>Broadway</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Broadway\Decoder\src\h264bsd_vlc.c">
-      <Filter>Broadway</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Broadway\Decoder\src\h264bsd_vui.c">
-      <Filter>Broadway</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Broadway\Decoder\src\H264SwDecApi.c">
-      <Filter>Broadway</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Broadway\Decoder\src\h264bsd_byte_stream.c">
-      <Filter>Broadway</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Broadway\Decoder\src\h264bsd_cavlc.c">
-      <Filter>Broadway</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Broadway\Decoder\src\h264bsd_conceal.c">
-      <Filter>Broadway</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Broadway\Decoder\src\h264bsd_deblocking.c">
-      <Filter>Broadway</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Broadway\Decoder\src\h264bsd_decoder.c">
-      <Filter>Broadway</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Broadway\Decoder\src\h264bsd_dpb.c">
-      <Filter>Broadway</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Broadway\Decoder\src\h264bsd_image.c">
-      <Filter>Broadway</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Broadway\Decoder\src\h264bsd_inter_prediction.c">
-      <Filter>Broadway</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Broadway\Decoder\src\h264bsd_intra_prediction.c">
-      <Filter>Broadway</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Broadway\Decoder\src\h264bsd_macroblock_layer.c">
-      <Filter>Broadway</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Broadway\Decoder\src\h264bsd_nal_unit.c">
-      <Filter>Broadway</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Broadway\Decoder\src\h264bsd_neighbour.c">
-      <Filter>Broadway</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Broadway\Decoder\src\h264bsd_pic_order_cnt.c">
-      <Filter>Broadway</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Broadway\Decoder\src\h264bsd_pic_param_set.c">
-      <Filter>Broadway</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Broadway\Decoder\src\h264bsd_reconstruct.c">
-      <Filter>Broadway</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Broadway\Decoder\src\h264bsd_sei.c">
-      <Filter>Broadway</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Broadway\Decoder\src\h264bsd_seq_param_set.c">
-      <Filter>Broadway</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Broadway\Decoder\src\h264bsd_slice_data.c">
-      <Filter>Broadway</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Broadway\Decoder\src\h264bsd_slice_group_map.c">
-      <Filter>Broadway</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Broadway\Decoder\src\Broadway.c">
-      <Filter>Broadway</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Broadway\Decoder\src\Decoder.c">
-      <Filter>Broadway</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Broadway\Decoder\src\DecTestBench.c">
-      <Filter>Broadway</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Broadway\Decoder\src\EvaluationTestBench.c">
-      <Filter>Broadway</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Broadway\Decoder\src\extraFlags.c">
-      <Filter>Broadway</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Broadway\Decoder\src\TestBenchMultipleInstance.c">
-      <Filter>Broadway</Filter>
-    </ClCompile>
     <ClCompile Include="..\Source\TDecoder.cpp">
       <Filter>Source</Filter>
     </ClCompile>
@@ -190,9 +76,6 @@
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\Test.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\X264Encoder.cpp">
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\SoyLib\src\SoyRuntimeLibrary.cpp">
@@ -271,93 +154,6 @@
     </ClInclude>
     <ClInclude Include="..\Source\PopH264Framework.h">
       <Filter>Source</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\BroadwayDecoder.h">
-      <Filter>Source</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Broadway\Decoder\src\h264bsd_slice_header.h">
-      <Filter>Broadway</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Broadway\Decoder\src\h264bsd_storage.h">
-      <Filter>Broadway</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Broadway\Decoder\src\h264bsd_stream.h">
-      <Filter>Broadway</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Broadway\Decoder\src\h264bsd_transform.h">
-      <Filter>Broadway</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Broadway\Decoder\src\h264bsd_util.h">
-      <Filter>Broadway</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Broadway\Decoder\src\h264bsd_vlc.h">
-      <Filter>Broadway</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Broadway\Decoder\src\h264bsd_vui.h">
-      <Filter>Broadway</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Broadway\Decoder\src\h264bsd_byte_stream.h">
-      <Filter>Broadway</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Broadway\Decoder\src\h264bsd_cavlc.h">
-      <Filter>Broadway</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Broadway\Decoder\src\h264bsd_cfg.h">
-      <Filter>Broadway</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Broadway\Decoder\src\h264bsd_conceal.h">
-      <Filter>Broadway</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Broadway\Decoder\src\h264bsd_container.h">
-      <Filter>Broadway</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Broadway\Decoder\src\h264bsd_deblocking.h">
-      <Filter>Broadway</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Broadway\Decoder\src\h264bsd_decoder.h">
-      <Filter>Broadway</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Broadway\Decoder\src\h264bsd_dpb.h">
-      <Filter>Broadway</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Broadway\Decoder\src\h264bsd_image.h">
-      <Filter>Broadway</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Broadway\Decoder\src\h264bsd_inter_prediction.h">
-      <Filter>Broadway</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Broadway\Decoder\src\h264bsd_intra_prediction.h">
-      <Filter>Broadway</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Broadway\Decoder\src\h264bsd_macroblock_layer.h">
-      <Filter>Broadway</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Broadway\Decoder\src\h264bsd_nal_unit.h">
-      <Filter>Broadway</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Broadway\Decoder\src\h264bsd_neighbour.h">
-      <Filter>Broadway</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Broadway\Decoder\src\h264bsd_pic_order_cnt.h">
-      <Filter>Broadway</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Broadway\Decoder\src\h264bsd_pic_param_set.h">
-      <Filter>Broadway</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Broadway\Decoder\src\h264bsd_reconstruct.h">
-      <Filter>Broadway</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Broadway\Decoder\src\h264bsd_sei.h">
-      <Filter>Broadway</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Broadway\Decoder\src\h264bsd_seq_param_set.h">
-      <Filter>Broadway</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Broadway\Decoder\src\h264bsd_slice_data.h">
-      <Filter>Broadway</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Broadway\Decoder\src\h264bsd_slice_group_map.h">
-      <Filter>Broadway</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\TDecoder.h">
       <Filter>Source</Filter>
@@ -455,20 +251,11 @@
     <ClInclude Include="..\Source\TInstanceManager.h">
       <Filter>Source</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\X264Encoder.h">
-      <Filter>Source</Filter>
-    </ClInclude>
     <ClInclude Include="..\Source\SoyLib\src\SoyRuntimeLibrary.h">
       <Filter>SoyLib</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\SoyLib\src\SoyFilesystem.h">
       <Filter>SoyLib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\X264\include\x264.h">
-      <Filter>x264</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\X264\include\x264_config.h">
-      <Filter>x264</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\MediaFoundationDecoder.h">
       <Filter>Source</Filter>
@@ -499,29 +286,17 @@
     <None Include="..\Source\InstanceManager.inc">
       <Filter>Source</Filter>
     </None>
-    <None Include="..\Source\Broadway\Decoder\src\EvaluationTestBench.x">
-      <Filter>Broadway</Filter>
-    </None>
     <None Include="..\Source\AvfEncoder.mm">
       <Filter>Source</Filter>
     </None>
     <None Include="..\Source\SoyAvf.mm">
       <Filter>Source</Filter>
     </None>
-    <None Include="..\Source\X264\lib\x86\x264.pdb">
-      <Filter>x264\x86</Filter>
-    </None>
-    <None Include="..\Source\X264\bin\x86\x264.dll">
-      <Filter>x264\x86</Filter>
-    </None>
     <None Include="..\Unity\PopH264\Assets\PopH264\PopH264.cs">
       <Filter>Unity Source</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <CopyFileToFolders Include="..\Source\X264\bin\x64\x264.dll">
-      <Filter>x264\x64</Filter>
-    </CopyFileToFolders>
     <CopyFileToFolders Include="..\Source\PopH264.h">
       <Filter>Source</Filter>
     </CopyFileToFolders>
@@ -532,15 +307,6 @@
     </Library>
     <Library Include="C:\Program Files (x86)\IntelSWTools\Intel(R) Media SDK 2019 R1\Software Development Kit\lib\x64\libmfx_vs2015.lib">
       <Filter>IntelMedia</Filter>
-    </Library>
-    <Library Include="..\Source\X264\lib\x86\x264.lib">
-      <Filter>x264\x86</Filter>
-    </Library>
-    <Library Include="..\Source\X264\lib\x64\libx264.lib">
-      <Filter>x264\x64</Filter>
-    </Library>
-    <Library Include="..\Source\X264\lib\x64\x264.lib">
-      <Filter>x264\x64</Filter>
     </Library>
   </ItemGroup>
 </Project>
