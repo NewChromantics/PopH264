@@ -4,40 +4,12 @@
 #include "json11.hpp"
 #include "PopH264.h"
 
-#if defined(TARGET_OSX) && defined(TARGET_ARCH_INTEL64)
-//	gr: removed in x64 too as we're doing universal builds
-//#define OSX_X264_SUPPORT
-#endif
-
-
-
-
-//	gr: disabled on ios atm as there's no x64 build for simulator. See if we can change this at compile time (but can't do the same with linking!)
-#if defined(TARGET_ANDROID) || defined(TARGET_IOS) || !defined(OSX_X264_SUPPORT)
-//	no x264
-#endif
-
-//	gr: disabling x264 until builds are good again
-#if defined(TARGET_WINDOWS)
-//#define ENABLE_X264
-#endif
-
 #if defined(TARGET_IOS) || defined(TARGET_OSX)
 #define ENABLE_AVF
 #endif
 
 #if defined(TARGET_WINDOWS)
 #define ENABLE_MEDIAFOUNDATION
-#endif
-
-#if defined(ENABLE_X264)
-#if defined(_MSC_VER)	//	different warning syntax, but we don't wanna do this globally :/
-//#define warning message
-#pragma message("X264 encoder enabled")
-#else
-#pragma warning("X264 encoder enabled")
-#endif
-#include "X264Encoder.h"
 #endif
 
 #if defined(ENABLE_AVF)
@@ -103,16 +75,6 @@ PopH264::TEncoderInstance::TEncoderInstance(const std::string& OptionsJsonString
 	{
 		Nvidia::TEncoderParams Params(Options);
 		mEncoder.reset( new Nvidia::TEncoder(Params,OnOutputPacket) );
-		return;
-	}
-#endif
-	
-	
-#if defined(ENABLE_X264)
-	if ( EncoderName.empty() || EncoderName == X264::TEncoder::Name )
-	{
-		X264::TEncoderParams Params(Options);
-		mEncoder.reset( new X264::TEncoder(Params,OnOutputPacket) );
 		return;
 	}
 #endif

@@ -102,7 +102,7 @@ p.decode(<binary>);
 				memsize: this.memsize,
 				reuseMemory: this._config.reuseMemory ? true : false,
 			}
-			worker.postMessage({type: "Broadway.js - Worker init", options: Options });
+			worker.postMessage({type: "Player.js - Worker init", options: Options });
 
 			//	gr: default off
 			if (this._config.transferMemory)

@@ -601,36 +601,11 @@ void MagicLeap::TDecoder::OnOutputFormatChanged(MLHandle NewFormat)
 	}
 }
 
-
-/*
-void Broadway::TDecoder::OnPicture(const H264SwDecPicture& Picture,const H264SwDecInfo& Meta,std::function<void(const SoyPixelsImpl&,SoyTime)> OnFrameDecoded,SoyTime DecodeDuration)
-{
-	//		headers just say
-	//	u32 *pOutputPicture;  	//	  Pointer to the picture, YUV format
-	auto Format = SoyPixelsFormat::Yuv_8_8_8_Full;
-	SoyPixelsMeta PixelMeta( Meta.picWidth, Meta.picHeight, Format );
-	//std::Debug << "Decoded picture " << PixelMeta << std::endl;
-	
-	//	gr: wish we knew exactly how many bytes Picture.pOutputPicture pointed at!
-	//		but demos all use this measurement
-	//auto DataSize = PixelMeta.GetDataSize();
-	auto DataSize = (3 * Meta.picWidth * Meta.picHeight)/2;
-
-	auto* Pixels8 = reinterpret_cast<uint8_t*>(Picture.pOutputPicture);
-	SoyPixelsRemote Pixels( Pixels8, DataSize, PixelMeta );
-	if ( OnFrameDecoded )
-		OnFrameDecoded( Pixels, DecodeDuration );
-}
-
-*/
-
-
 MagicLeap::TOutputThread::TOutputThread() :
 	SoyWorkerThread	("MagicLeapOutputThread", SoyWorkerWaitMode::Wake )
 {
 	Start();
 }
-
 
 void MagicLeap::TOutputThread::OnInputSubmitted(int32_t PresentationTime)
 {

@@ -18,8 +18,6 @@ namespace Avf
 	class TDecompressorH264;
 	class TDecompressorHevc;
 	class TDecompressorJpeg;
-
-	//	same as X264
 	class TFrameMeta;
 }
 
