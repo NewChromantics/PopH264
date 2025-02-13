@@ -17,8 +17,6 @@ SOY_PATH = $(PROJECT_PATH)/Source/SoyLib
 
 LIB_INCLUDES = \
 -I$(SRC_PATH)	\
--I$(SRC_PATH)/Broadway/Decoder	\
--I$(SRC_PATH)/Broadway/Decoder/inc	\
 -I$(SOY_PATH)/src	\
 -I$(SOY_PATH)/src/magic_enum/include/magic_enum/	\
 -I$(SRC_PATH)/Json11	\
@@ -79,15 +77,6 @@ APP_LINK_FLAGS = $(LDFLAGS)
 
 LIB_LINK_LIBS = -lstdc++fs
 APP_LINK_LIBS = -lstdc++fs
-
-ifdef $(ENABLE_X264)
-LIB_SRC_FILES += $(SRC_PATH)/X264Encoder.cpp
-LIB_INCLUDES += -I$(SRC_PATH)/X264/include
-LIB_DEFINES += -DENABLE_X264
-LIB_LINK_LIBS += -lx264
-LIB_LINK_LIBS += -L"$(SRC_PATH)/X264/include"
-endif
-
 
 ifeq ($(osTarget),Nvidia)
 	# from nvidia samples Rules.mk

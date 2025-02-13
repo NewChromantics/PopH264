@@ -16,8 +16,6 @@ SOY_PATH = $(PROJECT_PATH)/Source/SoyLib
 
 LIB_INCLUDES = \
 -I$(SRC_PATH)	\
--I$(SRC_PATH)/Broadway/Decoder	\
--I$(SRC_PATH)/Broadway/Decoder/inc	\
 -I$(SOY_PATH)/src	\
 -I$(SRC_PATH)/Json11	\
 
@@ -30,7 +28,7 @@ LIB_DEFINES = \
 
 EMCC_C_FLAGS = -O3 \
 -s NO_EXIT_RUNTIME=1	\
--s 'EXPORTED_FUNCTIONS=["GetVersion","HEAP8", "HEAP16", "HEAP32", "_broadwayGetMajorVersion", "_broadwayGetMinorVersion", "_broadwayInit", "_broadwayExit", "_broadwayCreateStream", "_broadwayPlayStream", "_broadwayOnHeadersDecoded", "_broadwayOnPictureDecoded"]'	\
+-s 'EXPORTED_FUNCTIONS=["GetVersion","HEAP8", "HEAP16", "HEAP32"]'	\
 
 EMCC_LINK_FLAGS = --no-entry
 
@@ -47,8 +45,7 @@ LDFLAGS = $(EMCC_LINK_FLAGS)
 
 LIB_LINK_FLAGS = $(LDFLAGS)
 
-# gr: maybe this should include the os lib dir for x264
-LIB_LINK_LIBS = 
+LIB_LINK_LIBS =
 
 LIB_OBJECTS=$(LIB_SRC_FILES:.c=.o)
 
