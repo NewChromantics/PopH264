@@ -53,8 +53,6 @@ SOY_PATH = $(SRC)/Source/SoyLib
 
 
 LOCAL_C_INCLUDES += \
-$(LOCAL_PATH)/$(SRC)/Source/Broadway/Decoder	\
-$(LOCAL_PATH)/$(SRC)/Source/Broadway/Decoder/inc	\
 $(LOCAL_PATH)/$(SOY_PATH)/src	\
 $(LOCAL_PATH)/$(SOY_PATH)/src/magic_enum/include/magic_enum/	\
 $(LOCAL_PATH)/$(SRC)/Source/Json11	\
@@ -77,8 +75,6 @@ $(SRC)/Source/TDecoder.cpp \
 $(SRC)/Source/TDecoderInstance.cpp \
 $(SRC)/Source/TEncoder.cpp \
 $(SRC)/Source/TEncoderInstance.cpp \
-$(SRC)/Source/BroadwayDecoder.cpp \
-$(SRC)/Source/BroadwayAll.c \
 $(SRC)/Source/Json11/json11.cpp \
 $(SRC)/Source/AndroidDecoder.cpp \
 $(SRC)/Source/FileReader.cpp \
