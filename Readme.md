@@ -56,7 +56,10 @@ Financial Contributers (Thank you!)
 These people have already contributed money towards the project. (Get in touch ASAP if I have missed you out!)
 - [Condense Reality](https://www.condensereality.com/)
 
+Open Source Attributions
+------------------------
 
+See [ATTRIBUTIONS.md](./ATTRIBUTIONS.md)
 
 API Documentation
 =========================
