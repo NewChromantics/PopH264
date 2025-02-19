@@ -29,15 +29,16 @@ jobs:
           submodules: "recursive"
 
       - name: Build Universal
-        uses: NewChromantics/PopAction_BuildApple@v1.0.11
+        id: Build
+        uses: NewChromantics/PopAction_BuildApple@v1.3.2
         with:
           BuildScheme: ${{ env.project }}_Universal
-          project: ${{ env.project }}
+          Project: ${{ env.project }}
+          Destination: "platform=macOS" # has no effect, but gets passed to xcodebuild so will fail if empty (todo: fix in action!)
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          # tsdk: these env vars are set in each of the actions
-          name: ${{ env.UPLOAD_NAME }}
-          path: ${{ env.UPLOAD_DIR }}
+          name: ${{ steps.Build.outputs.UPLOAD_NAME }}
+          path: ${{ steps.Build.outputs.UPLOAD_DIR }}
           if-no-files-found: error
