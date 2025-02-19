@@ -76,27 +76,27 @@ jobs:
             OutputDirectory: Windows/PopH264_Uwp_Arm
            
           - name: Apple Universal
-            runs_on: macos-12
+            runs_on: macos-15
             scheme: PopH264_Universal
             destination: "platform=macOS" # has no effect, but gets passed to xcodebuild so will fail if empty (todo: fix in action!)
 
           - name: Ios Framework
-            runs_on: macos-latest
+            runs_on: macos-15
             scheme: PopH264_Ios
             destination: "generic/platform=iOS"
             
           - name: Tvos Static
-            runs_on: macos-latest
+            runs_on: macos-15
             scheme: PopH264_TvosStatic
             destination: "generic/platform=tvOS"
 
           - name: Macos Static
-            runs_on: macos-latest
+            runs_on: macos-15
             scheme: PopH264_MacosStatic
             destination: "generic/platform=macOS"
 
           - name: Macos Dylib
-            runs_on: macos-latest
+            runs_on: macos-15
             scheme: PopH264_MacosDylib
             destination: "generic/platform=macOS"
 
