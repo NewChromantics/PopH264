@@ -59,10 +59,10 @@ jobs:
           OutputDirectory: ${{ github.workspace }}\${{ matrix.config.OutputDirectory }}\ # need an absolute path here, must end with trailing slash
 
       - name: Upload Artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          # gr: newer versions of build action use outputs
+          # gr: newer versions (which??) of build action use outputs
           #name: ${{ steps.Build.outputs.UPLOAD_NAME }}
-          name: ${{ matrix.config.name }}	# different artifact names so they don't override eachother
+          name: ${{ matrix.config.name }}	# different artifact names so they don't override eachother <--- gr: v4 wont allow file overrides
           path: ${{ steps.Build.outputs.UPLOAD_DIR }}
           if-no-files-found: error

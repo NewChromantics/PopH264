@@ -14,7 +14,7 @@ on:
 jobs:
   Build:
     name: Macos Dylib Library
-    runs-on: macos-12
+    runs-on: macos-15
     steps:
       - uses: actions/checkout@v2
         with:
@@ -29,7 +29,7 @@ jobs:
           Destination: "platform=macOS"
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.Build.outputs.UPLOAD_NAME }}
           path: ${{ steps.Build.outputs.UPLOAD_DIR }}

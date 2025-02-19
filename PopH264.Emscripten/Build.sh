@@ -1,16 +1,31 @@
 #!/bin/bash
-# gr: this should have been set by brew on osx
-#export ANDROID_NDK_HOME="/usr/local/share/android-ndk"
+#	gr: xcode isn't using the homebrew path? made this simpler by just adding it, in case it's needed
+#	gr: github workflow doesn't need this. 
+PATH=$PATH:/opt/homebrew/bin
+
+
+function CheckResult()
+{
+	RESULT=$1
+	if [[ $RESULT -ne 0 ]]; then
+		exit $RESULT
+	fi
+}
+
 
 #echo "env vars"
 #env
 
 # require param
+BUILD_SCRIPT_DIR="$(dirname $0)"	#	eg; CRStreamer.emscripten/BuildWasm.sh
 #BUILD_PROJECT_FOLDER=$BUILD_TARGET_NAME.Android
 BUILD_PROJECT_FOLDER="$1"
 OUTPUT_DIRECTORY=$BUILD_PROJECT_FOLDER/Build
 
 ACTION="$2"
+
+echo "BUILD_SCRIPT_DIR: $BUILD_SCRIPT_DIR"
+
 
 DEFAULT_ACTION="release"
 
@@ -26,6 +41,15 @@ if [ "$BUILD_TARGET_NAME" == "" ]; then
 	echo "Build.sh: BUILD_TARGET_NAME not specified, expecting PopXyz"
 	exit 1;
 fi
+
+
+
+echo "Emscripten version $(em++ -v)"
+CheckResult $?
+
+# show all DLL_EXPORT declarations in the code, these are probably symbols we want to output
+echo "DLL_EXPORT symbols"
+grep -o -e "DLL_EXPORT[^(]*" Source/*.h
 
 
 ADDITIONAL_BUILD_FILES=(Source_Wasm/PopH264WebApi.js Source_Wasm/Player.js)
@@ -66,13 +90,6 @@ function CopyBuildFilesToUnity()
 	#fi
 }
 
-function CheckResult()
-{
-	RESULT=$1
-	if [[ $RESULT -ne 0 ]]; then
-		exit $RESULT
-	fi
-}
 
 function Build()
 {

@@ -10,11 +10,12 @@ on:
     branches:
       - master
       - '*Test*' 
+      - '*Workflow*'
 
 jobs:
   Build:
     name: Ios Static Library
-    runs-on: macos-12
+    runs-on: macos-15
     steps:
       - uses: actions/checkout@v2
         with:
@@ -22,14 +23,15 @@ jobs:
 
       - name: Build Ios Static
         id: BuildIosStatic
-        uses: NewChromantics/PopAction_BuildApple@v1.2.0
+        uses: NewChromantics/PopAction_BuildApple@v1.3.2
         with:
           BuildScheme: ${{ env.project }}_IosStatic
-          project: ${{ env.project }}
+          Project: ${{ env.project }}
           Destination: "generic/platform=iOS"
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.BuildIosStatic.outputs.UPLOAD_NAME }}
           path: ${{ steps.BuildIosStatic.outputs.UPLOAD_DIR }}
+          if-no-files-found: error
