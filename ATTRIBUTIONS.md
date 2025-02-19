@@ -1,8 +1,9 @@
-﻿# PopH264 Attributions
-
+PopH264 Attributions
+==================================
 PopH264 utilizes the following open source projects.
 
-### SoyLib 
+SoyLib
+------------------- 
 - https://github.com/NewChromantics/SoyLib
 - by [Graham Reeves](https://github.com/NewChromantics)
 - licensed under [MIT](https://github.com/NewChromantics/SoyLib?tab=MIT-1-ov-file#readme)
@@ -30,7 +31,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-### magic_enum
+magic_enum
+-------------------
 - https://github.com/Neargye/magic_enum
 - by [Daniil Goncharov](https://github.com/Neargye/)
 - licensed under [MIT](https://github.com/Neargye/magic_enum?tab=MIT-1-ov-file#readme)
@@ -59,7 +61,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-### miniz 
+miniz 
+-------------------
 - https://github.com/richgel999/miniz
 - by [Rich Geldreich](https://github.com/richgel999)
 - licensed under [MIT](https://github.com/richgel999/miniz?tab=MIT-1-ov-file#readme)
@@ -88,12 +91,14 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ```
 
-### stb
+stb
+-------------------
 - https://github.com/nothings/stb
 - by [Sean Barrett](https://github.com/nothings)
 - licensed under [Public Domain](https://unlicense.org/)
 
-### Json11
+Json11
+-------------------
 - https://github.com/dropbox/json11
 - by [Dropbox, Inc.](https://github.com/dropbox)
 - licensed under [MIT](https://github.com/dropbox/json11?tab=MIT-1-ov-file#readme)
@@ -120,13 +125,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ```
 
----
 
-# Attributions only for specific platforms:
+Attributions only for specific platforms:
+===================
+Linux arm64 for Nvidia Jetson Nano / Magic Leap 1 (Lumin)
 
-## Linux arm64 for Nvidia Jetson Nano / Magic Leap 1 (Lumin)
-
-### NVIDIA Multimedia API
+NVIDIA Multimedia API
+-------------------
 - https://docs.nvidia.com/jetson/l4t-multimedia/index.html
 - by [NVIDIA CORPORATION](https://github.com/nvidia)
 - licensed under:
