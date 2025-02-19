@@ -135,11 +135,11 @@ jobs:
       - name: Build Apple ${{matrix.config.scheme}}
         id: Apple
         if: matrix.config.scheme != ''
-        uses: NewChromantics/PopAction_BuildApple@v1.2.2
+        uses: NewChromantics/PopAction_BuildApple@v1.3.2
         with:
           BuildScheme: ${{matrix.config.scheme}}
-          project: ${{ env.project }}
-          destination: ${{ matrix.config.destination }}
+          Project: ${{ env.project }}
+          Destination: ${{ matrix.config.destination }}
 
       - name: Build Linux ${{ matrix.config.linux_target }}
         id: Linux
