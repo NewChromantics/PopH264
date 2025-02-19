@@ -445,7 +445,7 @@
 		BF8AB6BC21F228D0008E7E76 /* SoyTime.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SoyTime.cpp; path = Source/SoyLib/src/SoyTime.cpp; sourceTree = "<group>"; };
 		BF8AB6BD21F228D0008E7E76 /* SoyTime.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = SoyTime.mm; path = Source/SoyLib/src/SoyTime.mm; sourceTree = "<group>"; };
 		BF8AB6BE21F228D0008E7E76 /* SoyTime.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SoyTime.h; path = Source/SoyLib/src/SoyTime.h; sourceTree = "<group>"; };
-		BF985EB52876E95700F04399 /* libPopH264_Macos_thingstatic.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = libPopH264_Macos_thingstatic.a; path = libPopH264_Static.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		BF985EB52876E95700F04399 /* libPopH264_Static.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPopH264_Static.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		BF9F2B532A4F5DFD00D7261A /* FileReader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = FileReader.hpp; path = Source/FileReader.hpp; sourceTree = "<group>"; };
 		BF9F2B542A4F5DFD00D7261A /* FileReader.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = FileReader.cpp; path = Source/FileReader.cpp; sourceTree = "<group>"; };
 		BF9F2B612A4F607E00D7261A /* Cat.jpg.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Cat.jpg.cpp; sourceTree = "<group>"; };
@@ -734,7 +734,7 @@
 				BFC4717124474FFA00A2DA70 /* PopH264_OsxTestApp */,
 				BF23A41125D9415D0060DE06 /* PopH264_TestAppIos.app */,
 				BF1D95E02850CB69008E3758 /* libPopH264.dylib */,
-				BF985EB52876E95700F04399 /* libPopH264_Macos_thingstatic.a */,
+				BF985EB52876E95700F04399 /* libPopH264_Static.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1168,7 +1168,7 @@
 			);
 			name = PopH264_Static;
 			productName = PopH264_IosStatic;
-			productReference = BF985EB52876E95700F04399 /* libPopH264_Macos_thingstatic.a */;
+			productReference = BF985EB52876E95700F04399 /* libPopH264_Static.a */;
 			productType = "com.apple.product-type.library.static";
 		};
 		BFC4717024474FFA00A2DA70 /* PopH264_OsxTestApp */ = {
@@ -1703,7 +1703,6 @@
 			baseConfigurationReference = BF004B6724FD3CAC00DC6A90 /* PopH264_Osx.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "Apple Development";
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = X52DR36JY2;
 				INFOPLIST_FILE = "$(SRCROOT)/Source_Osx/PopH264_Osx_Info.plist";
