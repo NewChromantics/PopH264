@@ -17,13 +17,14 @@ jobs:
     
     steps:
     - name: Setup Emscripten
-      uses: mymindstorm/setup-emsdk@v7
+      uses: mymindstorm/setup-emsdk@v11
       with:
-          version: "latest" #"1.39.15"
-
-    - name: Verify Emscripten
+          version: "3.1.66" #"1.39.15"
+          #version: "latest"
+          
+    - name: Verify Emscripten Version
       run: emcc -v
-        
+      
     - uses: actions/checkout@v2
       with:
         submodules: 'recursive'
