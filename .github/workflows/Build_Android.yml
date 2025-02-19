@@ -7,6 +7,7 @@ on:
     branches:
       - master
       - '*Test*'
+      - '*Workflow*'
 
 jobs:
   Build:
@@ -27,7 +28,7 @@ jobs:
         buildpath: "PopH264.Android/libPopH264"
 
     - name: Upload artifacts
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ steps.Build.outputs.UPLOAD_NAME }}
         path: ${{ steps.Build.outputs.UPLOAD_DIR }}

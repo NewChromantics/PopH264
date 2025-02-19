@@ -10,6 +10,7 @@ on:
     branches:
       - master
       - '*Test*' 
+      - '*Workflow*'
 
 jobs:
   Build:
@@ -29,7 +30,8 @@ jobs:
           Destination: "generic/platform=iOS"
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.BuildIosStatic.outputs.UPLOAD_NAME }}
           path: ${{ steps.BuildIosStatic.outputs.UPLOAD_DIR }}
+          if-no-files-found: error

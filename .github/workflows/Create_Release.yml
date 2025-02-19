@@ -178,7 +178,7 @@ jobs:
           echo "UPLOAD_DIR=PopH264.Emscripten/Build" >> $GITHUB_OUTPUT
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           #name: ${{ steps.Windows.outputs.UPLOAD_NAME }}
           name: ${{ matrix.config.name }}
@@ -195,7 +195,7 @@ jobs:
 
       # Download ALL artifacts into Packaging dir
       - name: Download build artifacts
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           path: ${{ env.project }}.Package/
 
