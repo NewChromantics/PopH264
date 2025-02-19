@@ -1,4 +1,4 @@
-name: Build Apple
+name: Build Apple Universal XCFramework
 
 env:
   project: PopH264
