@@ -677,9 +677,6 @@ void Test_Decoder_DecodeTestFile(const char* TestDataName, const char* DecoderNa
 		if (Result < 0)
 			throw std::runtime_error("DecoderTest: PushData error");
 
-		//	gr: did we need to push twice to catch a bug in broadway?
-		//PopH264_PushData(Handle, TestData, TestDataSize, 0);
-
 		//	flush
 		if (LastIteration)
 			PopH264_PushEndOfStream(Handle);

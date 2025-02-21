@@ -52,7 +52,7 @@ __export void				PopH264_UnitTestThrows();	//	for c++, this will throw an except
 #define POPH264_DECODER_KEY_DECODERNAME				"Decoder"
 #define POPH264_DECODER_KEY_VERBOSEDEBUG			"VerboseDebug"			//	print more debug to stderr
 #define POPH264_DECODER_KEY_ALLOWBUFFERING			"AllowBuffering"		//	by default most decoders will buffer up frames, by default we turn this off to deliver frames asap
-#define POPH264_DECODER_KEY_DOUBLEDECODEKEYFRAME	"DoubleDecodeKeyframe"	//	small hack for mediafoundation and broadway, get a keyframe output immediately by decoding an IDR frame twice
+#define POPH264_DECODER_KEY_DOUBLEDECODEKEYFRAME	"DoubleDecodeKeyframe"	//	small hack for mediafoundation, get a keyframe output immediately by decoding an IDR frame twice
 #define POPH264_DECODER_KEY_DRAINONKEYFRAME			"DrainOnKeyframe"		//	Mediafoundation test
 #define POPH264_DECODER_KEY_LOWPOWERMODE			"LowPowerMode"
 #define POPH264_DECODER_KEY_DROPBADFRAMES			"DropBadFrames"
@@ -104,7 +104,7 @@ __export void				PopH264_DecoderAddOnNewFrameCallback(int32_t Instance,PopH264_C
 #define POPH264_ENCODER_KEY_MAXKBPS			"MaxKbps"
 #define POPH264_ENCODER_KEY_REALTIME		"Realtime"	//	on nvidia, this is "max performance" setting
 
-//	x264 & nvidia
+//	nvidia
 #define POPH264_ENCODER_KEY_VERBOSEDEBUG	"VerboseDebug"
 
 //	avf
@@ -112,14 +112,6 @@ __export void				PopH264_DecoderAddOnNewFrameCallback(int32_t Instance,PopH264_C
 #define POPH264_ENCODER_KEY_MAXSLICEBYTES	"MaxSliceBytes"
 #define POPH264_ENCODER_KEY_MAXIMISEPOWEREFFICIENCY	"MaximisePowerEfficiency"
 #define POPH264_ENCODER_KEY_KEYFRAMEFREQUENCY	"KeyFrameFrequency"	//	keyframe every N frames
-
-//	x264
-#define POPH264_ENCODER_KEY_QUALITY				"Quality"
-#define POPH264_ENCODER_KEY_ENCODERTHREADS		"EncoderThreads"
-#define POPH264_ENCODER_KEY_LOOKAHEADTHREADS	"LookaheadThreads"
-#define POPH264_ENCODER_KEY_BSLICEDTHREADS		"BSlicedThreads"
-#define POPH264_ENCODER_KEY_DETERMINISTIC		"Deterministic"
-#define POPH264_ENCODER_KEY_CPUOPTIMISATIONS	"CpuOptimisations"
 
 //	nvidia
 #define POPH264_ENCODER_KEY_CONSTANTBITRATE		"ConstantBitRate"	//	else variable
@@ -136,8 +128,7 @@ __export void				PopH264_DecoderAddOnNewFrameCallback(int32_t Instance,PopH264_C
 
 
 //	All options are optional
-//	.Encoder = "avf"|"x264"
-//	.Quality = [0..9]				x264
+//	.Encoder = "avf"
 //	.AverageKbps = int				avf kiloBYTES
 //	.MaxKbps = int					avf kiloBYTES
 //	.Realtime = true				avf: kVTCompressionPropertyKey_RealTime

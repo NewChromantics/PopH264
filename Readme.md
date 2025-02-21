@@ -31,14 +31,14 @@ We have an MP4 decoder implementation here, https://github.com/NewChromantics/Po
 
 Future
 ----------------
-- Whilst the project is called PopH264, there is actually very little restriction in use of purely H264. The NALU splitting and specific handling of SPS/PPS is really the only restriction, (as well as the generic Broadway fallback).
+- Whilst the project is called PopH264, there is actually very little restriction in use of purely H264. The NALU splitting and specific handling of SPS/PPS is really the only restriction.
 - There is little holding back PopH264 from handling VP9, HEVC/H265 etc, but there isn't currently the demand, and H264 is still by far the most widely supported format.
 
 - The other benefit of being specific to H264, is that the project does intend to extract other meta (Macroblock information, motion vectors) cross platform.
 
 - PopH264 is unlikely to handle Audio.
 
-- Web build is being redone in a few ways (rewrite of the interface to broadway) and planned implementation of [WebCodecs](https://www.w3.org/TR/webcodecs/) and abusing WebRTC for a decoding loopback (no YUV output support though!)
+- Web build is being redone in a few ways (rewrite of the interface to broadway, Broadway removed from project as of 2025) and planned implementation of [WebCodecs](https://www.w3.org/TR/webcodecs/) and abusing WebRTC for a decoding loopback (no YUV output support though!)
 
 - Web via Unity is very low down on my list personally, if anyone who is experienced in this field want's to help and/or guide me how to bridge js modules, interfacing and unity's integration/build, get in touch. (I have never used unity for a web build)
 
@@ -56,7 +56,10 @@ Financial Contributers (Thank you!)
 These people have already contributed money towards the project. (Get in touch ASAP if I have missed you out!)
 - [Condense Reality](https://www.condensereality.com/)
 
+Open Source Attributions
+------------------------
 
+See [ATTRIBUTIONS.md](./ATTRIBUTIONS.md)
 
 API Documentation
 =========================
@@ -84,32 +87,35 @@ There is a SwiftPackageManager compatible package at https://github.com/NewChrom
 
 Platform Support
 =======================
-Any empty platforms are generally planned, but not yet implemented.
 
-| Platform       | Software Decoding | Hardware Decoding | Software Encoding | Hardware Encoding |
-|----------------|-------------------|-------------------|-------------------|-------------------|
-| Windows x86    |                   |                   |                   |                   |
-| Windows x64    | Broadway          | MediaFoundation   |                   | MediaFoundation   |
-| Windows UWP Hololens1 |            |                   |                   |                   |
-| Windows UWP Hololens2 |            | MediaFoundation   |                   | MediaFoundation   |
-| Linux arm64 for Nvidia Jetson Nano | Broadway |        | x264              | V4L2 (Nvidia)     |
-| Linux arm for Raspberry PI 1,2,Zero (untested) | Broadway |    | x264      |                   |
-| Linux arm for Raspberry PI 3 | Broadway |              | x264              |                   |
-| Linux x64 ubuntu | Broadway        |                   | x264              |                   |
-| Osx Intel      | Broadway          | AvFoundation      | x264[disabled for arm]| AvFoundation      |
-| Osx Arm64      | Broadway          | AvFoundation      |                   | AvFoundation      |
-| Ios            | Broadway          | AvFoundation      |                   | AvFoundation      |
-| Ios Simulator  | Untested          | Untested          | Untested          | Untested          |
-| Android armeabi-v7a | Broadway     | NdkMediaCodec     |                   |                   |
-| Android x86    | Broadway          | NdkMediaCodec     |                   |                   |
-| Android x86_64 | Broadway          | NdkMediaCodec     |                   |                   |
-| Android arm64-v8a | Broadway       | NdkMediaCodec     |                   |                   |
-| Magic Leap/Luma (Linux x86) | Broadway| MLMediaCodec Google,Nvidia|        |                   |
-| Web            | [Broadway.js*](https://github.com/SoylentGraham/Broadway) | | |               |
-| Unity WebGL    |                   |                   |                   |                   |
+* As of 2025, PopH264 supports only built-in OS decoders/encoders
+  * No longer contains any fallback solutions not provided by the OS/Platform.
+  * As before, it provides access to built-in hardware decoders/encoders if available on the platform
+  * Simplifies licensing as PopH264 now does not include any patented decoder/encoder algorithms itself.
 
-* Broadway.js is now with a fork for various bug fixes and optimisations; https://github.com/SoylentGraham/Broadway
+* Any empty platforms are generally planned, but not yet implemented.
 
+| Platform                                       | Built-in OS Decoding       | Built-in OS Encoding |
+|------------------------------------------------|----------------------------|----------------------|
+| Windows x86                                    |                            |                      |
+| Windows x64                                    | MediaFoundation            | MediaFoundation      |
+| Windows UWP Hololens1                          |                            |                      |
+| Windows UWP Hololens2                          | MediaFoundation            | MediaFoundation      |
+| Linux arm64 for Nvidia Jetson Nano             |                            | V4L2 (Nvidia)        |
+| Linux arm for Raspberry PI 1,2,Zero (untested) |                            |                      |
+| Linux arm for Raspberry PI 3                   |                            |                      |
+| Linux x64 ubuntu                               |                            |                      |
+| Osx Intel                                      | AvFoundation               | AvFoundation         |
+| Osx Arm64                                      | AvFoundation               | AvFoundation         |
+| Ios                                            | AvFoundation               | AvFoundation         |
+| Ios Simulator                                  | Untested                   | Untested             |
+| Android armeabi-v7a                            | NdkMediaCodec              |                      |
+| Android x86                                    | NdkMediaCodec              |                      |
+| Android x86_64                                 | NdkMediaCodec              |                      |
+| Android arm64-v8a                              | NdkMediaCodec              |                      |
+| Magic Leap/Luma (Linux x86)                    | MLMediaCodec Google,Nvidia |                      |
+| Web                                            | WebCodecs                  |                      |
+| Unity WebGL                                    |                            |                      |
 
 Android
 ---------------------
@@ -131,8 +137,6 @@ Osx & Ios
 
 Linux
 ----------------
-- Install X264
-  - `sudo apt-get install libx264-dev`
 - Compile
   - `make osTarget=arm64` (jetson,pi4 = arm64)
 
@@ -202,13 +206,6 @@ Some notes to save investigation (this is gathered from debugging and reading ou
 - `H264 QCom hardware encoder` takes only `NV12`
 - `H264 MFT encoder` (Microsoft's software encoder) takes `NV12` `IYUV` `YV12` `YUY2`
 - `VP9/VP8 hardware encoder` (extension) takes `NV12` `IYUV` `YV12` `YUY2`
-
-Broadway
------------------
-- If you try and decode an IDR keyframe once then end the stream, you will get no frame out. It requires submitting the frame a second time to get the frame out.
-- Similarly, you can submit an IDR/keyframe twice and get that frame immediately output.
-- SPS & PPS need to be sent before other packets, or we will get no output. #20
-- If you try and decode an intra-frame before keyframe, the decoder will stop with no error and get no frame output. #21
 
 Android
 ---------------

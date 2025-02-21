@@ -14,7 +14,7 @@ namespace PopH264
 	//	1.2.3	PopH264_CreateEncoder now takes JSON instead of encoder name
 	//	1.2.4	Added ProfileLevel
 	//	1.2.5	Encoder now uses .Keyframe meta setting
-	//	1.2.6	X264 now uses ProfileLevel + lots of x264 settings exposed
+	//	1.2.6	X264 now uses ProfileLevel + lots of x264 settings exposed. NOTE: X264 now fully removed from project as of 2025
 	//	1.2.7	Added MediaFoundation decoder to windows
 	//	1.2.8	Added Test data
 	//	1.2.9	Added PopH264_EncoderEndOfStream
@@ -29,7 +29,7 @@ namespace PopH264
 	//	1.3.x	Meta versions for packaging
 	//	1.3.15	Fixed/fixing correct frame number output to match input of decoder
 	//	1.3.17	MediaFoundation now doesn't get stuck if we try and decode PPS or frames before SPS
-	//	1.3.18	Broadway doesn't get stuck if we dont process in the order SPS, PPS, Keyframe
+	//	1.3.18	Broadway doesn't get stuck if we dont process in the order SPS, PPS, Keyframe. NOTE: Broadway now fully removed from project as of 2025
 	//	1.3.19	Android NDK MediaCodec implementation
 	//	1.3.20	Added PopH264_PushEndOfStream API as a clear wrapper for PopH264_PushData(null)
 	//	1.3.21	Added AllowBuffering option to decoder so by default LowLatency mode is on for Mediafoundation, which reduces buffering
@@ -44,7 +44,7 @@ namespace PopH264
 	//	1.3.30	Avf (Mac & ios) no longer try and decode SEI nalus (causes -12349 error). Added option to disable this
 	//	1.3.31	Added width/height/inputsize hints for android to try and get bigger input buffers; issue #48
 	//	1.3.32	Added extra timer debug. Android, if given 0 as size hints, will try and extract hint sizes from SPS
-	//	1.3.33	First wasm version of broadway compiled from our repository
+	//	1.3.33	First wasm version of broadway compiled from our repository. NOTE: Broadway now fully removed from project as of 2025
 	//	1.3.34	Added some extra macos/ios version number settings for mac-swift app compatibility
 	//	1.3.39	Ios now converts greyscale to YUV. Greyscale is blank on ios (fine on osx)
 

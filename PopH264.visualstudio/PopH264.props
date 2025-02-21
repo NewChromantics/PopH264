@@ -3,7 +3,7 @@
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
-    <IncludePath>$(ProjectDir)..\Source\SoyLib\src;$(ProjectDir)..\Source\Broadway\Decoder\inc;$(ProjectDir)..\Source\Json11;$(ProjectDir)..\Source\SoyLib\src\magic_enum\include\magic_enum;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)..\Source\SoyLib\src;$(ProjectDir)..\Source\Json11;$(ProjectDir)..\Source\SoyLib\src\magic_enum\include\magic_enum;$(IncludePath)</IncludePath>
     <IntDir>$(SolutionDir)$(ProjectName)_$(Platform)_$(Configuration)\Temp\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup>
@@ -29,7 +29,6 @@
     </ClCompile>
     <Link>
       <FullProgramDatabaseFile>true</FullProgramDatabaseFile>
-      <DelayLoadDLLs>x264.dll</DelayLoadDLLs>
     </Link>
     <PostBuildEvent />
   </ItemDefinitionGroup>

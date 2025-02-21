@@ -4,8 +4,6 @@ SRCS = \
 ../Source/PopH264.cpp	\
 ../Source/PopH264_Version.cpp	\
 ../Source/TDecoder.cpp \
-../Source/BroadwayDecoder.cpp \
-../Source/BroadwayAll.c	\
 ../Source/MagicLeapDecoder.cpp \
 ../Source/SoyLib/src/memheap.cpp \
 ../Source/SoyLib/src/SoyArray.cpp \
@@ -20,8 +18,6 @@ SRCS = \
 
 INCS = \
 /Volumes/Code/MagicLeap/mlsdk/v0.22.0/include \
-../Source/Broadway/Decoder/inc/	\
-../Source/Broadway/Decoder/src/	\
 ../Source/	\
 ../Source/SoyLib/src/	\
 

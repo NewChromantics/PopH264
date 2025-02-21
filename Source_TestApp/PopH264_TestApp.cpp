@@ -236,9 +236,6 @@ void DecoderTest(const char* TestDataName,CompareFunc_t* Compare,const char* Dec
 		if (Result < 0)
 			throw std::runtime_error("DecoderTest: PushData error");
 
-		//	gr: did we need to push twice to catch a bug in broadway?
-		//PopH264_PushData(Handle, TestData, TestDataSize, 0);
-
 		//	flush
 		if (LastIteration)
 			PopH264_PushEndOfStream(Handle);
@@ -615,11 +612,6 @@ auto DecodeTestValues = ::testing::Values
 	//DecodeTestParams_t{.Filename="GreyscaleGradient.h264", .ExpectedResults{.FrameCount=1,.Width=10,.Height=256,.Profile=H264Profile::Baseline} }
 
 	DecodeTestParams_t{.Filename="Cat.jpg", .ExpectedResults{.FrameCount=1,.Width=64,.Height=20} }
-
-	//	gr: broadway doesn't emit end of stream atm
-	//DecodeTestParams_t{.Filename="RainbowGradient.h264", .DecoderName="Broadway", .ExpectedResults{.FrameCount=1,.HadEndOfStream=true} },
-	//DecodeTestParams_t{.Filename="GreyscaleGradient.h264", .DecoderName="Broadway", .ExpectedResults{.FrameCount=1,.HadEndOfStream=true} },
-
 );
 	
 INSTANTIATE_TEST_SUITE_P( PopH264_Decode_Tests, PopH264_Decode_Tests, DecodeTestValues );
@@ -1191,9 +1183,7 @@ TEST(PopH264_General_Tests,OldMain)
 	SafeDecoderTest("TestData/Main5.h264", nullptr, nullptr );
 	SafeDecoderTest("TestData/Colour.h264", nullptr, nullptr );
 	SafeDecoderTest("TestData/Depth.h264", nullptr, nullptr );
-	SafeDecoderTest("TestData/Depth.h264", nullptr, "Broadway" );
 	SafeDecoderTest("../TestData/Colour.h264", nullptr, nullptr );
-	SafeDecoderTest("../TestData/Colour.h264", nullptr, "Broadway" );
 	//SafeDecoderTest("RainbowGradient.h264", CompareRainbow);
 	//SafeDecoderTest("RainbowGradient.h264",CompareRainbow);
 	

@@ -184,7 +184,7 @@ public static class PopH264
 	[System.Serializable]
 	public struct DecoderParams
 	{
-		//	Avf, Broadway, MediaFoundation, MagicLeap, Intel etc
+		//	Avf, MediaFoundation, MagicLeap, Intel etc
 		//	empty string defaults to "best" (hardware where possible)
 		//	todo: PopH264_EnumDecoders which will return a list of all possible decoders
 		//	ie. low level specific decoders/codecs installed on the system, including say MediaFoundation_NvidiaHardwareH264, or MagicLeap_GoogleSoftware
@@ -194,7 +194,7 @@ public static class PopH264
 		public bool VerboseDebug;
 
 		public bool AllowBuffering;			//	by default poph264 tries to reduce amount of buffering decoders do and deliver frames ASAP
-		public bool DoubleDecodeKeyframe;	//	Hack for broadway & MediaFoundation, process a keyframe twice to instantly decode instead of buffering
+		public bool DoubleDecodeKeyframe;	//	Hack for MediaFoundation, process a keyframe twice to instantly decode instead of buffering
 		public bool DrainOnKeyframe;		//	Debug for MediaFoundation, trigger drain command on a keyfrae
 		public bool LowPowerMode;
 		public bool DropBadFrames;
@@ -524,8 +524,7 @@ public static class PopH264
 		//		in json
 		public bool		VerboseDebug;	//	extra debug in stderr
 
-		//public string	Encoder;	// = "avf"|"x264", mediafoundation etc. todo: need to specify lower-level encoder too
-		//public int		Quality = [0..9]				x264
+		//public string	Encoder;	// = "avf", mediafoundation etc. todo: need to specify lower-level encoder too
 		//public int		AverageKbps = int				avf kiloBYTES
 		//public int		MaxKbps = int					avf kiloBYTES
 		//public bool		Realtime = true				avf: kVTCompressionPropertyKey_RealTime, on nvidia/V4L2, this is "max performance" setting

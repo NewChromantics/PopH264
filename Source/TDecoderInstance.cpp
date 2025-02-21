@@ -15,10 +15,6 @@
 #define ENABLE_AVF
 #endif
 
-#if !defined(TARGET_LINUX) && !defined(TARGET_UWP)
-#define ENABLE_BROADWAY
-#endif
-
 #if defined(TARGET_WINDOWS)
 //#define ENABLE_INTELMEDIA
 #define ENABLE_MEDIAFOUNDATION
@@ -30,10 +26,6 @@
 
 #if defined(ENABLE_MAGICLEAP_DECODER)
 #include "MagicLeapDecoder.h"
-#endif
-
-#if defined(ENABLE_BROADWAY)
-#include "BroadwayDecoder.h"
 #endif
 
 #if defined(ENABLE_INTELMEDIA)
@@ -71,10 +63,6 @@ void PopH264::EnumDecoderNames(std::function<void(const std::string&)> EnumDecod
 	//	todo: enum sub-decoder names
 #if defined(ENABLE_MEDIAFOUNDATION)
 	EnumDecoderName(MediaFoundation::TDecoder::Name);
-#endif
-
-#if defined(ENABLE_BROADWAY)
-	EnumDecoderName(Broadway::TDecoder::Name);
 #endif
 }
 
@@ -224,15 +212,6 @@ PopH264::TDecoderInstance::TDecoderInstance(json11::Json& Options)
 			if ( !AnyDecoder )
 				throw;
 		}
-	}
-#endif
-	
-	
-#if defined(ENABLE_BROADWAY)
-	if ( AnyDecoder || Params.mDecoderName == Broadway::TDecoder::Name)
-	{
-		mDecoder.reset( new Broadway::TDecoder( Params, OnFrameDecoded, OnError ) );
-		return;
 	}
 #endif
 	

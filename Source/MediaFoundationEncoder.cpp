@@ -43,7 +43,6 @@ MediaFoundation::TEncoderParams::TEncoderParams(json11::Json& Options)
 		Value = Handle.bool_value();
 		return true;
 	};
-	SetInt(POPH264_ENCODER_KEY_QUALITY, mQuality);
 	SetInt(POPH264_ENCODER_KEY_PROFILELEVEL, mProfileLevel);
 	SetInt(POPH264_ENCODER_KEY_AVERAGEKBPS, mAverageKbps);
 	SetBool(POPH264_ENCODER_KEY_VERBOSEDEBUG, mVerboseDebug);

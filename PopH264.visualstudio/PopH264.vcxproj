@@ -20,64 +20,6 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Static|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\Source\BroadwayDecoder.cpp" />
-    <ClCompile Include="..\Source\Broadway\Decoder\src\Broadway.c">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Static|x64'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\Source\Broadway\Decoder\src\Decoder.c">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Static|x64'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\Source\Broadway\Decoder\src\DecTestBench.c">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Static|x64'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\Source\Broadway\Decoder\src\EvaluationTestBench.c">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Static|x64'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\Source\Broadway\Decoder\src\extraFlags.c" />
-    <ClCompile Include="..\Source\Broadway\Decoder\src\h264bsd_byte_stream.c" />
-    <ClCompile Include="..\Source\Broadway\Decoder\src\h264bsd_cavlc.c" />
-    <ClCompile Include="..\Source\Broadway\Decoder\src\h264bsd_conceal.c" />
-    <ClCompile Include="..\Source\Broadway\Decoder\src\h264bsd_deblocking.c" />
-    <ClCompile Include="..\Source\Broadway\Decoder\src\h264bsd_decoder.c" />
-    <ClCompile Include="..\Source\Broadway\Decoder\src\h264bsd_dpb.c" />
-    <ClCompile Include="..\Source\Broadway\Decoder\src\h264bsd_image.c" />
-    <ClCompile Include="..\Source\Broadway\Decoder\src\h264bsd_inter_prediction.c" />
-    <ClCompile Include="..\Source\Broadway\Decoder\src\h264bsd_intra_prediction.c" />
-    <ClCompile Include="..\Source\Broadway\Decoder\src\h264bsd_macroblock_layer.c" />
-    <ClCompile Include="..\Source\Broadway\Decoder\src\h264bsd_nal_unit.c" />
-    <ClCompile Include="..\Source\Broadway\Decoder\src\h264bsd_neighbour.c" />
-    <ClCompile Include="..\Source\Broadway\Decoder\src\h264bsd_pic_order_cnt.c" />
-    <ClCompile Include="..\Source\Broadway\Decoder\src\h264bsd_pic_param_set.c" />
-    <ClCompile Include="..\Source\Broadway\Decoder\src\h264bsd_reconstruct.c" />
-    <ClCompile Include="..\Source\Broadway\Decoder\src\h264bsd_sei.c">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Static|x64'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\Source\Broadway\Decoder\src\h264bsd_seq_param_set.c" />
-    <ClCompile Include="..\Source\Broadway\Decoder\src\h264bsd_slice_data.c" />
-    <ClCompile Include="..\Source\Broadway\Decoder\src\h264bsd_slice_group_map.c" />
-    <ClCompile Include="..\Source\Broadway\Decoder\src\h264bsd_slice_header.c" />
-    <ClCompile Include="..\Source\Broadway\Decoder\src\h264bsd_storage.c" />
-    <ClCompile Include="..\Source\Broadway\Decoder\src\h264bsd_stream.c" />
-    <ClCompile Include="..\Source\Broadway\Decoder\src\h264bsd_transform.c" />
-    <ClCompile Include="..\Source\Broadway\Decoder\src\h264bsd_util.c" />
-    <ClCompile Include="..\Source\Broadway\Decoder\src\h264bsd_vlc.c" />
-    <ClCompile Include="..\Source\Broadway\Decoder\src\h264bsd_vui.c" />
-    <ClCompile Include="..\Source\Broadway\Decoder\src\H264SwDecApi.c" />
-    <ClCompile Include="..\Source\Broadway\Decoder\src\TestBenchMultipleInstance.c">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Static|x64'">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="..\Source\FileReader.cpp" />
     <ClCompile Include="..\Source\IntelMediaDecoder.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
@@ -111,7 +53,6 @@
     <ClCompile Include="..\Source\TEncoder.cpp" />
     <ClCompile Include="..\Source\TEncoderInstance.cpp" />
     <ClCompile Include="..\Source\Test.cpp" />
-    <ClCompile Include="..\Source\X264Encoder.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\AndroidMovieDecoder.h">
@@ -120,35 +61,6 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Static|x64'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="..\Source\AvfEncoder.h" />
-    <ClInclude Include="..\Source\BroadwayDecoder.h" />
-    <ClInclude Include="..\Source\Broadway\Decoder\src\h264bsd_byte_stream.h" />
-    <ClInclude Include="..\Source\Broadway\Decoder\src\h264bsd_cavlc.h" />
-    <ClInclude Include="..\Source\Broadway\Decoder\src\h264bsd_cfg.h" />
-    <ClInclude Include="..\Source\Broadway\Decoder\src\h264bsd_conceal.h" />
-    <ClInclude Include="..\Source\Broadway\Decoder\src\h264bsd_container.h" />
-    <ClInclude Include="..\Source\Broadway\Decoder\src\h264bsd_deblocking.h" />
-    <ClInclude Include="..\Source\Broadway\Decoder\src\h264bsd_decoder.h" />
-    <ClInclude Include="..\Source\Broadway\Decoder\src\h264bsd_dpb.h" />
-    <ClInclude Include="..\Source\Broadway\Decoder\src\h264bsd_image.h" />
-    <ClInclude Include="..\Source\Broadway\Decoder\src\h264bsd_inter_prediction.h" />
-    <ClInclude Include="..\Source\Broadway\Decoder\src\h264bsd_intra_prediction.h" />
-    <ClInclude Include="..\Source\Broadway\Decoder\src\h264bsd_macroblock_layer.h" />
-    <ClInclude Include="..\Source\Broadway\Decoder\src\h264bsd_nal_unit.h" />
-    <ClInclude Include="..\Source\Broadway\Decoder\src\h264bsd_neighbour.h" />
-    <ClInclude Include="..\Source\Broadway\Decoder\src\h264bsd_pic_order_cnt.h" />
-    <ClInclude Include="..\Source\Broadway\Decoder\src\h264bsd_pic_param_set.h" />
-    <ClInclude Include="..\Source\Broadway\Decoder\src\h264bsd_reconstruct.h" />
-    <ClInclude Include="..\Source\Broadway\Decoder\src\h264bsd_sei.h" />
-    <ClInclude Include="..\Source\Broadway\Decoder\src\h264bsd_seq_param_set.h" />
-    <ClInclude Include="..\Source\Broadway\Decoder\src\h264bsd_slice_data.h" />
-    <ClInclude Include="..\Source\Broadway\Decoder\src\h264bsd_slice_group_map.h" />
-    <ClInclude Include="..\Source\Broadway\Decoder\src\h264bsd_slice_header.h" />
-    <ClInclude Include="..\Source\Broadway\Decoder\src\h264bsd_storage.h" />
-    <ClInclude Include="..\Source\Broadway\Decoder\src\h264bsd_stream.h" />
-    <ClInclude Include="..\Source\Broadway\Decoder\src\h264bsd_transform.h" />
-    <ClInclude Include="..\Source\Broadway\Decoder\src\h264bsd_util.h" />
-    <ClInclude Include="..\Source\Broadway\Decoder\src\h264bsd_vlc.h" />
-    <ClInclude Include="..\Source\Broadway\Decoder\src\h264bsd_vui.h" />
     <ClInclude Include="..\Source\FileReader.hpp" />
     <ClInclude Include="..\Source\IntelMediaDecoder.h" />
     <ClInclude Include="..\Source\Json11\json11.hpp" />
@@ -165,9 +77,6 @@
     <ClInclude Include="..\Source\TEncoder.h" />
     <ClInclude Include="..\Source\TEncoderInstance.h" />
     <ClInclude Include="..\Source\TInstanceManager.h" />
-    <ClInclude Include="..\Source\X264Encoder.h" />
-    <ClInclude Include="..\Source\X264\include\x264.h" />
-    <ClInclude Include="..\Source\X264\include\x264_config.h" />
     <ClInclude Include="C:\Program Files (x86)\IntelSWTools\Intel(R) Media SDK 2019 R1\Software Development Kit\include\mfxastructures.h" />
     <ClInclude Include="C:\Program Files (x86)\IntelSWTools\Intel(R) Media SDK 2019 R1\Software Development Kit\include\mfxaudio++.h" />
     <ClInclude Include="C:\Program Files (x86)\IntelSWTools\Intel(R) Media SDK 2019 R1\Software Development Kit\include\mfxaudio.h" />
@@ -210,43 +119,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Source\AvfEncoder.mm" />
-    <None Include="..\Source\Broadway\Decoder\src\EvaluationTestBench.x">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Static|x64'">true</ExcludedFromBuild>
-    </None>
     <None Include="..\Source\InstanceManager.inc" />
     <None Include="..\Source\SoyAvf.mm" />
-    <CopyFileToFolders Include="..\Source\X264\bin\x64\x264.dll">
-      <FileType>Document</FileType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Static|x64'">true</ExcludedFromBuild>
-    </CopyFileToFolders>
-    <None Include="..\Source\X264\bin\x86\x264.dll">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Static|x64'">true</ExcludedFromBuild>
-    </None>
-    <None Include="..\Source\X264\lib\x86\x264.pdb">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Static|x64'">true</ExcludedFromBuild>
-    </None>
     <None Include="..\Unity\PopH264\Assets\PopH264\PopH264.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Library Include="..\Source\X264\lib\x64\libx264.lib">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Static|x64'">true</ExcludedFromBuild>
-    </Library>
-    <Library Include="..\Source\X264\lib\x64\x264.lib">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Static|x64'">true</ExcludedFromBuild>
-    </Library>
-    <Library Include="..\Source\X264\lib\x86\x264.lib">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Static|x64'">true</ExcludedFromBuild>
-    </Library>
     <Library Include="C:\Program Files (x86)\IntelSWTools\Intel(R) Media SDK 2019 R1\Software Development Kit\lib\x64\libmfx.lib">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
