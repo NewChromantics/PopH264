@@ -5,7 +5,7 @@
   "publishConfig": {
     "registry": "https://npm.pkg.github.com/@newchromantics"
   },
-  "version": "1.9.3",
+  "version": "1.10.0",
   "description": "H264 decoder & encoder CAPI library for various platforms",
   "main": "index.js",
   "scripts": {
