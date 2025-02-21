@@ -40,6 +40,7 @@
     <ClCompile Include="..\Source\SoyLib\src\SoyDebug.cpp" />
     <ClCompile Include="..\Source\SoyLib\src\SoyFourcc.cpp" />
     <ClCompile Include="..\Source\SoyLib\src\SoyH264.cpp" />
+    <ClCompile Include="..\Source\SoyLib\src\SoyHevc.cpp" />
     <ClCompile Include="..\Source\SoyLib\src\SoyPixels.cpp" />
     <ClCompile Include="..\Source\SoyLib\src\SoyPlatform.cpp" />
     <ClCompile Include="..\Source\SoyLib\src\SoyString.cpp" />
